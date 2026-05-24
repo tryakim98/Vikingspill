@@ -1,0 +1,849 @@
+{
+  "_meta": {
+    "title": "Vikingspill — Innholdspakke v2 (episke kulturmøter, skole-oppgaver, utvidet quiz, mekanikk)",
+    "version": "2.0",
+    "author": "T. Ulriksen / Claude",
+    "date": "2026-05-23",
+    "description": "Komplett innholdspakke. Erstatter/utvider felter i vikingspill_data.json. Inneholder: (1) episk kulturmøte-fortelling per destinasjon, (2) nye skole-baserte oppgaver med foto/innspilling, (3) GeoGuessr-aktig navigasjon, (4) minst 5 stedsquiz-spørsmål per destinasjon, (5) ny mekanikk for lærertriggede konkurranser og sjøslag.",
+    "merge_instruction": "For hver destinasjon: legg til feltene 'episkeKulturmote', 'task' (erstatt eksisterende), og 'stedsquiz'. Behold history, funFact, famousPerson, choices uendret."
+  },
+
+  "_encounterFlyt": {
+    "beskrivelse": "Ny rekkefølge i møtet med hver destinasjon.",
+    "steg": [
+      "1. HISTORIEN — eksisterende 'history'-tekst. Det narrative, faktabaserte.",
+      "2. EPISK KULTURMØTE — ny 'episkeKulturmote'-fortelling. Levende, dramatisk førsteperson-scene av selve møtet mellom kulturene. Ruller frem som en historie med lyd og illustrasjon.",
+      "3. OPPGAVESIDEN — de tre tekstboksene som nå: funFact, famousPerson, og oppgavens rationale. Her velger gruppen å gjøre en fysisk/kreativ oppgave OG/ELLER quizen.",
+      "4. QUIZ-OVERGANG — når gruppen trykker 'Start quiz', skjules ALT som kan røpe svar (history, episk kulturmøte, fun fact, kjent person) i en kul viking-overgang (f.eks. et skjold som glir over skjermen, en tåke som legger seg, runer som forsegler teksten). Quizen tester det de nettopp leste — uten fasit synlig.",
+      "5. VALG → TERNING → UTFALL — som før, med stedsquiz-bonus lagt til terningen."
+    ],
+    "quizSkjuling": {
+      "hvorfor": "Hvis faktateksten er synlig under quizen, tester den ikke kunnskap — bare avskrift. Skjuling tvinger frem reell lesing og hukommelse.",
+      "animasjonsforslag": ["Et trekant-skjold sklir inn fra hver side og møtes på midten", "Sjøtåke (CSS-blur + opacity) legger seg over faktaboksene", "Runer brenner seg fast over teksten som en forsegling", "Pergamentet rulles sammen med en lyd"],
+      "lydforslag": "Lav krigshorn-tone + tre-knirk når forseglingen skjer."
+    }
+  },
+
+  "destinasjoner": {
+
+    "lindisfarne": {
+      "episkeKulturmote": {
+        "tittel": "Grålysningen ved den hellige øya",
+        "scene": "Vi rodde inn mot Lindisfarne i grålysningen 8. juni. Tåka lå tjukk over vannet, og det første vi så var steinkorset som raget mot himmelen — høyere enn noe vi hadde reist hjemme. På stranda sto en enslig skikkelse i brun kappe. Han løftet hånda og vinket. Han trodde vi var venner med varer. Han visste ikke at verden nettopp hadde endret seg. Bak ham lå klosteret åpent: sølv på altrene, gullkalker, bøker med edelstener bundet inn i permene — alt ubeskyttet, fordi disse mennene aldri hadde trengt å forsvare noe. For dem var Gud vern nok. For oss var et ubevoktet skattkammer en gave fra Odin. To verdener møttes på den stranda, og ingen av dem forsto den andre.",
+        "kulturmøteSpørsmål": {
+          "q": "Den enslige munken på stranda vinket vikingene velkommen. Hva forteller dette om kulturmøtet?",
+          "opts": [
+            "At munkene var dumme",
+            "At munkene aldri hadde opplevd et angrep og ikke forsto trusselen",
+            "At munkene ville overgi seg",
+            "At vikingene var invitert"
+          ],
+          "correct": 1,
+          "feedback": "Munkene hadde levd i fred i generasjoner. De hadde ingen erfaring med vikinger og kunne ikke forestille seg faren. Kulturmøtet var så uventet at den ene parten ikke engang forsto at det var et møte — før det var for sent."
+        }
+      },
+      "task": {
+        "type": "foto",
+        "icon": "📿",
+        "typeLabel": "Foto-oppdrag",
+        "title": "Det ubeskyttede skattkammeret",
+        "desc": "Munkene beskyttet aldri rikdommen sin — de stolte på Gud. Gå rundt på skolen og finn noe verdifullt som står helt ubeskyttet og åpent (en dyr maskin, utstyr, noe som «alle bare stoler på» at ingen tar). Ta ett bilde av gruppen som «vokter» det med vikingblikk. Vis læreren.",
+        "rationale": "Lindisfarne ble plyndret fordi rikdommen lå åpen — i et samfunn bygget på tillit. Dere skal trene øyet til å se hvor et samfunn er sårbart nettopp fordi det stoler på hverandre."
+      },
+      "stedsquiz": [
+        {
+          "q": "Hvem skrev et berømt brev etter angrepet, der han sa at en slik redsel aldri hadde vist seg i Britannia?",
+          "opts": ["Kong Alfred", "Alkuin av York", "Beda den ærverdige", "Pave Leo III"],
+          "correct": 1,
+          "feedback": "Alkuin av York, lærd ved Karl den stores hoff. Brevet er en av de viktigste samtidige kildene til vikingtiden."
+        },
+        {
+          "q": "Hvilket årstall regnes som vikingtidens begynnelse, på grunn av dette angrepet?",
+          "opts": ["793", "850", "911", "1066"],
+          "correct": 0,
+          "feedback": "8. juni 793. Lindisfarne-angrepet er det første store vikingtoktet vi har skriftlige kilder på, og markerer starten på vikingtiden."
+        },
+        {
+          "q": "Hva skjedde med munken som først så vikingskipene?",
+          "opts": ["Han flyktet til skogs", "Han ringte kirkeklokkene", "Han gikk ned for å hilse — og ble drept først", "Han gjemte seg i krypten"],
+          "correct": 2,
+          "feedback": "Han antok det var venner med varer og gikk ned for å hilse. Det viser hvor uventet angrepet var."
+        },
+        {
+          "q": "Kulturmøtet skapte et bestemt bilde av vikingene. Hvem sine perspektiver ble dette bildet basert på?",
+          "opts": ["Vikingenes egne sagaer", "Arabiske handelsmenn", "Kristne krønikere som var ofrene", "Samiske fortellertradisjoner"],
+          "correct": 2,
+          "feedback": "De kristne ofrene skrev historien. Vikingenes eget perspektiv fra denne tiden finnes nesten ikke — derfor er bildet vårt formet av dem som ble angrepet."
+        },
+        {
+          "q": "Hvorfor lå klosterets rikdom helt ubeskyttet?",
+          "opts": ["Munkene var late", "Kongen hadde tatt soldatene", "Munkene hadde aldri trengt forsvar — de stolte på Guds vern", "Rikdommen var falsk"],
+          "correct": 2,
+          "feedback": "I munkenes verden var hellige gjenstander vernet av Gud. Tanken på at noen ville stjele fra kirken var nesten utenkelig. Den tilliten ble deres sårbarhet."
+        },
+        {
+          "q": "I vikingenes kultur, hva betydde et ubevoktet skattkammer?",
+          "opts": ["En felle", "En gave fra gudene — en invitasjon", "Et hellig sted man ikke rørte", "Et tegn på fattigdom"],
+          "correct": 1,
+          "feedback": "Samme gjenstand, to helt motsatte betydninger. For munkene: hellig og urørlig. For vikingene: en invitasjon. Det er kjernen i kultursammenstøtet."
+        }
+      ]
+    },
+
+    "hedeby": {
+      "episkeKulturmote": {
+        "tittel": "Tusen stemmer i plankegatene",
+        "scene": "Vi hadde aldri sett så mange mennesker på ett sted. Hedeby summet som et bikube — nesten to tusen sjeler i trange gater av planker. En friser ropte priser på et språk vi knapt forsto. En saksisk smed banket sølv. En mann med mørk hud og hvit turban — en araber, sa de — veide glassperler på en vekt finere enn noe vi eide. Og midt i alt sto en fremmed og stirret på OSS, som om VI var det merkelige. Han skrev noe på et skinn. Senere fikk vi vite hva han skrev: at vi sang «som hunder hyler». Vi som var stolte av kvadene våre! Men slik er det i Hedeby — her er alle noens fremmede.",
+        "kulturmøteSpørsmål": {
+          "q": "Den fremmede som stirret på vikingene og skrev at de 'sang som hunder', så på dem som det merkelige. Hva er poenget?",
+          "opts": [
+            "At vikingene var de eneste siviliserte",
+            "At hvem som er 'fremmed' og 'rar' avhenger av hvem som ser",
+            "At araberen hatet vikingene",
+            "At vikingene ikke kunne synge"
+          ],
+          "correct": 1,
+          "feedback": "I Hedeby var alle noens fremmede. Ibrahim ibn Yaqub syntes vikingene var rare — men vikingene syntes nok han var like rar. Kulturmøter handler om perspektiv: det 'normale' er alltid sett fra et ståsted."
+        }
+      },
+      "task": {
+        "type": "innspilling",
+        "icon": "🎤",
+        "typeLabel": "Innspilling",
+        "title": "Bevis Ibrahim feil",
+        "desc": "Ibrahim ibn Yaqub skrev at vikingenes sang lød som hyl. Lag en kort sang, rap eller rytmisk fremføring (minst 20 sekunder) om reisen så langt. Hele gruppen deltar. Spill det inn på telefon og last opp / vis læreren. Bevis at nordboerne kunne synge!",
+        "rationale": "Sang og kvad var hjørnesteinen i norrøn kultur, men kvaliteten varierte. Dere skal vise Ibrahim — og dere selv — at kulturuttrykk kan være kraftfullt selv om en fremmed ikke skjønner det."
+      },
+      "stedsquiz": [
+        {
+          "q": "Ibrahim ibn Yaqub sammenlignet vikingenes sang med noe lite flatterende. Hva?",
+          "opts": ["Torden", "Hunder som hyler", "Sauer som bræker", "Barn som skriker"],
+          "correct": 1,
+          "feedback": "Han skrev at de 'sang som hunder hyler'. Han var fra det sofistikerte al-Andalus og vant til helt annen musikk."
+        },
+        {
+          "q": "Hva slags bakgrunn hadde Ibrahim ibn Yaqub?",
+          "opts": ["Arabisk kriger fra Bagdad", "Sefardisk jøde fra Andalusia", "Gresk handelsmann", "Irsk munk"],
+          "correct": 1,
+          "feedback": "Sefardisk jøde fra al-Andalus (muslimsk Spania). Han snakket arabisk, hebraisk og latin — en sjelden utenforstående kilde til vikingene."
+        },
+        {
+          "q": "Omtrent hvor mange mennesker bodde i Hedeby — og hvorfor var det bemerkelsesverdig?",
+          "opts": ["200 — en liten landsby", "2000 — det største folket samlet nord for Alpene", "20 000 — større enn Roma", "50 — kun en handelsstasjon"],
+          "correct": 1,
+          "feedback": "Nesten 2000 mennesker — det største folket noen hadde sett samlet på ett sted nord for Alpene. For en viking var det overveldende."
+        },
+        {
+          "q": "Hva har arkeologer funnet i Hedeby som beviser fjernhandel?",
+          "opts": ["Romerske statuer", "Glassperler fra Indus-dalen, mynter fra Tasjkent og silke fra Kina", "Egyptiske mumier", "Amerikansk tobakk"],
+          "correct": 1,
+          "feedback": "Funn fra India, Sentral-Asia og Kina. Globalisering er ikke en moderne oppfinnelse — Hedeby var koblet til halve verden."
+        },
+        {
+          "q": "Hva slags by var Hedeby først og fremst?",
+          "opts": ["En festning", "Et kloster", "En handelsby der mange kulturer møttes", "En kongsgård"],
+          "correct": 2,
+          "feedback": "Et knutepunkt der saksere, frisere, slavere, arabere og nordmenn handlet side om side. Møtestedet selv var kulturmøtet."
+        },
+        {
+          "q": "Hva sier Ibrahims beskrivelse oss om kulturmøter generelt?",
+          "opts": ["At alle fremmede er fiender", "At det 'rare' alltid avhenger av hvem som ser", "At vikingene var underlegne araberne", "At handel er umulig mellom kulturer"],
+          "correct": 1,
+          "feedback": "Ibrahim syntes vikingene var rare; vikingene syntes nok han var rar. Perspektiv avgjør hva som regnes som normalt."
+        }
+      ]
+    },
+
+    "dublin": {
+      "episkeKulturmote": {
+        "tittel": "To verdener i samme blod",
+        "scene": "Det er noe underlig med Dublin. Om morgenen selger vi keltiske fanger på slavemarkedet — mennesker vi tok i raid oppover de irske elvene. Om kvelden sitter vi ved bordet til en irsk konge, og en av oss skal gifte seg med datteren hans. Vi snakker gælisk nå, halvparten av oss. Barna våre døpes i kirka og ofrer til Tor i smug. Er vi vikinger? Er vi irer? Aud, hun de kaller den Djuptenkte, sier vi er noe nytt. Hun selv var dronning her, og nå samler hun frigitte slaver og skip for å seile vestover og bygge et nytt land. Hun behandler trellene sine som mennesker — og selger dem aldri. Kanskje hun har skjønt noe vi andre ikke har.",
+        "kulturmøteSpørsmål": {
+          "q": "Vikingene i Dublin solgte keltiske slaver OG giftet seg inn i keltiske familier samtidig. Hva sier denne dobbeltheten om koloniale kulturmøter?",
+          "opts": [
+            "At vikingene var forvirret",
+            "At brutal utnyttelse og intim kulturblanding ofte skjedde samtidig",
+            "At irene var svake",
+            "At slavehandel ikke var så ille"
+          ],
+          "correct": 1,
+          "feedback": "Denne dobbeltheten — å utnytte og blande seg med samme folk på samme tid — er kjernen i mange koloniale møter. Det er ubehagelig, men avgjørende for å forstå historien ærlig."
+        }
+      },
+      "task": {
+        "type": "innspilling",
+        "icon": "🪢",
+        "typeLabel": "Innspilling",
+        "title": "Den keltiske knuten",
+        "desc": "Keltisk kunst er kjent for fletteverk uten begynnelse og slutt. Gå til biblioteket eller et fellesareal. Finn tre forskjellige steder der noe er flettet eller vevd sammen (bøker i hylle, ledninger, mønster, hekker). Lag en kort video (maks 30 sek) der dere går fra sted til sted og peker ut «den keltiske knuten» som en reiseguide. Vis læreren.",
+        "rationale": "Vikingene i Irland lærte å lage keltiske flettemønstre i sølv og tre — irsk-norrøn kunst ble en helt egen tradisjon. Dere skal trene øyet til å se hvordan to kulturer fletter seg sammen."
+      },
+      "stedsquiz": [
+        {
+          "q": "Hvem var Aud den Djuptenkte?",
+          "opts": ["En irsk nonne tatt som slave", "Først dronning av Dublin, så grunnlegger av Island", "En samisk seidkvinne", "En bysantinsk prinsesse"],
+          "correct": 1,
+          "feedback": "Etter mannens død førte hun en flåte fra Dublin til Island med 20 frigitte slaver. En av få kvinner som har hovedrollen i en saga."
+        },
+        {
+          "q": "Hva var spesielt med måten Aud behandlet slavene sine?",
+          "opts": ["Hun solgte dem dyrest mulig", "Hun frigjorde dem og tok dem med til Island", "Hun byttet dem mot sølv i Bagdad", "Hun nektet å ha slaver"],
+          "correct": 1,
+          "feedback": "Hun frigjorde slavene og tok dem med vestover som frie nybyggere — et uvanlig valg i en tid da slavehandel var normalt."
+        },
+        {
+          "q": "Hvilket år grunnla vikingene Dublin som handelshavn?",
+          "opts": ["793", "841", "930", "1066"],
+          "correct": 1,
+          "feedback": "Dublin (Dyflinn) ble grunnlagt i 841. Norrøne konger styrte her i rundt 200 år."
+        },
+        {
+          "q": "Hva betyr det at halve den irske befolkningen i dag har norrønt DNA?",
+          "opts": ["At vikingene utryddet irene", "At kulturmøtet gikk så dypt at folkeslagene smeltet sammen", "At alle irer er vikinger", "At vikingene aldri dro"],
+          "correct": 1,
+          "feedback": "Kulturmøtet gikk inn i familiene. Etternavn som McLoughlin, Doyle og Higgins kommer fra norrøne navn."
+        },
+        {
+          "q": "Hva ble den mørke dobbeltheten i Dublin-kulturmøtet?",
+          "opts": ["De bygde og brant kirker", "De drev slavhandel med keltere og giftet seg inn i keltiske familier samtidig", "De forbød irsk språk", "De stjal irsk kunst"],
+          "correct": 1,
+          "feedback": "Utnyttelse og kulturblanding på samme tid — kjernen i mange koloniale kulturmøter."
+        },
+        {
+          "q": "Hva ble vikingene i Dublin etter 200 år?",
+          "opts": ["Rene skandinaver", "Verken helt norrøne eller helt irske — en blandet kultur", "Utvist tilbake til Norge", "Engelske adelsmenn"],
+          "correct": 1,
+          "feedback": "De lærte gælisk, ble kristne, giftet seg inn i irske slekter — og ble noe nytt, en irsk-norrøn blandingskultur."
+        }
+      ]
+    },
+
+    "paris": {
+      "episkeKulturmote": {
+        "tittel": "Murene som ikke ville falle",
+        "scene": "Vi hadde tatt klostre og landsbyer som smør. Men Paris var noe annet. Steinmurer høyere enn mastene våre, broer sperret med kjettinger, og en greve ved navn Odo som ikke flyktet. Vi prøvde alt — branner, stiger, list — i et helt år. Mennene døde av sykdom i leiren mens parisere ropte hånord fra murene. Til slutt kom budet fra kong Karl: ta sølvet og dra. Sju tusen pund. En formue. Men noen av oss begynte å tenke annerledes. Hva om vi ikke dro? Hva om vi BLE? Rollo, høvdingen vår — så stor at ingen hest bar ham — gikk inn i forhandlinger. Ikke om sølv. Om land. Om å bli en av dem. Det var ikke nederlag. Det var den lengste seieren av alle.",
+        "kulturmøteSpørsmål": {
+          "q": "Rollo valgte land og tilpasning fremfor sølv og plyndring. Hvorfor kalles dette 'den lengste seieren'?",
+          "opts": [
+            "Fordi det tok lang tid",
+            "Fordi tilpasning ga varig makt — hans etterkommere erobret England",
+            "Fordi sølv er verdiløst",
+            "Fordi Paris var fattig"
+          ],
+          "correct": 1,
+          "feedback": "Plyndring ga rikdom for én generasjon. Rollos valg om å bli normanner ga makt i århundrer — helt frem til Vilhelm Erobreren i 1066. Tilpasning kan være sterkere enn erobring."
+        }
+      },
+      "task": {
+        "type": "foto",
+        "icon": "🏰",
+        "typeLabel": "Foto-oppdrag",
+        "title": "Den uinntakelige muren",
+        "desc": "Paris falt ikke fordi murene var for sterke. Finn det stedet på skolen som er vanskeligst å komme inn i eller forbi (en låst dør, en sperret gang, et område med adgangskontroll). Ta et bilde av gruppen som «beleirer» det med frustrerte vikingansikter. Bonus: skriv en kort tekst om hvordan dere ville forhandlet dere inn i stedet.",
+        "rationale": "Vikingene lærte ved Paris at noen murer ikke kan brytes med makt — bare med forhandling. Dere skal kjenne på frustrasjonen som drev Rollo til å velge en helt ny strategi."
+      },
+      "stedsquiz": [
+        {
+          "q": "Hva fikk Rollo som betaling for å slutte å plyndre og forsvare Paris?",
+          "opts": ["7000 pund sølv", "Et skip med vin", "Normandie — et helt landområde", "En plass i Væringgarden"],
+          "correct": 2,
+          "feedback": "Rollo fikk Normandie i 911 mot å konvertere og forsvare Frankrike. Et kulturmøte som forandret Europa."
+        },
+        {
+          "q": "Greven av Paris ble senere konge på grunn av forsvaret mot vikingene. Hva het han?",
+          "opts": ["Karl den skallede", "Rollo", "Odo", "Ragnar"],
+          "correct": 2,
+          "feedback": "Odo ble valgt til konge etter å ha holdt stand under beleiringen i 885–86. Vikingene skapte indirekte en ny kongerekke."
+        },
+        {
+          "q": "Hva er Danegeld?",
+          "opts": ["Et vikingvåpen", "Sølv betalt til vikingene for at de skulle dra", "En norrøn gud", "Et handelsskip"],
+          "correct": 1,
+          "feedback": "Betaling for fred. Problemet var at det bare inviterte vikingene tilbake år etter år — til slutt ble det billigere å gi dem land."
+        },
+        {
+          "q": "Hva skjedde med Rollos etterkommere etter fire generasjoner?",
+          "opts": ["De dro tilbake til Norge", "De ble fullstendig franske — snakket fransk, ble kristne riddere", "De fortsatte å plyndre", "De flyttet til Dublin"],
+          "correct": 1,
+          "feedback": "Fra hedenske krigere til franske riddere på fire generasjoner. Identitet er ikke fast — den forhandles."
+        },
+        {
+          "q": "Hvem var Rollos berømte etterkommer som erobret England i 1066?",
+          "opts": ["Harald Hardråde", "Vilhelm Erobreren", "Knut den mektige", "Olav den hellige"],
+          "correct": 1,
+          "feedback": "Vilhelm Erobreren var Rollos tipp-tipp-oldebarn. En norrøn vikings etterkommer ble konge av England — via Frankrike."
+        },
+        {
+          "q": "Hva lærte vikingene egentlig ved Paris?",
+          "opts": ["At krig alltid lønner seg", "At noen murer ikke kan brytes med makt — bare med forhandling", "At franskmennene var svake", "At sølv er verdiløst"],
+          "correct": 1,
+          "feedback": "Beleiringen mislyktes. De som vant langsiktig, var de som forhandlet, ikke de som beleiret."
+        }
+      ]
+    },
+
+    "hebrides": {
+      "episkeKulturmote": {
+        "tittel": "Når to folk blir ett",
+        "scene": "Bestefar min kom hit som plyndrer. Far giftet seg med en gælisk kvinne. Og nå? Nå synger jeg gæliske sanger med norrøne ord blandet inn, jeg lager sjakkbrikker av hvalrosstann med hellige ansikter, og jeg vet ikke lenger om jeg drømmer på norrønt eller gælisk. De kaller oss Gall-Gàidheal — «de utenlandske gæliske». Vi er ikke vikinger. Vi er ikke keltere. Vi er det havet skapte da to folk møttes og ikke gikk fra hverandre igjen. Stedsnavnene her forteller historien: Stornoway, Skye, Lewis — norrøne navn på keltisk jord. Om hundre år vil ingen kunne si hvor det ene folket slutter og det andre begynner.",
+        "kulturmøteSpørsmål": {
+          "q": "Fortelleren vet ikke lenger om hen er viking eller kelter. Hva kaller vi denne typen kulturmøte-resultat?",
+          "opts": [
+            "Erobring",
+            "Hybridkultur — der to kulturer smelter til noe nytt",
+            "Assimilering",
+            "Segregering"
+          ],
+          "correct": 1,
+          "feedback": "Gall-Gàidheal var en ekte hybridkultur. Ingen av de opprinnelige kulturene overlevde uendret — begge ble transformert til noe tredje. Det er en av de dypeste formene for kulturmøte."
+        }
+      },
+      "task": {
+        "type": "geoguesser",
+        "icon": "🗺️",
+        "typeLabel": "Navigasjon",
+        "title": "Finn de norrøne sporene",
+        "desc": "Stedsnavn avslører hvor vikingene var. Bruk nett (Google Maps / søk). Finn TRE steder i verden — utenfor Skandinavia — som har norrøne stedsnavn-endelser som «-by», «-thorpe», «-ness», «-vik» eller «-ay». Skriv ned stedet og hva endelsen betyr. Vis læreren. (Tips: store deler av England og Skottland er fulle av dem!)",
+        "rationale": "Hebridenes stedsnavn (Stornoway, Skye) er norrøne, selv om folket ble gælisk. Språk overlever lenger enn folk. Dere skal jakte på vikingenes avtrykk i kartet — det er der ennå, tusen år senere."
+      },
+      "stedsquiz": [
+        {
+          "q": "Hva betyr «Gall-Gàidheal»?",
+          "opts": ["De modige sjøfarerne", "De utenlandske gæliske", "De norrøne kristne", "Sjakkspillernes folk"],
+          "correct": 1,
+          "feedback": "'De utenlandske gæliske' — en blanding av norrøn og keltisk kultur som varte i over 400 år."
+        },
+        {
+          "q": "Lewis-sjakkbrikkene ble funnet på Hebridene, men hvor ble de laget?",
+          "opts": ["Dublin", "London", "Trondheim", "Reykjavik"],
+          "correct": 2,
+          "feedback": "Laget av hvalrosstann i Trondheim ca. 1150, men havnet på Hebridene. Sjakk var allerede en internasjonal aktivitet."
+        },
+        {
+          "q": "Hvor lenge tilhørte Hebridene Norge?",
+          "opts": ["I 20 år", "I rundt 200 år", "Aldri", "I 1000 år"],
+          "correct": 1,
+          "feedback": "I rundt 200 år var øyene norske. Stedsnavnene avslører det fortsatt."
+        },
+        {
+          "q": "Hva avslører stedsnavn som Stornoway og Skye?",
+          "opts": ["At keltere grunnla dem", "At de har norrønt opphav", "At romerne var der", "At de er moderne navn"],
+          "correct": 1,
+          "feedback": "Norrøne navn på keltisk jord. Språk overlever ofte lenger enn folkene som brakte det."
+        },
+        {
+          "q": "Hvem var Somerled?",
+          "opts": ["En irsk konge", "En gælisk-norrøn hersker hvis etterkommere styrte øyene i 400 år", "En bysantinsk general", "En samisk noaide"],
+          "correct": 1,
+          "feedback": "Dagens Clan Donald hevder slektskap med Somerled. Hybridkulturen ga opphav til mektige slekter."
+        },
+        {
+          "q": "Hva er det dypeste ved en hybridkultur som Gall-Gàidheal?",
+          "opts": ["At den ene kulturen vinner", "At ingen av de opprinnelige kulturene overlever uendret — begge blir til noe nytt", "At kulturene holdes adskilt", "At den er kortvarig"],
+          "correct": 1,
+          "feedback": "Begge kulturene transformeres. Det er ikke at den ene erobrer den andre — de skaper noe tredje sammen."
+        }
+      ]
+    },
+
+    "sameland": {
+      "episkeKulturmote": {
+        "tittel": "Noaiden som så mer enn oss",
+        "scene": "Vi kom med jern og korn, sikre på at vi var de mektige. Men da noaiden begynte å tromme på runebommen sin, ble det stille blant oss alle. Pulsen i govadas-trommen gikk inn i brystet. Han falt i transe — reiste, sa de, til åndeverdenen — og da han våknet, fortalte han ting om reisen vår han ikke kunne ha visst. Vi som lo av samene da vi kom, lo ikke nå. Ottar, høvdingen vår, sa det rett ut: deres seid er sterkere enn vår. Vi byttet jern mot pelsverk, men vi fikk noe mer — stjernekunnskap, vinterveier, en respekt vi ikke hadde ventet å føle. Og likevel: året etter kom andre nordmenn og krevde finnskatt med sverd. Det samme folket vi beundret, begynte vi å undertrykke. Slik var møtet — beundring og urett i samme åndedrag.",
+        "kulturmøteSpørsmål": {
+          "q": "Vikingene både beundret samisk åndelighet OG krevde finnskatt med makt. Hva sier dette om kulturmøtet?",
+          "opts": [
+            "At vikingene var ærlige",
+            "At respekt og undertrykkelse kan eksistere samtidig i et kulturmøte",
+            "At samene var svake",
+            "At noaidene lurte vikingene"
+          ],
+          "correct": 1,
+          "feedback": "Vikingene fryktet og respekterte noaidens kraft, men undertrykte likevel samene politisk og økonomisk. Kulturmøter er sjelden enten gode eller onde — de er ofte begge deler på en gang. Dette forholdet pågår fortsatt i dag."
+        }
+      },
+      "task": {
+        "type": "innspilling",
+        "icon": "🥁",
+        "typeLabel": "Innspilling",
+        "title": "Trommens puls",
+        "desc": "VIKTIG: Joik og runebommetromming er hellige samiske uttrykksformer — vi parodierer dem ikke, vi viser respekt. Lag i stedet en jevn, rolig rytme (bank på et bord/bok) i minst 30 sekunder, og spill inn en kort lyd der hele gruppen sammen sier én ting dere har lært å respektere ved en kultur som er annerledes enn deres egen. Vis/spill av for læreren.",
+        "rationale": "Samisk åndelighet ble respektert av vikingene fordi den var ekte og mektig. Dere skal øve på å anerkjenne styrke og visdom i en kultur som er ulik deres egen — uten å gjøre narr av den."
+      },
+      "stedsquiz": [
+        {
+          "q": "Hvorfor er Ottar fra Hålogaland viktig i norsk historie?",
+          "opts": ["Han var første norske konge", "Hans beretning er det eldste norske dokumentet vi kjenner", "Han oppdaget Island", "Han grunnla Trondheim"],
+          "correct": 1,
+          "feedback": "Ottar reiste til kong Alfreds hoff, og beretningen hans om Nord-Norge og samehandelen ble skrevet ned — det eldste norske dokumentet vi har."
+        },
+        {
+          "q": "Hva ble en samisk noaide ansett som?",
+          "opts": ["En slave", "En sjaman med åndelig kraft som ble regnet som mektigere enn norrøne seidmenn", "En vanlig handelsmann", "En kriger"],
+          "correct": 1,
+          "feedback": "Noaidene ble fryktet og respektert. Vikingene anså samisk åndelighet som sterkere enn sin egen."
+        },
+        {
+          "q": "Hva er en runebomme (govadas)?",
+          "opts": ["Et vikingvåpen", "En samisk tromme brukt til å gå i transe", "Et navigasjonsinstrument", "En type båt"],
+          "correct": 1,
+          "feedback": "Noaiden brukte den for å gå inn i transe og 'reise' til åndeverdenen. Den er en hellig gjenstand i samisk kultur."
+        },
+        {
+          "q": "Hva var finnskatten?",
+          "opts": ["En gave til samene", "Tributt vikingene krevde fra samene med makt", "En samisk skatt av sølv", "En handelsavtale"],
+          "correct": 1,
+          "feedback": "Tributt krevd uten å gi noe tilbake. Det ødela det gode forholdet og var en tidlig form for det vi senere kalte fornorskning."
+        },
+        {
+          "q": "Hvem giftet kong Harald Hårfagre seg med fra samisk slekt?",
+          "opts": ["Aud", "Snøfrid", "Olga", "Gudrid"],
+          "correct": 1,
+          "feedback": "Snøfrid, datter av samisk høvding Svåse. Kongelig blod ble blandet helt på toppen av samfunnet."
+        },
+        {
+          "q": "Teksten sier kulturmøtet med samene 'ikke er ferdig'. Hva menes?",
+          "opts": ["At vikinger og samer fortsatt slåss", "At forholdet fortsatt bearbeides — Sannhets- og forsoningskommisjonen kom i 2023", "At samene venter på hevn", "At vikingene aldri kom dit"],
+          "correct": 1,
+          "feedback": "Fornorskningen, som begynte i vikingtiden, fortsatte til 1900-tallet. Sannhets- og forsoningskommisjonen leverte rapport i 2023. Kulturmøter kan ha konsekvenser i tusen år."
+        }
+      ]
+    },
+
+    "faroyene": {
+      "episkeKulturmote": {
+        "tittel": "De som var der før oss",
+        "scene": "Vi trodde vi var de første. Men da vi gikk i land på de stupbratte øyene, fant vi spor: steinkors, en celle av tørrmur, en hage med urter ingen viking hadde plantet. Irske munker. De hadde levd her i hundre år, alene med Gud og havet, i en stillhet vi knapt kunne fatte. De flyktet da de så seilene våre. Vi tok landet deres uten kamp — det var ingen igjen å kjempe mot. Men her er det merkeligste: kvinnene som ble med oss for å bygge dette nye landet, mange av dem var ikke nordiske. De var keltiske, tatt fra Irland. Så da vi grunnla «det norrøne Færøyene», var det allerede en blanding — irsk og norrønt blod, fra første dag. Historien vil huske oss som de første. Den vil glemme munkene, og den vil glemme kvinnene.",
+        "kulturmøteSpørsmål": {
+          "q": "Vikingene 'oppdaget' Færøyene, men munkene var der først, og mange nybyggerkvinner var keltiske. Hva er poenget?",
+          "opts": [
+            "At vikingene løy om alt",
+            "At den offisielle historien ofte skjuler hvem som egentlig var der og deltok",
+            "At munkene eide øyene",
+            "At kvinner ikke betydde noe"
+          ],
+          "correct": 1,
+          "feedback": "Historien om 'oppdagelse' skjuler ofte de som var der først (munkene) og de som ikke valgte å delta (slavinnene). Hvem som skrives inn i historien, og hvem som skrives ut, er et spørsmål vi fortsatt må stille."
+        }
+      },
+      "task": {
+        "type": "geoguesser",
+        "icon": "🧭",
+        "typeLabel": "Navigasjon",
+        "title": "Den umulige reisen",
+        "desc": "Bruk nett (Google Maps). Mål avstanden fra Bergen til Færøyene, og fra Færøyene til Island. Skriv ned begge avstandene i kilometer. Diskuter og skriv én setning: hvordan klarte vikingene dette UTEN kart, kompass eller motor? Vis svaret til læreren.",
+        "rationale": "Færøyene var springbrettet mot Island og Vinland. Dere skal forstå med tall hvor vanvittig modig — eller desperat — man måtte være for å seile ut i det åpne Atlanterhavet mot land man ikke visste fantes."
+      },
+      "stedsquiz": [
+        {
+          "q": "Hvem bodde på Færøyene FØR vikingene kom?",
+          "opts": ["Samiske fiskere", "Ingen — øyene var ubebodde", "Irske munker som hadde levd der i 100 år", "Piktiske bønder"],
+          "correct": 2,
+          "feedback": "Irske munker i isolasjon. De flyktet da vikingene kom. At et sted er 'oppdaget' betyr sjelden at ingen var der."
+        },
+        {
+          "q": "Hva avslører DNA-tester om Færøyenes første befolkning?",
+          "opts": ["At alle var rene skandinaver", "At det også var keltisk innslag — trolig fra slavinner fra Irland", "At de var romere", "At de var beslektet med samer"],
+          "correct": 1,
+          "feedback": "Betydelig keltisk innslag, trolig fra kvinner brakt fra Irland. Koloniseringshistorien er alltid mer kompleks enn den offisielle fortellingen."
+        },
+        {
+          "q": "Hvem regnes som den første norrøne bosetteren på Færøyene?",
+          "opts": ["Leif Eriksson", "Grim Kamban", "Rollo", "Ottar"],
+          "correct": 1,
+          "feedback": "Grim Kamban — og etternavnet 'Kamban' antas å være gælisk, ikke norrønt. Selv den 'første vikingen' var trolig en blandingsperson."
+        },
+        {
+          "q": "Hva brukte vikingene Færøyene til, strategisk?",
+          "opts": ["Som fengsel", "Som springbrett videre mot Island og Vinland", "Som slavemarked", "Som kloster"],
+          "correct": 1,
+          "feedback": "Et hvilested og forsyningspunkt på veien vestover. Hvert steg over Atlanterhavet var en egen etappe."
+        },
+        {
+          "q": "Hvorfor er færøyinger i dag genetisk svært homogene?",
+          "opts": ["På grunn av moderne innvandring", "Fordi nesten alle stammer fra noen hundre vikinger fra rundt år 825", "Fordi øyene var ubebodde til 1800-tallet", "På grunn av en pandemi"],
+          "correct": 1,
+          "feedback": "En liten grunnleggerbefolkning. Men DNA viser også keltisk innslag — stille spor etter kvinner som ikke valgte å reise dit."
+        },
+        {
+          "q": "Hva er hovedpoenget med Færøyene som kulturmøte?",
+          "opts": ["At vikingene var fredelige", "At den offisielle historien om 'oppdagelse' ofte skjuler hvem som egentlig var der", "At munkene var krigere", "At øyene var verdiløse"],
+          "correct": 1,
+          "feedback": "Munkene som var der først, og slavinnene som ikke valgte å reise, skrives ut av historien. Hvem som huskes, er aldri tilfeldig."
+        }
+      ]
+    },
+
+    "island": {
+      "episkeKulturmote": {
+        "tittel": "Mannen under kappen",
+        "scene": "Året er 1000. Hele Island er samlet på Þingvellir, og vi står på randen av borgerkrig. De kristne på den ene siden, vi som holder på Tor og Odin på den andre. Begge sider har våpen. Begge sider har rett, mener de. Og hele samfunnet — verdens eneste land uten konge — kan splittes for alltid i dag. Da reiser Þorgeirr seg, lovsigemannen, han som alle stoler på selv om han selv er hedning. Han sier: «La én mann bestemme, så vi ikke river hverandre i stykker.» Og så legger han seg ned, trekker kappen over hodet, og blir liggende et helt døgn. Vi venter. Ingen tør røre seg. Når han endelig reiser seg, sier han: «Alle skal døpes. Men den som vil ofre til de gamle gudene, kan gjøre det — i det stille, hjemme.» Og slik, med ett kompromiss, reddet én mann under en kappe et helt folk fra å ødelegge seg selv.",
+        "kulturmøteSpørsmål": {
+          "q": "Þorgeirr løste konflikten mellom hedendom og kristendom med et kompromiss. Hva lærer dette oss om kulturmøter?",
+          "opts": [
+            "At den sterkeste alltid vinner",
+            "At kulturmøter ikke trenger en vinner og en taper — kompromiss kan redde begge",
+            "At religion ikke betyr noe",
+            "At hedningene tapte"
+          ],
+          "correct": 1,
+          "feedback": "I stedet for at én kultur knuste den andre, fant Þorgeirr en løsning der begge fikk plass. Det er et av historiens mest elegante kulturmøte-kompromisser — og et forbilde for hvordan ulike grupper kan leve sammen."
+        }
+      },
+      "task": {
+        "type": "innspilling",
+        "icon": "⚖️",
+        "typeLabel": "Innspilling",
+        "title": "Lovtalen",
+        "desc": "På Alltinget måtte alt sies muntlig — det fantes ikke skrift for lover. Én i gruppen står frem og holder en 30-sekunders «lovtale» om en NY regel som burde gjelde på skolen, med minst tre grunner. Resten av gruppen er «Alltinget» og stemmer ja/nei på slutten. Spill inn talen OG avstemningen. Vis læreren.",
+        "rationale": "Demokrati på Island var en muntlig kunst. Lovsigemannen måtte huske 130 lover utenat. Dere skal kjenne på hvor krevende det er å overbevise en forsamling uten manus — bare med ord og argumenter."
+      },
+      "stedsquiz": [
+        {
+          "q": "Hva var spesielt med Alltinget (grunnlagt 930)?",
+          "opts": ["Det var verdens første hær", "Det var verdens eldste fortsatt fungerende parlament", "Det var et kloster", "Det var et slavemarked"],
+          "correct": 1,
+          "feedback": "Verdens eldste fortsatt fungerende parlament, styrt uten konge. Lover ble sagt høyt av en lovsigemann."
+        },
+        {
+          "q": "Hva var Þorgeirrs kompromiss i år 1000?",
+          "opts": ["Kristne og hedninger byttet på å styre", "Alle skulle døpes, men hedendom kunne praktiseres privat", "Hedningene måtte forlate Island", "Kristendom ble forbudt"],
+          "correct": 1,
+          "feedback": "Et elegant kompromiss som hindret borgerkrig. Begge sider fikk noe — ingen ble fullstendig knust."
+        },
+        {
+          "q": "Hvordan tok Þorgeirr avgjørelsen?",
+          "opts": ["Ved terningkast", "Han la seg under en kappe i ett døgn", "Han spurte kongen i Norge", "Ved en duell"],
+          "correct": 1,
+          "feedback": "Han trakk en kappe over hodet og lå et helt døgn i refleksjon før han kom ut med kompromisset."
+        },
+        {
+          "q": "Hvorfor vet vi i dag om Tor, Odin og Ragnarok?",
+          "opts": ["Vikingene skrev det ned selv", "Arabiske reisende dokumenterte det", "Snorre Sturlason skrev det ned på 1200-tallet, 200 år etter at folk sluttet å tro på det", "Det ble bevart i runer"],
+          "correct": 2,
+          "feedback": "Snorres arbeid reddet norrøn mytologi for ettertiden. Uten ham ville nesten alt vært tapt."
+        },
+        {
+          "q": "Hva betyr 'lovsigemann'?",
+          "opts": ["En kriger", "En som måtte huske og fremsi lovene utenat", "En konge", "En prest"],
+          "correct": 1,
+          "feedback": "Siden lovene ikke var skrevet ned, måtte lovsigemannen huske alle 130 utenat og si dem høyt på Alltinget."
+        },
+        {
+          "q": "Hva er hovedlærdommen fra kulturmøtet på Island?",
+          "opts": ["At den sterkeste vinner", "At kulturmøter kan løses med kompromiss i stedet for at én part knuser den andre", "At demokrati ikke fungerer", "At religion må forbys"],
+          "correct": 1,
+          "feedback": "Þorgeirr viste at ulike kulturer og verdensbilder kan finne plass sammen — uten vinner og taper."
+        }
+      ]
+    },
+
+    "vinland": {
+      "episkeKulturmote": {
+        "tittel": "Ord som ikke fantes",
+        "scene": "Vi hadde reist lenger enn noen viking før oss — forbi Grønland, vest over et hav uten ende, til et land med vindruer og laks så stor som barn. Og så møtte vi dem. Skrælingene. De lignet ingen vi hadde sett: hud som kobber, klær av skinn vi ikke kjente, et språk som ikke hadde ett eneste ord til felles med vårt. Vi prøvde å handle. Vi ga dem rødt stoff og melk. De ga oss pelsverk. Det gikk bra — helt til noen av dem drakk melken og ble syke. De forsto det som gift. Vi forsto det ikke i det hele tatt. Plutselig var pilene i lufta, og Thorvald lå død med en pil i brystet. Vi hadde våpen, men de var hundre mot en, og de kjente landet. Vi flyktet. Det fantes ingen felles ord å bygge fred på — og uten ord, ble alt til krig.",
+        "kulturmøteSpørsmål": {
+          "q": "Det fredelige møtet ble til vold fordi urfolket ble syke av melk (laktoseintoleranse). Hva viser dette om kulturmøter?",
+          "opts": [
+            "At urfolket var fiendtlige",
+            "At uten felles forståelse kan selv velvilje bli dødelig — kulturkunnskap er ikke valgfritt",
+            "At vikingene var onde",
+            "At melk er farlig"
+          ],
+          "correct": 1,
+          "feedback": "Ingen hadde onde hensikter. Men uten felles språk eller kunnskap om hverandre, ble en biologisk forskjell (laktoseintoleranse) tolket som forgiftning. Kulturforståelse kan være forskjellen på fred og død."
+        }
+      },
+      "task": {
+        "type": "innspilling",
+        "icon": "🤲",
+        "typeLabel": "Innspilling",
+        "title": "Uten ord",
+        "desc": "Skrælingene og vikingene hadde ingen felles språk. Velg én beskjed: «vi vil handle pels», «vi vil ikke skade dere», eller «vi trenger vann». Spill inn en video (maks 30 sek) der hele gruppen KUN med kroppsspråk og lyder (ingen ord på noe språk) prøver å formidle beskjeden. La læreren — eller en annen klasse — gjette. Last opp / vis videoen.",
+        "rationale": "Misforståelser mellom vikinger og urfolk ble dødelige nettopp fordi de manglet felles språk. Dere skal kjenne på hvor vanskelig — og hvor lett misforstått — kommunikasjon uten ord er."
+      },
+      "stedsquiz": [
+        {
+          "q": "Hva kalte vikingene urfolket de møtte i Vinland?",
+          "opts": ["Indianere", "Skrælinger", "Rus", "Gall-Gàidheal"],
+          "correct": 1,
+          "feedback": "'Skrælinger' — ikke et respektfullt navn. Det sier noe om vikingenes holdning til folk de ikke forsto."
+        },
+        {
+          "q": "Hva utløste trolig volden mellom vikinger og urfolk?",
+          "opts": ["Vikingene angrep først", "Urfolket stjal våpen", "Urfolket drakk melk og ble syke — trolig laktoseintoleranse", "En storm"],
+          "correct": 2,
+          "feedback": "En biologisk forskjell ble tolket som forgiftning. Uten kulturkunnskap ble velvilje til katastrofe."
+        },
+        {
+          "q": "I hvilket år var vikingene i Nord-Amerika, ifølge den eksakte dateringen fra 2021?",
+          "opts": ["793", "1021", "1492", "1066"],
+          "correct": 1,
+          "feedback": "År 1021, datert ved et solstormsignal i tre fra L'Anse aux Meadows. 471 år før Columbus."
+        },
+        {
+          "q": "Hvem var Gudrid Torbjørnsdotter?",
+          "opts": ["En skrælinghøvding", "Kvinnen som reiste mest i vikingtiden — født på Island, fødte det første europeiske barnet i Amerika", "En irsk slave", "En bysantinsk dronning"],
+          "correct": 1,
+          "feedback": "Hun fødte sønnen Snorre i Vinland — det første europeiske barnet født i Amerika — og pilgrimerte senere til Roma."
+        },
+        {
+          "q": "Hvor lenge varte vikingbosetningen i Vinland?",
+          "opts": ["I 200 år", "Bare noen få år", "I 50 år", "Den varer fortsatt"],
+          "correct": 1,
+          "feedback": "Bosetningene ble forlatt etter få år. Nord-Amerika var deretter 'stengt' for europeere i nesten 500 år."
+        },
+        {
+          "q": "Hva er den store lærdommen fra Vinland?",
+          "opts": ["At krig alltid vinner", "At manglende kulturforståelse kostet vikingene en hel verdensdel", "At urfolket var underlegne", "At melk er farlig"],
+          "correct": 1,
+          "feedback": "Vikingenes våpenmakt fungerte ikke uten forståelse. Mot kunne ikke erstatte kommunikasjon."
+        }
+      ]
+    },
+
+    "novgorod": {
+      "episkeKulturmote": {
+        "tittel": "De som ble bedt om å herske",
+        "scene": "Det merkeligste oppdraget en viking kan få: å bli invitert. Slaverne sendte bud over havet og sa — så går i hvert fall fortellingen — «Vårt land er stort og rikt, men det er ikke orden i det. Kom og hersk over oss.» Så vi kom. Rurik og brødrene hans. Vi som var vant til å ta med makt, ble bedt om å styre med rettferd. Men her er det rare: jo lenger vi ble, jo mindre norrøne ble vi. Sønnene mine heter slaviske navn nå. De ber til Kristus i greske kirker. De snakker et språk bestefar aldri ville forstått. Vi kom for å herske over slaverne — og endte med å bli slavere selv. Til og med navnet de ga oss, «Rus», ble navnet på hele dette enorme landet. Vi forsvant inn i det folket vi skulle styre.",
+        "kulturmøteSpørsmål": {
+          "q": "Rus-vikingene kom som herskere, men ble fullstendig slaviske på tre generasjoner. Hva kalles dette?",
+          "opts": [
+            "Erobring",
+            "Assimilering — der erobreren går opp i de erobredes kultur",
+            "Hybridkultur",
+            "Segregering"
+          ],
+          "correct": 1,
+          "feedback": "Erobreren ble assimilert av de erobrede — de tok slavisk språk, religion og navn. Det er ett av historiens mest overraskende kulturmøte-utfall: makt betyr ikke alltid kulturell dominans."
+        }
+      },
+      "task": {
+        "type": "geoguesser",
+        "icon": "🌍",
+        "typeLabel": "Navigasjon",
+        "title": "Følg sølvet",
+        "desc": "Bruk nett (Google Maps). Vikingene fraktet varer fra Novgorod nedover elvene helt til Bagdad. Finn elvene de brukte: start ved Novgorod, finn Volga-elven, og følg den til den renner ut i Det kaspiske hav. Skriv ned navnet på havet Volga renner ut i, og anslå reiselengden. Vis læreren.",
+        "rationale": "Volga-ruten brakte mer arabisk sølv til Skandinavia enn alle plyndringene til sammen. Dere skal se med egne øyne hvor langt vikingene var villige til å reise for fredelig handel."
+      },
+      "stedsquiz": [
+        {
+          "q": "Hva betyr at vikingene ble kalt «Rus» — og hvilken konsekvens fikk det?",
+          "opts": ["Det var vikingenes eget navn", "Det er det slaviske ordet for vikingene, og ble til navnet 'Russland'", "Det betyr 'den røde'", "Det var et skjellsord"],
+          "correct": 1,
+          "feedback": "Navnet på verdens største land kommer fra vikingene. Et dramatisk eksempel på at kulturmøter kan forme identitet i tusen år."
+        },
+        {
+          "q": "Hvordan kom vikingene til makten i Novgorod, ifølge Den russiske krønike?",
+          "opts": ["De erobret byen med vold", "De ble invitert til å styre fordi det var kaos blant slaverne", "De kjøpte byen", "De vant den i et terningspill"],
+          "correct": 1,
+          "feedback": "Slaviske stammer ba dem komme og herske. Sjeldent i historien — men fortellingen kan også være propaganda skrevet av vinnerne."
+        },
+        {
+          "q": "Hvem grunnla dynastiet som styrte Russland i 700 år?",
+          "opts": ["Olga", "Rurik", "Vladimir", "Oleg"],
+          "correct": 1,
+          "feedback": "Rurik grunnla Rurik-dynastiet i 862. Det styrte området i 700 år."
+        },
+        {
+          "q": "Olga av Kiev hevnet mannens død på en uvanlig måte. Hva gjorde hun?",
+          "opts": ["Forgiftet fienden", "Brant en hel by med duer som hadde svovelfakler i halene", "Sendte leiemordere", "Utfordret til holmgang"],
+          "correct": 1,
+          "feedback": "Hun bandt fakler til duer og slapp dem over fiendens by. Senere ble hun helgenkåret av den ortodokse kirken."
+        },
+        {
+          "q": "Hvilke norrøne navn lever videre i russisk kongerekke?",
+          "opts": ["Erik, Olav, Harald", "Igor (Yngvarr), Oleg (Helgi), Olga (Helga), Vladimir (Valdemar)", "Rollo, Knut, Sven", "Leif, Bjørn, Ragnar"],
+          "correct": 1,
+          "feedback": "Norrøne navn ble slaviske over generasjoner. Vikingarven sitter innvevd i et helt lands historie."
+        },
+        {
+          "q": "Hva skjedde med Rus-vikingene kulturelt?",
+          "opts": ["De forble rene skandinaver", "De ble fullstendig slaviske på tre generasjoner", "De dro tilbake til Sverige", "De ble utvist"],
+          "correct": 1,
+          "feedback": "De tok språk, navn og religion fra dem de styrte. Erobreren ble assimilert — makt er ikke det samme som kulturell dominans."
+        }
+      ]
+    },
+
+    "baghdad": {
+      "episkeKulturmote": {
+        "tittel": "Allahs skitneste skapninger",
+        "scene": "Vi møtte araberen Ibn Fadlan ved Volga, og han kunne ikke slutte å stirre på oss. Han skrev på rullene sine hele tiden. Senere fikk vi vite hva han skrev: at kroppene våre var «perfekte, som palmer» — men at vi var «Allahs skitneste skapninger». Han ble forferdet da han så oss vaske oss om morgenen: vi delte alle samme vannfat, og ja, noen spyttet og snøt seg i det. For oss var det normalt. For ham, som vasket seg fem ganger om dagen med rennende vann, var det avskyelig. Og vi? Vi syntes araberne var rare som vasket seg så ofte — som om de aldri ble ferdige. Hvem av oss var «sivilisert»? Han trodde det var ham. Vi trodde det var oss. Begge hadde rett. Begge tok feil.",
+        "kulturmøteSpørsmål": {
+          "q": "Vikingene og araberne syntes begge den andre var 'usivilisert' når det gjaldt hygiene. Hva er poenget?",
+          "opts": [
+            "At araberne hadde rett",
+            "At 'sivilisert' avhenger av hvilken kultur som vurderer — det finnes ingen nøytral målestokk",
+            "At vikingene var skitne",
+            "At hygiene ikke betyr noe"
+          ],
+          "correct": 1,
+          "feedback": "Begge målte den andre med sin egen kulturs målestokk og fant den andre mangelfull. Det viser at 'sivilisert' ikke er en objektiv standard, men et perspektiv. Å forstå dette er kjernen i å forstå kulturmøter."
+        }
+      },
+      "task": {
+        "type": "foto",
+        "icon": "🧼",
+        "typeLabel": "Foto-oppdrag",
+        "title": "Renselsen",
+        "desc": "Ibn Fadlan ble sjokkert over vikingenes hygiene. Bevis at dere kan bedre: gå sammen til nærmeste toalett, vask hendene grundig (minst 20 sekunder med såpe), og ta ETT bilde av alle gruppemedlemmenes rene hender sammen (gjerne med såpe synlig). Vis læreren.",
+        "rationale": "Hygiene var det største kultursjokket mellom arabere og vikinger. Araberne badet flere ganger daglig; vikingene én gang i uka. Dere skal kjenne på hvor mye en enkel skikk — som håndvask — kan skille to kulturer."
+      },
+      "stedsquiz": [
+        {
+          "q": "Ibn Fadlan hadde to motstridende reaksjoner på vikingene. Hva var de?",
+          "opts": ["Beundret kunsten, foraktet maten", "Beundret kroppene ('som palmer'), sjokkert over hygienen ('Allahs skitneste')", "Respekterte religionen, fryktet våpnene", "Likte musikken, hatet klærne"],
+          "correct": 1,
+          "feedback": "Fascinert OG forferdet. Kulturmøter er sjelden enten positive eller negative — de er ofte begge deler."
+        },
+        {
+          "q": "Hva er Ibn Fadlans 'Risalah' kjent som?",
+          "opts": ["Den viktigste arabiske diktsamlingen", "Den viktigste utenforstående kilden til vikingtiden vi har", "Den første boken på norrønt", "En kokebok"],
+          "correct": 1,
+          "feedback": "Den mest detaljerte øyenvitnebeskrivelsen av vikinger fra noen utenfor Norden — inkludert den eneste øyenvitneskildringen av en vikinghøvdings begravelse."
+        },
+        {
+          "q": "Hva sjokkerte Ibn Fadlan ved vikingenes morgenvask?",
+          "opts": ["At de ikke vasket seg i det hele tatt", "At de delte samme vannfat, og noen spyttet og snøt seg i det", "At de vasket seg for ofte", "At de brukte parfyme"],
+          "correct": 1,
+          "feedback": "Felles vannfat der alle delte. For en araber vant til rennende vann fem ganger daglig, var det avskyelig."
+        },
+        {
+          "q": "Hvor mange arabiske sølvmynter er funnet i skandinaviske jordfunn?",
+          "opts": ["Rundt 100", "Over 500 000", "Akkurat 1000", "Ingen"],
+          "correct": 1,
+          "feedback": "Over en halv million — alt fra fredelig handel via Volga-ruten. Mer rikdom enn alle plyndringene til sammen."
+        },
+        {
+          "q": "Hvilket instrument fikk vikingene tilgang til gjennom arabisk kontakt, som senere hjalp europeisk navigasjon?",
+          "opts": ["Kompasset", "Astrolabet", "Solsteinen", "Teleskopet"],
+          "correct": 1,
+          "feedback": "Astrolabet — et arabisk instrument for å måle stjernenes posisjon. Kulturmøtet ga teknologi, ikke bare sølv."
+        },
+        {
+          "q": "Hva er hovedpoenget med møtet mellom vikinger og arabere?",
+          "opts": ["At araberne var overlegne", "At 'sivilisert' avhenger av hvem som vurderer — det finnes ingen nøytral målestokk", "At vikingene var barbarer", "At handel er umulig"],
+          "correct": 1,
+          "feedback": "Begge syntes den andre var usivilisert. 'Sivilisert' er et perspektiv, ikke en objektiv standard."
+        }
+      ]
+    },
+
+    "miklagard": {
+      "episkeKulturmote": {
+        "tittel": "Byen som rørte himmelen",
+        "scene": "Da vi rodde inn i Miklagards havn, måtte vi legge nakken bakover for å se toppen av Hagia Sofia. Ingen av oss trodde mennesker kunne bygge så høyt. En halv million mennesker bodde her — flere enn i hele Norge. Gull glinset på kuplene. Og keiseren ville ha OSS som livvakter! Ikke fordi vi var de beste krigerne, men fordi vi var fremmede — uten slekt her, uten å bry oss om deres intriger. For å tjene ham måtte vi legge igjen alt vi var: våpnene ved porten, det ville blikket, den norrøne stoltheten. Vi måtte bukke dypt og si fremmede ord på gresk: «Doxa to Theo.» Halvdan, kameraten min, risset navnet sitt i marmoren i Hagia Sofia en kjedelig vaktdag. Det står der ennå, tusen år senere: Halvdan var her. Vi kom som ville menn fra nord, og dro hjem med gull, gresk og hoffmanerer — forvandlet av byen som rørte himmelen.",
+        "kulturmøteSpørsmål": {
+          "q": "Keiseren ansatte vikinger som livvakter nettopp FORDI de var fremmede uten lokale bånd. Hva sier dette om kulturmøter?",
+          "opts": [
+            "At fremmedhet alltid er en ulempe",
+            "At det å være utenforstående noen ganger kan være en styrke og en mulighet",
+            "At vikingene var de beste krigerne",
+            "At keiseren var dum"
+          ],
+          "correct": 1,
+          "feedback": "Vikingenes fremmedhet — at de ikke hadde slekt eller politiske ambisjoner i byen — gjorde dem til perfekte, lojale livvakter. Noen ganger åpner det å være 'utenfor' dører som er stengt for de som er 'innenfor'."
+        }
+      },
+      "task": {
+        "type": "innspilling",
+        "icon": "🙇",
+        "typeLabel": "Innspilling",
+        "title": "Hoffhilsenen",
+        "desc": "For å tjene keiseren måtte vikingene lære hoffprotokoll. Øv i ett minutt, og spill så inn en video der hele gruppen samtidig: (1) bøyer seg dypt, (2) sier «Doxa to Theo» (DOK-sa to THE-o), (3) holder stillingen i 5 sekunder. Alle synkront. Last opp / vis læreren, som avgjør om det var verdig keiseren.",
+        "rationale": "Den som ikke bukket riktig, fikk ikke jobben — og jobben var verdt en formue. Dere skal kjenne på hvordan tilpasning til en fremmed kulturs regler kunne være forskjellen på rikdom og avvisning."
+      },
+      "stedsquiz": [
+        {
+          "q": "Hvorfor ansatte keiseren norrøne vikinger som livvakter?",
+          "opts": ["De var billigst", "De var utlendinger uten lokale lojaliteter — ville aldri delta i kupp", "De var de beste sjømennene", "De var kristne"],
+          "correct": 1,
+          "feedback": "Utlendinger uten slekt eller ambisjoner i byen var perfekte, pålitelige livvakter. Fremmedhet ble en fordel."
+        },
+        {
+          "q": "Hva het vikingenes livvaktstyrke for keiseren?",
+          "opts": ["Skjoldborgen", "Væringgarden", "Berserkene", "Jomsvikingene"],
+          "correct": 1,
+          "feedback": "Væringgarden. Tusenvis av nordmenn og svensker tjente der gjennom årene."
+        },
+        {
+          "q": "En viking risset navnet sitt i Hagia Sofia. Hva het han?",
+          "opts": ["Leif", "Halvdan", "Harald", "Olav"],
+          "correct": 1,
+          "feedback": "'Halftan auk Are...' — Halvdan var her. Runene står ennå i andre etasje av Hagia Sofia."
+        },
+        {
+          "q": "Hvem tjente i Væringgarden og kom hjem som Norges rikeste mann og konge?",
+          "opts": ["Rollo", "Harald Hardråde", "Knut den mektige", "Olav Tryggvason"],
+          "correct": 1,
+          "feedback": "Harald Hardråde tjente 10 år, kjempet i Italia, Bulgaria og Nord-Afrika, og ble konge. Han døde ved Stamford Bridge i 1066 — ofte regnet som vikingtidens slutt."
+        },
+        {
+          "q": "Hva betyr 'Miklagard'?",
+          "opts": ["Den hellige byen", "Den store byen", "Den gylne byen", "Den fjerne byen"],
+          "correct": 1,
+          "feedback": "Mikla (stor) + garðr (by). Vikingene var overveldet av størrelsen — over en halv million innbyggere."
+        },
+        {
+          "q": "Hva tok vikinger fra Væringgarden med seg hjem som formet Norges middelalder?",
+          "opts": ["Bare gull", "Kunnskap om kirkebygging, lovverk, militær taktikk og skriftkultur", "Greske slaver", "Ingenting"],
+          "correct": 1,
+          "feedback": "Det fjerneste kulturmøtet formet hjemlandet mest. Norges middelalder ble bygget på bysantinsk gull og kunnskap."
+        }
+      ]
+    }
+  },
+
+  "ferdighetstreQuiz": {
+    "beskrivelse": "Oppsummerende quiz om alle 12 land, brukt til å låse opp ferdighetsnivå 2 og 3. SEPARAT fra stedsquizen. Bruker den eksisterende quiz-banken (vikingspill_quiz.json), men filtrert slik at den dekker steder gruppen har besøkt på tvers av hele reisen. Dette er 'mesterprøven' fra CLAUDE.md §3.2.",
+    "forskjellFraStedsquiz": "Stedsquiz = test av ÉN destinasjon rett etter du leste den (belønner lesing, +1 terning). Ferdighetstre-quiz = oppsummerende test om HELE reisen (låser opp ferdigheter, krever bestått)."
+  },
+
+  "_mekanikk": {
+
+    "lærertriggetKonkurranse": {
+      "navn": "Gudenes prøve (Ragnarok-øyeblikk)",
+      "prinsipp": "Læreren kan KUN bestemme NÅR den inntreffer. Alt annet er likt for alle og avgjøres av en kjapp utfordring + ferdigheter. Læreren velger ikke gruppe, ikke type, ikke utfall.",
+      "flyt": [
+        "1. Læreren trykker 'Utløs gudenes prøve' på lærerskjermen.",
+        "2. ALLE gruppers skjermer avbrytes samtidig med en dramatisk varsling (torden, mørkere skjerm, Odins øye).",
+        "3. Spillet trekker TILFELDIG én av flere utfordringstyper (se under). Samme for alle grupper.",
+        "4. Utfordringen kobles til ÉN tilfeldig ferdighet. Grupper med høyt nivå i den ferdigheten får bonus (handicap-fordel) i konkurransen.",
+        "5. Alle grupper gjennomfører den fysiske/kreative utfordringen samtidig. Læreren observerer.",
+        "6. Resultat + ferdighetsbonus avgjør rangering. Vinneren får poeng/bonus, de andre mindre. Ingen taper alt.",
+        "7. Spillet fortsetter der det var."
+      ],
+      "utfordringstyper": [
+        { "id": "flaskeflipp", "navn": "Tor's flaskeflipp", "ferdighet": "krigskunst", "desc": "Hver gruppe utnevner én forkjemper. På 30 sekunder: flest vellykkede flaskeflipp (flaske lander stående). Krigskunst gir +1 forsøk per nivå.", "type": "fysisk" },
+        { "id": "balanse", "navn": "Skipets balanse", "ferdighet": "sjømannskap", "desc": "Hele gruppen står på ett ben samtidig. Den gruppen som har flest stående etter 45 sekunder vinner. Sjømannskap gir lov til å hvile 5 sek per nivå.", "type": "fysisk" },
+        { "id": "skaldekvad", "navn": "Skaldenes kappestrid", "ferdighet": "tro", "desc": "På 60 sekunder: lag et 4-linjers rim om reisen. Beste kvad (lærer/avstemning) vinner. Tro gir startfordel — de begynner med første linje gitt.", "type": "kreativ" },
+        { "id": "tegnestafett", "navn": "Runerisseren", "ferdighet": "tro", "desc": "Én tegner et begrep fra reisen (f.eks. 'Hagia Sofia', 'finnskatt') uten ord, resten gjetter. Flest riktige på 90 sek vinner.", "type": "kreativ" },
+        { "id": "hilsestafett", "navn": "Tungenes mester", "ferdighet": "språk", "desc": "Gruppen må på 60 sek si 'fred' eller 'hilsen' på flest mulig av språkene fra reisen (gresk, arabisk, russisk, gælisk, norrønt). Språk gir +1 godkjent ord per nivå.", "type": "kreativ" },
+        { "id": "forhandling", "navn": "Gavekunst", "ferdighet": "diplomati", "desc": "Hver gruppe sender én forkjemper til læreren med ett 'tilbud' (en kreativ, morsom grunn til at nettopp de fortjener gudenes gunst). Beste pitch vinner. Diplomati gir +5 sek taletid per nivå.", "type": "kreativ" }
+      ],
+      "viktig": "Siden utfordring + ferdighet er tilfeldig trukket, kan en gruppe som har spesialisert seg tungt i krigskunst plutselig møte en SPRÅK-utfordring og slite — mens en balansert gruppe gjør det jevnt bra. Det er hele poenget: spesialisering er et tveegget sverd, og ingen vet hva gudene sender."
+    },
+
+    "sjøslag": {
+      "navn": "Holmgang på bølgene",
+      "prinsipp": "Grupper kan fortsatt utfordre hverandre — men gjennom MORSOMME forkjemper-dueller, ikke forhandling. Hver gruppe utnevner en forkjemper (vikingvariant av en ridder): en 'holmgangsmann' / 'enekjempe'.",
+      "flyt": [
+        "1. Gruppe A utfordrer Gruppe B til holmgang via spillet.",
+        "2. Gruppe B kan akseptere eller avslå (læreren ser alt og kan vetoe).",
+        "3. Hvis akseptert: hver gruppe utnevner sin holmgangsmann (forkjemper).",
+        "4. Spillet trekker en tilfeldig duell-aktivitet (se under).",
+        "5. De to forkjemperne dyster ansikt til ansikt. Ferdigheter gir bonus.",
+        "6. Vinner: +3 handel. Taper: −2 handel. Begge: −1 rykte (kamp koster ære)."
+      ],
+      "duellAktiviteter": [
+        { "navn": "Flaskeflipp-duell", "desc": "Først til 3 vellykkede flaskeflipp vinner.", "ferdighet": "krigskunst" },
+        { "navn": "Stirrekamp", "desc": "Først som blunker eller ler taper.", "ferdighet": "tro" },
+        { "navn": "Balansedyst", "desc": "Stå på ett ben lengst — siste stående vinner.", "ferdighet": "sjømannskap" },
+        { "navn": "Tungebrekker", "desc": "Si en norrøn-inspirert regle tre ganger raskt uten feil.", "ferdighet": "språk" },
+        { "navn": "Sten-saks-papir, beste av 5", "desc": "Klassisk, men med vikingnavn: Sverd (saks) – Skjold (stein) – Seil (papir).", "ferdighet": "diplomati" }
+      ],
+      "holmgangsmann_forklaring": "I vikingtiden var 'holmgang' en formell tvekamp, ofte på en liten holme (øy), for å avgjøre tvister. Forkjemperen kjempet på vegne av hele saken. Her er det en morsom, ufarlig variant — men begrepet er historisk ekte."
+    }
+  }
+}

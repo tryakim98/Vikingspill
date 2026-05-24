@@ -1,0 +1,1858 @@
+{
+  "skillTree": {
+    "språk": {
+      "name": "Språk",
+      "icon": "🗣️",
+      "color": "#2B6B6B",
+      "tiers": [
+        {
+          "name": "Grunnleggende språkforståelse",
+          "desc": "Dere kan si hilsener og takk på flere språk. +1 i fredelige handelssituasjoner."
+        },
+        {
+          "name": "Tolk",
+          "desc": "Dere forstår hva fremmede sier. Låser opp valg som krever forhandling."
+        },
+        {
+          "name": "Polyglot",
+          "desc": "Dere snakker tre språk flytende. +2 i alle kulturmøter."
+        }
+      ]
+    },
+    "sjømannskap": {
+      "name": "Sjømannskap",
+      "icon": "⛵",
+      "color": "#1A4F7A",
+      "tiers": [
+        {
+          "name": "Kystnavigasjon",
+          "desc": "Dere kan seile langs kjente kyster. +1 mot uvær."
+        },
+        {
+          "name": "Åpent hav",
+          "desc": "Dere våger åpne strekninger. Låser opp Færøyene, Island, Vinland."
+        },
+        {
+          "name": "Stjernenavigasjon",
+          "desc": "Dere navigerer etter stjerner og solstein. +2 på lange reiser."
+        }
+      ]
+    },
+    "krigskunst": {
+      "name": "Krigskunst",
+      "icon": "⚔️",
+      "color": "#8B2929",
+      "tiers": [
+        {
+          "name": "Skjoldborg",
+          "desc": "Dere kan slåss i formasjon. +1 i kamp."
+        },
+        {
+          "name": "Strategi",
+          "desc": "Dere ser kampens helhet. Låser opp leiesoldat-roller (f.eks. Væringgarden)."
+        },
+        {
+          "name": "Berserkergang",
+          "desc": "Dere kan gå i kampraseri. +3 i kamp, men −1 kulturforståelse hver gang."
+        }
+      ]
+    },
+    "diplomati": {
+      "name": "Diplomati",
+      "icon": "🤝",
+      "color": "#5B7553",
+      "tiers": [
+        {
+          "name": "Gavekultur",
+          "desc": "Dere forstår norrøn gaveseremoni. +1 ved første møte med fremmede."
+        },
+        {
+          "name": "Forhandling",
+          "desc": "Dere kan forhandle traktater. Låser opp avtale-valg."
+        },
+        {
+          "name": "Allianse",
+          "desc": "Varig +1 i én valgt kultur, og dere kan be andre grupper om hjelp."
+        }
+      ]
+    },
+    "tro": {
+      "name": "Tro & visdom",
+      "icon": "🌳",
+      "color": "#6B3FA0",
+      "tiers": [
+        {
+          "name": "Runelesning",
+          "desc": "Dere kan tolke runer og varsler. +1 i åndelige situasjoner."
+        },
+        {
+          "name": "Skaldekunst",
+          "desc": "Dere kan dikte og synge. Låser opp kreative valg ved hoff."
+        },
+        {
+          "name": "Synkretisme",
+          "desc": "Dere kombinerer tro fra flere kulturer. Klarer både kristne og hedenske møter."
+        }
+      ]
+    }
+  },
+  "destinations": [
+    {
+      "id": "lindisfarne",
+      "name": "Lindisfarne",
+      "region": "Nordøst-England, 793",
+      "color": "#8B2929",
+      "difficulty": "farlig",
+      "history": "Det første store vikingangrepet vi har skriftlige kilder på. <strong>8. juni 793</strong> stiger nordmenn i land på den hellige øya og plyndrer klosteret. Dette er øyeblikket Europa lærte at vikingene fantes — året som regnes som vikingtidens begynnelse.",
+      "funFact": "Munken som først så skipene, antok det var venner med varer. Han gikk ned til stranden for å hilse — og ble drept først.",
+      "famousPerson": "<strong>Alkuin av York</strong> (735–804) — engelsk lærd ved Karl den stores hoff. Hans brev hjem etter angrepet er blant våre viktigste samtidige kilder. Han skrev: «Aldri før har en slik redsel vist seg i Britannia.»",
+      "task": {
+        "type": "movement",
+        "icon": "⚔️",
+        "typeLabel": "Bevegelse",
+        "title": "Stormløpet",
+        "desc": "Hele gruppen stiller seg i en linje. På «GO!» løper alle samtidig så fort dere kan rundt nærmeste bygning og tilbake. Læreren bekrefter at hele gruppen utfører løpet samlet, og at dere puster tungt når dere kommer inn.",
+        "rationale": "Vikingene kom plutselig — munkene fikk ikke tid til å reagere. Dere skal kjenne det samme tempoet på kroppen som de som først så seilene komme inn fra havet."
+      },
+      "choices": [
+        {
+          "id": "plunder",
+          "title": "Plyndre klosteret — alt eller intet",
+          "desc": "Munkene er ikke krigere. Sølvet ligger åpent. Dette er hele grunnen til at dere kom.",
+          "tag": "aggressive",
+          "skillReq": null,
+          "skillReward": {
+            "krigskunst": 1
+          },
+          "baseRoll": {
+            "bad": 1,
+            "mid": 2,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": -3,
+              "trade": 1,
+              "rep": -3,
+              "text": "En gammel munk holder fast i alterkalken og dør i et basketak. Andre vikinger ser dere som «de som drepte en hellig mann». Skipet er tungt, men forbannet."
+            },
+            "mid": {
+              "und": -2,
+              "trade": 4,
+              "rep": -3,
+              "text": "Dere kommer hjem med kirkesølv og hellige bøker. Hjemme er dere rike — i Europa er dere fryktet."
+            },
+            "good": {
+              "und": -2,
+              "trade": 6,
+              "rep": -3,
+              "text": "Skipet er fullt: sølv, gullkalker, edelstener fra evangeliebøker. Hver mann er rik. Halve det kristne Europa hater dere."
+            },
+            "crit": {
+              "und": -2,
+              "trade": 8,
+              "rep": -4,
+              "text": "Dere finner det hemmelige skattkammeret. Skipet er så tungt at det knapt holder seg flytende. Karl den store sender personlig en straffeekspedisjon etter dere."
+            }
+          },
+          "lesson": "Lindisfarne 793 var historisk lønnsomt på kort sikt. Men plyndringen startet 250 år med europeisk frykt — og stengte dører for vikinger som ville handle fredelig.",
+          "locks": [
+            "paris"
+          ]
+        },
+        {
+          "id": "ransom",
+          "title": "Ta munker som gisler — krev løsepenger",
+          "desc": "Dere viser styrke uten å rasere. Den som vil ha munkene tilbake, må betale.",
+          "tag": "trade",
+          "skillReq": null,
+          "skillReward": {
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 1,
+            "mid": 2,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": -1,
+              "trade": 1,
+              "rep": -2,
+              "text": "Bispen i York nekter å betale — han mener munkene er nærmere Gud som martyrer. Dere drar med tomme hender."
+            },
+            "mid": {
+              "und": 0,
+              "trade": 3,
+              "rep": -1,
+              "text": "Bispen betaler i sølv. Munkene returneres uskadd. Forretning, ikke massakre."
+            },
+            "good": {
+              "und": 1,
+              "trade": 4,
+              "rep": 0,
+              "text": "Hele Northumbria samler inn sølv. Dere får mer enn forventet, og en ung munk velger frivillig å bli med dere som tolk."
+            },
+            "crit": {
+              "und": 2,
+              "trade": 5,
+              "rep": 1,
+              "text": "Bispen er imponert over deres mildhet og tilbyr en formell handelsavtale. Dere er invitert tilbake — som handelsmenn."
+            }
+          },
+          "lesson": "Vikingene perfeksjonerte løsepenge-systemet, og det ble en hel økonomi (Danegeld). Bare i 1012 betalte England 48 000 pund sølv for å bli kvitt vikinger.",
+          "locks": []
+        },
+        {
+          "id": "spare",
+          "title": "Spar munkene — bare ta det dere trenger",
+          "desc": "Mange av dere tror på Tor og Odin, men «de kristnes hellige menn» kan likevel være mektige. Hold dere unna alteret.",
+          "tag": "respect",
+          "skillReq": null,
+          "skillReward": {
+            "tro": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 2,
+            "good": 3,
+            "crit": 1
+          },
+          "outcomes": {
+            "mid": {
+              "und": 2,
+              "trade": 1,
+              "rep": 1,
+              "text": "Dere får mat og forsyninger. Munkene gir dere til og med en latinsk bønn for trygg hjemreise."
+            },
+            "good": {
+              "und": 3,
+              "trade": 2,
+              "rep": 2,
+              "text": "En av munkene gir dere et lite trekors og en bok med tegninger. Dere blir invitert tilbake. Andre vikinger ler av dere senere."
+            },
+            "crit": {
+              "und": 4,
+              "trade": 2,
+              "rep": 3,
+              "text": "Munken Beda — han som senere skriver kirkehistorien — sender brev til Karl den store: «Disse nordmennene er ikke som de andre.» Dører åpnes overalt."
+            }
+          },
+          "lesson": "En liten gruppe vikinger valgte faktisk dette i tidlige raid. Sagaene minnes dem ikke — historien glemte de moderate, og husket de brutale. Men kontaktene de moderate skapte, ble kanaler for handel i 200 år.",
+          "locks": []
+        }
+      ]
+    },
+    {
+      "id": "hedeby",
+      "name": "Hedeby",
+      "region": "Sør-Danmark, ca. 850",
+      "color": "#6B4C3B",
+      "difficulty": "trygg",
+      "history": "Vikingtidens største handelsby — nesten 2000 mennesker, det største folket noen hadde sett samlet på ett sted nord for Alpene. Her møttes saksere, frisere, slavere, arabere og nordmenn i tett pakkede gater av planker.",
+      "funFact": "I Hedeby har arkeologer funnet glassperler fra Indus-dalen, mynter fra Tasjkent og silke fra Kina. Globalisering er ikke en moderne oppfinnelse.",
+      "famousPerson": "<strong>Ibrahim ibn Yaqub</strong> (900-tallet) — sefardisk jøde fra Andalusia. Hans beskrivelse av Hedeby er en av få samtidige kilder til byen, og den er ikke smigrende: han skrev at vikingene «sang som hunder hyler».",
+      "task": {
+        "type": "creative",
+        "icon": "🎵",
+        "typeLabel": "Kreativ",
+        "title": "Bevis Ibrahim feil",
+        "desc": "Lag en kort sang eller rytme om reisen så langt — minst 15 sekunder. Hele gruppen må synge eller fremføre den sammen. Spill den inn på telefon eller fremfør den live for læreren.",
+        "rationale": "Ibrahim ibn Yaqub skrev at vikingenes sang lød som hyl. Vis ham at han tok feil — eller bekreft det. Sang og kvad var hjørnesteinen i norrøn kultur, og kvaliteten varierte sterkt."
+      },
+      "choices": [
+        {
+          "id": "merchant",
+          "title": "Etablere fast handelsstand",
+          "desc": "Leie en bod, lære frisisk, bygge nettverk. Det tar tid, men gir varig avkastning.",
+          "tag": "trade",
+          "skillReq": null,
+          "skillReward": {
+            "språk": 1,
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 2,
+            "good": 3,
+            "crit": 1
+          },
+          "outcomes": {
+            "mid": {
+              "und": 2,
+              "trade": 3,
+              "rep": 1,
+              "text": "Dere lærer nok frisisk til å forhandle. Etter en sesong kjenner dere folk fra seks ulike kulturer ved navn."
+            },
+            "good": {
+              "und": 3,
+              "trade": 4,
+              "rep": 2,
+              "text": "Boden går så godt at en saksisk kjøpmann tilbyr dere kompaniskap. Dere blir kjent med Ibrahim ibn Yaqub personlig."
+            },
+            "crit": {
+              "und": 4,
+              "trade": 6,
+              "rep": 3,
+              "text": "Dere blir et navn i Hedeby. Når dere reiser videre, har dere brev fra tre kjøpmenn som åpner dører i hele Europa."
+            }
+          },
+          "lesson": "Hedeby var stedet hvor norrøne ble kosmopolitter. Vikingene som lærte språk og skikker her, var de samme som senere bygget Norge til en europeisk maktstat under Olavene.",
+          "locks": []
+        },
+        {
+          "id": "glass",
+          "title": "Investere alt i glassperler",
+          "desc": "Glassperler fra Bagdad selges for tre ganger prisen i Norge. Men en hel last er en risikabel investering.",
+          "tag": "trade",
+          "skillReq": null,
+          "skillReward": {
+            "sjømannskap": 1
+          },
+          "baseRoll": {
+            "bad": 2,
+            "mid": 1,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": 0,
+              "trade": -2,
+              "rep": 0,
+              "text": "Storm på Skagerrak. Halve lasten knuses. Dere kommer hjem med skuffelse og en lekkasje."
+            },
+            "mid": {
+              "und": 0,
+              "trade": 2,
+              "rep": 0,
+              "text": "Lasten kommer hjem hel. Markedet hjemme er mettet — dere måtte selge for halv pris."
+            },
+            "good": {
+              "und": 1,
+              "trade": 5,
+              "rep": 0,
+              "text": "Riktig sesong. En høvding gir dere dobbelt pris for et sett til datteren sin."
+            },
+            "crit": {
+              "und": 1,
+              "trade": 7,
+              "rep": 0,
+              "text": "Dere selger til kongens hoff. Hele bygda snakker om perlene de neste ti årene."
+            }
+          },
+          "lesson": "Hedeby-handelsmenn lærte tidlig å aldri legge hele formuen i én vare. Det moderne uttrykket «ikke legg alle eggene i én kurv» har røtter helt tilbake hit.",
+          "locks": []
+        },
+        {
+          "id": "spy",
+          "title": "Spionere på sakserne",
+          "desc": "Hedeby ligger på saksisk grense. Få oversikt over kongens troppestyrke. Informasjon kan være verdt mer enn varer.",
+          "tag": "aggressive",
+          "skillReq": {
+            "språk": 1
+          },
+          "skillReward": {
+            "krigskunst": 1,
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 2,
+            "mid": 3,
+            "good": 1,
+            "crit": 0
+          },
+          "outcomes": {
+            "bad": {
+              "und": -2,
+              "trade": 0,
+              "rep": -2,
+              "text": "Dere blir oppdaget. En av dere må flykte i hast. Hedeby er stengt for dere et tiår fremover."
+            },
+            "mid": {
+              "und": 0,
+              "trade": 1,
+              "rep": -1,
+              "text": "Dere får noe info. En kjøpmann kjenner dere igjen, men sier ingenting — i dag."
+            },
+            "good": {
+              "und": 1,
+              "trade": 2,
+              "rep": 0,
+              "text": "Verdifull info. Kongen i Norge betaler dere godt for kart over saksiske festninger."
+            }
+          },
+          "lesson": "Hedeby var et nullpunkt for spionasje. Knytlinge-saga forteller om vikinger som «forsvant» her etter å ha gjort feil ærend. Tillit i en handelsby er fragil.",
+          "locks": []
+        }
+      ]
+    },
+    {
+      "id": "dublin",
+      "name": "Dublin",
+      "region": "Irland, fra 841",
+      "color": "#5B7553",
+      "difficulty": "middels",
+      "history": "Vikingene grunnla Dublin (Dyflinn) i 841 som handelshavn. I 200 år styrte norrøne konger her. De handlet keltiske slaver — men giftet seg også inn i irske kongefamilier, lærte gælisk, og ble kristne.",
+      "funFact": "Halve den irske befolkningen i dag har norrønt DNA i en eller annen form. Etternavn som McLoughlin, Doyle og Higgins kommer fra norrøne navn.",
+      "famousPerson": "<strong>Aud den Djuptenkte</strong> (800-tallet) — først dronning av Dublin, så en av Islands grunnleggere. Etter mannens død førte hun en hel flåte vestover med 20 frigitte slaver, og er en av få kvinner som er hovedperson i en saga (Laxdœla saga).",
+      "task": {
+        "type": "photo",
+        "icon": "🪢",
+        "typeLabel": "Foto",
+        "title": "Den keltiske knuten",
+        "desc": "Keltisk kunst er kjent for sammenflettede mønstre — uten begynnelse og slutt, som livets sammenheng. Finn et sted på skolen hvor noe veves eller flettes inn i hverandre (gjerder, ledninger, hekker, mønster i gulv eller veggdekor). Ta ett bilde som viser dette.",
+        "rationale": "Vikingene som ble i Irland, lærte å lage keltiske flettemønstre i sølv og tre. Stilarten ble blandet — irsk-norrøn kunst er en hel egen tradisjon, og dere skal trene øyet til å se den."
+      },
+      "choices": [
+        {
+          "id": "slave",
+          "title": "Drive slavehandel",
+          "desc": "Keltiske slaver er den mest lønnsomme «varen» i kjent verden. Volgaruten venter, og araberne betaler i sølv.",
+          "tag": "aggressive",
+          "skillReq": {
+            "krigskunst": 1
+          },
+          "skillReward": {
+            "krigskunst": 1
+          },
+          "baseRoll": {
+            "bad": 1,
+            "mid": 2,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": -3,
+              "trade": 0,
+              "rep": -3,
+              "text": "Et opprør på skipet. Tre av slavene rømmer, og en irsk konge sender hærmenn etter dere. Dere reddes så vidt."
+            },
+            "mid": {
+              "und": -3,
+              "trade": 4,
+              "rep": -3,
+              "text": "Skipet kommer hjem fullt av sølv. Halve det kristne Europa stenger dørene for dere."
+            },
+            "good": {
+              "und": -3,
+              "trade": 6,
+              "rep": -4,
+              "text": "Dere selger lasten i Bagdad for en fyrstelig sum. Men ryktet sprer seg: «Det skipet lever av menneskeskjebner.»"
+            },
+            "crit": {
+              "und": -3,
+              "trade": 9,
+              "rep": -5,
+              "text": "En av slavene er datter av en irsk konge. Han betaler dere det doble for å få henne tilbake. Dere er rike. Dere er foraktet."
+            }
+          },
+          "lesson": "Vikingenes slavehandel var enorm. Tusenvis av irer, samer og slavere ble solgt. Selve ordet «slave» kommer fra «slaver», fordi så mange slaviske folk endte i fangenskap. Dette er et av historiens mørkeste kapitler.",
+          "locks": [
+            "miklagard"
+          ]
+        },
+        {
+          "id": "marriage",
+          "title": "Gifte dere inn i irsk slekt",
+          "desc": "En av dere gifter seg med en lokal konges datter. Dere blir delvis irske, lærer gælisk, blir gradvis kristne.",
+          "tag": "respect",
+          "skillReq": {
+            "diplomati": 1
+          },
+          "skillReward": {
+            "språk": 1,
+            "diplomati": 1,
+            "tro": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 1,
+            "good": 3,
+            "crit": 2
+          },
+          "outcomes": {
+            "mid": {
+              "und": 3,
+              "trade": 1,
+              "rep": 1,
+              "text": "Dere blir del av en lokal slekt. Barna deres vokser opp tospråklige."
+            },
+            "good": {
+              "und": 4,
+              "trade": 2,
+              "rep": 2,
+              "text": "Dere blir slekt med Uí Néill-dynastiet. Aud den Djuptenkte sender bud — hun trenger menn til å bosette Island."
+            },
+            "crit": {
+              "und": 5,
+              "trade": 3,
+              "rep": 3,
+              "text": "Den irske kongen utnevner en av dere til hans personlige diplomat. Dere er nå rikets mektigste utlendinger."
+            }
+          },
+          "lesson": "Slik ble Dublin blandet. Halve det moderne Irlands gener har norrønt blod, og halve Norges har keltisk. «Vikingtiden» var også Europas største kulturblanding.",
+          "locks": []
+        },
+        {
+          "id": "kingdom",
+          "title": "Bygge eget norrønt rike",
+          "desc": "Bli del av Dublin-styringsklassen. Krev tributt fra omkringliggende stammer. Vær både norrøn og hersker.",
+          "tag": "aggressive",
+          "skillReq": {
+            "krigskunst": 1,
+            "diplomati": 1
+          },
+          "skillReward": {
+            "krigskunst": 1,
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 1,
+            "mid": 2,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": -1,
+              "trade": 1,
+              "rep": -1,
+              "text": "Dere kommer i konflikt med en eldre norrøn klan i byen. Dere må flykte til Hebridene."
+            },
+            "mid": {
+              "und": 1,
+              "trade": 3,
+              "rep": 1,
+              "text": "Dere får plass i kongeshallen. I 902 blir vikingene drevet ut av Dublin — men dere har hatt 20 gode år."
+            },
+            "good": {
+              "und": 2,
+              "trade": 5,
+              "rep": 2,
+              "text": "Dere bygger en festning og styrer halve omegnen. Sønnen deres blir konge etter dere."
+            },
+            "crit": {
+              "und": 2,
+              "trade": 7,
+              "rep": 3,
+              "text": "Dere blir Dublin-konger. Sagaen om dere skrives flere hundre år senere på Island."
+            }
+          },
+          "lesson": "Norrøn maktposisjon i Dublin varte i 60 år, så ble vikingene jaget ut. Maktposisjoner er midlertidige; slektsbånd og handel varer lengre.",
+          "locks": []
+        }
+      ]
+    },
+    {
+      "id": "paris",
+      "name": "Paris",
+      "region": "Frankrike, 845 og 885–86",
+      "color": "#A0522D",
+      "difficulty": "farlig",
+      "history": "I 845 seilte vikinghøvdingen Ragnar opp Seinen med 120 skip og fikk 7000 pund sølv av Karl den skallede. I 885–86 kom 30 000 vikinger tilbake. Beleiringen varte ett år.",
+      "funFact": "Greven av Paris, Odo, ble så berømt for å holde stand mot vikingene at han senere ble valgt til konge av Frankrike. Vikinger laget ham, indirekte, til kongelig.",
+      "famousPerson": "<strong>Rollo (Gange-Rolv)</strong> (ca. 860–930) — norrøn høvding så stor at ingen hest kunne bære ham. Etter mange års plyndring fikk han Normandie i 911 mot å konvertere og forsvare Frankrike. Hans tipp-tipp-oldebarn var Vilhelm Erobreren.",
+      "task": {
+        "type": "creative",
+        "icon": "🏰",
+        "typeLabel": "Kreativ",
+        "title": "Beleiringsmaskinen",
+        "desc": "Bygg en miniatyr-beleiringsmaskin (katapult, ramme, bro) av det dere finner rundt dere — penner, papir, viskelær, sekker, hva som helst. Den må være fysisk fritt-stående og minst 15 cm høy. Ta bilde og vis læreren.",
+        "rationale": "Vikingene måtte improvisere maskiner under Paris-beleiringen — de hadde ikke med seg slikt fra hjemlandet. Dere skal kjenne på problemet: hvordan bygger man noe stort av hva som helst?"
+      },
+      "choices": [
+        {
+          "id": "tribute",
+          "title": "Ta sølvet og dra hjem",
+          "desc": "Karl den skallede tilbyr 7000 pund sølv hvis dere drar. Dette er en hel formue. Klassisk Danegeld.",
+          "tag": "trade",
+          "skillReq": null,
+          "skillReward": {},
+          "baseRoll": {
+            "bad": 0,
+            "mid": 1,
+            "good": 3,
+            "crit": 2
+          },
+          "outcomes": {
+            "mid": {
+              "und": 0,
+              "trade": 5,
+              "rep": 0,
+              "text": "Dere kommer hjem rikere enn noen andre nordmenn. Karl sender bud neste år: kom igjen for samme pris."
+            },
+            "good": {
+              "und": 0,
+              "trade": 7,
+              "rep": 1,
+              "text": "Sølvet er av høyeste kvalitet. Hjemme blir dere lokale legender."
+            },
+            "crit": {
+              "und": 1,
+              "trade": 9,
+              "rep": 1,
+              "text": "Karl er så lettet at han legger til et skip fullt av vin. Dere kommer hjem som halvguder."
+            }
+          },
+          "lesson": "Danegeld virket på kort sikt, men franskmennene måtte betale igjen og igjen. Til slutt ble det billigere å GI vikingene land — og det er slik Normandie ble til.",
+          "locks": []
+        },
+        {
+          "id": "normandy",
+          "title": "Forhandle om land — bli normannere",
+          "desc": "I stedet for sølv: krev land permanent. Gå med på å konvertere til kristendommen og forsvare Paris mot fremtidige vikinger.",
+          "tag": "respect",
+          "skillReq": {
+            "diplomati": 2
+          },
+          "skillReward": {
+            "diplomati": 1,
+            "tro": 1,
+            "språk": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 2,
+            "good": 2,
+            "crit": 2
+          },
+          "outcomes": {
+            "mid": {
+              "und": 3,
+              "trade": 4,
+              "rep": 2,
+              "text": "Dere får land langs Seinen. Innen 50 år snakker barna deres fransk."
+            },
+            "good": {
+              "und": 5,
+              "trade": 5,
+              "rep": 3,
+              "text": "Dere blir normannere. På fire generasjoner går dere fra hedenske krigere til franske riddere."
+            },
+            "crit": {
+              "und": 6,
+              "trade": 6,
+              "rep": 4,
+              "text": "En av deres etterkommere — om to hundre år — heter Vilhelm. Han skal erobre England."
+            }
+          },
+          "lesson": "Rollos avtale er en av historiens mest dramatiske kulturelle endringer. Identitet er ikke fast — den forhandles. Fra «hedenske barbarer» til «kristne aristokrater» på fire generasjoner.",
+          "locks": []
+        },
+        {
+          "id": "siege",
+          "title": "Beleire byen — knus dem helt",
+          "desc": "Ingen pakt. Ingen sølv. Dere viser hvem som virkelig styrer. Ett år utenfor Paris.",
+          "tag": "aggressive",
+          "skillReq": {
+            "krigskunst": 2
+          },
+          "skillReward": {
+            "krigskunst": 2
+          },
+          "baseRoll": {
+            "bad": 3,
+            "mid": 1,
+            "good": 1,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": -3,
+              "trade": 0,
+              "rep": -2,
+              "text": "Etter åtte måneder bryter dysenteri ut. Dere mister tre menn for hver én franskmann. Dere drar hjem med få varer."
+            },
+            "mid": {
+              "und": -2,
+              "trade": 2,
+              "rep": -1,
+              "text": "Dere lykkes ikke å ta byen. Odo blir lokal helt. Dere får noen forsteder."
+            },
+            "good": {
+              "und": -1,
+              "trade": 5,
+              "rep": 0,
+              "text": "Dere bryter en mur og plyndrer ett kvarter før Odos forsterkninger ankommer."
+            },
+            "crit": {
+              "und": 0,
+              "trade": 8,
+              "rep": 1,
+              "text": "Dere bryter inn én natt og slipper unna med bispens skattkammer før noen våkner."
+            }
+          },
+          "lesson": "Beleiringen i 885–86 endte historisk dårlig for vikingene. Krig vant ikke alltid. De som vant LANGSIKTIG, var de som forhandlet, ikke de som beleiret.",
+          "locks": []
+        }
+      ]
+    },
+    {
+      "id": "hebrides",
+      "name": "Hebridene",
+      "region": "Vest-Skottland, 800-tallet",
+      "color": "#1A4F7A",
+      "difficulty": "middels",
+      "history": "Norrøne vikinger erobret de skotske øyene tidlig. I 200 år tilhørte Hebridene Norge. Folk her snakket en blanding av gælisk og norrønt. Stedsnavnene avslører det fortsatt: Stornoway, Lewis, Skye.",
+      "funFact": "Lewis-sjakkbrikkene, funnet på Hebridene i 1831, ble laget av hvalrosstann i Trondheim ca. 1150. Sjakk var allerede en internasjonal sport, og brikkene reiste sjøveien.",
+      "famousPerson": "<strong>Somerled</strong> (død 1164) — gælisk-norrøn herskerskikkelse fra 1100-tallet. Hans etterkommere ble herskere over øyene i 400 år, og dagens Clan Donald hevder slektskap.",
+      "task": {
+        "type": "movement",
+        "icon": "⚖️",
+        "typeLabel": "Bevegelse",
+        "title": "Sjakkbrikkenes balanse",
+        "desc": "Lewis-sjakkbrikkene er kjent for sine intense ansiktsuttrykk og perfekt balanse. Hele gruppen står på ett ben SAMTIDIG i 30 sekunder. Mister noen balansen før tiden er ute, må dere starte på nytt — maks tre forsøk. Læreren teller.",
+        "rationale": "Sjakk handler om presisjon under press. Brikkene står på ett punkt — perfekt balansert. Kan dere det samme?"
+      },
+      "choices": [
+        {
+          "id": "hybrid",
+          "title": "Slå dere ned som Gall-Gàidheal",
+          "desc": "Et roligere liv. Lær gælisk. Bli del av en blandet kultur. «Gall-Gàidheal» betyr «de utenlandske gæliske».",
+          "tag": "respect",
+          "skillReq": null,
+          "skillReward": {
+            "språk": 1,
+            "sjømannskap": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 1,
+            "good": 3,
+            "crit": 2
+          },
+          "outcomes": {
+            "mid": {
+              "und": 3,
+              "trade": 2,
+              "rep": 1,
+              "text": "Dere blir en del av en blandet kultur. Barna deres synger gæliske sanger på norrønt vis."
+            },
+            "good": {
+              "und": 4,
+              "trade": 3,
+              "rep": 2,
+              "text": "Dere blir respekterte fiskere. En av dere lærer å lage Lewis-sjakkbrikker av hvalrosstann."
+            },
+            "crit": {
+              "und": 5,
+              "trade": 4,
+              "rep": 3,
+              "text": "Sønnen deres blir Somerled — en av Skottlands største herskere."
+            }
+          },
+          "lesson": "På Hebridene oppstod en helt egen «hybridkultur» som varte i over 400 år. To folkegrupper smeltet sammen mer fullstendig her enn nesten noe annet sted i Europa.",
+          "locks": []
+        },
+        {
+          "id": "pirates",
+          "title": "Bli sjørøvere — kontroller havet",
+          "desc": "Fra Hebridene kan dere true alle skip mellom Irland og Norge. Lett å plyndre, vanskelig å fange.",
+          "tag": "aggressive",
+          "skillReq": {
+            "sjømannskap": 1
+          },
+          "skillReward": {
+            "sjømannskap": 2,
+            "krigskunst": 1
+          },
+          "baseRoll": {
+            "bad": 1,
+            "mid": 2,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": -2,
+              "trade": 1,
+              "rep": -2,
+              "text": "En storm tar to skip. Dere får navnet «de uheldige» blant andre vikinger."
+            },
+            "mid": {
+              "und": -1,
+              "trade": 4,
+              "rep": -2,
+              "text": "Dere lever som sjørøvere ti år. Skipsledene flyttes for å unngå dere."
+            },
+            "good": {
+              "und": -1,
+              "trade": 6,
+              "rep": -2,
+              "text": "Dere blir velstående. Kongen i Norge får brev fra biskoper som ber ham «kontrollere mennene sine»."
+            },
+            "crit": {
+              "und": -1,
+              "trade": 8,
+              "rep": -3,
+              "text": "Dere blir havets herrer — ingen kjøpmann våger leia uten å betale dere, og skipene bugner av sølv. Men ryktet følger helt hjem: Magnus Berrføtt selv lover å rydde opp i «sine egne menn»."
+            }
+          },
+          "lesson": "Hebrid-vikinger var beryktet for sjørøveri. Det skapte handelsproblemer for HELE Norge — og er en grunn til at Magnus Berrføtt i 1098 måtte seile vest for å rydde opp i sine egne menn.",
+          "locks": []
+        },
+        {
+          "id": "iona",
+          "title": "Beskytte Iona-klosteret",
+          "desc": "Iona er plyndret tre ganger av andre vikinger. Tilby beskyttelse mot betaling. Munkene gir dere mat, vin — og kunnskap.",
+          "tag": "respect",
+          "skillReq": {
+            "krigskunst": 1
+          },
+          "skillReward": {
+            "tro": 2,
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 3,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "mid": {
+              "und": 3,
+              "trade": 2,
+              "rep": 2,
+              "text": "Munkene gir dere mat og latinske bøker. To av dere lærer å lese."
+            },
+            "good": {
+              "und": 4,
+              "trade": 3,
+              "rep": 3,
+              "text": "En munk lærer dere astronomi. Dere kan nå navigere bedre enn noen annen vikingflåte."
+            },
+            "crit": {
+              "und": 5,
+              "trade": 3,
+              "rep": 4,
+              "text": "Iona blir deres faste base. Munkene skriver om dere — vennlig — i sine krøniker."
+            }
+          },
+          "lesson": "Mange vikinger ble kristne i Skottland og Irland gradvis, ikke ved tvang. Munkene var lærde og ofte de eneste som kunne lese — kontakten endret vikingene mer enn omvendt.",
+          "locks": []
+        }
+      ]
+    },
+    {
+      "id": "sameland",
+      "name": "Sameland",
+      "region": "Hålogaland og nordover, 800–900-tallet",
+      "color": "#5B7553",
+      "difficulty": "middels",
+      "history": "Hovdingen <strong>Ottar fra Hålogaland</strong> (ca. 890) beskrev forholdet til samene som gjensidig og respektfullt. Samene leverte pelsverk, reinskinn og hvalrosstann. Vikingene ga jern, korn og sølv. Samiske <strong>noaider</strong> (sjamaner) ble ansett som mektigere enn norrøne seidmenn.",
+      "funFact": "Kong Harald Hårfagre giftet seg med <strong>Snøfrid</strong>, datter av samisk høvding Svåse. Han skal ha vært så forelsket at han forsømte rikets styre i tre år etter at hun døde — for hun lå tilsynelatende uforandret i kista.",
+      "famousPerson": "<strong>Ottar fra Hålogaland</strong> (800-tallet) — hovding og handelsmann fra Nord-Norge. Han reiste til kong Alfred den stores hoff i England, og hans beretning ble skrevet ned. Den er det eldste norske dokumentet vi kjenner.",
+      "task": {
+        "type": "creative",
+        "icon": "🥁",
+        "typeLabel": "Kreativ",
+        "title": "Joikens kraft",
+        "desc": "Samiske noaider brukte runebommer (govadas) til å gå inn i transe. Lag en rytme på et bord eller en bok ved å banke med fingrene. Den må vare i minst 30 sekunder og ha en gjenkjennelig puls. Hele gruppen må delta — én banker, andre nynner. Spill inn eller fremfør for læreren.",
+        "rationale": "Joik og runebommetrommer er bærere av kunnskap som ikke kan skrives ned. Vikingene som kunne respektere dette, fikk tilgang til samisk visdom; de andre fikk den ikke."
+      },
+      "choices": [
+        {
+          "id": "reciprocity",
+          "title": "Bytt rettferdig — vare for vare",
+          "desc": "Tilby jern og korn for pelsverk og reinskinn. Like mye begge veier. Samene godtar ikke ujevn handel.",
+          "tag": "respect",
+          "skillReq": null,
+          "skillReward": {
+            "diplomati": 1,
+            "tro": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 2,
+            "good": 3,
+            "crit": 1
+          },
+          "outcomes": {
+            "mid": {
+              "und": 3,
+              "trade": 2,
+              "rep": 1,
+              "text": "Samene godtar handelen. Dere får varme klær som kan redde dere på vinteren."
+            },
+            "good": {
+              "und": 4,
+              "trade": 3,
+              "rep": 2,
+              "text": "Noaiden velsigner reisen og lærer dere stjernetegn dere ikke kjente."
+            },
+            "crit": {
+              "und": 5,
+              "trade": 4,
+              "rep": 3,
+              "text": "Dere får et sjeldent runebommekart over vinterveier som har vært hemmelige i generasjoner."
+            }
+          },
+          "lesson": "Vikingene lærte arktisk overlevelse av samene. Skip seilte tryggere langs Norskekysten på grunn av kunnskap som kom UTENFRA, fra et folk de regnet som «fremmede».",
+          "locks": []
+        },
+        {
+          "id": "marriage",
+          "title": "Gift dere inn i samisk slekt",
+          "desc": "En av dere gifter seg inn i en samisk familie. Permanent allianse, men dere mister ett gruppemedlem hjem.",
+          "tag": "respect",
+          "skillReq": {
+            "diplomati": 1
+          },
+          "skillReward": {
+            "tro": 2,
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 1,
+            "good": 3,
+            "crit": 2
+          },
+          "outcomes": {
+            "mid": {
+              "und": 4,
+              "trade": 1,
+              "rep": 2,
+              "text": "Dere blir slekt. Permanent fred langs hele kysten."
+            },
+            "good": {
+              "und": 5,
+              "trade": 2,
+              "rep": 3,
+              "text": "Slektsbånd som har vart i generasjoner. Etterkommere finnes fortsatt i dag."
+            },
+            "crit": {
+              "und": 6,
+              "trade": 3,
+              "rep": 4,
+              "text": "Datteren av høvdingen er sterk i seid. Hun kan se fremtiden — og hun spår at en av deres etterkommere skal bli konge."
+            }
+          },
+          "lesson": "Slektsbånd var den sterkeste «traktaten» i vikingtiden. Harald Hårfagre giftet seg med samisk kvinne — kongelig blod ble blandet helt på toppen av samfunnet.",
+          "locks": []
+        },
+        {
+          "id": "finnskatt",
+          "title": "Krev finnskatt",
+          "desc": "Bruk vikingmakten. Krev tributt fra samene uten å gi noe tilbake. Historisk vanlig.",
+          "tag": "aggressive",
+          "skillReq": {
+            "krigskunst": 1
+          },
+          "skillReward": {},
+          "baseRoll": {
+            "bad": 2,
+            "mid": 3,
+            "good": 1,
+            "crit": 0
+          },
+          "outcomes": {
+            "bad": {
+              "und": -3,
+              "trade": 1,
+              "rep": -2,
+              "text": "Noaiden forbanner reisen. Halve gruppen blir syk. Ingen samer vil handle med dere igjen — i hundre år."
+            },
+            "mid": {
+              "und": -3,
+              "trade": 3,
+              "rep": -1,
+              "text": "Dere får varene. Forholdet er for alltid ødelagt."
+            },
+            "good": {
+              "und": -3,
+              "trade": 5,
+              "rep": 0,
+              "text": "Dere får mer enn vanlig. En samisk kvinne sier ingenting, men husker."
+            }
+          },
+          "lesson": "Finnskatten var historisk reell og ødela det gode forholdet. Det vi i dag kaller fornorskning, begynte allerede i vikingtiden — og det måtte Norge gjøre opp for så sent som i 2023, da Sannhets- og forsoningskommisjonen leverte sin rapport.",
+          "locks": []
+        }
+      ]
+    },
+    {
+      "id": "faroyene",
+      "name": "Færøyene",
+      "region": "Nord-Atlanteren, ca. 825",
+      "color": "#3A6A8A",
+      "difficulty": "farlig",
+      "history": "De første nordmennene som kom til Færøyene fant irske munker som hadde levd der i isolasjon i 100 år. Munkene flyktet — vikingene tok over. Snart var Færøyene springbrettet mot Island. Storm, klippekyst og åpent hav.",
+      "funFact": "Færøyenes befolkning er en av Europas mest «innavlede» folkegrupper — nesten alle moderne færøyinger stammer fra noen hundre vikinger som kom rundt år 825. DNA-tester viser også betydelig keltisk innslag fra slavekvinner brakt fra Irland.",
+      "famousPerson": "<strong>Grim Kamban</strong> — kjent som den første norrøne bosetteren på Færøyene. Etternavnet «Kamban» antas å være gælisk, ikke norrønt. Han var sannsynligvis en blandingsperson, ikke en «ren» viking.",
+      "task": {
+        "type": "movement",
+        "icon": "🌊",
+        "typeLabel": "Bevegelse",
+        "title": "Stormen",
+        "desc": "Færøyske farvann er beryktede — bølger på 12 meter, vind så hard at man knapt står oppreist. Hele gruppen står tett sammen i en sirkel, holder hverandre i armene, og «vugger» som et skip i 60 sekunder uten å miste taket eller falle. Læreren teller.",
+        "rationale": "Vikingene måtte stå sammen for å overleve åpent hav. Lasten skiftet, mannskapet kastet opp, og kun samhold holdt skipet på rett kjøl."
+      },
+      "choices": [
+        {
+          "id": "settle",
+          "title": "Bosette dere — bli færøyinger",
+          "desc": "Bygg gard, hold sauer, lag tørrkjøtt. Et hardt liv, men et eget land.",
+          "tag": "respect",
+          "skillReq": {
+            "sjømannskap": 1
+          },
+          "skillReward": {
+            "sjømannskap": 1
+          },
+          "baseRoll": {
+            "bad": 1,
+            "mid": 2,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": 0,
+              "trade": 0,
+              "rep": 0,
+              "text": "Den første vinteren tar tre menn. Dere klarer dere så vidt."
+            },
+            "mid": {
+              "und": 2,
+              "trade": 1,
+              "rep": 1,
+              "text": "Dere bygger gard. Etter fem år har dere 50 sauer og en gravplass."
+            },
+            "good": {
+              "und": 3,
+              "trade": 2,
+              "rep": 1,
+              "text": "Dere blir småhøvdinger over en bygd. Kongen i Norge anerkjenner dere."
+            },
+            "crit": {
+              "und": 4,
+              "trade": 3,
+              "rep": 2,
+              "text": "Dere blir blant Færøyenes opprinnelige slekter. Færøyske sagaer nevner dere."
+            }
+          },
+          "lesson": "Færøyene viser hvor langt vikingene kunne dra og fortsatt skape stabile samfunn. Det krevde tilpasning til steder de aldri hadde sett før.",
+          "locks": []
+        },
+        {
+          "id": "monks",
+          "title": "Snakk med de irske munkene før de flykter",
+          "desc": "Munkene har bodd her i 100 år. De vet hvor sauene gresser, hvor stormen kommer fra, hvor kildene ligger.",
+          "tag": "respect",
+          "skillReq": {
+            "språk": 1
+          },
+          "skillReward": {
+            "språk": 1,
+            "tro": 1,
+            "sjømannskap": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 1,
+            "good": 3,
+            "crit": 2
+          },
+          "outcomes": {
+            "mid": {
+              "und": 3,
+              "trade": 1,
+              "rep": 1,
+              "text": "Munkene viser dere de beste beitene før de seiler vekk. Dere overlever første vinter med god margin."
+            },
+            "good": {
+              "und": 4,
+              "trade": 2,
+              "rep": 2,
+              "text": "En munk velger å bli. Han lærer dere astronomi og latinsk grammatikk."
+            },
+            "crit": {
+              "und": 5,
+              "trade": 2,
+              "rep": 3,
+              "text": "Dere finner munkenes hemmelige bibliotek av bøker reddet fra Irland. Det blir grunnlaget for færøysk skriftkultur."
+            }
+          },
+          "lesson": "Vikingene «oppdaget» sjelden noe helt nytt — det var ofte allerede mennesker der. Færøyene var bebodd av irske munker. Island også. Hvordan man behandler dem som var der først, definerer ofte hvordan resten av kolonien går.",
+          "locks": []
+        },
+        {
+          "id": "springboard",
+          "title": "Bruk Færøyene som springbrett mot Island",
+          "desc": "Ikke bli her. Hvil mannskapet, bytt til ferskvann, og dra videre. Vest venter noe enda større.",
+          "tag": "trade",
+          "skillReq": {
+            "sjømannskap": 2
+          },
+          "skillReward": {
+            "sjømannskap": 2
+          },
+          "baseRoll": {
+            "bad": 2,
+            "mid": 2,
+            "good": 1,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": 0,
+              "trade": 0,
+              "rep": 0,
+              "text": "Dere drar for tidlig. Storm slår dere tilbake. To skip går tapt."
+            },
+            "mid": {
+              "und": 1,
+              "trade": 1,
+              "rep": 0,
+              "text": "Dere kommer fram til Island, slitne men i live."
+            },
+            "good": {
+              "und": 2,
+              "trade": 2,
+              "rep": 1,
+              "text": "Rask seilas. Dere er tidlig på Island og kan velge de beste landstrekningene."
+            },
+            "crit": {
+              "und": 3,
+              "trade": 3,
+              "rep": 2,
+              "text": "Dere setter en ny rekord for kryssing Færøyene–Island. Sagaer skrives om dere."
+            }
+          },
+          "lesson": "Mange viking-ekspedisjoner var bygget på «leg-by-leg». Få seilte rett fra Norge til Island. Hvert skritt vestover var et eget kulturmøte.",
+          "locks": []
+        }
+      ]
+    },
+    {
+      "id": "island",
+      "name": "Island",
+      "region": "Þingvellir, 930",
+      "color": "#7A8B5B",
+      "difficulty": "middels",
+      "history": "I 930 møttes islandske bønder for første gang på <strong>Þingvellir</strong> for å danne <strong>Alltinget</strong> — verdens eldste fortsatt fungerende parlament. Det var et samfunn uten konge, der lover ble sagt høyt av en «lovsigemann» som måtte huske dem utenat.",
+      "funFact": "Snorre Sturlason skrev sagaene på Island på 1200-tallet. Halve det vi vet om norrøn mytologi (Tor, Odin, Loke, Ragnarok) finnes kun fordi en islandsk høvding tok seg tid til å skrive det ned 200 år etter at folk sluttet å tro på det.",
+      "famousPerson": "<strong>Þorgeirr Ljósvetningagoði</strong> — lovsigemann som i år 1000 måtte avgjøre om Island skulle bli kristent eller forbli hedensk. Han la seg under en kappe i ett døgn og kom ut med kompromisset: alle skulle døpes, men hedendom kunne fortsatt praktiseres privat.",
+      "task": {
+        "type": "creative",
+        "icon": "⚖️",
+        "typeLabel": "Kreativ",
+        "title": "Lovtalen",
+        "desc": "Hele gruppen samles i en sirkel. Én person står i midten og holder en 30-sekunders «lovtale» om en NY regel som burde gjelde i klasserommet eller på skolen. Talen må gi minst tre grunner. Gruppen stemmer ja eller nei. Spill inn talen og avstemningen.",
+        "rationale": "På Þingvellir måtte folk argumentere muntlig — det fantes ikke skrift for slikt. Lovsigemannen måtte huske alt utenat. Demokrati var en muntlig kunst."
+      },
+      "choices": [
+        {
+          "id": "lawspeaker",
+          "title": "Bli lovsigemann",
+          "desc": "En av dere stiller som lovsigemann. Dere må huske 130 lover utenat. Gir prestisje, men ingen lønn.",
+          "tag": "respect",
+          "skillReq": {
+            "tro": 1
+          },
+          "skillReward": {
+            "tro": 2,
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 1,
+            "mid": 2,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": 1,
+              "trade": 0,
+              "rep": 0,
+              "text": "Dere glemmer en lov i et viktig spørsmål. Det blir blodfeide."
+            },
+            "mid": {
+              "und": 3,
+              "trade": 1,
+              "rep": 2,
+              "text": "Dere blir respektert. Folk kommer til dere for tvister."
+            },
+            "good": {
+              "und": 4,
+              "trade": 1,
+              "rep": 3,
+              "text": "Dere blir nevnt i Landnámabók — boken over Islands grunnleggere."
+            },
+            "crit": {
+              "und": 5,
+              "trade": 2,
+              "rep": 4,
+              "text": "Dere er Þorgeirr Ljósvetningagoði. Året er 1000. Dere får oppgaven å avgjøre om Island blir kristent."
+            }
+          },
+          "lesson": "Island skapte verdens første parlament. Det fungerte fordi folk respekterte muntlige lover og en felles dommer. Da ingen sentralmakt finnes, må kulturen selv bære lovverket.",
+          "locks": []
+        },
+        {
+          "id": "feud",
+          "title": "Hevn for blodsskyld",
+          "desc": "En slektning er drept av en nabo. Etter norrøn ære må dere hevne — eller miste hele familiens posisjon.",
+          "tag": "aggressive",
+          "skillReq": {
+            "krigskunst": 1
+          },
+          "skillReward": {
+            "krigskunst": 1
+          },
+          "baseRoll": {
+            "bad": 2,
+            "mid": 1,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": -2,
+              "trade": -1,
+              "rep": -1,
+              "text": "Dere blir overfalt på vei tilbake. Hevnen koster mer enn den ga."
+            },
+            "mid": {
+              "und": -1,
+              "trade": 0,
+              "rep": 0,
+              "text": "Æren er gjenopprettet. Men nå venter naboens slekt på sin tur."
+            },
+            "good": {
+              "und": 0,
+              "trade": 1,
+              "rep": 1,
+              "text": "Dere vinner. Saken bringes for Alltinget; dere blir frikjent fordi gjengjeldelsen var rettferdig."
+            },
+            "crit": {
+              "und": 1,
+              "trade": 2,
+              "rep": 2,
+              "text": "Dere blir helter. En saga skrives om dere — kanskje til og med Njålssaga."
+            }
+          },
+          "lesson": "Blodfeider holdt det islandske samfunnet i sjakk i 200 år før det kollapset i borgerkrig. Æreskultur kunne være en lov i seg selv — men også samfunnets svøpe.",
+          "locks": []
+        },
+        {
+          "id": "saga",
+          "title": "Bli skald — diktekunst og fortellinger",
+          "desc": "I stedet for våpen, bli mester av ord. Diktene dine vil overleve deg i hundre år.",
+          "tag": "respect",
+          "skillReq": {
+            "tro": 1
+          },
+          "skillReward": {
+            "tro": 2,
+            "språk": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 1,
+            "good": 3,
+            "crit": 2
+          },
+          "outcomes": {
+            "mid": {
+              "und": 3,
+              "trade": 1,
+              "rep": 2,
+              "text": "Dere reiser mellom høvdinger og synger om dem. De gir dere sølv."
+            },
+            "good": {
+              "und": 4,
+              "trade": 2,
+              "rep": 3,
+              "text": "Et av deres dikt blir sitert i Snorres Edda 200 år senere."
+            },
+            "crit": {
+              "und": 5,
+              "trade": 2,
+              "rep": 4,
+              "text": "Dere er Egil Skallagrimsson — viking, drapsmann, og Islands største dikter. Kongen lar dere leve fordi versene deres er for vakre til å miste."
+            }
+          },
+          "lesson": "Islendingene reddet norrøn mytologi for ettertiden. Hadde de ikke skrevet ned sagaene på 1200-tallet, ville Tor, Odin og Ragnarok vært glemt. Kunst er ofte historiens viktigste redningsplanke.",
+          "locks": []
+        }
+      ]
+    },
+    {
+      "id": "vinland",
+      "name": "Vinland",
+      "region": "Nord-Amerika, ca. 1021",
+      "color": "#A0522D",
+      "difficulty": "farlig",
+      "history": "<strong>Leif Eriksson</strong> seiler fra Grønland og finner et land med vindruer, laks og enorme skoger. Vikingene møter urfolk de kaller <strong>skrælinger</strong>. Første handel går bra — rødt stoff og melk mot pelsverk. Men kulturelle misforståelser eskalerer til vold. Bosetningen forlates etter få år.",
+      "funFact": "I 2021 publiserte forskere en eksakt datering: vikingene var i Nord-Amerika i året <strong>1021</strong>. Daterningen ble gjort ved å analysere et solstormsignal i tre fra L'Anse aux Meadows. Det er det eldste eksakt daterte europeiske besøket i Amerika — 471 år før Columbus.",
+      "famousPerson": "<strong>Gudrid Torbjørnsdotter</strong> (ca. 980–1050) — kvinnen som har reist mest i Europa. Hun var født på Island, levde på Grønland, dro til Vinland og fødte sønnen Snorre der (det første europeiske barnet født i Amerika), og pilgrimerte senere til Roma. Hun er nevnt i to sagaer.",
+      "task": {
+        "type": "creative",
+        "icon": "🤲",
+        "typeLabel": "Kreativ",
+        "title": "Uten ord",
+        "desc": "Velg én viking-relatert handling: «vi ønsker å handle pelsverk», «vi vil ikke skade dere», eller «vi vil ha vann». Hele gruppen, kun med kroppsspråk og lyder (ingen norske ord), skal forklare denne for læreren. Læreren må gjette riktig.",
+        "rationale": "Skrælingene og vikingene hadde ingen felles språk. Misforståelser ble dødelige. Dere skal kjenne på hvor vanskelig det er å bli forstått uten ord."
+      },
+      "choices": [
+        {
+          "id": "patient",
+          "title": "Vis tålmodighet — bygg tillit sakte",
+          "desc": "Ta tiden det trenger. Smårøtte. Lær noen tegn. La urfolket lede tempoet.",
+          "tag": "respect",
+          "skillReq": {
+            "diplomati": 1
+          },
+          "skillReward": {
+            "språk": 1,
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 1,
+            "mid": 2,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": 1,
+              "trade": 0,
+              "rep": 0,
+              "text": "En misforståelse: noen drikker melk og blir syke (de tåler ikke laktose). Dere drar uten skade, men også uten avtale."
+            },
+            "mid": {
+              "und": 3,
+              "trade": 1,
+              "rep": 1,
+              "text": "Etter mange møter får dere eksotisk pels og lærer å overleve på fisk og bær."
+            },
+            "good": {
+              "und": 4,
+              "trade": 2,
+              "rep": 2,
+              "text": "Dere finner et felles tegn for «handel». Avtalen blir varig."
+            },
+            "crit": {
+              "und": 5,
+              "trade": 3,
+              "rep": 3,
+              "text": "En av dere — Gudrid? — får barn med en lokal og lærer hele språket. Sagaen om dere skrives 200 år senere."
+            }
+          },
+          "lesson": "Vikingene som ble lengst i Vinland (på L'Anse aux Meadows) overlevde nettopp fordi de tok tid til å forstå urfolket. Det fikk de aldri ærefulle saga-omtaler for, men arkeologien viser det.",
+          "locks": []
+        },
+        {
+          "id": "force",
+          "title": "Få fortgang — vis at dere er sterkere",
+          "desc": "Krev raskt bytte. Hvis de ikke gir, ta. Vikingmakten har virket andre steder.",
+          "tag": "aggressive",
+          "skillReq": {
+            "krigskunst": 2
+          },
+          "skillReward": {},
+          "baseRoll": {
+            "bad": 3,
+            "mid": 2,
+            "good": 1,
+            "crit": 0
+          },
+          "outcomes": {
+            "bad": {
+              "und": -3,
+              "trade": 0,
+              "rep": -2,
+              "text": "Skrælingene er mange flere enn dere trodde. Thorvald Eriksson dør av en pil. Dere må flykte i hast."
+            },
+            "mid": {
+              "und": -2,
+              "trade": 2,
+              "rep": -1,
+              "text": "Dere får varer i én runde. Neste gang er urfolket borte. Eller verre — de venter på dere."
+            },
+            "good": {
+              "und": -1,
+              "trade": 3,
+              "rep": 0,
+              "text": "Dere lykkes med ett raid. Men vesten er stengt for dere."
+            }
+          },
+          "lesson": "Vikingenes våpenmakt fungerte ikke i Amerika. Skrælingene var mange flere, og kjente landet. Mot kunne ikke erstatte forståelse. Manglende kulturforståelse kostet vikingene en hel verdensdel — Nord-Amerika var stengt for europeere i nesten 500 år etter dette.",
+          "locks": []
+        },
+        {
+          "id": "flee",
+          "title": "Flykt hjem — kall det en suksess uansett",
+          "desc": "Det er for fjernt, for fremmed. Ta noen prøver av tre og bær med hjem som «bevis», og dra.",
+          "tag": "trade",
+          "skillReq": {
+            "sjømannskap": 2
+          },
+          "skillReward": {
+            "sjømannskap": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 5,
+            "good": 1,
+            "crit": 0
+          },
+          "outcomes": {
+            "mid": {
+              "und": 1,
+              "trade": 2,
+              "rep": 0,
+              "text": "Dere kommer hjem med tømmer og historier. Få tror på dere helt. Men sagaen begynner."
+            },
+            "good": {
+              "und": 2,
+              "trade": 3,
+              "rep": 1,
+              "text": "Dere klarer å selge tømmeret som «hellig». Pris-økning, prestisje."
+            }
+          },
+          "lesson": "Vinland-bosetningene varte kun noen få år. Det er kanskje en lærdom i seg selv — av og til er retrett klokere enn utholdenhet, særlig når man ikke kan forstå dem man møter.",
+          "locks": []
+        }
+      ]
+    },
+    {
+      "id": "novgorod",
+      "name": "Novgorod",
+      "region": "Russland (slaviske områder), fra 862",
+      "color": "#6B3FA0",
+      "difficulty": "middels",
+      "history": "Ifølge Den russiske krønike kom svenske vikinger (kalt <strong>Rus</strong>) i 862 etter invitasjon fra slaviske stammer som ba dem styre fordi det var anarki. Lederen <strong>Rurik</strong> grunnla et dynasti som styrte Russland i 700 år. Selve navnet Russland kommer fra «Rus».",
+      "funFact": "Norrøne navn er bevart i russisk kongerekke: Igor (Yngvarr), Oleg (Helgi), Olga (Helga), Vladimir (Valdemar). Kievs grunnlegger Oleg var sannsynligvis svensk viking før han ble «slaviske Russlands første store hersker».",
+      "famousPerson": "<strong>Olga av Kiev</strong> (ca. 890–969) — vikingvitva som ble Kievs regent etter mannens død. Hun startet kristningen av Russland og hevnet mannen sin ved å brenne en hel by ved hjelp av oppbundne duer med svovel-fakler i halene. Hun ble senere helgenkåret.",
+      "task": {
+        "type": "timed",
+        "icon": "🔤",
+        "typeLabel": "Tidsbasert",
+        "title": "Slavisk på 90 sekunder",
+        "desc": "Bruk telefonen. På 90 sekunder skal dere finne ut hva disse fire ordene betyr på russisk: «mir» (мир), «zdravstvuyte» (здравствуйте), «spasibo» (спасибо), «droog» (друг). Skriv betydningene og vis læreren.",
+        "rationale": "Vikingene som dro til Novgorod måtte lære slavisk i full fart. Handelen ventet ikke. Dere har 90 sekunder — de hadde noen uker før vinterhandelen begynte."
+      },
+      "choices": [
+        {
+          "id": "rule",
+          "title": "Aksepter invitasjonen — bli herskere",
+          "desc": "Slaverne ber om en rettferdig dommer. Dere blir det. Dere blir Rus.",
+          "tag": "respect",
+          "skillReq": {
+            "diplomati": 2
+          },
+          "skillReward": {
+            "diplomati": 2,
+            "språk": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 3,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "mid": {
+              "und": 3,
+              "trade": 3,
+              "rep": 2,
+              "text": "Dere blir respektert. Slavernes lover styrkes; deres egne tilpasses."
+            },
+            "good": {
+              "und": 4,
+              "trade": 5,
+              "rep": 3,
+              "text": "Dere bygger Novgorod til en handelsby. Russere kaller landet sitt etter dere."
+            },
+            "crit": {
+              "und": 5,
+              "trade": 7,
+              "rep": 4,
+              "text": "Dere grunnlegger Rurik-dynastiet. I 700 år styrer deres etterkommere et område fra Østersjøen til Svartehavet."
+            }
+          },
+          "lesson": "Novgorod-vikingene ble fullstendig slaviske på tre generasjoner. De tok navn, religion og språk fra dem de styrte. Det er ett av få eksempler i historien hvor erobreren ble assimilert mer enn de erobrede.",
+          "locks": []
+        },
+        {
+          "id": "trade",
+          "title": "Bare handel — Volgaruten sørover",
+          "desc": "Nei takk til styre. Dere er handelsmenn, ikke konger. Pelsverk og slaver mot arabisk sølv.",
+          "tag": "trade",
+          "skillReq": {
+            "sjømannskap": 1
+          },
+          "skillReward": {
+            "sjømannskap": 1
+          },
+          "baseRoll": {
+            "bad": 1,
+            "mid": 2,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": -1,
+              "trade": 1,
+              "rep": -1,
+              "text": "Volga-elven er forrædersk om vinteren. Halv last frosset."
+            },
+            "mid": {
+              "und": 1,
+              "trade": 4,
+              "rep": 0,
+              "text": "God handel. Dere kommer hjem med arabisk sølv og silke."
+            },
+            "good": {
+              "und": 2,
+              "trade": 6,
+              "rep": 1,
+              "text": "Dere etablerer en fast rute. Andre vikinger betaler dere for å lære den."
+            },
+            "crit": {
+              "und": 3,
+              "trade": 8,
+              "rep": 2,
+              "text": "Dere blir blant de rikeste mennene i hele Norden."
+            }
+          },
+          "lesson": "Volgaruten brakte mer sølv til Skandinavia enn alle plyndringene til sammen. Vi har funnet over 500 000 arabiske sølvmynter i norske og svenske jordfunn — alt sammen fra fredelig handel via Novgorod.",
+          "locks": []
+        },
+        {
+          "id": "olga",
+          "title": "Bli kristen — bygg en russisk kirke",
+          "desc": "Olga av Kiev er nylig kristnet. Følg etter henne. Dette er fremtiden.",
+          "tag": "respect",
+          "skillReq": {
+            "tro": 1
+          },
+          "skillReward": {
+            "tro": 2,
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 3,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "mid": {
+              "und": 3,
+              "trade": 2,
+              "rep": 2,
+              "text": "Dere får en plass ved Olgas hoff. Dere lærer gresk og russisk."
+            },
+            "good": {
+              "und": 4,
+              "trade": 3,
+              "rep": 3,
+              "text": "Dere bygger en av Russlands første trekirker. Den står i 200 år."
+            },
+            "crit": {
+              "und": 5,
+              "trade": 4,
+              "rep": 4,
+              "text": "Dere blir munker i et av Kievs første klostre. En av dere skriver krøniken vi nå leser."
+            }
+          },
+          "lesson": "Olga av Kiev startet kristningen av Russland. Hennes barnebarn Vladimir gjennomførte den. Vikingene ble dermed brobyggere mellom bysantinsk kristendom og slavisk kultur — den russisk-ortodokse kirken er deres arv.",
+          "locks": []
+        }
+      ]
+    },
+    {
+      "id": "baghdad",
+      "name": "Bagdad",
+      "region": "Volga-ruten, ca. 921",
+      "color": "#2B6B6B",
+      "difficulty": "middels",
+      "history": "År 921: Den arabiske diplomaten <strong>Ibn Fadlan</strong> møter en gruppe svenske rus-vikinger ved Volga. Hans beretning er en av de mest detaljerte beskrivelsene av vikinger noensinne skrevet. Han er fascinert av deres kropper («som palmer») og forskrekket over deres hygiene («Allahs skitneste skapninger»).",
+      "funFact": "Ibn Fadlan beskriver et vikinghøvdings begravelse i detalj: skipet ble brent med ham om bord, og en frivillig slavinne ble drept som offer. Beretningen er den eneste øyenvitneskildringen vi har av et slikt ritual — alt annet er senere saga-rekonstruksjoner.",
+      "famousPerson": "<strong>Ibn Fadlan</strong> (900-tallet) — arabisk diplomat fra abbasidekalifatet. Hans «Risalah» er den viktigste utenforstående kilden til vikingtiden vi har. Han ble sendt for å lære volga-bulgarene islam, men endte med å skrive antropologi om vikingene.",
+      "task": {
+        "type": "movement",
+        "icon": "🧼",
+        "typeLabel": "Bevegelse",
+        "title": "Renselsesritualet",
+        "desc": "Ibn Fadlan ble sjokkert over at vikingene ikke vasket seg før morgenmåltidet — alle delte samme vannfat og spyttet i det. Bevis at dere er bedre: gå ut av klasserommet, vask hendene grundig på toalettet (minst 20 sekunder, med såpe), og kom tilbake. Hele gruppen samtidig. Ta gjerne et bilde av såpe på hånden.",
+        "rationale": "Hygiene var det største kultursjokket i møtet mellom arabere og vikinger. Araberne badet og vasket seg flere ganger om dagen. Vikingene gjorde det én gang i uken. Hvilket samfunn var mest «sivilisert»?"
+      },
+      "choices": [
+        {
+          "id": "adapt",
+          "title": "Tilpass dere — vask, lær, respekter",
+          "desc": "Følg arabernes skikker. Vask før måltid. Lær hilsenen «As-salamu alaykum». Skriv navnet ditt med arabiske bokstaver.",
+          "tag": "respect",
+          "skillReq": {
+            "språk": 1
+          },
+          "skillReward": {
+            "språk": 2,
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 1,
+            "good": 3,
+            "crit": 2
+          },
+          "outcomes": {
+            "mid": {
+              "und": 3,
+              "trade": 3,
+              "rep": 2,
+              "text": "Selgeren er imponert. Dere får sølvmynter og et brev som åpner dører i hele kalifatet."
+            },
+            "good": {
+              "und": 4,
+              "trade": 5,
+              "rep": 3,
+              "text": "Ibn Fadlan selv intervjuer dere — vennlig denne gangen. Dere får en damaskstål-kniv som gave."
+            },
+            "crit": {
+              "und": 5,
+              "trade": 7,
+              "rep": 4,
+              "text": "Kalifen møter dere personlig. Han gir dere et arabisk astrolab — instrumentet som senere gjør europeisk navigasjon mulig."
+            }
+          },
+          "lesson": "Vikingene tilpasset seg muslimske skikker når det lønnet seg — hygiene, klesdrakt, til og med språk endret seg på reisen. Sølvet rant over Volga i over hundre år FORDI handelen var fredelig og respektfull.",
+          "locks": []
+        },
+        {
+          "id": "rigid",
+          "title": "Hold på vikingenes egne skikker",
+          "desc": "Dere nekter å vaske dere eller endre noe. Forhandler likevel. Dere er nordmenn — det skal de finne ut.",
+          "tag": "trade",
+          "skillReq": null,
+          "skillReward": {},
+          "baseRoll": {
+            "bad": 1,
+            "mid": 4,
+            "good": 1,
+            "crit": 0
+          },
+          "outcomes": {
+            "bad": {
+              "und": -2,
+              "trade": 0,
+              "rep": -1,
+              "text": "Selgeren nekter å handle direkte med dere. Dere må gå gjennom en mellommann som tar 50% kommisjon."
+            },
+            "mid": {
+              "und": 0,
+              "trade": 2,
+              "rep": 0,
+              "text": "Araberne handler med dere, men holder avstand. Dere får få varer for høy pris."
+            },
+            "good": {
+              "und": 1,
+              "trade": 3,
+              "rep": 0,
+              "text": "Et lite gjennombrudd: en handelsmann respekterer at dere ikke prøver å late som dere er noen andre."
+            }
+          },
+          "lesson": "Selv uten tilpasning ble det handlet — men på dårligere vilkår. Stivhet kostet vikingene penger. Identitet uten åpenhet er ofte dyr.",
+          "locks": []
+        },
+        {
+          "id": "slave_trade",
+          "title": "Selg slaver — det araberne vil ha mest",
+          "desc": "Bagdad-markedet betaler best for nordeuropeiske slaver. Dere har keltiske kvinner fra Dublin.",
+          "tag": "aggressive",
+          "skillReq": null,
+          "skillReward": {
+            "krigskunst": 1
+          },
+          "baseRoll": {
+            "bad": 1,
+            "mid": 2,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": -3,
+              "trade": 2,
+              "rep": -3,
+              "text": "En av kvinnene snakker arabisk og forteller historier som vekker sympati. Markedet snur mot dere."
+            },
+            "mid": {
+              "und": -3,
+              "trade": 5,
+              "rep": -3,
+              "text": "Dere selger lasten. Sølv strømmer inn. Dere er rike og foraktet av andre handelsmenn."
+            },
+            "good": {
+              "und": -3,
+              "trade": 7,
+              "rep": -4,
+              "text": "Kalifens egen harem kjøper to. Sølvet er enormt. Ryktet om dere når Norge før dere selv gjør det."
+            },
+            "crit": {
+              "und": -3,
+              "trade": 10,
+              "rep": -5,
+              "text": "Dere blir Bagdad-markedets foretrukne leverandør. Dere er nå en pilar i en internasjonal slavehandel som vil vare i 800 år."
+            }
+          },
+          "lesson": "Bagdads slavemarked var verdens største på 900-tallet. Norrøne, slaviske og afrikanske mennesker ble byttevare. Vikingenes deltakelse i denne handelen finansierte mye av Skandinavias rikdom — og er en arv vi sjelden snakker om.",
+          "locks": []
+        }
+      ]
+    },
+    {
+      "id": "miklagard",
+      "name": "Miklagard",
+      "region": "Konstantinopel, 900-tallet",
+      "color": "#7B5BA8",
+      "difficulty": "farlig",
+      "history": "Verdens rikeste by. Den bysantinske keiseren ansetter norrøne krigere som personlig livvakt — <strong>Væringgarden</strong> — fordi de ikke har lokale lojaliteter. Harald Hardråde tjente her i ungdommen og kom hjem som en av Europas rikeste menn.",
+      "funFact": "En væring ved navn <strong>Halvdan</strong> risset runene sine inn i Hagia Sophia rundt år 900. De er der ennå — du kan se dem i dag i andre etasje, høyre side. «Halftan auk Are…» Halvdan var her.",
+      "famousPerson": "<strong>Harald Hardråde</strong> (1015–1066) — som ung tjente han 10 år i Væringgarden, kjempet i Italia, Bulgaria og Nord-Afrika. Han kom hjem som Norges rikeste mann og ble konge. Han døde ved Stamford Bridge i 1066, tre uker før Vilhelm Erobreren landet i England — og er ofte regnet som vikingtidens slutt.",
+      "task": {
+        "type": "timed",
+        "icon": "🙇",
+        "typeLabel": "Tidsbasert",
+        "title": "Hoffhilsen",
+        "desc": "Dere har ETT minutt til å øve, så fremfører hele gruppen samtidig en bysantinsk hoffhilsen for læreren: dere må (1) bøye dere dypt, (2) si «Doxa to Theo» (DOK-sa to thé-o), (3) holde stillingen i 5 sekunder. Alle samtidig. Læreren bestemmer om det var verdig keiseren.",
+        "rationale": "Vikingene som tjente keiseren måtte lære protokoll de aldri hadde sett før. Den som ikke bukket riktig, fikk ikke jobben — og jobben var verdt en formue."
+      },
+      "choices": [
+        {
+          "id": "guard",
+          "title": "Tjen i Væringgarden",
+          "desc": "Bli leiesoldat for keiseren i 10 år. Dere får gull, men en av dere må bli igjen permanent.",
+          "tag": "trade",
+          "skillReq": {
+            "krigskunst": 2
+          },
+          "skillReward": {
+            "krigskunst": 2,
+            "språk": 1,
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 1,
+            "mid": 2,
+            "good": 2,
+            "crit": 1
+          },
+          "outcomes": {
+            "bad": {
+              "und": -1,
+              "trade": 4,
+              "rep": 1,
+              "text": "En av dere dør i kamp i Bulgaria. De andre kommer hjem rike, men slitne."
+            },
+            "mid": {
+              "und": 2,
+              "trade": 7,
+              "rep": 2,
+              "text": "Dere kommer hjem med gull, gresk og hoffmanerer. Sønnen til en høvding gifter seg med datteren deres."
+            },
+            "good": {
+              "und": 3,
+              "trade": 9,
+              "rep": 3,
+              "text": "En av dere er Harald Hardråde. Dere blir konge i Norge."
+            },
+            "crit": {
+              "und": 4,
+              "trade": 12,
+              "rep": 4,
+              "text": "Dere risser navnene deres i Hagia Sophia. De står der ennå."
+            }
+          },
+          "lesson": "Tusenvis av nordmenn og svensker tjente i Væringgarden. De brakte hjem kunnskap som endret samfunnet — kirkebygging, lovverk, militær taktikk. Norges middelalder var bygget på Bysants gull.",
+          "locks": []
+        },
+        {
+          "id": "silk",
+          "title": "Forhandle som handelsmenn",
+          "desc": "Pelsverk og rav for silke og krydder. Hold dere unna politikken.",
+          "tag": "trade",
+          "skillReq": {
+            "diplomati": 1
+          },
+          "skillReward": {
+            "språk": 1,
+            "diplomati": 1
+          },
+          "baseRoll": {
+            "bad": 0,
+            "mid": 2,
+            "good": 3,
+            "crit": 1
+          },
+          "outcomes": {
+            "mid": {
+              "und": 2,
+              "trade": 5,
+              "rep": 1,
+              "text": "God handel — silke og krydder dere kan selge dyrt hjemme."
+            },
+            "good": {
+              "und": 3,
+              "trade": 7,
+              "rep": 2,
+              "text": "Dere får tilgang til keiserens egne lagre. Silke nok til en hel bygd."
+            },
+            "crit": {
+              "und": 4,
+              "trade": 10,
+              "rep": 3,
+              "text": "Dere etablerer fast handelskontor. Dere får signert dokument fra keiseren — eldste norske handelsavtale vi vet om."
+            }
+          },
+          "lesson": "Mange vikinger var rene handelsmenn. De tjente godt, men fikk ikke samme dybdekunnskap som de som ble lenge — handel er rikdom, men ofte uten varig kulturmøte.",
+          "locks": []
+        },
+        {
+          "id": "spy",
+          "title": "Spioner og selg hemmelighetene",
+          "desc": "Lat som dere vil tjene keiseren, men spionerer for fienden — bulgarene betaler godt.",
+          "tag": "aggressive",
+          "skillReq": {
+            "språk": 1,
+            "krigskunst": 1
+          },
+          "skillReward": {},
+          "baseRoll": {
+            "bad": 4,
+            "mid": 2,
+            "good": 0,
+            "crit": 0
+          },
+          "outcomes": {
+            "bad": {
+              "und": -3,
+              "trade": -2,
+              "rep": -3,
+              "text": "Dere blir oppdaget. Sluppet ut av byen kun fordi keiseren ikke vil starte krig. Aldri velkommen tilbake. To av dere blindes som advarsel."
+            },
+            "mid": {
+              "und": -2,
+              "trade": 2,
+              "rep": -2,
+              "text": "Dere lykkes så vidt. Bulgarene betaler litt. Dere må flykte hjem etter to år."
+            }
+          },
+          "lesson": "Tilliten i Miklagard ble bygget over generasjoner. Vikinger som brøt den, ødela for alle nordmenn som kom etter. Spionasje var sjelden lønnsomt — særlig i en by der bestraffelsen ofte var blendinger.",
+          "locks": []
+        }
+      ]
+    }
+  ]
+}

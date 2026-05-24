@@ -37,7 +37,9 @@ export type GroupSkills = {
 // DESTINASJONER & OPPGAVER
 // ========================
 
-export type TaskType = 'movement' | 'photo' | 'timed' | 'creative' | 'foto' | 'innspilling' | 'geoguesser';
+// v3-oppgavetyper (§4.1). De gamle (movement/photo/timed/creative) er erstattet
+// av de nye, skole-baserte typene som ligger i vikingspill_innhold_v2.json.
+export type TaskType = 'foto' | 'innspilling' | 'geoguesser';
 
 export interface Task {
   type: TaskType;
@@ -76,11 +78,13 @@ export interface RollOutcome {
   text: string;    // Narrativ beskrivelse av hva som skjer
 }
 
+// Utfallstekst pr. terningresultat. Prototypen definerer kun grenene som faktisk
+// kan inntreffe (der baseRoll > 0), så alle fire er valgfrie.
 export interface RollOutcomeMap {
-  bad: RollOutcome;
-  mid: RollOutcome;
-  good: RollOutcome;
-  crit: RollOutcome;
+  bad?: RollOutcome;
+  mid?: RollOutcome;
+  good?: RollOutcome;
+  crit?: RollOutcome;
 }
 
 export interface Choice {
@@ -105,18 +109,20 @@ export type Difficulty = 'trygg' | 'middels' | 'farlig';
 export interface Destination {
   id: string;
   name: string;
+
+  // Basisfelt fra vikingspill_data.json (komplett for alle 12 destinasjoner):
   region: string;
-  color: string;        // Hex-farge for visuell identitet
+  color: string;           // Hex-farge for visuell identitet
   difficulty: Difficulty;
-  history: string;      // Førsteperson-fortelling av ankomsten
+  history: string;         // Førsteperson-fortelling av ankomsten
   funFact: string;
   famousPerson: string;
-  task: Task;
-  choices: Choice[];
-  
-  // Disse kommer fra v2-innhold (legges til senere):
-  episkeKulturmote?: EpiskeKulturmote;
-  stedsquiz?: StedsQuizQuestion[];
+  choices: Choice[];       // valg → terning → utfall
+
+  // v3-innhold flettet inn fra vikingspill_innhold_v2.json (matchet på id):
+  task: Task;              // v2-oppgave (erstatter gammel task, §14)
+  episkeKulturmote: EpiskeKulturmote;
+  stedsquiz: StedsQuizQuestion[];
 }
 
 // ========================
@@ -129,7 +135,8 @@ export interface EpiskeKulturmote {
   kulturmøteSpørsmål: {
     q: string;
     opts: string[];
-    correct: number;
+    correct: number;        // 0-3, indeks i opts-array
+    feedback: string;       // forklaring etter svar
   };
 }
 
@@ -222,16 +229,22 @@ export interface GameEvent {
 // FASE 2/3: MEKANIKKER (v2)
 // ========================
 
-export interface GudsensProveChallenge {
-  challengeType: string;
-  skill: SkillKey;
-  activity: string;
-  description: string;
+// «Gudenes prøve» — lærertrigget konkurranse (§3.4 / §8.5).
+// Kilde: vikingspill_innhold_v2.json → _mekanikk.lærertriggetKonkurranse.utfordringstyper
+export interface GudenesProveChallenge {
+  id: string;
+  navn: string;
+  ferdighet: SkillKey;            // ferdigheten som gir bonus i konkurransen
+  desc: string;
+  type: 'fysisk' | 'kreativ';
 }
 
+// Sjøslag — «Holmgang på bølgene» (§7.2).
+// Kilde: vikingspill_innhold_v2.json → _mekanikk.sjøslag.duellAktiviteter
 export interface HolmgangDuel {
-  activity: string;
-  description: string;
+  navn: string;
+  desc: string;
+  ferdighet: SkillKey;            // ferdigheten som gir bonus i duellen
 }
 
 export interface FateCard {

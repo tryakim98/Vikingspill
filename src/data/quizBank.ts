@@ -82,7 +82,7 @@ export const skillQuizBank: SkillQuizBank = {
         opts: ['En type viking-øks', 'En bredhullskip designet for handel', 'En navigationsinstrument', 'Et norsk betalingsmiddel'],
         correct: 1,
         feedback: 'Knarr var et bredt, stabilt handelsskip — helt ulik drakkar (kampskoip). Knarren brukes til lange handelsreiser som til Island og Vinland.',
-        source: ['island', 'vinland', 'færøyene']
+        source: ['island', 'vinland', 'faroyene']
       }
     ],
     tier3: []

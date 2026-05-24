@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<!--
+================================================================================
+VIKINGENES KULTURMØTER v3 — Reisen
+Forfatter: Til T. Ulriksen, Mysen VGS
+================================================================================
+
+LOCALSTORAGE-SKJEMA (delt med lærerversjon)
+Nøkkel: vikinggame_v3_group_<groupId>
+Verdi (JSON):
+{
+  groupId: 1-10,
+  shipName: string,
+  scores: { understanding, trade, reputation },     // alle tall
+  skills: { språk, sjømannskap, krigskunst, diplomati, tro },  // hver 0-3
+  visited: { [destId]: { choiceId, taskCompleted, taskBonus, diceRoll, outcome } },
+  log: [ { dest, region, color, choiceTitle, result, lesson } ],
+  status: 'in_progress' | 'completed',
+  initialSkillChosen: bool,
+  lastUpdated: ISO timestamp
+}
+
+GODKJENNINGSKODE (deterministisk, brukes av begge versjoner)
+  fullCode    = simpleHash('viking_v3_' + groupId + '_' + destId + '_task') mod 10000
+  partialCode = (fullCode + 1) mod 10000
+Hvor simpleHash er definert i begynnelsen av <script>-blokka under.
+================================================================================
+-->
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vikingenes kulturmøter — Reisen</title>
+<style>
+  :root {
+    --navy: #1A2744;
+    --navy-deep: #0B1426;
+    --navy-mid: #182846;
+    --gold: #D4A843;
+    --gold-soft: #E8C97A;
+    --gold-glow: #F0D88B;
+    --cream: #F5F0E8;
+    --paper: #FDFBF6;
+    --paper-dim: #EFE8DC;
+    --rust: #A0522D;
+    --teal: #2B6B6B;
+    --moss: #5B7553;
+    --plum: #6B3FA0;
+    --bark: #6B4C3B;
+    --crimson: #8B2929;
+    --ink: #1A2744;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+    --shadow-deep: 0 14px 40px rgba(0, 0, 0, 0.5);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    background: radial-gradient(ellipse at top, #243355 0%, var(--navy-deep) 65%), var(--navy-deep);
+    color: var(--paper);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.5;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: repeating-linear-gradient(0deg, transparent 0, transparent 3px, rgba(212, 168, 67, 0.012) 3px, rgba(212, 168, 67, 0.012) 4px);
+    pointer-events: none; z-index: 1;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(212, 168, 67, 0.06) 0%, transparent 35%),
+      radial-gradient(circle at 85% 70%, rgba(91, 117, 83, 0.05) 0%, transparent 35%);
+    pointer-events: none; z-index: 1;
+  }
+  .app { position: relative; z-index: 2; max-width: 1080px; margin: 0 auto; padding: 18px 16px 100px; }
+
+  /* ───── HEADER ───── */
+  header.topbar {
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    align-items: center; gap: 16px;
+    padding: 14px 22px; margin-bottom: 18px;
+    background: linear-gradient(135deg, rgba(212, 168, 67, 0.1), rgba(212, 168, 67, 0.02));
+    border: 1px solid rgba(212, 168, 67, 0.3);
+    border-radius: 14px; backdrop-filter: blur(10px);
+  }
+  .topbar h1 {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 17px; letter-spacing: 0.2em;
+    color: var(--gold); text-transform: uppercase;
+    font-weight: 600; text-align: center;
+  }
+  .topbar h1 small {
+    display: block; font-size: 9px; letter-spacing: 0.32em;
+    color: rgba(245, 240, 232, 0.5); font-weight: 400; margin-top: 4px;
+  }
+  .topbar .ship-tag, .topbar .group-tag {
+    font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: rgba(245, 240, 232, 0.55);
+  }
+  .topbar .ship-tag { text-align: right; }
+  .topbar strong {
+    display: block; color: var(--gold); font-size: 14px;
+    letter-spacing: 0.08em; margin-top: 3px;
+    font-family: 'Iowan Old Style', Georgia, serif; font-weight: 600;
+  }
+
+  /* ───── SETUP ───── */
+  .setup { text-align: center; padding: 30px 20px; animation: fadeUp 0.7s ease; }
+  .runes {
+    font-size: 38px; letter-spacing: 0.45em; color: var(--gold);
+    margin-bottom: 14px; opacity: 0.85;
+    text-shadow: 0 0 30px rgba(212, 168, 67, 0.4);
+  }
+  .setup h2 {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 32px; letter-spacing: 0.08em;
+    color: var(--paper); margin-bottom: 10px; line-height: 1.2;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+  }
+  .setup p.lead {
+    color: rgba(245, 240, 232, 0.72); font-size: 15px;
+    max-width: 580px; margin: 0 auto 32px; font-style: italic; line-height: 1.65;
+  }
+  .label-divider {
+    font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold); margin: 28px auto 14px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    max-width: 460px;
+  }
+  .label-divider::before, .label-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 168, 67, 0.5), transparent);
+  }
+  .group-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+    max-width: 520px; margin: 0 auto;
+  }
+  .group-btn {
+    background: rgba(245, 240, 232, 0.04);
+    border: 1.5px solid rgba(212, 168, 67, 0.32);
+    color: var(--paper);
+    padding: 14px 4px; border-radius: 10px;
+    font-family: inherit; font-size: 11px; letter-spacing: 0.1em;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .group-btn:hover { background: rgba(212, 168, 67, 0.15); border-color: var(--gold); transform: translateY(-2px); }
+  .group-btn.selected {
+    background: var(--gold); color: var(--navy-deep); border-color: var(--gold);
+    font-weight: 700; box-shadow: 0 4px 14px rgba(212, 168, 67, 0.45);
+  }
+  .group-btn strong {
+    display: block; font-size: 22px;
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif; margin-bottom: 2px;
+  }
+  .ship-input {
+    background: rgba(245, 240, 232, 0.12);
+    border: 1.5px solid rgba(212, 168, 67, 0.45);
+    color: #FDFBF6 !important;
+    -webkit-text-fill-color: #FDFBF6;
+    caret-color: #D4A843;
+    padding: 14px 20px;
+    font-family: inherit; font-size: 16px;
+    border-radius: 8px; width: min(420px, 90%);
+    margin: 0 auto; display: block; text-align: center;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .ship-input::placeholder {
+    color: rgba(245, 240, 232, 0.4); font-style: italic;
+    -webkit-text-fill-color: rgba(245, 240, 232, 0.4);
+  }
+  .ship-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(245, 240, 232, 0.18);
+  }
+  .ship-input:-webkit-autofill,
+  .ship-input:-webkit-autofill:hover,
+  .ship-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #FDFBF6 !important;
+    -webkit-box-shadow: 0 0 0 30px rgba(26, 39, 68, 0.95) inset !important;
+    caret-color: #D4A843;
+  }
+  .primary-btn {
+    background: linear-gradient(180deg, var(--gold) 0%, #B58A2D 100%);
+    color: var(--navy-deep); border: none;
+    padding: 14px 32px; border-radius: 8px;
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    cursor: pointer; margin-top: 22px;
+    box-shadow: 0 4px 14px rgba(212, 168, 67, 0.35); transition: all 0.2s;
+  }
+  .primary-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(212, 168, 67, 0.5); }
+  .primary-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .secondary-btn {
+    background: transparent; color: var(--gold);
+    border: 1px solid rgba(212, 168, 67, 0.5);
+    padding: 11px 24px; border-radius: 8px;
+    font-family: inherit; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .secondary-btn:hover { background: rgba(212, 168, 67, 0.12); }
+
+  /* ───── DASHBOARD ───── */
+  .dash { display: none; animation: fadeUp 0.5s ease; }
+  .dash.active { display: block; }
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px; margin-bottom: 14px;
+  }
+  .stat-card {
+    background: linear-gradient(135deg, rgba(212, 168, 67, 0.12), rgba(212, 168, 67, 0.03));
+    border: 1px solid rgba(212, 168, 67, 0.28);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .stat-card.understanding { border-color: rgba(91, 117, 83, 0.45); background: linear-gradient(135deg, rgba(91, 117, 83, 0.18), rgba(91, 117, 83, 0.04)); }
+  .stat-card.trade { border-color: rgba(212, 168, 67, 0.45); }
+  .stat-card.reputation { border-color: rgba(160, 82, 45, 0.45); background: linear-gradient(135deg, rgba(160, 82, 45, 0.16), rgba(160, 82, 45, 0.04)); }
+  .stat-card .label {
+    font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(245, 240, 232, 0.55); margin-bottom: 4px;
+  }
+  .stat-card .value {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 26px; color: var(--gold); font-weight: 700; line-height: 1;
+  }
+  .stat-card.understanding .value { color: #A8C99A; }
+  .stat-card.reputation .value { color: #D89A6E; }
+  .stat-card .sub { font-size: 10px; color: rgba(245, 240, 232, 0.45); margin-top: 4px; }
+
+  /* ───── SKILL TREE ───── */
+  .skill-tree-wrapper {
+    background: rgba(245, 240, 232, 0.03);
+    border: 1px solid rgba(212, 168, 67, 0.18);
+    border-radius: 10px; padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+  .skill-tree-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .skill-tree-title {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--gold);
+  }
+  .skill-tree-toggle {
+    background: rgba(212, 168, 67, 0.15); color: var(--gold-soft);
+    border: 1px solid rgba(212, 168, 67, 0.4);
+    padding: 5px 12px; border-radius: 6px;
+    font-family: inherit; font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; cursor: pointer;
+  }
+  .skill-tree-toggle:hover { background: rgba(212, 168, 67, 0.25); }
+  .skill-branches {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+  }
+  .skill-branch {
+    text-align: center; padding: 8px 4px;
+    border-right: 1px dotted rgba(212, 168, 67, 0.18);
+  }
+  .skill-branch:last-child { border-right: none; }
+  .skill-branch .skill-icon { font-size: 22px; margin-bottom: 4px; display: block; }
+  .skill-branch .skill-name {
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: rgba(245, 240, 232, 0.55); margin-bottom: 4px;
+  }
+  .skill-nodes {
+    display: flex; justify-content: center; gap: 3px;
+    margin-top: 4px;
+  }
+  .skill-node {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 1.5px solid rgba(245, 240, 232, 0.25);
+    background: rgba(245, 240, 232, 0.04);
+  }
+  .skill-node.unlocked {
+    background: var(--gold); border-color: var(--gold);
+    box-shadow: 0 0 8px rgba(212, 168, 67, 0.6);
+  }
+
+  /* ───── SECTION TITLE ───── */
+  .section-title {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 12px; margin-top: 6px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, rgba(212, 168, 67, 0.4), transparent);
+  }
+
+  /* ───── DESTINATIONS ───── */
+  .destinations {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 10px; margin-bottom: 24px;
+  }
+  .dest-card {
+    background: rgba(245, 240, 232, 0.04);
+    border: 1.5px solid rgba(245, 240, 232, 0.1);
+    border-radius: 10px; padding: 14px 16px;
+    cursor: pointer; transition: all 0.25s;
+    position: relative; overflow: hidden;
+    min-height: 110px;
+  }
+  .dest-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; background: var(--col, var(--gold)); opacity: 0.7;
+  }
+  .dest-card:hover:not(.visited):not(.locked) {
+    border-color: var(--col); transform: translateY(-3px); box-shadow: var(--shadow);
+  }
+  .dest-card.visited { opacity: 0.45; cursor: default; }
+  .dest-card.visited::after {
+    content: '✓ BESØKT'; position: absolute; top: 10px; right: 10px;
+    font-size: 8px; letter-spacing: 0.18em; color: var(--gold);
+    background: rgba(26, 39, 68, 0.7); padding: 3px 6px; border-radius: 3px;
+  }
+  .dest-card.locked { opacity: 0.45; cursor: not-allowed; }
+  .dest-card.locked::after {
+    content: '🔒 STENGT'; position: absolute; top: 10px; right: 10px;
+    font-size: 8px; letter-spacing: 0.18em; color: var(--rust);
+    background: rgba(26, 39, 68, 0.85); padding: 3px 6px; border-radius: 3px;
+  }
+  .dest-card .dest-num {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 10px; color: var(--col); letter-spacing: 0.2em;
+    margin-bottom: 4px;
+  }
+  .dest-card .dest-name {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 17px; color: var(--paper);
+    margin-bottom: 4px; font-weight: 600;
+  }
+  .dest-card .dest-region {
+    font-size: 11px; color: rgba(245, 240, 232, 0.5); font-style: italic;
+  }
+  .dest-card .dest-difficulty {
+    margin-top: 8px; font-size: 9px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: rgba(245, 240, 232, 0.45);
+  }
+  .dest-card .dest-difficulty .danger { color: #D89A6E; font-weight: 700; }
+  .dest-card .dest-difficulty .safe { color: #A8C99A; }
+
+  /* ───── LOG ───── */
+  .log-empty {
+    background: rgba(245, 240, 232, 0.03);
+    border: 1px dashed rgba(245, 240, 232, 0.15);
+    border-radius: 10px; padding: 22px;
+    text-align: center; font-style: italic;
+    color: rgba(245, 240, 232, 0.4); font-size: 13px;
+  }
+  .log-entry {
+    background: rgba(245, 240, 232, 0.04);
+    border-left: 3px solid var(--col, var(--gold));
+    padding: 12px 14px; margin-bottom: 10px;
+    border-radius: 0 8px 8px 0;
+  }
+  .log-entry h4 {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 14px; color: var(--paper); margin-bottom: 4px;
+  }
+  .log-entry .log-meta {
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--col); margin-bottom: 6px;
+  }
+  .log-entry p { font-size: 12.5px; color: rgba(245, 240, 232, 0.75); line-height: 1.55; }
+  .log-entry .lesson {
+    margin-top: 6px; padding-top: 6px;
+    border-top: 1px dotted rgba(245, 240, 232, 0.15);
+    font-size: 12px; color: var(--gold-soft); font-style: italic;
+  }
+
+  .hidden { display: none !important; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.5); } 50% { box-shadow: 0 0 0 8px rgba(212, 168, 67, 0); } }
+
+  @media (max-width: 700px) {
+    .group-grid { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .group-btn { padding: 10px 2px; font-size: 9px; }
+    .group-btn strong { font-size: 18px; }
+    .topbar { grid-template-columns: 1fr; gap: 8px; padding: 10px 12px; }
+    .topbar h1 { font-size: 13px; letter-spacing: 0.12em; }
+    .topbar .ship-tag, .topbar .group-tag { text-align: center; }
+    .destinations { grid-template-columns: 1fr 1fr; }
+    .stat-card .value { font-size: 22px; }
+    .skill-branches { grid-template-columns: repeat(5, 1fr); }
+    .skill-branch { padding: 4px 2px; }
+    .skill-branch .skill-icon { font-size: 18px; }
+    .skill-branch .skill-name { font-size: 7px; letter-spacing: 0.1em; }
+  }
+
+  /* ───── MODAL ───── */
+  .modal-bg {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(11, 20, 38, 0.88); backdrop-filter: blur(8px);
+    align-items: flex-start; justify-content: center;
+    padding: 18px; overflow-y: auto;
+  }
+  .modal-bg.active { display: flex; animation: fadeIn 0.3s; }
+  .modal {
+    background: var(--paper); color: var(--ink);
+    max-width: 720px; width: 100%;
+    border-radius: 14px; overflow: hidden;
+    box-shadow: var(--shadow-deep); margin: auto;
+    animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .modal-head {
+    background: var(--col); color: white;
+    padding: 18px 22px; position: relative;
+  }
+  .modal-head h2 {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 24px; letter-spacing: 0.06em; margin-bottom: 3px;
+  }
+  .modal-head .modal-subtitle {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.85;
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 14px;
+    background: rgba(255, 255, 255, 0.18); border: none; color: white;
+    width: 32px; height: 32px; border-radius: 50%;
+    font-size: 20px; cursor: pointer; transition: background 0.2s;
+  }
+  .modal-close:hover { background: rgba(255, 255, 255, 0.32); }
+  .modal-body { padding: 20px 22px 24px; }
+
+  .historical {
+    background: var(--paper-dim);
+    border-left: 3px solid var(--col);
+    padding: 12px 14px; border-radius: 0 6px 6px 0;
+    font-size: 13px; line-height: 1.6;
+    color: #3a4358; margin-bottom: 12px; font-style: italic;
+  }
+  .historical strong { color: var(--col); font-style: normal; }
+  .funfact, .famous-person {
+    background: linear-gradient(135deg, #FFF8E8, #F5F0E8);
+    border: 1px solid rgba(212, 168, 67, 0.5);
+    border-radius: 8px; padding: 10px 14px;
+    margin-bottom: 10px; font-size: 12.5px; color: #5a4818;
+  }
+  .famous-person {
+    background: linear-gradient(135deg, #FCEBDB, #F5E5D0);
+    border-color: rgba(160, 82, 45, 0.4); color: #5a3818;
+  }
+  .funfact strong, .famous-person strong {
+    display: inline-block; font-size: 9px; letter-spacing: 0.2em;
+    text-transform: uppercase; margin-right: 6px;
+  }
+  .funfact strong { color: var(--rust); }
+  .famous-person strong { color: var(--rust); }
+
+  /* Physical task block */
+  .physical-task {
+    background: linear-gradient(135deg, #2B6B6B 0%, #1F4F4F 100%);
+    color: white; border-radius: 10px;
+    padding: 16px 18px; margin: 14px 0 18px;
+    box-shadow: 0 6px 18px rgba(43, 107, 107, 0.3);
+  }
+  .physical-task .task-head {
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: #B8E0E0; font-weight: 700; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .physical-task .task-head .task-type {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px; border-radius: 10px; font-size: 8px;
+  }
+  .physical-task .task-title {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 17px; margin-bottom: 6px; line-height: 1.3; font-weight: 600;
+  }
+  .physical-task .task-desc {
+    font-size: 13px; opacity: 0.92; line-height: 1.55;
+    margin-bottom: 12px;
+  }
+  .physical-task .task-rationale {
+    font-size: 11.5px; opacity: 0.78; font-style: italic;
+    margin-bottom: 12px; padding-top: 8px;
+    border-top: 1px dotted rgba(255, 255, 255, 0.2);
+  }
+  .physical-task .task-action {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  }
+  .physical-task button {
+    background: var(--gold); color: var(--navy-deep);
+    border: none; padding: 9px 16px;
+    border-radius: 6px; font-family: inherit;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+  }
+  .physical-task button:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(212, 168, 67, 0.4); }
+  .physical-task button.skip {
+    background: rgba(255, 255, 255, 0.15); color: white;
+  }
+  .approval-input {
+    width: 130px; padding: 9px 10px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    color: white !important;
+    -webkit-text-fill-color: white;
+    caret-color: #D4A843;
+    border-radius: 6px;
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    text-align: center; letter-spacing: 0.3em;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .approval-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.1em; font-weight: 400;
+  }
+  .approval-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(255, 255, 255, 0.25);
+  }
+  .task-status {
+    display: inline-block; padding: 4px 10px;
+    border-radius: 12px; font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;
+  }
+  .task-status.success { background: #4A8B4A; color: white; }
+  .task-status.partial { background: #C49E3A; color: white; }
+  .task-status.fail { background: #B85F4A; color: white; }
+
+  /* Choices */
+  .choices-label {
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(26, 39, 68, 0.6); margin-bottom: 10px; font-weight: 700; margin-top: 4px;
+  }
+  .choice {
+    border: 2px solid #ddd; border-radius: 8px;
+    padding: 13px 14px; margin-bottom: 10px;
+    cursor: pointer; transition: all 0.2s; background: white;
+  }
+  .choice:hover:not(.disabled) {
+    border-color: var(--col); background: var(--paper-dim); transform: translateX(3px);
+  }
+  .choice.disabled { opacity: 0.55; cursor: not-allowed; background: #f5f5f5; }
+  .choice .choice-title { font-weight: 700; color: var(--ink); font-size: 14px; margin-bottom: 3px; }
+  .choice .choice-desc { font-size: 12.5px; color: #5a6378; line-height: 1.5; }
+  .choice-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+  .choice-tag {
+    display: inline-block; font-size: 9px; letter-spacing: 0.18em;
+    text-transform: uppercase; padding: 2px 7px; border-radius: 3px; font-weight: 700;
+  }
+  .tag-respect { background: #E8F5E9; color: #2E5E35; }
+  .tag-trade { background: #FFF8E1; color: #8B6914; }
+  .tag-aggressive { background: #FFEBEE; color: #8B2929; }
+  .tag-skill { background: #E3F2FD; color: #1A4F7A; }
+  .tag-skill.req-fail { background: #FCE4EC; color: #8B2929; }
+
+  /* Dice */
+  .dice-section { text-align: center; padding: 14px 0; }
+  .dice-section h3 {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 16px; color: var(--ink); margin-bottom: 4px; letter-spacing: 0.08em;
+  }
+  .dice-section p.flavor {
+    font-size: 12.5px; color: #5a6378; margin-bottom: 14px; font-style: italic;
+  }
+  .odds-bar {
+    display: flex; height: 26px; border-radius: 6px;
+    overflow: hidden; margin: 0 auto 6px;
+    max-width: 380px; border: 1px solid #ddd;
+  }
+  .odds-segment {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: white; transition: width 0.4s ease;
+  }
+  .odds-segment.bad { background: #B85F4A; }
+  .odds-segment.mid { background: #C49E3A; }
+  .odds-segment.good { background: #4A8B4A; }
+  .odds-segment.crit { background: #2E5E35; }
+  .odds-labels {
+    display: flex; justify-content: space-between;
+    max-width: 380px; margin: 0 auto 14px;
+    font-size: 9px; color: #999; letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .modifiers {
+    background: var(--paper-dim); border-radius: 6px;
+    padding: 10px 14px; font-size: 12.5px; color: var(--ink);
+    margin-bottom: 14px; text-align: left;
+  }
+  .modifiers .mod-line { display: flex; justify-content: space-between; padding: 2px 0; }
+  .modifiers .mod-line .mod-pos { color: #2E5E35; font-weight: 700; }
+  .modifiers .mod-line .mod-neg { color: #8B2929; font-weight: 700; }
+  .modifiers .mod-total {
+    border-top: 1px dotted #999; padding-top: 4px; margin-top: 4px; font-weight: 700;
+  }
+  .dice {
+    width: 90px; height: 90px; margin: 12px auto;
+    background: white; border: 3px solid var(--ink);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 52px; font-weight: 700; color: var(--ink);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  }
+  .dice.rolling { animation: diceRoll 0.6s ease-in-out infinite; }
+  .dice.shown {
+    animation: scaleIn 0.4s ease;
+    box-shadow: 0 6px 22px rgba(212, 168, 67, 0.4);
+  }
+  @keyframes diceRoll {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(90deg) scale(1.1); }
+    50% { transform: rotate(180deg) scale(0.95); }
+    75% { transform: rotate(270deg) scale(1.05); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+  .roll-btn {
+    background: linear-gradient(180deg, var(--gold) 0%, #B58A2D 100%);
+    color: var(--navy-deep); border: none;
+    padding: 12px 28px; border-radius: 8px;
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    cursor: pointer; margin-top: 8px;
+    box-shadow: 0 4px 14px rgba(212, 168, 67, 0.35); transition: all 0.2s;
+  }
+  .roll-btn:hover:not(:disabled) { transform: translateY(-2px); }
+  .roll-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Result */
+  .result { text-align: center; padding: 8px 0 4px; }
+  .result .result-icon { font-size: 46px; margin-bottom: 8px; }
+  .result h3 {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 22px; color: var(--ink); margin-bottom: 8px; letter-spacing: 0.06em;
+  }
+  .result .result-text {
+    font-size: 14px; color: #4a5366; line-height: 1.6; margin-bottom: 16px;
+  }
+  .points-earned {
+    display: flex; gap: 8px; justify-content: center;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .point-pill {
+    padding: 7px 12px; border-radius: 16px;
+    font-weight: 700; font-size: 12px; letter-spacing: 0.05em;
+  }
+  .pp-understanding { background: #E8F5E9; color: #2E5E35; }
+  .pp-trade { background: #FFF8E1; color: #8B6914; }
+  .pp-rep { background: #FFE0CC; color: #8B4218; }
+  .pp-loss { background: #FFEBEE; color: #8B2929; }
+  .lesson-box {
+    background: var(--paper-dim);
+    border-left: 3px solid var(--gold);
+    padding: 12px 14px; border-radius: 0 6px 6px 0;
+    text-align: left; font-size: 13px;
+    color: var(--ink); line-height: 1.6; margin-bottom: 12px;
+  }
+  .lesson-box .lesson-head {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--rust); font-weight: 700; margin-bottom: 4px;
+  }
+
+  /* Skill modal */
+  .skill-tier-row {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 6px 0; opacity: 1;
+  }
+  .skill-tier-row.locked { opacity: 0.45; }
+  .skill-tier-row .tier-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 4px; border: 1.5px solid;
+  }
+  .skill-tier-row .tier-content {
+    flex: 1; font-size: 12.5px; color: var(--ink);
+  }
+  .skill-tier-row .tier-content strong { display: block; margin-bottom: 2px; }
+  .skill-tier-row .tier-content .desc {
+    color: #5a6378;
+  }
+
+
+  /* ───── QUIZ ───── */
+  .quiz-unlock-btn {
+    margin-top: 6px;
+    background: linear-gradient(180deg, var(--gold) 0%, #B58A2D 100%);
+    color: var(--navy-deep); border: none;
+    padding: 7px 14px; border-radius: 6px;
+    font-family: inherit; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(212, 168, 67, 0.35);
+    animation: pulse 2s infinite;
+  }
+  .quiz-unlock-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(212, 168, 67, 0.5); }
+  .quiz-locked-msg {
+    margin-top: 4px; font-size: 11px; color: #999;
+    font-style: italic;
+  }
+  .skill-tree-toggle.has-quiz {
+    background: linear-gradient(180deg, var(--gold) 0%, #B58A2D 100%);
+    color: var(--navy-deep);
+    animation: pulse 2s infinite; font-weight: 700;
+  }
+
+  .quiz-intro {
+    background: linear-gradient(135deg, #FFF8E8, #F5F0E8);
+    border: 1px solid rgba(212, 168, 67, 0.4);
+    border-radius: 8px; padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .quiz-intro h4 {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 15px; color: var(--ink); margin-bottom: 4px;
+  }
+  .quiz-intro p {
+    font-size: 12.5px; color: #5a4818; line-height: 1.55;
+  }
+  .quiz-progress {
+    display: flex; gap: 6px; margin: 10px 0 16px;
+    justify-content: center;
+  }
+  .quiz-progress .qp-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #ddd; border: 1.5px solid #aaa;
+  }
+  .quiz-progress .qp-dot.current { background: var(--gold); border-color: var(--gold); }
+  .quiz-progress .qp-dot.correct { background: #4A8B4A; border-color: #4A8B4A; }
+  .quiz-progress .qp-dot.wrong { background: #B85F4A; border-color: #B85F4A; }
+
+  .quiz-question {
+    margin-bottom: 4px;
+  }
+  .quiz-question .q-num {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--rust); font-weight: 700; margin-bottom: 6px;
+  }
+  .quiz-question .q-text {
+    font-size: 15px; color: var(--ink); line-height: 1.55;
+    margin-bottom: 14px; font-weight: 600;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 7px; }
+  .quiz-option {
+    background: white; border: 2px solid #ddd;
+    border-radius: 6px; padding: 11px 14px;
+    cursor: pointer; transition: all 0.15s;
+    font-size: 13px; color: var(--ink); text-align: left;
+    font-family: inherit; line-height: 1.45;
+  }
+  .quiz-option:hover:not(:disabled) {
+    border-color: var(--gold);
+    background: var(--paper-dim);
+  }
+  .quiz-option:disabled { cursor: default; }
+  .quiz-option.correct {
+    border-color: #4A8B4A; background: #E8F5E9; color: #2E5E35; font-weight: 600;
+  }
+  .quiz-option.wrong {
+    border-color: #B85F4A; background: #FFEBEE; color: #8B2929;
+  }
+  .quiz-option.was-correct {
+    border-color: #4A8B4A; background: #E8F5E9; color: #2E5E35;
+  }
+  .quiz-feedback {
+    margin-top: 12px; padding: 11px 14px;
+    border-radius: 6px; font-size: 12.5px; line-height: 1.55;
+  }
+  .quiz-feedback.success {
+    background: #E8F5E9; color: #2E5E35; border-left: 3px solid #4A8B4A;
+  }
+  .quiz-feedback.fail {
+    background: #FFEBEE; color: #8B2929; border-left: 3px solid #B85F4A;
+  }
+  .quiz-feedback .fb-head {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    font-weight: 700; margin-bottom: 4px;
+  }
+
+  .quiz-result {
+    text-align: center; padding: 14px 0 4px;
+  }
+  .quiz-result .qr-icon {
+    font-size: 44px; margin-bottom: 8px;
+  }
+  .quiz-result h3 {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 22px; color: var(--ink); margin-bottom: 6px; letter-spacing: 0.06em;
+  }
+  .quiz-result p {
+    font-size: 13.5px; color: #4a5366; line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .quiz-result .qr-score {
+    display: inline-block;
+    background: var(--paper-dim);
+    padding: 6px 14px; border-radius: 16px;
+    font-weight: 700; font-size: 13px; letter-spacing: 0.05em;
+    margin-bottom: 14px; color: var(--ink);
+  }
+
+  /* Final summary */
+  .summary-screen {
+    background: rgba(245, 240, 232, 0.04);
+    border: 1px solid rgba(212, 168, 67, 0.3);
+    border-radius: 14px; padding: 26px 22px; margin-top: 16px;
+  }
+  .summary-screen h2 {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 24px; color: var(--gold); text-align: center;
+    letter-spacing: 0.1em; margin-bottom: 4px;
+  }
+  .summary-screen .ship-name-display {
+    text-align: center; font-style: italic;
+    color: rgba(245, 240, 232, 0.6); margin-bottom: 18px; font-size: 14px;
+  }
+  .total-score {
+    text-align: center; padding: 18px;
+    background: linear-gradient(135deg, rgba(212, 168, 67, 0.18), rgba(212, 168, 67, 0.05));
+    border-radius: 10px; margin-bottom: 18px;
+    border: 1px solid rgba(212, 168, 67, 0.4);
+  }
+  .total-score .total-label {
+    font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 4px;
+  }
+  .total-score .total-value {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 56px; color: var(--gold); line-height: 1; font-weight: 700;
+  }
+  .archetype {
+    text-align: center; padding: 14px;
+    background: rgba(212, 168, 67, 0.08);
+    border-radius: 10px; margin-bottom: 18px;
+    border: 1px dashed rgba(212, 168, 67, 0.4);
+  }
+  .archetype .arch-label {
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: rgba(245, 240, 232, 0.5); margin-bottom: 4px;
+  }
+  .archetype .arch-name {
+    font-family: 'Trajan Pro', 'Cinzel', Georgia, serif;
+    font-size: 22px; color: var(--gold-soft); letter-spacing: 0.08em; margin-bottom: 6px;
+  }
+  .archetype .arch-desc {
+    font-size: 12.5px; color: rgba(245, 240, 232, 0.7);
+    font-style: italic; line-height: 1.5;
+  }
+  .summary-screen h3 {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 16px; color: var(--gold-soft);
+    margin-bottom: 10px; margin-top: 18px;
+  }
+  .lessons-list { list-style: none; }
+  .lessons-list li {
+    background: rgba(245, 240, 232, 0.04);
+    padding: 10px 14px; margin-bottom: 8px;
+    border-radius: 6px; border-left: 3px solid var(--col);
+    font-size: 13px; color: rgba(245, 240, 232, 0.85); line-height: 1.55;
+  }
+  .lessons-list li strong {
+    color: var(--col); display: block; margin-bottom: 2px;
+    font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ══════════ SETUP ══════════ -->
+  <div id="setup" class="setup">
+    <div class="runes">ᚢ&nbsp;&nbsp;ᛁ&nbsp;&nbsp;ᚴ&nbsp;&nbsp;ᛁ&nbsp;&nbsp;ᚾ&nbsp;&nbsp;ᚴ&nbsp;&nbsp;ᚱ</div>
+    <h2>Vikingenes kulturmøter</h2>
+    <p class="lead">Dere er et vikingmannskap som skal seile ut i den kjente — og ukjente — verden. Tolv reisemål venter. Hva dere lærer, og hvem dere blir, avhenger av valgene dere tar.</p>
+
+    <div class="label-divider">Velg gruppen deres</div>
+    <div class="group-grid" id="groupGrid"></div>
+
+    <div class="label-divider">Skipets navn</div>
+    <input type="text" id="shipName" class="ship-input" placeholder="F.eks. Ormen Lange…" maxlength="30">
+
+    <button id="startBtn" class="primary-btn" disabled>Sett seil</button>
+
+    <div style="margin-top: 18px;">
+      <button id="resumeBtn" class="secondary-btn hidden">Fortsett der dere slapp</button>
+    </div>
+  </div>
+
+  <!-- ══════════ DASHBOARD ══════════ -->
+  <div id="dash" class="dash">
+    <header class="topbar">
+      <div class="group-tag">Mannskap<strong id="groupTag">–</strong></div>
+      <h1>Vikingenes kulturmøter <small>Reise i 12 stasjoner</small></h1>
+      <div class="ship-tag">Skipet<strong id="shipTag">–</strong></div>
+    </header>
+
+    <div class="stats-row">
+      <div class="stat-card understanding">
+        <div class="label">Kulturforståelse</div>
+        <div class="value" id="undScore">0</div>
+        <div class="sub">Respekt og læring</div>
+      </div>
+      <div class="stat-card trade">
+        <div class="label">Handelsutbytte</div>
+        <div class="value" id="tradeScore">0</div>
+        <div class="sub">Varer hjem til Norge</div>
+      </div>
+      <div class="stat-card reputation">
+        <div class="label">Rykte</div>
+        <div class="value" id="repScore">0</div>
+        <div class="sub">Hvordan andre folk ser dere</div>
+      </div>
+    </div>
+
+    <div class="skill-tree-wrapper">
+      <div class="skill-tree-header">
+        <div class="skill-tree-title">Ferdighetstre</div>
+        <button class="skill-tree-toggle" id="skillTreeOpen">Se ferdigheter</button>
+      </div>
+      <div class="skill-branches" id="skillBranches"></div>
+    </div>
+
+    <div class="section-title">Reisemål — 12 stasjoner</div>
+    <div class="destinations" id="destGrid"></div>
+
+    <div class="section-title">Skipsloggen</div>
+    <div id="logContent">
+      <div class="log-empty">Loggen er fortsatt blank. Hva vil dere skrive i den?</div>
+    </div>
+
+    <div style="margin-top: 14px; text-align: center;">
+      <button id="exportStatusBtn" class="secondary-btn" style="font-size: 11px; padding: 8px 16px;">📋 Eksporter status til lærer</button>
+    </div>
+
+    <div id="finalSection" class="hidden"></div>
+  </div>
+
+  <!-- ══════════ MODAL ══════════ -->
+  <div id="modal" class="modal-bg">
+    <div class="modal" id="modalBox">
+      <div class="modal-head" id="modalHead">
+        <button class="modal-close" id="modalClose">×</button>
+        <h2 id="modalTitle">—</h2>
+        <div class="modal-subtitle" id="modalSub">—</div>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+/* =============================================================================
+   GAME DATA — embedded from vikingspill_data.json (prompt 1)
+   The teacher version will read the same structure.
+   ============================================================================= */
+const GAME_DATA = 
+{"skillTree":{"språk":{"name":"Språk","icon":"🗣️","color":"#2B6B6B","tiers":[{"name":"Grunnleggende språkforståelse","desc":"Dere kan si hilsener og takk på flere språk. +1 i fredelige handelssituasjoner."},{"name":"Tolk","desc":"Dere forstår hva fremmede sier. Låser opp valg som krever forhandling."},{"name":"Polyglot","desc":"Dere snakker tre språk flytende. +2 i alle kulturmøter."}]},"sjømannskap":{"name":"Sjømannskap","icon":"⛵","color":"#1A4F7A","tiers":[{"name":"Kystnavigasjon","desc":"Dere kan seile langs kjente kyster. +1 mot uvær."},{"name":"Åpent hav","desc":"Dere våger åpne strekninger. Låser opp Færøyene, Island, Vinland."},{"name":"Stjernenavigasjon","desc":"Dere navigerer etter stjerner og solstein. +2 på lange reiser."}]},"krigskunst":{"name":"Krigskunst","icon":"⚔️","color":"#8B2929","tiers":[{"name":"Skjoldborg","desc":"Dere kan slåss i formasjon. +1 i kamp."},{"name":"Strategi","desc":"Dere ser kampens helhet. Låser opp leiesoldat-roller (f.eks. Væringgarden)."},{"name":"Berserkergang","desc":"Dere kan gå i kampraseri. +3 i kamp, men −1 kulturforståelse hver gang."}]},"diplomati":{"name":"Diplomati","icon":"🤝","color":"#5B7553","tiers":[{"name":"Gavekultur","desc":"Dere forstår norrøn gaveseremoni. +1 ved første møte med fremmede."},{"name":"Forhandling","desc":"Dere kan forhandle traktater. Låser opp avtale-valg."},{"name":"Allianse","desc":"Varig +1 i én valgt kultur, og dere kan be andre grupper om hjelp."}]},"tro":{"name":"Tro & visdom","icon":"🌳","color":"#6B3FA0","tiers":[{"name":"Runelesning","desc":"Dere kan tolke runer og varsler. +1 i åndelige situasjoner."},{"name":"Skaldekunst","desc":"Dere kan dikte og synge. Låser opp kreative valg ved hoff."},{"name":"Synkretisme","desc":"Dere kombinerer tro fra flere kulturer. Klarer både kristne og hedenske møter."}]}},"destinations":[{"id":"lindisfarne","name":"Lindisfarne","region":"Nordøst-England, 793","color":"#8B2929","difficulty":"farlig","history":"Det første store vikingangrepet vi har skriftlige kilder på. <strong>8. juni 793</strong> stiger nordmenn i land på den hellige øya og plyndrer klosteret. Dette er øyeblikket Europa lærte at vikingene fantes — året som regnes som vikingtidens begynnelse.","funFact":"Munken som først så skipene, antok det var venner med varer. Han gikk ned til stranden for å hilse — og ble drept først.","famousPerson":"<strong>Alkuin av York</strong> (735–804) — engelsk lærd ved Karl den stores hoff. Hans brev hjem etter angrepet er blant våre viktigste samtidige kilder. Han skrev: «Aldri før har en slik redsel vist seg i Britannia.»","task":{"type":"movement","icon":"⚔️","typeLabel":"Bevegelse","title":"Stormløpet","desc":"Hele gruppen stiller seg i en linje. På «GO!» løper alle samtidig så fort dere kan rundt nærmeste bygning og tilbake. Læreren bekrefter at hele gruppen utfører løpet samlet, og at dere puster tungt når dere kommer inn.","rationale":"Vikingene kom plutselig — munkene fikk ikke tid til å reagere. Dere skal kjenne det samme tempoet på kroppen som de som først så seilene komme inn fra havet."},"choices":[{"id":"plunder","title":"Plyndre klosteret — alt eller intet","desc":"Munkene er ikke krigere. Sølvet ligger åpent. Dette er hele grunnen til at dere kom.","tag":"aggressive","skillReq":null,"skillReward":{"krigskunst":1},"baseRoll":{"bad":1,"mid":2,"good":2,"crit":1},"outcomes":{"bad":{"und":-3,"trade":1,"rep":-3,"text":"En gammel munk holder fast i alterkalken og dør i et basketak. Andre vikinger ser dere som «de som drepte en hellig mann». Skipet er tungt, men forbannet."},"mid":{"und":-2,"trade":4,"rep":-3,"text":"Dere kommer hjem med kirkesølv og hellige bøker. Hjemme er dere rike — i Europa er dere fryktet."},"good":{"und":-2,"trade":6,"rep":-3,"text":"Skipet er fullt: sølv, gullkalker, edelstener fra evangeliebøker. Hver mann er rik. Halve det kristne Europa hater dere."},"crit":{"und":-2,"trade":8,"rep":-4,"text":"Dere finner det hemmelige skattkammeret. Skipet er så tungt at det knapt holder seg flytende. Karl den store sender personlig en straffeekspedisjon etter dere."}},"lesson":"Lindisfarne 793 var historisk lønnsomt på kort sikt. Men plyndringen startet 250 år med europeisk frykt — og stengte dører for vikinger som ville handle fredelig.","locks":["paris"]},{"id":"ransom","title":"Ta munker som gisler — krev løsepenger","desc":"Dere viser styrke uten å rasere. Den som vil ha munkene tilbake, må betale.","tag":"trade","skillReq":null,"skillReward":{"diplomati":1},"baseRoll":{"bad":1,"mid":2,"good":2,"crit":1},"outcomes":{"bad":{"und":-1,"trade":1,"rep":-2,"text":"Bispen i York nekter å betale — han mener munkene er nærmere Gud som martyrer. Dere drar med tomme hender."},"mid":{"und":0,"trade":3,"rep":-1,"text":"Bispen betaler i sølv. Munkene returneres uskadd. Forretning, ikke massakre."},"good":{"und":1,"trade":4,"rep":0,"text":"Hele Northumbria samler inn sølv. Dere får mer enn forventet, og en ung munk velger frivillig å bli med dere som tolk."},"crit":{"und":2,"trade":5,"rep":1,"text":"Bispen er imponert over deres mildhet og tilbyr en formell handelsavtale. Dere er invitert tilbake — som handelsmenn."}},"lesson":"Vikingene perfeksjonerte løsepenge-systemet, og det ble en hel økonomi (Danegeld). Bare i 1012 betalte England 48 000 pund sølv for å bli kvitt vikinger.","locks":[]},{"id":"spare","title":"Spar munkene — bare ta det dere trenger","desc":"Mange av dere tror på Tor og Odin, men «de kristnes hellige menn» kan likevel være mektige. Hold dere unna alteret.","tag":"respect","skillReq":null,"skillReward":{"tro":1},"baseRoll":{"bad":0,"mid":2,"good":3,"crit":1},"outcomes":{"mid":{"und":2,"trade":1,"rep":1,"text":"Dere får mat og forsyninger. Munkene gir dere til og med en latinsk bønn for trygg hjemreise."},"good":{"und":3,"trade":2,"rep":2,"text":"En av munkene gir dere et lite trekors og en bok med tegninger. Dere blir invitert tilbake. Andre vikinger ler av dere senere."},"crit":{"und":4,"trade":2,"rep":3,"text":"Munken Beda — han som senere skriver kirkehistorien — sender brev til Karl den store: «Disse nordmennene er ikke som de andre.» Dører åpnes overalt."}},"lesson":"En liten gruppe vikinger valgte faktisk dette i tidlige raid. Sagaene minnes dem ikke — historien glemte de moderate, og husket de brutale. Men kontaktene de moderate skapte, ble kanaler for handel i 200 år.","locks":[]}]},{"id":"hedeby","name":"Hedeby","region":"Sør-Danmark, ca. 850","color":"#6B4C3B","difficulty":"trygg","history":"Vikingtidens største handelsby — nesten 2000 mennesker, det største folket noen hadde sett samlet på ett sted nord for Alpene. Her møttes saksere, frisere, slavere, arabere og nordmenn i tett pakkede gater av planker.","funFact":"I Hedeby har arkeologer funnet glassperler fra Indus-dalen, mynter fra Tasjkent og silke fra Kina. Globalisering er ikke en moderne oppfinnelse.","famousPerson":"<strong>Ibrahim ibn Yaqub</strong> (900-tallet) — sefardisk jøde fra Andalusia. Hans beskrivelse av Hedeby er en av få samtidige kilder til byen, og den er ikke smigrende: han skrev at vikingene «sang som hunder hyler».","task":{"type":"creative","icon":"🎵","typeLabel":"Kreativ","title":"Bevis Ibrahim feil","desc":"Lag en kort sang eller rytme om reisen så langt — minst 15 sekunder. Hele gruppen må synge eller fremføre den sammen. Spill den inn på telefon eller fremfør den live for læreren.","rationale":"Ibrahim ibn Yaqub skrev at vikingenes sang lød som hyl. Vis ham at han tok feil — eller bekreft det. Sang og kvad var hjørnesteinen i norrøn kultur, og kvaliteten varierte sterkt."},"choices":[{"id":"merchant","title":"Etablere fast handelsstand","desc":"Leie en bod, lære frisisk, bygge nettverk. Det tar tid, men gir varig avkastning.","tag":"trade","skillReq":null,"skillReward":{"språk":1,"diplomati":1},"baseRoll":{"bad":0,"mid":2,"good":3,"crit":1},"outcomes":{"mid":{"und":2,"trade":3,"rep":1,"text":"Dere lærer nok frisisk til å forhandle. Etter en sesong kjenner dere folk fra seks ulike kulturer ved navn."},"good":{"und":3,"trade":4,"rep":2,"text":"Boden går så godt at en saksisk kjøpmann tilbyr dere kompaniskap. Dere blir kjent med Ibrahim ibn Yaqub personlig."},"crit":{"und":4,"trade":6,"rep":3,"text":"Dere blir et navn i Hedeby. Når dere reiser videre, har dere brev fra tre kjøpmenn som åpner dører i hele Europa."}},"lesson":"Hedeby var stedet hvor norrøne ble kosmopolitter. Vikingene som lærte språk og skikker her, var de samme som senere bygget Norge til en europeisk maktstat under Olavene.","locks":[]},{"id":"glass","title":"Investere alt i glassperler","desc":"Glassperler fra Bagdad selges for tre ganger prisen i Norge. Men en hel last er en risikabel investering.","tag":"trade","skillReq":null,"skillReward":{"sjømannskap":1},"baseRoll":{"bad":2,"mid":1,"good":2,"crit":1},"outcomes":{"bad":{"und":0,"trade":-2,"rep":0,"text":"Storm på Skagerrak. Halve lasten knuses. Dere kommer hjem med skuffelse og en lekkasje."},"mid":{"und":0,"trade":2,"rep":0,"text":"Lasten kommer hjem hel. Markedet hjemme er mettet — dere måtte selge for halv pris."},"good":{"und":1,"trade":5,"rep":0,"text":"Riktig sesong. En høvding gir dere dobbelt pris for et sett til datteren sin."},"crit":{"und":1,"trade":7,"rep":0,"text":"Dere selger til kongens hoff. Hele bygda snakker om perlene de neste ti årene."}},"lesson":"Hedeby-handelsmenn lærte tidlig å aldri legge hele formuen i én vare. Det moderne uttrykket «ikke legg alle eggene i én kurv» har røtter helt tilbake hit.","locks":[]},{"id":"spy","title":"Spionere på sakserne","desc":"Hedeby ligger på saksisk grense. Få oversikt over kongens troppestyrke. Informasjon kan være verdt mer enn varer.","tag":"aggressive","skillReq":{"språk":1},"skillReward":{"krigskunst":1,"diplomati":1},"baseRoll":{"bad":2,"mid":2,"good":1,"crit":0},"outcomes":{"bad":{"und":-2,"trade":0,"rep":-2,"text":"Dere blir oppdaget. En av dere må flykte i hast. Hedeby er stengt for dere et tiår fremover."},"mid":{"und":0,"trade":1,"rep":-1,"text":"Dere får noe info. En kjøpmann kjenner dere igjen, men sier ingenting — i dag."},"good":{"und":1,"trade":2,"rep":0,"text":"Verdifull info. Kongen i Norge betaler dere godt for kart over saksiske festninger."}},"lesson":"Hedeby var et nullpunkt for spionasje. Knytlinge-saga forteller om vikinger som «forsvant» her etter å ha gjort feil ærend. Tillit i en handelsby er fragil.","locks":[]}]},{"id":"dublin","name":"Dublin","region":"Irland, fra 841","color":"#5B7553","difficulty":"middels","history":"Vikingene grunnla Dublin (Dyflinn) i 841 som handelshavn. I 200 år styrte norrøne konger her. De handlet keltiske slaver — men giftet seg også inn i irske kongefamilier, lærte gælisk, og ble kristne.","funFact":"Halve den irske befolkningen i dag har norrønt DNA i en eller annen form. Etternavn som McLoughlin, Doyle og Higgins kommer fra norrøne navn.","famousPerson":"<strong>Aud den Djuptenkte</strong> (800-tallet) — først dronning av Dublin, så en av Islands grunnleggere. Etter mannens død førte hun en hel flåte vestover med 20 frigitte slaver, og er en av få kvinner som er hovedperson i en saga (Laxdœla saga).","task":{"type":"photo","icon":"🪢","typeLabel":"Foto","title":"Den keltiske knuten","desc":"Keltisk kunst er kjent for sammenflettede mønstre — uten begynnelse og slutt, som livets sammenheng. Finn et sted på skolen hvor noe veves eller flettes inn i hverandre (gjerder, ledninger, hekker, mønster i gulv eller veggdekor). Ta ett bilde som viser dette.","rationale":"Vikingene som ble i Irland, lærte å lage keltiske flettemønstre i sølv og tre. Stilarten ble blandet — irsk-norrøn kunst er en hel egen tradisjon, og dere skal trene øyet til å se den."},"choices":[{"id":"slave","title":"Drive slavehandel","desc":"Keltiske slaver er den mest lønnsomme «varen» i kjent verden. Volgaruten venter, og araberne betaler i sølv.","tag":"aggressive","skillReq":{"krigskunst":1},"skillReward":{"krigskunst":1},"baseRoll":{"bad":1,"mid":2,"good":2,"crit":1},"outcomes":{"bad":{"und":-3,"trade":0,"rep":-3,"text":"Et opprør på skipet. Tre av slavene rømmer, og en irsk konge sender hærmenn etter dere. Dere reddes så vidt."},"mid":{"und":-3,"trade":4,"rep":-3,"text":"Skipet kommer hjem fullt av sølv. Halve det kristne Europa stenger dørene for dere."},"good":{"und":-3,"trade":6,"rep":-4,"text":"Dere selger lasten i Bagdad for en fyrstelig sum. Men ryktet sprer seg: «Det skipet lever av menneskeskjebner.»"},"crit":{"und":-3,"trade":9,"rep":-5,"text":"En av slavene er datter av en irsk konge. Han betaler dere det doble for å få henne tilbake. Dere er rike. Dere er foraktet."}},"lesson":"Vikingenes slavehandel var enorm. Tusenvis av irer, samer og slavere ble solgt. Selve ordet «slave» kommer fra «slaver», fordi så mange slaviske folk endte i fangenskap. Dette er et av historiens mørkeste kapitler.","locks":["miklagard"]},{"id":"marriage","title":"Gifte dere inn i irsk slekt","desc":"En av dere gifter seg med en lokal konges datter. Dere blir delvis irske, lærer gælisk, blir gradvis kristne.","tag":"respect","skillReq":{"diplomati":1},"skillReward":{"språk":1,"diplomati":1,"tro":1},"baseRoll":{"bad":0,"mid":1,"good":3,"crit":2},"outcomes":{"mid":{"und":3,"trade":1,"rep":1,"text":"Dere blir del av en lokal slekt. Barna deres vokser opp tospråklige."},"good":{"und":4,"trade":2,"rep":2,"text":"Dere blir slekt med Uí Néill-dynastiet. Aud den Djuptenkte sender bud — hun trenger menn til å bosette Island."},"crit":{"und":5,"trade":3,"rep":3,"text":"Den irske kongen utnevner en av dere til hans personlige diplomat. Dere er nå rikets mektigste utlendinger."}},"lesson":"Slik ble Dublin blandet. Halve det moderne Irlands gener har norrønt blod, og halve Norges har keltisk. «Vikingtiden» var også Europas største kulturblanding.","locks":[]},{"id":"kingdom","title":"Bygge eget norrønt rike","desc":"Bli del av Dublin-styringsklassen. Krev tributt fra omkringliggende stammer. Vær både norrøn og hersker.","tag":"aggressive","skillReq":{"krigskunst":1,"diplomati":1},"skillReward":{"krigskunst":1,"diplomati":1},"baseRoll":{"bad":1,"mid":2,"good":2,"crit":1},"outcomes":{"bad":{"und":-1,"trade":1,"rep":-1,"text":"Dere kommer i konflikt med en eldre norrøn klan i byen. Dere må flykte til Hebridene."},"mid":{"und":1,"trade":3,"rep":1,"text":"Dere får plass i kongeshallen. I 902 blir vikingene drevet ut av Dublin — men dere har hatt 20 gode år."},"good":{"und":2,"trade":5,"rep":2,"text":"Dere bygger en festning og styrer halve omegnen. Sønnen deres blir konge etter dere."},"crit":{"und":2,"trade":7,"rep":3,"text":"Dere blir Dublin-konger. Sagaen om dere skrives flere hundre år senere på Island."}},"lesson":"Norrøn maktposisjon i Dublin varte i 60 år, så ble vikingene jaget ut. Maktposisjoner er midlertidige; slektsbånd og handel varer lengre.","locks":[]}]},{"id":"paris","name":"Paris","region":"Frankrike, 845 og 885–86","color":"#A0522D","difficulty":"farlig","history":"I 845 seilte vikinghøvdingen Ragnar opp Seinen med 120 skip og fikk 7000 pund sølv av Karl den skallede. I 885–86 kom 30 000 vikinger tilbake. Beleiringen varte ett år.","funFact":"Greven av Paris, Odo, ble så berømt for å holde stand mot vikingene at han senere ble valgt til konge av Frankrike. Vikinger laget ham, indirekte, til kongelig.","famousPerson":"<strong>Rollo (Gange-Rolv)</strong> (ca. 860–930) — norrøn høvding så stor at ingen hest kunne bære ham. Etter mange års plyndring fikk han Normandie i 911 mot å konvertere og forsvare Frankrike. Hans tipp-tipp-oldebarn var Vilhelm Erobreren.","task":{"type":"creative","icon":"🏰","typeLabel":"Kreativ","title":"Beleiringsmaskinen","desc":"Bygg en miniatyr-beleiringsmaskin (katapult, ramme, bro) av det dere finner rundt dere — penner, papir, viskelær, sekker, hva som helst. Den må være fysisk fritt-stående og minst 15 cm høy. Ta bilde og vis læreren.","rationale":"Vikingene måtte improvisere maskiner under Paris-beleiringen — de hadde ikke med seg slikt fra hjemlandet. Dere skal kjenne på problemet: hvordan bygger man noe stort av hva som helst?"},"choices":[{"id":"tribute","title":"Ta sølvet og dra hjem","desc":"Karl den skallede tilbyr 7000 pund sølv hvis dere drar. Dette er en hel formue. Klassisk Danegeld.","tag":"trade","skillReq":null,"skillReward":{},"baseRoll":{"bad":0,"mid":1,"good":3,"crit":2},"outcomes":{"mid":{"und":0,"trade":5,"rep":0,"text":"Dere kommer hjem rikere enn noen andre nordmenn. Karl sender bud neste år: kom igjen for samme pris."},"good":{"und":0,"trade":7,"rep":1,"text":"Sølvet er av høyeste kvalitet. Hjemme blir dere lokale legender."},"crit":{"und":1,"trade":9,"rep":1,"text":"Karl er så lettet at han legger til et skip fullt av vin. Dere kommer hjem som halvguder."}},"lesson":"Danegeld virket på kort sikt, men franskmennene måtte betale igjen og igjen. Til slutt ble det billigere å GI vikingene land — og det er slik Normandie ble til.","locks":[]},{"id":"normandy","title":"Forhandle om land — bli normannere","desc":"I stedet for sølv: krev land permanent. Gå med på å konvertere til kristendommen og forsvare Paris mot fremtidige vikinger.","tag":"respect","skillReq":{"diplomati":2},"skillReward":{"diplomati":1,"tro":1,"språk":1},"baseRoll":{"bad":0,"mid":1,"good":2,"crit":2},"outcomes":{"mid":{"und":3,"trade":4,"rep":2,"text":"Dere får land langs Seinen. Innen 50 år snakker barna deres fransk."},"good":{"und":5,"trade":5,"rep":3,"text":"Dere blir normannere. På fire generasjoner går dere fra hedenske krigere til franske riddere."},"crit":{"und":6,"trade":6,"rep":4,"text":"En av deres etterkommere — om to hundre år — heter Vilhelm. Han skal erobre England."}},"lesson":"Rollos avtale er en av historiens mest dramatiske kulturelle endringer. Identitet er ikke fast — den forhandles. Fra «hedenske barbarer» til «kristne aristokrater» på fire generasjoner.","locks":[]},{"id":"siege","title":"Beleire byen — knus dem helt","desc":"Ingen pakt. Ingen sølv. Dere viser hvem som virkelig styrer. Ett år utenfor Paris.","tag":"aggressive","skillReq":{"krigskunst":2},"skillReward":{"krigskunst":2},"baseRoll":{"bad":3,"mid":1,"good":1,"crit":1},"outcomes":{"bad":{"und":-3,"trade":0,"rep":-2,"text":"Etter åtte måneder bryter dysenteri ut. Dere mister tre menn for hver én franskmann. Dere drar hjem med få varer."},"mid":{"und":-2,"trade":2,"rep":-1,"text":"Dere lykkes ikke å ta byen. Odo blir lokal helt. Dere får noen forsteder."},"good":{"und":-1,"trade":5,"rep":0,"text":"Dere bryter en mur og plyndrer ett kvarter før Odos forsterkninger ankommer."},"crit":{"und":0,"trade":8,"rep":1,"text":"Dere bryter inn én natt og slipper unna med bispens skattkammer før noen våkner."}},"lesson":"Beleiringen i 885–86 endte historisk dårlig for vikingene. Krig vant ikke alltid. De som vant LANGSIKTIG, var de som forhandlet, ikke de som beleiret.","locks":[]}]},{"id":"hebrides","name":"Hebridene","region":"Vest-Skottland, 800-tallet","color":"#1A4F7A","difficulty":"middels","history":"Norrøne vikinger erobret de skotske øyene tidlig. I 200 år tilhørte Hebridene Norge. Folk her snakket en blanding av gælisk og norrønt. Stedsnavnene avslører det fortsatt: Stornoway, Lewis, Skye.","funFact":"Lewis-sjakkbrikkene, funnet på Hebridene i 1831, ble laget av hvalrosstann i Trondheim ca. 1150. Sjakk var allerede en internasjonal sport, og brikkene reiste sjøveien.","famousPerson":"<strong>Somerled</strong> (død 1164) — gælisk-norrøn herskerskikkelse fra 1100-tallet. Hans etterkommere ble herskere over øyene i 400 år, og dagens Clan Donald hevder slektskap.","task":{"type":"movement","icon":"⚖️","typeLabel":"Bevegelse","title":"Sjakkbrikkenes balanse","desc":"Lewis-sjakkbrikkene er kjent for sine intense ansiktsuttrykk og perfekt balanse. Hele gruppen står på ett ben SAMTIDIG i 30 sekunder. Mister noen balansen før tiden er ute, må dere starte på nytt — maks tre forsøk. Læreren teller.","rationale":"Sjakk handler om presisjon under press. Brikkene står på ett punkt — perfekt balansert. Kan dere det samme?"},"choices":[{"id":"hybrid","title":"Slå dere ned som Gall-Gàidheal","desc":"Et roligere liv. Lær gælisk. Bli del av en blandet kultur. «Gall-Gàidheal» betyr «de utenlandske gæliske».","tag":"respect","skillReq":null,"skillReward":{"språk":1,"sjømannskap":1},"baseRoll":{"bad":0,"mid":1,"good":3,"crit":2},"outcomes":{"mid":{"und":3,"trade":2,"rep":1,"text":"Dere blir en del av en blandet kultur. Barna deres synger gæliske sanger på norrønt vis."},"good":{"und":4,"trade":3,"rep":2,"text":"Dere blir respekterte fiskere. En av dere lærer å lage Lewis-sjakkbrikker av hvalrosstann."},"crit":{"und":5,"trade":4,"rep":3,"text":"Sønnen deres blir Somerled — en av Skottlands største herskere."}},"lesson":"På Hebridene oppstod en helt egen «hybridkultur» som varte i over 400 år. To folkegrupper smeltet sammen mer fullstendig her enn nesten noe annet sted i Europa.","locks":[]},{"id":"pirates","title":"Bli sjørøvere — kontroller havet","desc":"Fra Hebridene kan dere true alle skip mellom Irland og Norge. Lett å plyndre, vanskelig å fange.","tag":"aggressive","skillReq":{"sjømannskap":1},"skillReward":{"sjømannskap":2,"krigskunst":1},"baseRoll":{"bad":1,"mid":2,"good":2,"crit":1},"outcomes":{"bad":{"und":-2,"trade":1,"rep":-2,"text":"En storm tar to skip. Dere får navnet «de uheldige» blant andre vikinger."},"mid":{"und":-1,"trade":4,"rep":-2,"text":"Dere lever som sjørøvere ti år. Skipsledene flyttes for å unngå dere."},"good":{"und":-1,"trade":6,"rep":-2,"text":"Dere blir velstående. Kongen i Norge får brev fra biskoper som ber ham «kontrollere mennene sine»."}},"lesson":"Hebrid-vikinger var beryktet for sjørøveri. Det skapte handelsproblemer for HELE Norge — og er en grunn til at Magnus Berrføtt i 1098 måtte seile vest for å rydde opp i sine egne menn.","locks":[]},{"id":"iona","title":"Beskytte Iona-klosteret","desc":"Iona er plyndret tre ganger av andre vikinger. Tilby beskyttelse mot betaling. Munkene gir dere mat, vin — og kunnskap.","tag":"respect","skillReq":{"krigskunst":1},"skillReward":{"tro":2,"diplomati":1},"baseRoll":{"bad":0,"mid":2,"good":2,"crit":1},"outcomes":{"mid":{"und":3,"trade":2,"rep":2,"text":"Munkene gir dere mat og latinske bøker. To av dere lærer å lese."},"good":{"und":4,"trade":3,"rep":3,"text":"En munk lærer dere astronomi. Dere kan nå navigere bedre enn noen annen vikingflåte."},"crit":{"und":5,"trade":3,"rep":4,"text":"Iona blir deres faste base. Munkene skriver om dere — vennlig — i sine krøniker."}},"lesson":"Mange vikinger ble kristne i Skottland og Irland gradvis, ikke ved tvang. Munkene var lærde og ofte de eneste som kunne lese — kontakten endret vikingene mer enn omvendt.","locks":[]}]},{"id":"sameland","name":"Sameland","region":"Hålogaland og nordover, 800–900-tallet","color":"#5B7553","difficulty":"middels","history":"Hovdingen <strong>Ottar fra Hålogaland</strong> (ca. 890) beskrev forholdet til samene som gjensidig og respektfullt. Samene leverte pelsverk, reinskinn og hvalrosstann. Vikingene ga jern, korn og sølv. Samiske <strong>noaider</strong> (sjamaner) ble ansett som mektigere enn norrøne seidmenn.","funFact":"Kong Harald Hårfagre giftet seg med <strong>Snøfrid</strong>, datter av samisk høvding Svåse. Han skal ha vært så forelsket at han forsømte rikets styre i tre år etter at hun døde — for hun lå tilsynelatende uforandret i kista.","famousPerson":"<strong>Ottar fra Hålogaland</strong> (800-tallet) — hovding og handelsmann fra Nord-Norge. Han reiste til kong Alfred den stores hoff i England, og hans beretning ble skrevet ned. Den er det eldste norske dokumentet vi kjenner.","task":{"type":"creative","icon":"🥁","typeLabel":"Kreativ","title":"Joikens kraft","desc":"Samiske noaider brukte runebommer (govadas) til å gå inn i transe. Lag en rytme på et bord eller en bok ved å banke med fingrene. Den må vare i minst 30 sekunder og ha en gjenkjennelig puls. Hele gruppen må delta — én banker, andre nynner. Spill inn eller fremfør for læreren.","rationale":"Joik og runebommetrommer er bærere av kunnskap som ikke kan skrives ned. Vikingene som kunne respektere dette, fikk tilgang til samisk visdom; de andre fikk den ikke."},"choices":[{"id":"reciprocity","title":"Bytt rettferdig — vare for vare","desc":"Tilby jern og korn for pelsverk og reinskinn. Like mye begge veier. Samene godtar ikke ujevn handel.","tag":"respect","skillReq":null,"skillReward":{"diplomati":1,"tro":1},"baseRoll":{"bad":0,"mid":2,"good":3,"crit":1},"outcomes":{"mid":{"und":3,"trade":2,"rep":1,"text":"Samene godtar handelen. Dere får varme klær som kan redde dere på vinteren."},"good":{"und":4,"trade":3,"rep":2,"text":"Noaiden velsigner reisen og lærer dere stjernetegn dere ikke kjente."},"crit":{"und":5,"trade":4,"rep":3,"text":"Dere får et sjeldent runebommekart over vinterveier som har vært hemmelige i generasjoner."}},"lesson":"Vikingene lærte arktisk overlevelse av samene. Skip seilte tryggere langs Norskekysten på grunn av kunnskap som kom UTENFRA, fra et folk de regnet som «fremmede».","locks":[]},{"id":"marriage","title":"Gift dere inn i samisk slekt","desc":"En av dere gifter seg inn i en samisk familie. Permanent allianse, men dere mister ett gruppemedlem hjem.","tag":"respect","skillReq":{"diplomati":1},"skillReward":{"tro":2,"diplomati":1},"baseRoll":{"bad":0,"mid":1,"good":3,"crit":2},"outcomes":{"mid":{"und":4,"trade":1,"rep":2,"text":"Dere blir slekt. Permanent fred langs hele kysten."},"good":{"und":5,"trade":2,"rep":3,"text":"Slektsbånd som har vart i generasjoner. Etterkommere finnes fortsatt i dag."},"crit":{"und":6,"trade":3,"rep":4,"text":"Datteren av høvdingen er sterk i seid. Hun kan se fremtiden — og hun spår at en av deres etterkommere skal bli konge."}},"lesson":"Slektsbånd var den sterkeste «traktaten» i vikingtiden. Harald Hårfagre giftet seg med samisk kvinne — kongelig blod ble blandet helt på toppen av samfunnet.","locks":[]},{"id":"finnskatt","title":"Krev finnskatt","desc":"Bruk vikingmakten. Krev tributt fra samene uten å gi noe tilbake. Historisk vanlig.","tag":"aggressive","skillReq":{"krigskunst":1},"skillReward":{},"baseRoll":{"bad":2,"mid":2,"good":1,"crit":0},"outcomes":{"bad":{"und":-3,"trade":1,"rep":-2,"text":"Noaiden forbanner reisen. Halve gruppen blir syk. Ingen samer vil handle med dere igjen — i hundre år."},"mid":{"und":-3,"trade":3,"rep":-1,"text":"Dere får varene. Forholdet er for alltid ødelagt."},"good":{"und":-3,"trade":5,"rep":0,"text":"Dere får mer enn vanlig. En samisk kvinne sier ingenting, men husker."}},"lesson":"Finnskatten var historisk reell og ødela det gode forholdet. Det vi i dag kaller fornorskning, begynte allerede i vikingtiden — og det måtte Norge gjøre opp for så sent som i 2023, da Sannhets- og forsoningskommisjonen leverte sin rapport.","locks":[]}]},{"id":"faroyene","name":"Færøyene","region":"Nord-Atlanteren, ca. 825","color":"#3A6A8A","difficulty":"farlig","history":"De første nordmennene som kom til Færøyene fant irske munker som hadde levd der i isolasjon i 100 år. Munkene flyktet — vikingene tok over. Snart var Færøyene springbrettet mot Island. Storm, klippekyst og åpent hav.","funFact":"Færøyenes befolkning er en av Europas mest «innavlede» folkegrupper — nesten alle moderne færøyinger stammer fra noen hundre vikinger som kom rundt år 825. DNA-tester viser også betydelig keltisk innslag fra slavekvinner brakt fra Irland.","famousPerson":"<strong>Grim Kamban</strong> — kjent som den første norrøne bosetteren på Færøyene. Etternavnet «Kamban» antas å være gælisk, ikke norrønt. Han var sannsynligvis en blandingsperson, ikke en «ren» viking.","task":{"type":"movement","icon":"🌊","typeLabel":"Bevegelse","title":"Stormen","desc":"Færøyske farvann er beryktede — bølger på 12 meter, vind så hard at man knapt står oppreist. Hele gruppen står tett sammen i en sirkel, holder hverandre i armene, og «vugger» som et skip i 60 sekunder uten å miste taket eller falle. Læreren teller.","rationale":"Vikingene måtte stå sammen for å overleve åpent hav. Lasten skiftet, mannskapet kastet opp, og kun samhold holdt skipet på rett kjøl."},"choices":[{"id":"settle","title":"Bosette dere — bli færøyinger","desc":"Bygg gard, hold sauer, lag tørrkjøtt. Et hardt liv, men et eget land.","tag":"respect","skillReq":{"sjømannskap":1},"skillReward":{"sjømannskap":1},"baseRoll":{"bad":1,"mid":2,"good":2,"crit":1},"outcomes":{"bad":{"und":0,"trade":0,"rep":0,"text":"Den første vinteren tar tre menn. Dere klarer dere så vidt."},"mid":{"und":2,"trade":1,"rep":1,"text":"Dere bygger gard. Etter fem år har dere 50 sauer og en gravplass."},"good":{"und":3,"trade":2,"rep":1,"text":"Dere blir småhøvdinger over en bygd. Kongen i Norge anerkjenner dere."},"crit":{"und":4,"trade":3,"rep":2,"text":"Dere blir blant Færøyenes opprinnelige slekter. Færøyske sagaer nevner dere."}},"lesson":"Færøyene viser hvor langt vikingene kunne dra og fortsatt skape stabile samfunn. Det krevde tilpasning til steder de aldri hadde sett før.","locks":[]},{"id":"monks","title":"Snakk med de irske munkene før de flykter","desc":"Munkene har bodd her i 100 år. De vet hvor sauene gresser, hvor stormen kommer fra, hvor kildene ligger.","tag":"respect","skillReq":{"språk":1},"skillReward":{"språk":1,"tro":1,"sjømannskap":1},"baseRoll":{"bad":0,"mid":1,"good":3,"crit":2},"outcomes":{"mid":{"und":3,"trade":1,"rep":1,"text":"Munkene viser dere de beste beitene før de seiler vekk. Dere overlever første vinter med god margin."},"good":{"und":4,"trade":2,"rep":2,"text":"En munk velger å bli. Han lærer dere astronomi og latinsk grammatikk."},"crit":{"und":5,"trade":2,"rep":3,"text":"Dere finner munkenes hemmelige bibliotek av bøker reddet fra Irland. Det blir grunnlaget for færøysk skriftkultur."}},"lesson":"Vikingene «oppdaget» sjelden noe helt nytt — det var ofte allerede mennesker der. Færøyene var bebodd av irske munker. Island også. Hvordan man behandler dem som var der først, definerer ofte hvordan resten av kolonien går.","locks":[]},{"id":"springboard","title":"Bruk Færøyene som springbrett mot Island","desc":"Ikke bli her. Hvil mannskapet, bytt til ferskvann, og dra videre. Vest venter noe enda større.","tag":"trade","skillReq":{"sjømannskap":2},"skillReward":{"sjømannskap":2},"baseRoll":{"bad":2,"mid":2,"good":1,"crit":1},"outcomes":{"bad":{"und":0,"trade":0,"rep":0,"text":"Dere drar for tidlig. Storm slår dere tilbake. To skip går tapt."},"mid":{"und":1,"trade":1,"rep":0,"text":"Dere kommer fram til Island, slitne men i live."},"good":{"und":2,"trade":2,"rep":1,"text":"Rask seilas. Dere er tidlig på Island og kan velge de beste landstrekningene."},"crit":{"und":3,"trade":3,"rep":2,"text":"Dere setter en ny rekord for kryssing Færøyene–Island. Sagaer skrives om dere."}},"lesson":"Mange viking-ekspedisjoner var bygget på «leg-by-leg». Få seilte rett fra Norge til Island. Hvert skritt vestover var et eget kulturmøte.","locks":[]}]},{"id":"island","name":"Island","region":"Þingvellir, 930","color":"#7A8B5B","difficulty":"middels","history":"I 930 møttes islandske bønder for første gang på <strong>Þingvellir</strong> for å danne <strong>Alltinget</strong> — verdens eldste fortsatt fungerende parlament. Det var et samfunn uten konge, der lover ble sagt høyt av en «lovsigemann» som måtte huske dem utenat.","funFact":"Snorre Sturlason skrev sagaene på Island på 1200-tallet. Halve det vi vet om norrøn mytologi (Tor, Odin, Loke, Ragnarok) finnes kun fordi en islandsk høvding tok seg tid til å skrive det ned 200 år etter at folk sluttet å tro på det.","famousPerson":"<strong>Þorgeirr Ljósvetningagoði</strong> — lovsigemann som i år 1000 måtte avgjøre om Island skulle bli kristent eller forbli hedensk. Han la seg under en kappe i ett døgn og kom ut med kompromisset: alle skulle døpes, men hedendom kunne fortsatt praktiseres privat.","task":{"type":"creative","icon":"⚖️","typeLabel":"Kreativ","title":"Lovtalen","desc":"Hele gruppen samles i en sirkel. Én person står i midten og holder en 30-sekunders «lovtale» om en NY regel som burde gjelde i klasserommet eller på skolen. Talen må gi minst tre grunner. Gruppen stemmer ja eller nei. Spill inn talen og avstemningen.","rationale":"På Þingvellir måtte folk argumentere muntlig — det fantes ikke skrift for slikt. Lovsigemannen måtte huske alt utenat. Demokrati var en muntlig kunst."},"choices":[{"id":"lawspeaker","title":"Bli lovsigemann","desc":"En av dere stiller som lovsigemann. Dere må huske 130 lover utenat. Gir prestisje, men ingen lønn.","tag":"respect","skillReq":{"tro":1},"skillReward":{"tro":2,"diplomati":1},"baseRoll":{"bad":1,"mid":2,"good":2,"crit":1},"outcomes":{"bad":{"und":1,"trade":0,"rep":0,"text":"Dere glemmer en lov i et viktig spørsmål. Det blir blodfeide."},"mid":{"und":3,"trade":1,"rep":2,"text":"Dere blir respektert. Folk kommer til dere for tvister."},"good":{"und":4,"trade":1,"rep":3,"text":"Dere blir nevnt i Landnámabók — boken over Islands grunnleggere."},"crit":{"und":5,"trade":2,"rep":4,"text":"Dere er Þorgeirr Ljósvetningagoði. Året er 1000. Dere får oppgaven å avgjøre om Island blir kristent."}},"lesson":"Island skapte verdens første parlament. Det fungerte fordi folk respekterte muntlige lover og en felles dommer. Da ingen sentralmakt finnes, må kulturen selv bære lovverket.","locks":[]},{"id":"feud","title":"Hevn for blodsskyld","desc":"En slektning er drept av en nabo. Etter norrøn ære må dere hevne — eller miste hele familiens posisjon.","tag":"aggressive","skillReq":{"krigskunst":1},"skillReward":{"krigskunst":1},"baseRoll":{"bad":2,"mid":1,"good":2,"crit":1},"outcomes":{"bad":{"und":-2,"trade":-1,"rep":-1,"text":"Dere blir overfalt på vei tilbake. Hevnen koster mer enn den ga."},"mid":{"und":-1,"trade":0,"rep":0,"text":"Æren er gjenopprettet. Men nå venter naboens slekt på sin tur."},"good":{"und":0,"trade":1,"rep":1,"text":"Dere vinner. Saken bringes for Alltinget; dere blir frikjent fordi gjengjeldelsen var rettferdig."},"crit":{"und":1,"trade":2,"rep":2,"text":"Dere blir helter. En saga skrives om dere — kanskje til og med Njålssaga."}},"lesson":"Blodfeider holdt det islandske samfunnet i sjakk i 200 år før det kollapset i borgerkrig. Æreskultur kunne være en lov i seg selv — men også samfunnets svøpe.","locks":[]},{"id":"saga","title":"Bli skald — diktekunst og fortellinger","desc":"I stedet for våpen, bli mester av ord. Diktene dine vil overleve deg i hundre år.","tag":"respect","skillReq":{"tro":1},"skillReward":{"tro":2,"språk":1},"baseRoll":{"bad":0,"mid":1,"good":3,"crit":2},"outcomes":{"mid":{"und":3,"trade":1,"rep":2,"text":"Dere reiser mellom høvdinger og synger om dem. De gir dere sølv."},"good":{"und":4,"trade":2,"rep":3,"text":"Et av deres dikt blir sitert i Snorres Edda 200 år senere."},"crit":{"und":5,"trade":2,"rep":4,"text":"Dere er Egil Skallagrimsson — viking, drapsmann, og Islands største dikter. Kongen lar dere leve fordi versene deres er for vakre til å miste."}},"lesson":"Islendingene reddet norrøn mytologi for ettertiden. Hadde de ikke skrevet ned sagaene på 1200-tallet, ville Tor, Odin og Ragnarok vært glemt. Kunst er ofte historiens viktigste redningsplanke.","locks":[]}]},{"id":"vinland","name":"Vinland","region":"Nord-Amerika, ca. 1021","color":"#A0522D","difficulty":"farlig","history":"<strong>Leif Eriksson</strong> seiler fra Grønland og finner et land med vindruer, laks og enorme skoger. Vikingene møter urfolk de kaller <strong>skrælinger</strong>. Første handel går bra — rødt stoff og melk mot pelsverk. Men kulturelle misforståelser eskalerer til vold. Bosetningen forlates etter få år.","funFact":"I 2021 publiserte forskere en eksakt datering: vikingene var i Nord-Amerika i året <strong>1021</strong>. Daterningen ble gjort ved å analysere et solstormsignal i tre fra L'Anse aux Meadows. Det er det eldste eksakt daterte europeiske besøket i Amerika — 471 år før Columbus.","famousPerson":"<strong>Gudrid Torbjørnsdotter</strong> (ca. 980–1050) — kvinnen som har reist mest i Europa. Hun var født på Island, levde på Grønland, dro til Vinland og fødte sønnen Snorre der (det første europeiske barnet født i Amerika), og pilgrimerte senere til Roma. Hun er nevnt i to sagaer.","task":{"type":"creative","icon":"🤲","typeLabel":"Kreativ","title":"Uten ord","desc":"Velg én viking-relatert handling: «vi ønsker å handle pelsverk», «vi vil ikke skade dere», eller «vi vil ha vann». Hele gruppen, kun med kroppsspråk og lyder (ingen norske ord), skal forklare denne for læreren. Læreren må gjette riktig.","rationale":"Skrælingene og vikingene hadde ingen felles språk. Misforståelser ble dødelige. Dere skal kjenne på hvor vanskelig det er å bli forstått uten ord."},"choices":[{"id":"patient","title":"Vis tålmodighet — bygg tillit sakte","desc":"Ta tiden det trenger. Smårøtte. Lær noen tegn. La urfolket lede tempoet.","tag":"respect","skillReq":{"diplomati":1},"skillReward":{"språk":1,"diplomati":1},"baseRoll":{"bad":1,"mid":2,"good":2,"crit":1},"outcomes":{"bad":{"und":1,"trade":0,"rep":0,"text":"En misforståelse: noen drikker melk og blir syke (de tåler ikke laktose). Dere drar uten skade, men også uten avtale."},"mid":{"und":3,"trade":1,"rep":1,"text":"Etter mange møter får dere eksotisk pels og lærer å overleve på fisk og bær."},"good":{"und":4,"trade":2,"rep":2,"text":"Dere finner et felles tegn for «handel». Avtalen blir varig."},"crit":{"und":5,"trade":3,"rep":3,"text":"En av dere — Gudrid? — får barn med en lokal og lærer hele språket. Sagaen om dere skrives 200 år senere."}},"lesson":"Vikingene som ble lengst i Vinland (på L'Anse aux Meadows) overlevde nettopp fordi de tok tid til å forstå urfolket. Det fikk de aldri ærefulle saga-omtaler for, men arkeologien viser det.","locks":[]},{"id":"force","title":"Få fortgang — vis at dere er sterkere","desc":"Krev raskt bytte. Hvis de ikke gir, ta. Vikingmakten har virket andre steder.","tag":"aggressive","skillReq":{"krigskunst":2},"skillReward":{},"baseRoll":{"bad":3,"mid":1,"good":1,"crit":0},"outcomes":{"bad":{"und":-3,"trade":0,"rep":-2,"text":"Skrælingene er mange flere enn dere trodde. Thorvald Eriksson dør av en pil. Dere må flykte i hast."},"mid":{"und":-2,"trade":2,"rep":-1,"text":"Dere får varer i én runde. Neste gang er urfolket borte. Eller verre — de venter på dere."},"good":{"und":-1,"trade":3,"rep":0,"text":"Dere lykkes med ett raid. Men vesten er stengt for dere."}},"lesson":"Vikingenes våpenmakt fungerte ikke i Amerika. Skrælingene var mange flere, og kjente landet. Mot kunne ikke erstatte forståelse. Manglende kulturforståelse kostet vikingene en hel verdensdel — Nord-Amerika var stengt for europeere i nesten 500 år etter dette.","locks":[]},{"id":"flee","title":"Flykt hjem — kall det en suksess uansett","desc":"Det er for fjernt, for fremmed. Ta noen prøver av tre og bær med hjem som «bevis», og dra.","tag":"trade","skillReq":{"sjømannskap":2},"skillReward":{"sjømannskap":1},"baseRoll":{"bad":0,"mid":3,"good":1,"crit":0},"outcomes":{"mid":{"und":1,"trade":2,"rep":0,"text":"Dere kommer hjem med tømmer og historier. Få tror på dere helt. Men sagaen begynner."},"good":{"und":2,"trade":3,"rep":1,"text":"Dere klarer å selge tømmeret som «hellig». Pris-økning, prestisje."}},"lesson":"Vinland-bosetningene varte kun noen få år. Det er kanskje en lærdom i seg selv — av og til er retrett klokere enn utholdenhet, særlig når man ikke kan forstå dem man møter.","locks":[]}]},{"id":"novgorod","name":"Novgorod","region":"Russland (slaviske områder), fra 862","color":"#6B3FA0","difficulty":"middels","history":"Ifølge Den russiske krønike kom svenske vikinger (kalt <strong>Rus</strong>) i 862 etter invitasjon fra slaviske stammer som ba dem styre fordi det var anarki. Lederen <strong>Rurik</strong> grunnla et dynasti som styrte Russland i 700 år. Selve navnet Russland kommer fra «Rus».","funFact":"Norrøne navn er bevart i russisk kongerekke: Igor (Yngvarr), Oleg (Helgi), Olga (Helga), Vladimir (Valdemar). Kievs grunnlegger Oleg var sannsynligvis svensk viking før han ble «slaviske Russlands første store hersker».","famousPerson":"<strong>Olga av Kiev</strong> (ca. 890–969) — vikingvitva som ble Kievs regent etter mannens død. Hun startet kristningen av Russland og hevnet mannen sin ved å brenne en hel by ved hjelp av oppbundne duer med svovel-fakler i halene. Hun ble senere helgenkåret.","task":{"type":"timed","icon":"🔤","typeLabel":"Tidsbasert","title":"Slavisk på 90 sekunder","desc":"Bruk telefonen. På 90 sekunder skal dere finne ut hva disse fire ordene betyr på russisk: «mir» (мир), «zdravstvuyte» (здравствуйте), «spasibo» (спасибо), «droog» (друг). Skriv betydningene og vis læreren.","rationale":"Vikingene som dro til Novgorod måtte lære slavisk i full fart. Handelen ventet ikke. Dere har 90 sekunder — de hadde noen uker før vinterhandelen begynte."},"choices":[{"id":"rule","title":"Aksepter invitasjonen — bli herskere","desc":"Slaverne ber om en rettferdig dommer. Dere blir det. Dere blir Rus.","tag":"respect","skillReq":{"diplomati":2},"skillReward":{"diplomati":2,"språk":1},"baseRoll":{"bad":0,"mid":2,"good":2,"crit":1},"outcomes":{"mid":{"und":3,"trade":3,"rep":2,"text":"Dere blir respektert. Slavernes lover styrkes; deres egne tilpasses."},"good":{"und":4,"trade":5,"rep":3,"text":"Dere bygger Novgorod til en handelsby. Russere kaller landet sitt etter dere."},"crit":{"und":5,"trade":7,"rep":4,"text":"Dere grunnlegger Rurik-dynastiet. I 700 år styrer deres etterkommere et område fra Østersjøen til Svartehavet."}},"lesson":"Novgorod-vikingene ble fullstendig slaviske på tre generasjoner. De tok navn, religion og språk fra dem de styrte. Det er ett av få eksempler i historien hvor erobreren ble assimilert mer enn de erobrede.","locks":[]},{"id":"trade","title":"Bare handel — Volgaruten sørover","desc":"Nei takk til styre. Dere er handelsmenn, ikke konger. Pelsverk og slaver mot arabisk sølv.","tag":"trade","skillReq":{"sjømannskap":1},"skillReward":{"sjømannskap":1},"baseRoll":{"bad":1,"mid":2,"good":2,"crit":1},"outcomes":{"bad":{"und":-1,"trade":1,"rep":-1,"text":"Volga-elven er forrædersk om vinteren. Halv last frosset."},"mid":{"und":1,"trade":4,"rep":0,"text":"God handel. Dere kommer hjem med arabisk sølv og silke."},"good":{"und":2,"trade":6,"rep":1,"text":"Dere etablerer en fast rute. Andre vikinger betaler dere for å lære den."},"crit":{"und":3,"trade":8,"rep":2,"text":"Dere blir blant de rikeste mennene i hele Norden."}},"lesson":"Volgaruten brakte mer sølv til Skandinavia enn alle plyndringene til sammen. Vi har funnet over 500 000 arabiske sølvmynter i norske og svenske jordfunn — alt sammen fra fredelig handel via Novgorod.","locks":[]},{"id":"olga","title":"Bli kristen — bygg en russisk kirke","desc":"Olga av Kiev er nylig kristnet. Følg etter henne. Dette er fremtiden.","tag":"respect","skillReq":{"tro":1},"skillReward":{"tro":2,"diplomati":1},"baseRoll":{"bad":0,"mid":2,"good":2,"crit":1},"outcomes":{"mid":{"und":3,"trade":2,"rep":2,"text":"Dere får en plass ved Olgas hoff. Dere lærer gresk og russisk."},"good":{"und":4,"trade":3,"rep":3,"text":"Dere bygger en av Russlands første trekirker. Den står i 200 år."},"crit":{"und":5,"trade":4,"rep":4,"text":"Dere blir munker i et av Kievs første klostre. En av dere skriver krøniken vi nå leser."}},"lesson":"Olga av Kiev startet kristningen av Russland. Hennes barnebarn Vladimir gjennomførte den. Vikingene ble dermed brobyggere mellom bysantinsk kristendom og slavisk kultur — den russisk-ortodokse kirken er deres arv.","locks":[]}]},{"id":"baghdad","name":"Bagdad","region":"Volga-ruten, ca. 921","color":"#2B6B6B","difficulty":"middels","history":"År 921: Den arabiske diplomaten <strong>Ibn Fadlan</strong> møter en gruppe svenske rus-vikinger ved Volga. Hans beretning er en av de mest detaljerte beskrivelsene av vikinger noensinne skrevet. Han er fascinert av deres kropper («som palmer») og forskrekket over deres hygiene («Allahs skitneste skapninger»).","funFact":"Ibn Fadlan beskriver et vikinghøvdings begravelse i detalj: skipet ble brent med ham om bord, og en frivillig slavinne ble drept som offer. Beretningen er den eneste øyenvitneskildringen vi har av et slikt ritual — alt annet er senere saga-rekonstruksjoner.","famousPerson":"<strong>Ibn Fadlan</strong> (900-tallet) — arabisk diplomat fra abbasidekalifatet. Hans «Risalah» er den viktigste utenforstående kilden til vikingtiden vi har. Han ble sendt for å lære volga-bulgarene islam, men endte med å skrive antropologi om vikingene.","task":{"type":"movement","icon":"🧼","typeLabel":"Bevegelse","title":"Renselsesritualet","desc":"Ibn Fadlan ble sjokkert over at vikingene ikke vasket seg før morgenmåltidet — alle delte samme vannfat og spyttet i det. Bevis at dere er bedre: gå ut av klasserommet, vask hendene grundig på toalettet (minst 20 sekunder, med såpe), og kom tilbake. Hele gruppen samtidig. Ta gjerne et bilde av såpe på hånden.","rationale":"Hygiene var det største kultursjokket i møtet mellom arabere og vikinger. Araberne badet og vasket seg flere ganger om dagen. Vikingene gjorde det én gang i uken. Hvilket samfunn var mest «sivilisert»?"},"choices":[{"id":"adapt","title":"Tilpass dere — vask, lær, respekter","desc":"Følg arabernes skikker. Vask før måltid. Lær hilsenen «As-salamu alaykum». Skriv navnet ditt med arabiske bokstaver.","tag":"respect","skillReq":{"språk":1},"skillReward":{"språk":2,"diplomati":1},"baseRoll":{"bad":0,"mid":1,"good":3,"crit":2},"outcomes":{"mid":{"und":3,"trade":3,"rep":2,"text":"Selgeren er imponert. Dere får sølvmynter og et brev som åpner dører i hele kalifatet."},"good":{"und":4,"trade":5,"rep":3,"text":"Ibn Fadlan selv intervjuer dere — vennlig denne gangen. Dere får en damaskstål-kniv som gave."},"crit":{"und":5,"trade":7,"rep":4,"text":"Kalifen møter dere personlig. Han gir dere et arabisk astrolab — instrumentet som senere gjør europeisk navigasjon mulig."}},"lesson":"Vikingene tilpasset seg muslimske skikker når det lønnet seg — hygiene, klesdrakt, til og med språk endret seg på reisen. Sølvet rant over Volga i over hundre år FORDI handelen var fredelig og respektfull.","locks":[]},{"id":"rigid","title":"Hold på vikingenes egne skikker","desc":"Dere nekter å vaske dere eller endre noe. Forhandler likevel. Dere er nordmenn — det skal de finne ut.","tag":"trade","skillReq":null,"skillReward":{},"baseRoll":{"bad":1,"mid":3,"good":1,"crit":0},"outcomes":{"bad":{"und":-2,"trade":0,"rep":-1,"text":"Selgeren nekter å handle direkte med dere. Dere må gå gjennom en mellommann som tar 50% kommisjon."},"mid":{"und":0,"trade":2,"rep":0,"text":"Araberne handler med dere, men holder avstand. Dere får få varer for høy pris."},"good":{"und":1,"trade":3,"rep":0,"text":"Et lite gjennombrudd: en handelsmann respekterer at dere ikke prøver å late som dere er noen andre."}},"lesson":"Selv uten tilpasning ble det handlet — men på dårligere vilkår. Stivhet kostet vikingene penger. Identitet uten åpenhet er ofte dyr.","locks":[]},{"id":"slave_trade","title":"Selg slaver — det araberne vil ha mest","desc":"Bagdad-markedet betaler best for nordeuropeiske slaver. Dere har keltiske kvinner fra Dublin.","tag":"aggressive","skillReq":null,"skillReward":{"krigskunst":1},"baseRoll":{"bad":1,"mid":2,"good":2,"crit":1},"outcomes":{"bad":{"und":-3,"trade":2,"rep":-3,"text":"En av kvinnene snakker arabisk og forteller historier som vekker sympati. Markedet snur mot dere."},"mid":{"und":-3,"trade":5,"rep":-3,"text":"Dere selger lasten. Sølv strømmer inn. Dere er rike og foraktet av andre handelsmenn."},"good":{"und":-3,"trade":7,"rep":-4,"text":"Kalifens egen harem kjøper to. Sølvet er enormt. Ryktet om dere når Norge før dere selv gjør det."},"crit":{"und":-3,"trade":10,"rep":-5,"text":"Dere blir Bagdad-markedets foretrukne leverandør. Dere er nå en pilar i en internasjonal slavehandel som vil vare i 800 år."}},"lesson":"Bagdads slavemarked var verdens største på 900-tallet. Norrøne, slaviske og afrikanske mennesker ble byttevare. Vikingenes deltakelse i denne handelen finansierte mye av Skandinavias rikdom — og er en arv vi sjelden snakker om.","locks":[]}]},{"id":"miklagard","name":"Miklagard","region":"Konstantinopel, 900-tallet","color":"#7B5BA8","difficulty":"farlig","history":"Verdens rikeste by. Den bysantinske keiseren ansetter norrøne krigere som personlig livvakt — <strong>Væringgarden</strong> — fordi de ikke har lokale lojaliteter. Harald Hardråde tjente her i ungdommen og kom hjem som en av Europas rikeste menn.","funFact":"En væring ved navn <strong>Halvdan</strong> risset runene sine inn i Hagia Sophia rundt år 900. De er der ennå — du kan se dem i dag i andre etasje, høyre side. «Halftan auk Are…» Halvdan var her.","famousPerson":"<strong>Harald Hardråde</strong> (1015–1066) — som ung tjente han 10 år i Væringgarden, kjempet i Italia, Bulgaria og Nord-Afrika. Han kom hjem som Norges rikeste mann og ble konge. Han døde ved Stamford Bridge i 1066, tre uker før Vilhelm Erobreren landet i England — og er ofte regnet som vikingtidens slutt.","task":{"type":"timed","icon":"🙇","typeLabel":"Tidsbasert","title":"Hoffhilsen","desc":"Dere har ETT minutt til å øve, så fremfører hele gruppen samtidig en bysantinsk hoffhilsen for læreren: dere må (1) bøye dere dypt, (2) si «Doxa to Theo» (DOK-sa to thé-o), (3) holde stillingen i 5 sekunder. Alle samtidig. Læreren bestemmer om det var verdig keiseren.","rationale":"Vikingene som tjente keiseren måtte lære protokoll de aldri hadde sett før. Den som ikke bukket riktig, fikk ikke jobben — og jobben var verdt en formue."},"choices":[{"id":"guard","title":"Tjen i Væringgarden","desc":"Bli leiesoldat for keiseren i 10 år. Dere får gull, men en av dere må bli igjen permanent.","tag":"trade","skillReq":{"krigskunst":2},"skillReward":{"krigskunst":2,"språk":1,"diplomati":1},"baseRoll":{"bad":1,"mid":2,"good":2,"crit":1},"outcomes":{"bad":{"und":-1,"trade":4,"rep":1,"text":"En av dere dør i kamp i Bulgaria. De andre kommer hjem rike, men slitne."},"mid":{"und":2,"trade":7,"rep":2,"text":"Dere kommer hjem med gull, gresk og hoffmanerer. Sønnen til en høvding gifter seg med datteren deres."},"good":{"und":3,"trade":9,"rep":3,"text":"En av dere er Harald Hardråde. Dere blir konge i Norge."},"crit":{"und":4,"trade":12,"rep":4,"text":"Dere risser navnene deres i Hagia Sophia. De står der ennå."}},"lesson":"Tusenvis av nordmenn og svensker tjente i Væringgarden. De brakte hjem kunnskap som endret samfunnet — kirkebygging, lovverk, militær taktikk. Norges middelalder var bygget på Bysants gull.","locks":[]},{"id":"silk","title":"Forhandle som handelsmenn","desc":"Pelsverk og rav for silke og krydder. Hold dere unna politikken.","tag":"trade","skillReq":{"diplomati":1},"skillReward":{"språk":1,"diplomati":1},"baseRoll":{"bad":0,"mid":2,"good":3,"crit":1},"outcomes":{"mid":{"und":2,"trade":5,"rep":1,"text":"God handel — silke og krydder dere kan selge dyrt hjemme."},"good":{"und":3,"trade":7,"rep":2,"text":"Dere får tilgang til keiserens egne lagre. Silke nok til en hel bygd."},"crit":{"und":4,"trade":10,"rep":3,"text":"Dere etablerer fast handelskontor. Dere får signert dokument fra keiseren — eldste norske handelsavtale vi vet om."}},"lesson":"Mange vikinger var rene handelsmenn. De tjente godt, men fikk ikke samme dybdekunnskap som de som ble lenge — handel er rikdom, men ofte uten varig kulturmøte.","locks":[]},{"id":"spy","title":"Spioner og selg hemmelighetene","desc":"Lat som dere vil tjene keiseren, men spionerer for fienden — bulgarene betaler godt.","tag":"aggressive","skillReq":{"språk":1,"krigskunst":1},"skillReward":{},"baseRoll":{"bad":4,"mid":1,"good":0,"crit":0},"outcomes":{"bad":{"und":-3,"trade":-2,"rep":-3,"text":"Dere blir oppdaget. Sluppet ut av byen kun fordi keiseren ikke vil starte krig. Aldri velkommen tilbake. To av dere blindes som advarsel."},"mid":{"und":-2,"trade":2,"rep":-2,"text":"Dere lykkes så vidt. Bulgarene betaler litt. Dere må flykte hjem etter to år."}},"lesson":"Tilliten i Miklagard ble bygget over generasjoner. Vikinger som brøt den, ødela for alle nordmenn som kom etter. Spionasje var sjelden lønnsomt — særlig i en by der bestraffelsen ofte var blendinger.","locks":[]}]}]};
+
+const SKILL_TREE = GAME_DATA.skillTree;
+const DESTINATIONS = GAME_DATA.destinations;
+
+const QUIZ_BANK = {"språk":{"tier2":[{"q":"Hva betyr hilsenen «As-salamu alaykum» som vikingene lærte i Bagdad?","opts":["«Lykke til med handelen»","«Fred være med dere»","«Vi kommer i fred»","«Allah er stor»"],"correct":1,"feedback":"«As-salamu alaykum» er arabisk for «fred være med dere». Det riktige svaret når noen sier det til deg er «Wa alaykum as-salam» — «og fred være med deg».","source":["baghdad"]},{"q":"Vikingene som styrte Novgorod ble kalt noe spesielt av slaverne. Hva?","opts":["Væringer","Skrælinger","Rus","Normannere"],"correct":2,"feedback":"Rus — det er derfor selve landet kalles «Russland». Selv det moderne navnet på et helt land kommer fra det slaviske ordet for de svenske vikingene.","source":["novgorod"]},{"q":"På Hebridene oppstod en blandet kultur som snakket både norrønt og gælisk. Hva ble dette folket kalt?","opts":["Rus","Væringer","Gall-Gàidheal","Skrælinger"],"correct":2,"feedback":"Gall-Gàidheal — «de utenlandske gæliske». En blanding av norrøn og keltisk kultur som varte i over 400 år.","source":["hebrides"]},{"q":"Hva betyr ordet «Miklagard» — det norrøne navnet på Konstantinopel?","opts":["Den hellige byen","Den store byen","Den gylne byen","Den rike byen"],"correct":1,"feedback":"«Miklagard» betyr «den store byen» (mikla = stor, garðr = by/gård). Vikingene var imponert over størrelsen — Konstantinopel hadde over en halv million innbyggere på 900-tallet.","source":["miklagard"]},{"q":"Den norrøne hilsenen «Doxa to Theo» som vikingene måtte lære ved keiserhoffet er ikke norrøn — den er på et annet språk. Hvilket?","opts":["Latin","Arabisk","Gresk","Slavisk"],"correct":2,"feedback":"«Doxa to Theo» er gresk og betyr «ære være Gud». Bysants-rikets offisielle språk var gresk, ikke latin — selv om de regnet seg som arvtakere etter Romerriket.","source":["miklagard"]},{"q":"Den jødiske handelsmannen som beskrev Hedeby kom fra et område der mange språk møttes. Hvor var han fra?","opts":["Bagdad","Konstantinopel","Andalusia (muslimsk Spania)","Roma"],"correct":2,"feedback":"Ibrahim ibn Yaqub var sefardisk jøde fra al-Andalus — det muslimske Spania. Han snakket arabisk, hebraisk og latin, og hans Hedeby-beskrivelse er en sjelden utenforstående kilde.","source":["hedeby"]},{"q":"Vikingene som plyndret Lindisfarne i 793 ga ord til moderne engelsk. Hvilket av disse engelske ordene er IKKE av norrønt opphav?","opts":["Sky","Egg","Bread","Knife"],"correct":2,"feedback":"Bread er anglo-saksisk. De andre tre — sky, egg, knife — er alle norrøne. Også happy, law, give og they kommer fra norrønt og endte opp i hverdags-engelsk.","source":["lindisfarne"]},{"q":"På Hebridene møtte vikingene et keltisk folk som snakket et språk som fortsatt finnes. Hvilket?","opts":["Walisisk","Gælisk","Bretonsk","Cornisk"],"correct":1,"feedback":"Skotsk gælisk. Det snakkes fortsatt på Hebridene i dag. På 800-tallet var det det dominerende språket der, og vikingene måtte lære det for å handle.","source":["hebrides"]}],"tier3":[{"q":"Hvilket av disse engelske ordene har norrønt opphav?","opts":["Bread","Window","Tree","Bird"],"correct":1,"feedback":"«Window» kommer fra norrønt «vindauga» — vind-øye. Også egg, sky, happy, knife, law, skill, give, take og they er norrøne ord i moderne engelsk.","source":["lindisfarne","dublin","paris"]},{"q":"Det russiske kvinnenavnet «Olga» har norrønt opphav. Hva er det opprinnelige norrøne navnet?","opts":["Ingrid","Helga","Astrid","Sigrid"],"correct":1,"feedback":"Olga = slavisk form av Helga. Tilsvarende: Igor (Yngvarr), Oleg (Helgi), Vladimir (Valdemar). Hele rekken med tidlige russiske herskere bar norrøne navn i slavisk drakt.","source":["novgorod"]},{"q":"Hva skjedde med vikingene som etablerte seg i Normandie etter Rollos avtale i 911?","opts":["De holdt på det norrøne språket i 500 år","De ble tospråklige (norrønt + fransk) permanent","De mistet norrønt og snakket fransk innen 100 år","De vekslet mellom språkene avhengig av sosial klasse"],"correct":2,"feedback":"På fire generasjoner var norrønt nesten borte i Normandie. På 1000-tallet snakket «normannerne» fransk. Da Vilhelm Erobreren tok England i 1066, brakte han FRANSK med seg — ikke norrønt.","source":["paris"]},{"q":"På Færøyene fant DNA-tester noe overraskende om de tidlige bosetterne. Hva?","opts":["De var rene nordmenn","De var rene irer","De hadde betydelig keltisk innslag fra slavekvinner brakt fra Irland","De var samer"],"correct":2,"feedback":"Mens mennene som bosatte Færøyene var hovedsakelig norrøne, var en stor del av kvinnene keltiske — sannsynligvis brakt med fra Irland og Skottland som slaver. Færøysk DNA viser dette tydelig den dag i dag.","source":["faroyene","dublin"]},{"q":"Selve ordet «slave» på engelsk og flere andre europeiske språk har en mørk etymologisk rot. Hvilken?","opts":["Det kommer fra latin «servus» (tjener)","Det kommer fra «slaver» — det slaviske folket — fordi så mange ble solgt i fangenskap","Det kommer fra norrønt «þræll» (træl)","Det kommer fra arabisk «abd» (slave)"],"correct":1,"feedback":"«Slave» kommer fra «slav». Vikingenes handel sørover Volga til Bagdad omfattet enorme mengder slaviske mennesker — så mange at folkenavnet ble til selve ordet for fangenskap. En av historiens mørkere etymologier.","source":["novgorod","baghdad"]},{"q":"Hvilket av disse var IKKE et språk vikingene faktisk lærte og brukte under reisene sine?","opts":["Frisisk (Hedeby)","Gresk (Miklagard)","Mandarin (Kina)","Gælisk (Hebridene/Irland)"],"correct":2,"feedback":"Vikingene rakk aldri Kina. Men silke fra Kina nådde dem via Konstantinopel og Volgaruten. Frisisk, gresk, gælisk, slavisk og arabisk lærte mange vikinger — Skandinavia var faktisk Europas mest kosmopolittiske region på 900-tallet.","source":["hedeby","miklagard","hebrides"]}]},"sjømannskap":{"tier2":[{"q":"Med god vind, hvor lang tid tok det vikingene å seile fra Norge til Island?","opts":["1-2 dager","3-7 dager","2-3 uker","Over en måned"],"correct":1,"feedback":"Med god vind tok turen 3-7 dager. Vikingene var blant Europas beste sjømenn — ingen andre kunne seile så langt på åpent hav på den tida.","source":["island","faroyene"]},{"q":"På Færøyene oppdaget vikingene at noen allerede bodde der. Hvem?","opts":["Irer (vanlige bønder)","Skotter","Irske munker","Samer"],"correct":2,"feedback":"Irske munker hadde levd der i 100 år som eneboere før vikingene kom. De flyktet — eller ble drept. Det samme gjentok seg på Island. «Oppdagelse» er sjelden virkelig oppdagelse.","source":["faroyene"]},{"q":"Vinland-bosetningen i Nord-Amerika varte ikke lenge. Hvor lenge omtrent?","opts":["Bare noen få år","Rundt 50 år","Over 100 år","Vikingene ble der permanent"],"correct":0,"feedback":"Bare noen få år. Konflikten med skrælingene gjorde det umulig å fortsette. Det er den eldste eksakt daterte europeiske bosetningen i Amerika (år 1021), men også en av de korteste.","source":["vinland"]},{"q":"Hva var det største problemet for vikingene som krysset åpent hav?","opts":["Sykdom om bord","Mangel på drikkevann og navigasjon i overskyet vær","Sjørøvere","Dårlige skip"],"correct":1,"feedback":"Drikkevann og navigasjon. Skipene var glimrende — det var menneskene som kunne svikte. På åpent hav uten landemerker, og uten kompass, var solen og stjernene eneste hjelp. Når det var tåke, var de blinde.","source":["faroyene","vinland","island"]},{"q":"Vikingene som dro til Vinland kom fra et sted som var enda lenger fra Europa. Hvor?","opts":["Færøyene","Island","Grønland","Hebridene"],"correct":2,"feedback":"Grønland. Leif Erikssons far Erik den Røde grunnla Grønland-koloniene rundt 985, og Leif seilte derfra mot vest til Vinland. Vesten ble erobret etappevis: Færøyene → Island → Grønland → Vinland.","source":["vinland"]},{"q":"Hvilket skipsdesign gjorde det mulig for vikingene å seile både i åpent hav og opp grunne elver som Seinen?","opts":["Et tungt skip med dyp kjøl","Et lett, klinkbygd skip med flat bunn","En romersk galei","Et arabisk dhowskip"],"correct":1,"feedback":"Vikingskipet var klinkbygd (overlappende bord), lett og hadde flat bunn. Det kunne både krysse Atlanterhavet OG seile oppover elver til Paris. Få andre skip i historien har vært så allsidige.","source":["paris","lindisfarne"]},{"q":"Da vikingene seilte oppover Seinen i 845, hvor mange skip førte de med seg?","opts":["Rundt 30","Rundt 60","Rundt 120","Rundt 200"],"correct":2,"feedback":"Hele 120 skip seilte oppover Seinen i 845 under høvding Ragnar. Det var en av tidens største flåteoperasjoner. Karl den skallede betalte 7000 pund sølv for å få dem til å dra.","source":["paris"]},{"q":"Da vikingene seilte fra Norge til Lindisfarne i 793, krysset de hvilket havområde?","opts":["Nordsjøen","Norskehavet","Atlanterhavet","Skagerrak"],"correct":0,"feedback":"Nordsjøen — den åpne strekningen fra norske kyst til Northumbria. Det er ikke det lengste havet vikingene krysset, men det krevde åpent-hav-navigasjon.","source":["lindisfarne"]},{"q":"Hvilken irsk havneby grunnla vikingene i 841 og brukte som handelsbase i 200 år?","opts":["Cork","Dublin","Galway","Belfast"],"correct":1,"feedback":"Dublin — eller Dyflinn, som vikingene kalte det. Det er en ren norrøn grunnleggelse. I dag er Irlands hovedstad bygget på en vikingeboslag.","source":["dublin"]}],"tier3":[{"q":"Hva var en «solstein» (sólarsteinn) i vikingnavigasjon?","opts":["En stein de la i kjølen for ballast","En stein de slipte sokner med","En kalsittkrystall som viste solens posisjon selv i overskyet vær","En markeringsstein de plasserte på land"],"correct":2,"feedback":"Kalsitt («islandsk spat») polariserer lys og kan vise solens retning gjennom skyer. Beskrevet i sagaer, og forskere har bekreftet at det fungerer. En genial lavteknologisk løsning på et reelt problem.","source":["island","faroyene"]},{"q":"Hvilket dyr brukte vikingene som «kompass» på åpent hav?","opts":["Hund","Ravn","Falk","Geit"],"correct":1,"feedback":"Ravner. Floke Vilgerdarsson tok med tre ravner til Island. Når de slapp en og den ikke kom tilbake, visste de at land var nær. Da en kom tilbake, var det ikke land i nærheten ennå.","source":["island","faroyene"]},{"q":"Hvorfor var Færøyene så viktige strategisk for vikingenes ekspansjon vestover?","opts":["De hadde gull og sølv","De var et springbrett — kort hvile før den lange seilasen til Island","De hadde en stor flåte vikingene kunne kuppe","De var en militær festning"],"correct":1,"feedback":"Springbrett. Skipene måtte hvile, forsyninger måtte fylles, mannskapet måtte sove på fast grunn. Få seilte rett fra Norge til Island — Færøyene gjorde det mulig.","source":["faroyene"]},{"q":"Hva betyr det at vikingenes ekspedisjoner var bygget på «leg-by-leg»?","opts":["De seilte i bein-formet rute","De hoppet fra øy til øy, ikke direkte over åpent hav","De tok pauser for å sove","De konkurrerte i løping"],"correct":1,"feedback":"Leg-by-leg = etappe-for-etappe. Norge → Færøyene → Island → Grønland → Vinland. Hver etappe var håndterbar, men den totale reisen ble enorm. Ingen andre på 1000-tallet kunne gjøre dette.","source":["faroyene","island","vinland"]},{"q":"I 2021 publiserte forskere en EKSAKT datering for vikingenes tilstedeværelse i Nord-Amerika. Hvilket år?","opts":["År 982","År 1000","År 1021","År 1066"],"correct":2,"feedback":"1021. Daterningen ble gjort ved å analysere en kosmisk hendelse (solstorm) bevart i tre fra L'Anse aux Meadows. 471 år før Columbus.","source":["vinland"]},{"q":"På hvilken østlig handelsrute kunne vikingene reise fra Østersjøen helt ned til Svartehavet og videre?","opts":["Volgaruten","Donau-ruten","Donruten","Atlanterhavsruten"],"correct":0,"feedback":"Volgaruten — mest brukt — gikk fra Østersjøen via Novgorod og elvenettverket sørover Volga til Det kaspiske havet og videre til Bagdad. Det var elver, ikke åpent hav, men det var det arkitektoniske mesterverket.","source":["novgorod","baghdad"]}]},"krigskunst":{"tier2":[{"q":"Hva var en «berserker»?","opts":["En leiesoldat som brukte bjørneskinn og gikk i kampraseri","En type vikingskip","En lederrolle på skipet","En type sverd"],"correct":0,"feedback":"Berserkere gikk i kamp i raseri, ofte i bjørneskinn. Ordet kommer fra «ber-serkr» = bjørneskjorte. De ble fryktet, men også sett som upålitelige og halvgale av sine egne.","source":["lindisfarne","paris","island"]},{"q":"I Lindisfarne 793: hvorfor var klosteret et perfekt angrepsmål?","opts":["Munkene var krigere som måtte stoppes","Klosteret hadde mye ubeskyttet sølv og ingen forsvarere","Munkene var fiender av Norge","Klosteret blokkerte handelen til havs"],"correct":1,"feedback":"Klosteret hadde generasjoner av kirkesølv, gull og edelstener — og det var ingen krigere der. Et perfekt mål for vikinger som ville bli rike fort.","source":["lindisfarne"]},{"q":"I Paris-beleiringen 885-86 kjempet vikingene i ett år utenfor byen. Hvordan endte det historisk?","opts":["Vikingene tok byen og brente den ned","Beleiringen feilet — dysenteri og forsvar slo dem tilbake","Keiser Karl betalte dem for å dra","Pariserne overga seg uten kamp"],"correct":1,"feedback":"Beleiringen feilet historisk. Sykdom rev gjennom vikingleiren, og Odo (greven av Paris) ble en helt for å ha holdt stand. Det er denne suksessen som senere gjorde Odo til konge av Frankrike.","source":["paris"]},{"q":"Hva betyr begrepet «Danegeld»?","opts":["Norrøn valuta","En hedensk gud","Sølv betalt til vikingene for at de skulle dra","Et type vikingskip"],"correct":2,"feedback":"Danegeld = sølv betalt til vikingene for å unngå plyndring. England betalte 48 000 pund i ett enkelt år (1012) — en enorm sum. Det fungerte ikke i lengden; vikingene kom bare tilbake.","source":["lindisfarne","paris"]},{"q":"På Island vedtok bøndene en «hevn-praksis» som holdt rettsorden. Hva het systemet?","opts":["Tinging","Blodfeider","Holmgang","Berserkergang"],"correct":1,"feedback":"Blodfeider. Når sentralmakt manglet, måtte slekten selv hevne drap — eller miste posisjon. Systemet holdt Island i sjakk i 200 år før det kollapset i borgerkrig på 1200-tallet.","source":["island"]},{"q":"I irsk slavehandel — som vikingene drev fra Dublin — ble keltiske mennesker primært solgt til hvilket marked?","opts":["Italia","Bagdad og det muslimske markedet","Skottland","Frankrike"],"correct":1,"feedback":"Bagdad. Volgaruten knyttet Dublin til arabermarkedet via Norden. Slavehandel var et helt nettverk: irske slaver fanget i Dublin endte opp tjent som tjenere i Bagdad — over 6000 km unna.","source":["dublin","baghdad"]},{"q":"Hva slags krigerformasjon ga vikinger styrke i kamp mot tunge frankiske riddere ved beleiringen av Paris?","opts":["Romersk falanks","Skjoldborg (skjaldborg)","Mongolsk kavaleri-rotasjon","Engelsk langbueformasjon"],"correct":1,"feedback":"Skjoldborgen — vegg av overlappende skjold — ga vikingene en defensiv struktur som var svært vanskelig å bryte. Den ble også brukt under Slaget ved Hastings i 1066, hvor anglosakserne under Harold Godwinson kjempet mot normannerne.","source":["paris"]}],"tier3":[{"q":"Hva var Væringgardens hovedoppgave i Konstantinopel?","opts":["Bygge skip for keiseren","Personlig livvakt for keiseren","Politi i bygatene","Forsvare havnen mot pirater"],"correct":1,"feedback":"Personlig livvakt. De ble valgt nettopp fordi de IKKE hadde lokale lojaliteter. Bysantinske kupper var vanlige; keiseren ville ha menn som ikke kunne kjøpes med bestikkelser fra hans rivaler.","source":["miklagard"]},{"q":"Harald Hardråde døde ved Stamford Bridge i 1066, og dette markerer et symbolsk skille. Hva?","opts":["Vikingtidens slutt","Begynnelsen på korstogene","Slutten på den engelske tronen","Slutten på Bysants"],"correct":0,"feedback":"Slaget ved Stamford Bridge regnes ofte som vikingtidens symbolske slutt — tre uker før Vilhelm Erobreren landet i England. Etter Harald drev ingen flere store norrøne erobringskampanjer.","source":["miklagard"]},{"q":"I Vinland kostet feilet kulturmøte vikingene noe stort. Hva?","opts":["Et sølvskip","En hel kongerekke","Tilgang til en hel verdensdel i nesten 500 år","Hele Grønland-kolonien"],"correct":2,"feedback":"Da vikingene måtte gi opp Vinland, var Nord-Amerika stengt for europeere i nesten 500 år — fram til Columbus 1492. Det er en av historiens største «hva-hvis»-historier: hva om de hadde forstått skrælingene?","source":["vinland"]},{"q":"Hvorfor virket vikingenes våpenmakt så dårlig akkurat i Vinland — sammenlignet med f.eks. Lindisfarne?","opts":["De hadde dårligere våpen denne gangen","Skrælingene var mange flere og kjente landet bedre","Vikingene var trette etter den lange reisen","Lederen Thorvald gjorde tabber"],"correct":1,"feedback":"Skrælingene var mange flere, og kjente landet. På steder som Lindisfarne var vikingene i overtall lokalt. I Amerika var det motsatt — og våpen alene var ikke nok.","source":["vinland"]},{"q":"På Island ble berømte sagaer skrevet om hevnsykluser. Hvilken er mest kjent?","opts":["Heimskringla","Njålssaga","Egil Skallagrimssons saga","Eddaen"],"correct":1,"feedback":"Njålssaga (ca. 1280) er den mest kjente — en hevnsyklus som ender med at hele slekten brennes inne. Den regnes som en av middelalderens største litterære verk, og leses på islandske skoler den dag i dag.","source":["island"]},{"q":"Hvorfor måtte den norske kongen Magnus Berrføtt seile til Hebridene i 1098?","opts":["For å handle med engelskmenn","For å lære gælisk","For å rydde opp blant sine egne menn — vikingene der drev sjørøveri som plaget hele Norge","For å konvertere lokalbefolkningen"],"correct":2,"feedback":"Hebrid-vikingene drev sjørøveri som skadet ALL norsk handel. Magnus måtte seile vest med en hær for å disiplinere dem. Sjørøveri lønner seg sjelden i lengden, særlig ikke for hjemlandet.","source":["hebrides"]}]},"diplomati":{"tier2":[{"q":"Hva betydde gjensidighet i samisk handel?","opts":["Vikingene måtte gi like mye som de fikk","Samene bestemte alle priser ensidig","Handelen ble gjort uten ord","Vikingene måtte betale en avgift først"],"correct":0,"feedback":"Samene godtok ikke ujevn handel. Tilbød du for lite, ble du avvist — uten forhandling. Gjensidighet var en kjerneverdi som vikingene måtte respektere for å få tilgang til samiske varer.","source":["sameland"]},{"q":"Hva var Rollos avtale i 911?","opts":["Han ble keiser i Roma","Han fikk Normandie mot å bli kristen og forsvare Frankrike","Han fikk lov å plyndre fritt","Han ble konge i Norge"],"correct":1,"feedback":"Rollo (Gange-Rolv) fikk Normandie i 911 mot å konvertere og BESKYTTE Frankrike mot ANDRE vikinger. Avtalen forvandlet hans etterkommere til franske aristokrater på fire generasjoner.","source":["paris"]},{"q":"Hva fikk Aud den Djuptenkte til å forlate Dublin og dra vestover?","opts":["Hun ble drevet ut etter mannens død","Hun ville oppdage Vinland","Hun ledet en flåte til Skottland og Færøyene før hun grunnla en koloni på Island","Hun ble kidnappet"],"correct":2,"feedback":"Aud var en av få kvinner som er hovedperson i en saga (Laxdœla saga). Etter mannens død førte hun en hel flåte med 20 frigitte slaver vestover og ble en av Islands grunnleggere.","source":["dublin","island"]},{"q":"Kong Harald Hårfagre giftet seg med en kvinne fra et folk vikingene ofte handlet med. Hvilket folk?","opts":["Engelskmennene","Samene","Frankerne","Skottene"],"correct":1,"feedback":"Han giftet seg med Snøfrid, datter av samisk høvding Svåse. Etter hennes død skal han ha sittet ved kista hennes i tre år før han kom til seg selv. Norrønt og samisk blod blandet seg helt på toppen av samfunnet.","source":["sameland"]},{"q":"På Hebridene oppstod blandingskulturen Gall-Gàidheal. Hva var det viktigste som muliggjorde dette?","opts":["Krig og erobring","Tospråklighet og blandingsekteskap mellom norrøne og keltere","En sentral konge styrte begge folkene","Religion"],"correct":1,"feedback":"Tospråklighet og blandingsekteskap. Hverdagskulturen smeltet sammen — barna lærte begge språk hjemme, og foreldrene kom fra ulike folk. Krig kan ikke skape den slags kultur; bare hverdag kan det.","source":["hebrides"]},{"q":"Hvorfor var løsepenger (gisselholding) ofte en mer LØNNSOM strategi enn ren plyndring for vikinger?","opts":["Det var lettere å transportere","Man fikk bedre rykte hjemme","Et levende gissel kunne bringe inn mer sølv enn et plyndret kloster — og munkene kunne returneres uten å starte krig","Det var lov etter norrøn lov"],"correct":2,"feedback":"Et gissel kunne være verdt mer enn alt sølvet i et kloster — særlig hvis det var en høyættet munk eller bisp. I tillegg skapte det mindre langsiktig fiendskap enn massakrer. Det er klassisk «win-win»-økonomi.","source":["lindisfarne"]}],"tier3":[{"q":"Hva var en «lovsigemann» (lögsögumaðr) på det islandske Alltinget?","opts":["En slags konge","En lederfor en bondestyrke","En person som måtte huske og resitere alle lovene utenat — ettersom de ikke var skrevet ned","En soldat"],"correct":2,"feedback":"Lovsigemannen måtte huske 130+ lover utenat og resitere dem. Han var samfunnets juridiske hukommelse. Da Þorgeirr Ljósvetningagoði i år 1000 måtte avgjøre om Island skulle bli kristent, var det LOVSIGEMANNEN, ikke en konge, som tok beslutningen.","source":["island"]},{"q":"Hvorfor ble vikingene som invaderte Russland (Rus-vikingene) ASSIMILERT av slaverne — i stedet for omvendt?","opts":["Slaverne var militært sterkere","Vikingene var få i antall, og de tok navn, religion og språk fra dem de styrte","Bysants tvang dem til det","De ville ikke styre"],"correct":1,"feedback":"Et særtilfelle i historien: erobreren ble assimilert mer enn de erobrede. På tre generasjoner var Rurik-dynastiet språklig og religiøst slavisk. Det viser hvor mye mindretallets identitet kan vannes ut når man styrer en stor majoritet.","source":["novgorod"]},{"q":"Hva var det som først og fremst skapte tillit mellom vikinger og fremmede folkeslag — mer enn handel og ord?","opts":["Felles religion","Slektsbånd og giftermål","Felles fiender","Samme språk"],"correct":1,"feedback":"Slektsbånd. Norrøn samfunnsstruktur var bygget på slekt. Når en av deres giftet seg inn i en annen kultur, ble de slekt for evig. Dette var en sterkere «traktat» enn noen skreven avtale, og det forklarer hvor raskt vikinger ble normannere, irer, færøyinger.","source":["dublin","sameland","hebrides","novgorod"]},{"q":"I 911 sa Rollo angivelig nei til å kysse kong Karls fot under avtaleseremonien. Hva er den apokryfe historien?","opts":["Han kysset foten direkte","Han fikk en av sine menn til å gjøre det — som løftet kongens fot så høyt at kongen falt","Han nektet helt og fikk straff","Det skjedde aldri"],"correct":1,"feedback":"Den fortelles i krønikene: Rollo nektet å bøye seg for noen, så han fikk en av mennene til å løfte foten i stedet — og han løftet den så høyt at Karl falt bakover. En perfekt parodisk seremoni som viste at avtalen var mellom likemenn.","source":["paris"]},{"q":"Hvilken av disse er det MEST eksempel på vellykket diplomati gjennom historien?","opts":["Lindisfarne 793 — plyndringen","Paris 885-86 — beleiringen","Normandie 911 — Rollos landavtale","Vinland 1021 — kontakten med skrælinger"],"correct":2,"feedback":"Rollos avtale forvandlet brutale plyndrere til franske aristokrater på 100 år, og hans tipp-tipp-oldebarn ble Vilhelm Erobreren. Få diplomatiske avtaler i verdenshistorien har hatt slik avkastning over så lang tid.","source":["paris","lindisfarne","vinland"]},{"q":"Hvorfor er den såkalte «finnskatten» fortsatt et politisk betent tema i Norge i dag?","opts":["Den var bare et historisk fenomen uten dagens betydning","Den var begynnelsen på en lang fornorsknings-historie som Sannhets- og forsoningskommisjonen leverte rapport om i 2023","Den finnes fortsatt som en skatt","Samene avviser at den fant sted"],"correct":1,"feedback":"Finnskatten var første skritt i en lang fornorskning av samene. Sannhets- og forsoningskommisjonen leverte i 2023 sin rapport — over tusen år etter at det startet. Vikingtidens valg har lange ettervirkninger.","source":["sameland"]}]},"tro":{"tier2":[{"q":"Hvem var noaiden i samisk kultur?","opts":["Høvdingen i en samisk siida","Sjamanen / spirituell leder, brukte runebomme (govadas) til transe","Skipsbyggemesteren","Kjøpmannen"],"correct":1,"feedback":"Noaiden var samisk sjaman. Vikingene anså noaider som mektigere enn sine egne seidmenn — derfor handlet de respektfullt med samene når de kunne, og fryktet samiske forbannelser når de ikke kunne.","source":["sameland"]},{"q":"Hva skjedde på Þingvellir i år 1000?","opts":["Island ble et kongedømme","Vikingene oppdaget Vinland","Island vedtok å bli kristent","Alltinget ble oppløst"],"correct":2,"feedback":"Lovsigemann Þorgeirr Ljósvetningagoði la seg under en kappe i ett døgn og kom ut med kompromisset: alle skulle døpes, men hedendom kunne praktiseres privat. En av historiens mest pragmatiske religionskifter.","source":["island"]},{"q":"Hva er en «runesigemann» eller «runerister»?","opts":["En kriger","En person som kunne risse og tolke runer — alfabetet","En sjakkspiller","En seilsetter"],"correct":1,"feedback":"Runer var ikke bare bokstaver, men også et system for varsling, magi og minne. En væring som het Halvdan risset sitt navn i Hagia Sophia rundt år 900 — det står der ennå.","source":["miklagard"]},{"q":"I Bagdad var én skikk arabere praktiserte daglig som sjokkerte vikingene mest. Hvilken?","opts":["Bønn fem ganger om dagen","Faste i ramadan","Hyppig hygiene — vasking flere ganger om dagen","Avstå fra svinekjøtt"],"correct":2,"feedback":"Hygiene. Ibn Fadlan ble sjokkert over at vikingene bare vasket seg én gang i uken. Men vikingene ble like sjokkert over at araberne vasket seg så ofte! Hva som er «sivilisert» avhenger helt av hvor du står.","source":["baghdad"]},{"q":"Olga av Kiev gjorde noe oppsiktsvekkende etter mannens død. Hva er hun mest kjent for?","opts":["Å frafalle vikingsk tro og bli kristen — og senere å starte kristningen av Russland","Å seile til Vinland","Å gifte seg med en gresk keiser","Å bygge en flåte for Rurik"],"correct":0,"feedback":"Olga ble kristen — den første kristne herskeren i Russland. Hennes barnebarn Vladimir gjennomførte kristningen av hele riket. Hun ble senere helgenkåret. (Hun hevnet også mannen sin ved å brenne ned en hel by, men hun ble likevel helgen.)","source":["novgorod"]},{"q":"På Lindisfarne i 793 var klosteret hellig for kristne — men hva var vikingenes hovedreligion da?","opts":["Islam","Keltisk druidkultus","Tor, Odin, og åsatru","De var allerede kristne"],"correct":2,"feedback":"Norrøn hedendom: Tor, Odin, Frøya, Loke, og hele panteonet. Mange vikinger anså kristendommen som dårligere fordi den ba folk «vende det andre kinnet til» — det stred mot æreskodeksen.","source":["lindisfarne"]},{"q":"På Hebridene møtte vikingene noe i den keltiske kristendommen som var ANNERLEDES enn romerkatolsk. Hva?","opts":["De ba til andre guder","De var en mer selvstendig, asketisk munkkultur som hadde overlevd uten Romas innflytelse","De var ikke kristne i det hele tatt","De brukte ikke latin"],"correct":1,"feedback":"Den keltiske kirken var lenge selvstendig fra Roma — egne tradisjoner, mer asketiske munker, andre kalkylene for påsken. Iona-klosteret på Hebridene var et av sentrene. Det er én grunn til at kontakt med dem endret vikingene mer enn omvendt.","source":["hebrides"]}],"tier3":[{"q":"Hvorfor er Snorre Sturlason så viktig for vår kunnskap om norrøn mytologi?","opts":["Han var den siste hedenske presten","Han skrev ned mytologien (Eddaen) på 1200-tallet — 200 år etter at folk sluttet å tro på den","Han fant Tors hammer arkeologisk","Han konverterte Island til kristendommen"],"correct":1,"feedback":"Snorre skrev Eddaen ca. 1220. Uten ham ville Tor, Odin, Loke og Ragnarok vært glemt. Hele vår moderne kunnskap om norrøn religion — og dermed alle Marvel-filmer om Tor — kommer fra ÉN islandsk forfatter på 1200-tallet.","source":["island"]},{"q":"Hva er det historisk paradokset med Olga av Kiev?","opts":["Hun var ikke virkelig kristen","Hun ble helgenkåret samtidig som hun beordret massedrap (brente en hel by for å hevne mannen)","Hun var aldri vikingvitva","Hun var faktisk to forskjellige kvinner"],"correct":1,"feedback":"Hun ble helgenkåret som «likeapostlene Olga» — den russiske ortodokse kirken regner henne som hellig. Likevel brente hun en hel by ned ved å feste fakler til duer som fløy hjem til reir. Helgenstatus tar ikke alltid hensyn til CV-en.","source":["novgorod"]},{"q":"Vikinger handlet med både muslimer (Bagdad) og kristne (Konstantinopel) på samme reise. Hva betydde dette for deres egen tro?","opts":["De holdt strengt på Tor og Odin","Mange ble synkretistiske — kombinerte elementer fra flere troer; en støpeform i Jorvik laget både Tors hammer og kristne kors","De valgte én tro og ble enten kristne eller muslimer fullt ut","De avskaffet all religion"],"correct":1,"feedback":"Synkretisme — kombinasjon av troer — var vanlig blant reisende vikinger. En støpeform fra Jorvik (York) viser produksjon av BÅDE Tors hammer OG kristne kors fra samme verksted. Folkene tilpasset troen til marked og situasjon.","source":["baghdad","miklagard","lindisfarne"]},{"q":"Ibn Fadlans beretning beskriver et begravelsesritual i detalj. Hva er den ENESTE delen vi har øyenvitnebeskrivelse av?","opts":["Begravelsen i et gravkammer","Et likbål","En skip-brenning der en frivillig slavinne ble drept som offer","Begravelse til havs"],"correct":2,"feedback":"Skip-brenningen ved Volga, ca. 921. Inkludert det som senere ble fortalt i sagaer som vanlig: en frivillig slavinne ofret. Saga-rekonstruksjoner var alle SENERE — Ibn Fadlan så det selv. Samtidskilden er gull verdt.","source":["baghdad"]},{"q":"Hva var en seidmann i norrøn tro?","opts":["En vanlig kriger","En spåmann / mann som praktiserte magi — ofte sett ned på fordi det var ansett som «kvinnelig»","En skipsstyrer","En islandsk kjøpmann"],"correct":1,"feedback":"Seid var magi — å påvirke fremtiden eller andres vilje. Det ble regnet som «kvinnefag», så menn som praktiserte det fikk dårlig rykte. Selv Odin, gudenes far, ble ledd av for sin seid-praksis.","source":["sameland","island"]},{"q":"Vikingene som kom til Hebridene møtte irske munker som hadde noe vikingene IKKE hadde. Hva ga munkene dem som varig kunnskap?","opts":["Penger og gull","Latinsk skriftkultur, astronomi og bøker","Bedre våpen","Slaver"],"correct":1,"feedback":"Bøker, latinsk grammatikk, astronomi. Munkene var lærde i en grad som fantes få andre steder i Europa. Mange vikinger ble kristne på Hebridene IKKE av tvang, men fordi munkene var fascinerende lærere.","source":["hebrides","faroyene"]}]}};
+
+</script>
+<script>
+/* =============================================================================
+   STATE & PERSISTENCE
+   ============================================================================= */
+const STORAGE_KEY_PREFIX = 'vikinggame_v3_group_';
+
+const state = {
+  groupId: null,
+  shipName: '',
+  scores: { understanding: 0, trade: 0, reputation: 0 },
+  skills: { 'språk': 0, 'sjømannskap': 0, 'krigskunst': 0, 'diplomati': 0, 'tro': 0 },
+  visited: {},
+  log: [],
+  status: 'in_progress',
+  initialSkillChosen: false,
+  // transient (not saved):
+  currentDestId: null,
+  currentChoiceId: null,
+  currentTaskCompleted: false,
+  currentTaskBonus: 0
+};
+
+function saveState() {
+  if (!state.groupId) return;
+  const data = {
+    groupId: state.groupId,
+    shipName: state.shipName,
+    scores: state.scores,
+    skills: state.skills,
+    visited: state.visited,
+    log: state.log,
+    status: state.status,
+    initialSkillChosen: state.initialSkillChosen,
+    lastUpdated: new Date().toISOString()
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY_PREFIX + state.groupId, JSON.stringify(data));
+  } catch (e) { console.warn('Save failed', e); }
+}
+
+function loadState(groupId) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + groupId);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+
+function applyLoadedState(loaded) {
+  state.groupId = loaded.groupId;
+  state.shipName = loaded.shipName;
+  state.scores = loaded.scores || { understanding: 0, trade: 0, reputation: 0 };
+  state.skills = Object.assign(
+    { 'språk': 0, 'sjømannskap': 0, 'krigskunst': 0, 'diplomati': 0, 'tro': 0 },
+    loaded.skills || {}
+  );
+  state.visited = loaded.visited || {};
+  state.log = loaded.log || [];
+  state.status = loaded.status || 'in_progress';
+  state.initialSkillChosen = loaded.initialSkillChosen || false;
+}
+
+/* =============================================================================
+   APPROVAL CODES (deterministic — teacher version uses the same function)
+     fullCode    = simpleHash('viking_v3_' + groupId + '_' + destId + '_task') % 10000
+     partialCode = (fullCode + 1) % 10000
+   Both versions must produce identical codes for the same (groupId, destId).
+   ============================================================================= */
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function approvalCodeFor(groupId, destId) {
+  const code = simpleHash('viking_v3_' + groupId + '_' + destId + '_task') % 10000;
+  return code.toString().padStart(4, '0');
+}
+
+function partialApprovalCodeFor(groupId, destId) {
+  const full = parseInt(approvalCodeFor(groupId, destId), 10);
+  return ((full + 1) % 10000).toString().padStart(4, '0');
+}
+
+/* =============================================================================
+   SETUP SCREEN
+   ============================================================================= */
+const groupGrid = document.getElementById('groupGrid');
+const shipInput = document.getElementById('shipName');
+const startBtn = document.getElementById('startBtn');
+const resumeBtn = document.getElementById('resumeBtn');
+
+let pendingResumeData = null;
+
+for (let i = 1; i <= 10; i++) {
+  const b = document.createElement('button');
+  b.className = 'group-btn';
+  b.innerHTML = '<strong>' + i + '</strong>Gruppe';
+  b.dataset.group = i;
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.group-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected');
+    state.groupId = i;
+    const existing = loadState(i);
+    if (existing && existing.status === 'in_progress' && existing.shipName) {
+      pendingResumeData = existing;
+      shipInput.value = existing.shipName;
+      state.shipName = existing.shipName;
+      resumeBtn.classList.remove('hidden');
+      resumeBtn.textContent = 'Fortsett som «' + existing.shipName + '»';
+    } else {
+      pendingResumeData = null;
+      resumeBtn.classList.add('hidden');
+    }
+    checkSetup();
+  });
+  groupGrid.appendChild(b);
+}
+
+shipInput.addEventListener('input', () => {
+  state.shipName = shipInput.value.trim();
+  checkSetup();
+});
+
+function checkSetup() {
+  startBtn.disabled = !(state.groupId && state.shipName.length > 0);
+}
+
+startBtn.addEventListener('click', () => {
+  // Fresh game
+  state.scores = { understanding: 0, trade: 0, reputation: 0 };
+  state.skills = { 'språk': 0, 'sjømannskap': 0, 'krigskunst': 0, 'diplomati': 0, 'tro': 0 };
+  state.visited = {};
+  state.log = [];
+  state.status = 'in_progress';
+  state.initialSkillChosen = false;
+  enterGame();
+  promptInitialSkill();
+});
+
+resumeBtn.addEventListener('click', () => {
+  if (pendingResumeData) {
+    applyLoadedState(pendingResumeData);
+    enterGame();
+  }
+});
+
+function enterGame() {
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('dash').classList.add('active');
+  document.getElementById('groupTag').textContent = 'Gruppe ' + state.groupId;
+  document.getElementById('shipTag').textContent = state.shipName;
+  renderAll();
+  saveState();
+  // If game already completed, show summary
+  if (state.status === 'completed') {
+    showFinalSummary();
+  }
+}
+
+/* =============================================================================
+   RENDERING — dashboard pieces
+   ============================================================================= */
+function renderAll() {
+  updateScores();
+  renderSkillBranches();
+  renderDestinations();
+  renderLog();
+}
+
+function updateScores() {
+  document.getElementById('undScore').textContent = state.scores.understanding;
+  document.getElementById('tradeScore').textContent = state.scores.trade;
+  document.getElementById('repScore').textContent = state.scores.reputation;
+}
+
+function renderSkillBranches() {
+  const container = document.getElementById('skillBranches');
+  container.innerHTML = '';
+  Object.entries(SKILL_TREE).forEach(([key, info]) => {
+    const tier = state.skills[key] || 0;
+    const branch = document.createElement('div');
+    branch.className = 'skill-branch';
+    branch.innerHTML =
+      '<span class="skill-icon">' + info.icon + '</span>' +
+      '<div class="skill-name">' + info.name + '</div>' +
+      '<div class="skill-nodes">' +
+        '<div class="skill-node ' + (tier >= 1 ? 'unlocked' : '') + '" title="' + info.tiers[0].name + '"></div>' +
+        '<div class="skill-node ' + (tier >= 2 ? 'unlocked' : '') + '" title="' + info.tiers[1].name + '"></div>' +
+        '<div class="skill-node ' + (tier >= 3 ? 'unlocked' : '') + '" title="' + info.tiers[2].name + '"></div>' +
+      '</div>';
+    container.appendChild(branch);
+  });
+}
+
+function renderDestinations() {
+  const grid = document.getElementById('destGrid');
+  grid.innerHTML = '';
+  DESTINATIONS.forEach((d, idx) => {
+    const card = document.createElement('div');
+    card.className = 'dest-card';
+    card.style.setProperty('--col', d.color);
+
+    const visited = state.visited[d.id];
+    const lockReason = checkDestLock(d);
+
+    if (visited) {
+      card.classList.add('visited');
+    } else if (lockReason) {
+      card.classList.add('locked');
+      card.title = lockReason;
+    }
+
+    let diffLabel = 'Middels risiko';
+    if (d.difficulty === 'farlig') diffLabel = '<span class="danger">Farlig</span>';
+    else if (d.difficulty === 'trygg') diffLabel = '<span class="safe">Trygg</span>';
+
+    card.innerHTML =
+      '<div class="dest-num">' + (idx + 1).toString().padStart(2, '0') + ' · STASJON</div>' +
+      '<div class="dest-name">' + d.name + '</div>' +
+      '<div class="dest-region">' + d.region + '</div>' +
+      '<div class="dest-difficulty">' + diffLabel + '</div>';
+
+    if (!visited && !lockReason) {
+      card.addEventListener('click', () => openEncounter(d));
+    }
+    grid.appendChild(card);
+  });
+}
+
+function checkDestLock(dest) {
+  for (const visitId of Object.keys(state.visited)) {
+    const visit = state.visited[visitId];
+    const visitedDest = DESTINATIONS.find(d => d.id === visitId);
+    if (!visitedDest) continue;
+    const choice = visitedDest.choices.find(c => c.id === visit.choiceId);
+    if (choice && choice.locks && choice.locks.includes(dest.id)) {
+      return 'Stengt etter ' + visitedDest.name;
+    }
+  }
+  return null;
+}
+
+function renderLog() {
+  const c = document.getElementById('logContent');
+  if (state.log.length === 0) {
+    c.innerHTML = '<div class="log-empty">Loggen er fortsatt blank. Hva vil dere skrive i den?</div>';
+    return;
+  }
+  c.innerHTML = '';
+  state.log.forEach(entry => {
+    const el = document.createElement('div');
+    el.className = 'log-entry';
+    el.style.setProperty('--col', entry.color);
+    el.innerHTML =
+      '<div class="log-meta">' + entry.region + '</div>' +
+      '<h4>' + entry.dest + ' — ' + entry.choiceTitle + '</h4>' +
+      '<p>' + entry.result + '</p>' +
+      '<div class="lesson">⚓ ' + entry.lesson + '</div>';
+    c.appendChild(el);
+  });
+}
+</script>
+<script>
+/* =============================================================================
+   MODAL CORE
+   ============================================================================= */
+const modal = document.getElementById('modal');
+const modalHead = document.getElementById('modalHead');
+const modalBody = document.getElementById('modalBody');
+const modalTitle = document.getElementById('modalTitle');
+const modalSub = document.getElementById('modalSub');
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+function openModal(color) {
+  modalHead.style.background = color || 'var(--gold)';
+  modal.classList.add('active');
+  modalBody.scrollTop = 0;
+}
+
+function closeModal() {
+  modal.classList.remove('active');
+  // After closing, check if all destinations have been visited
+  if (Object.keys(state.visited).length === DESTINATIONS.length && state.status !== 'completed') {
+    state.status = 'completed';
+    saveState();
+    showFinalSummary();
+  }
+}
+
+/* =============================================================================
+   INITIAL SKILL CHOICE — first thing player does
+   ============================================================================= */
+function promptInitialSkill() {
+  if (state.initialSkillChosen) return;
+  modalTitle.textContent = 'Velg en startferdighet';
+  modalSub.textContent = 'Hvilken kunst kommer dere fra hjemmebygda med?';
+  modalHead.style.background = '#1A2744';
+
+  let html = '<p style="font-size: 13.5px; color: #5a6378; margin-bottom: 16px; line-height: 1.55;">' +
+    'Hver gruppe begynner med ÉN ferdighet på nivå 1. De andre kan låses opp underveis ved å fullføre valg som gir ferdighetspoeng. Velg klokt — startferdigheten påvirker hvilke valg dere kan ta tidlig i spillet.' +
+    '</p>';
+
+  Object.entries(SKILL_TREE).forEach(([key, info]) => {
+    html += '<div class="choice" data-skill="' + key + '" style="--col: ' + info.color + ';">' +
+      '<div class="choice-title">' + info.icon + ' ' + info.name + ' — ' + info.tiers[0].name + '</div>' +
+      '<div class="choice-desc">' + info.tiers[0].desc + '</div>' +
+    '</div>';
+  });
+  modalBody.innerHTML = html;
+
+  modalBody.querySelectorAll('.choice').forEach(el => {
+    el.addEventListener('click', () => {
+      const skill = el.dataset.skill;
+      state.skills[skill] = 1;
+      state.initialSkillChosen = true;
+      saveState();
+      renderSkillBranches();
+      closeModal();
+    });
+  });
+  openModal('#1A2744');
+}
+
+/* =============================================================================
+   ENCOUNTER FLOW
+   1. Show context (history + funfact + famous person)
+   2. Show physical task with approval-code system
+   3. After task, show choices
+   4. After choice, dice roll with modifiers
+   5. Result + log entry
+   ============================================================================= */
+function openEncounter(dest) {
+  state.currentDestId = dest.id;
+  state.currentTaskCompleted = false;
+  state.currentTaskBonus = 0;
+  modalTitle.textContent = dest.name;
+  modalSub.textContent = dest.region;
+  modalHead.style.background = dest.color;
+
+  modalBody.innerHTML =
+    '<div class="historical">' + dest.history + '</div>' +
+    '<div class="famous-person"><strong>Kjent person</strong>' + dest.famousPerson + '</div>' +
+    '<div class="funfact"><strong>Visste du</strong>' + dest.funFact + '</div>' +
+    renderTaskBlock(dest) +
+    '<div id="choicesArea" class="hidden">' +
+      '<div class="choices-label">Hva gjør dere?</div>' +
+      '<div id="choiceList"></div>' +
+    '</div>';
+
+  wireTaskButtons(dest);
+  openModal(dest.color);
+}
+
+function renderTaskBlock(dest) {
+  const t = dest.task;
+  return '<div class="physical-task" id="taskBlock">' +
+    '<div class="task-head">' +
+      '<span>' + t.icon + ' Fysisk oppgave</span>' +
+      '<span class="task-type">' + t.typeLabel + '</span>' +
+    '</div>' +
+    '<div class="task-title">' + t.title + '</div>' +
+    '<div class="task-desc">' + t.desc + '</div>' +
+    '<div class="task-rationale">💡 ' + t.rationale + '</div>' +
+    '<div class="task-action" id="taskAction">' +
+      '<button id="startTaskBtn">Start oppgaven</button>' +
+      '<button class="skip" id="skipTaskBtn">Hopp over (uten bonus)</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function wireTaskButtons(dest) {
+  document.getElementById('startTaskBtn').addEventListener('click', () => {
+    showTaskInProgress(dest);
+  });
+  document.getElementById('skipTaskBtn').addEventListener('click', () => {
+    state.currentTaskCompleted = false;
+    state.currentTaskBonus = -1;
+    revealTaskComplete(dest, false, 'Dere hoppet over oppgaven — −1 på terningen.');
+  });
+}
+
+function showTaskInProgress(dest) {
+  const action = document.getElementById('taskAction');
+  action.innerHTML =
+    '<div style="width: 100%;">' +
+      '<p style="font-size: 13px; margin-bottom: 10px; opacity: 0.95;">' +
+        'Utfør oppgaven nå. Vis læreren resultatet når dere er ferdige. Læreren har en kode dere kan taste inn.' +
+      '</p>' +
+      '<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">' +
+        '<input type="text" class="approval-input" id="approvalInput" placeholder="••••" maxlength="4" inputmode="numeric">' +
+        '<button id="submitApprovalBtn">Send inn</button>' +
+        '<button class="skip" id="selfApproveBtn">Egengodkjenn</button>' +
+      '</div>' +
+      '<p style="font-size: 11px; opacity: 0.7; margin-top: 8px; font-style: italic;">' +
+        'Læreren kan også gi delvis godkjenning hvis det var halvbra.' +
+      '</p>' +
+    '</div>';
+
+  const input = document.getElementById('approvalInput');
+  input.focus();
+  const fullCode = approvalCodeFor(state.groupId, dest.id);
+  const partialCode = partialApprovalCodeFor(state.groupId, dest.id);
+
+  document.getElementById('submitApprovalBtn').addEventListener('click', () => {
+    const entered = input.value.trim();
+    if (entered === fullCode) {
+      revealTaskComplete(dest, true, '✓ Læreren godkjente oppgaven helt — +2 på terningen.');
+      state.currentTaskCompleted = true;
+      state.currentTaskBonus = 2;
+    } else if (entered === partialCode) {
+      revealTaskComplete(dest, true, '✓ Læreren ga delvis godkjenning — +1 på terningen.');
+      state.currentTaskCompleted = true;
+      state.currentTaskBonus = 1;
+    } else {
+      input.style.animation = 'shake 0.3s';
+      setTimeout(() => input.style.animation = '', 300);
+      input.value = '';
+      input.placeholder = 'Feil';
+    }
+  });
+  document.getElementById('selfApproveBtn').addEventListener('click', () => {
+    revealTaskComplete(dest, true, '✓ Egengodkjent (uten lærer) — +0 på terningen.');
+    state.currentTaskCompleted = true;
+    state.currentTaskBonus = 0;
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('submitApprovalBtn').click();
+  });
+}
+
+function revealTaskComplete(dest, success, statusMsg) {
+  const statusClass = state.currentTaskBonus >= 2 ? 'success' :
+                      state.currentTaskBonus === 1 ? 'partial' : 'fail';
+  document.getElementById('taskAction').innerHTML =
+    '<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">' +
+      '<span class="task-status ' + statusClass + '">' +
+        (success ? (state.currentTaskBonus >= 2 ? 'GODKJENT' : state.currentTaskBonus === 1 ? 'DELVIS' : 'EGENGODKJENT') : 'HOPPET OVER') +
+      '</span>' +
+      '<span style="font-size: 12px; opacity: 0.95;">' + statusMsg + '</span>' +
+    '</div>';
+
+  document.getElementById('choicesArea').classList.remove('hidden');
+  renderChoices(dest);
+
+  setTimeout(() => {
+    const choicesEl = document.getElementById('choicesArea');
+    if (choicesEl) choicesEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 200);
+}
+
+function renderChoices(dest) {
+  const list = document.getElementById('choiceList');
+  list.innerHTML = '';
+  dest.choices.forEach(choice => {
+    const tagLabel = { respect: 'Respekt', trade: 'Handel', aggressive: 'Makt' }[choice.tag];
+    const reqMet = checkSkillRequirements(choice.skillReq);
+    const c = document.createElement('div');
+    c.className = 'choice' + (reqMet ? '' : ' disabled');
+    c.style.setProperty('--col', dest.color);
+
+    let reqHtml = '';
+    if (choice.skillReq) {
+      Object.entries(choice.skillReq).forEach(([skill, lvl]) => {
+        const has = (state.skills[skill] || 0) >= lvl;
+        const skillInfo = SKILL_TREE[skill];
+        reqHtml += '<span class="choice-tag tag-skill ' + (has ? '' : 'req-fail') + '">' +
+          skillInfo.icon + ' ' + skillInfo.name + ' ' + lvl + '+</span>';
+      });
+    }
+
+    c.innerHTML =
+      '<div class="choice-title">' + choice.title + '</div>' +
+      '<div class="choice-desc">' + choice.desc + '</div>' +
+      '<div class="choice-meta">' +
+        '<span class="choice-tag tag-' + choice.tag + '">' + tagLabel + '</span>' +
+        reqHtml +
+      '</div>';
+
+    if (reqMet) {
+      c.addEventListener('click', () => prepareDiceRoll(dest, choice));
+    }
+    list.appendChild(c);
+  });
+}
+
+function checkSkillRequirements(req) {
+  if (!req) return true;
+  return Object.entries(req).every(([skill, lvl]) => (state.skills[skill] || 0) >= lvl);
+}
+
+/* =============================================================================
+   DICE ROLL
+   ============================================================================= */
+function prepareDiceRoll(dest, choice) {
+  state.currentChoiceId = choice.id;
+
+  const mods = [];
+  let total = 0;
+
+  if (state.currentTaskBonus !== 0) {
+    mods.push({
+      label: state.currentTaskBonus > 0 ? 'Fysisk oppgave fullført' : 'Hoppet over oppgave',
+      val: state.currentTaskBonus
+    });
+    total += state.currentTaskBonus;
+  }
+
+  if (choice.skillReq) {
+    Object.entries(choice.skillReq).forEach(([skill, lvl]) => {
+      const have = state.skills[skill] || 0;
+      if (have > lvl) {
+        mods.push({ label: SKILL_TREE[skill].name + ' (over kravet)', val: 1 });
+        total += 1;
+      }
+    });
+  }
+
+  if (choice.tag === 'aggressive' && state.scores.reputation < -3) {
+    mods.push({ label: 'Dårlig rykte forfølger dere', val: -1 });
+    total -= 1;
+  }
+  if (choice.tag === 'respect' && state.scores.reputation > 3) {
+    mods.push({ label: 'Godt rykte åpner dører', val: 1 });
+    total += 1;
+  }
+  if (choice.tag === 'respect' && state.scores.understanding > 8) {
+    mods.push({ label: 'Mye kulturforståelse', val: 1 });
+    total += 1;
+  }
+
+  const odds = computeOdds(choice.baseRoll, total);
+
+  let modsHtml = '';
+  if (mods.length === 0) {
+    modsHtml = '<div class="mod-line"><span>Ingen modifikatorer</span><span>0</span></div>';
+  } else {
+    mods.forEach(m => {
+      modsHtml += '<div class="mod-line"><span>' + m.label + '</span>' +
+        '<span class="' + (m.val > 0 ? 'mod-pos' : 'mod-neg') + '">' +
+        (m.val > 0 ? '+' : '') + m.val + '</span></div>';
+    });
+  }
+  modsHtml += '<div class="mod-line mod-total"><span>Total terning-justering</span>' +
+    '<span class="' + (total > 0 ? 'mod-pos' : total < 0 ? 'mod-neg' : '') + '">' +
+    (total > 0 ? '+' : '') + total + '</span></div>';
+
+  let oddsBarHtml = '';
+  if (odds.bad > 1) oddsBarHtml += '<div class="odds-segment bad" style="width: ' + odds.bad + '%">' + Math.round(odds.bad) + '%</div>';
+  if (odds.mid > 1) oddsBarHtml += '<div class="odds-segment mid" style="width: ' + odds.mid + '%">' + Math.round(odds.mid) + '%</div>';
+  if (odds.good > 1) oddsBarHtml += '<div class="odds-segment good" style="width: ' + odds.good + '%">' + Math.round(odds.good) + '%</div>';
+  if (odds.crit > 1) oddsBarHtml += '<div class="odds-segment crit" style="width: ' + odds.crit + '%">' + Math.round(odds.crit) + '%</div>';
+
+  modalBody.innerHTML =
+    '<div class="dice-section">' +
+      '<h3>Skjebnen ruller</h3>' +
+      '<p class="flavor">«' + choice.title + '»</p>' +
+      '<div class="modifiers">' + modsHtml + '</div>' +
+      '<div class="odds-bar">' + oddsBarHtml + '</div>' +
+      '<div class="odds-labels">' +
+        '<span>Katastrofe</span><span>Middels</span><span>Bra</span><span>Trumf</span>' +
+      '</div>' +
+      '<div class="dice" id="diceEl">?</div>' +
+      '<button class="roll-btn" id="rollBtn">Rull terningen</button>' +
+    '</div>';
+
+  document.getElementById('rollBtn').addEventListener('click', () => doRoll(dest, choice, odds));
+}
+
+function computeOdds(base, mod) {
+  const totalCount = base.bad + base.mid + base.good + (base.crit || 0);
+  let bad = (base.bad / totalCount) * 100;
+  let mid = (base.mid / totalCount) * 100;
+  let good = (base.good / totalCount) * 100;
+  let crit = ((base.crit || 0) / totalCount) * 100;
+
+  const shift = Math.abs(mod) * 8;
+  if (mod > 0) {
+    const fromBad = Math.min(bad, shift);
+    bad -= fromBad;
+    mid += fromBad * 0.5;
+    good += fromBad * 0.4;
+    crit += fromBad * 0.1;
+    const fromMid = Math.min(mid, shift * 0.5);
+    mid -= fromMid;
+    good += fromMid * 0.7;
+    crit += fromMid * 0.3;
+  } else if (mod < 0) {
+    const fromCrit = Math.min(crit, shift * 0.4);
+    crit -= fromCrit;
+    good += fromCrit * 0.5;
+    mid += fromCrit * 0.5;
+    const fromGood = Math.min(good, shift * 0.7);
+    good -= fromGood;
+    mid += fromGood * 0.5;
+    bad += fromGood * 0.5;
+    const fromMid = Math.min(mid, shift * 0.5);
+    mid -= fromMid;
+    bad += fromMid;
+  }
+
+  bad = Math.max(0, bad); mid = Math.max(0, mid);
+  good = Math.max(0, good); crit = Math.max(0, crit);
+  const sum = bad + mid + good + crit || 1;
+  return {
+    bad: bad / sum * 100,
+    mid: mid / sum * 100,
+    good: good / sum * 100,
+    crit: crit / sum * 100
+  };
+}
+
+function doRoll(dest, choice, odds) {
+  const btn = document.getElementById('rollBtn');
+  btn.disabled = true;
+  const diceEl = document.getElementById('diceEl');
+  diceEl.classList.add('rolling');
+
+  const cycleInt = setInterval(() => {
+    diceEl.textContent = (Math.floor(Math.random() * 6) + 1);
+  }, 80);
+
+  setTimeout(() => {
+    clearInterval(cycleInt);
+    diceEl.classList.remove('rolling');
+    diceEl.classList.add('shown');
+
+    // Pick outcome bucket using weighted roll
+    const r = Math.random() * 100;
+    let outcomeKey;
+    if (r < odds.bad) outcomeKey = 'bad';
+    else if (r < odds.bad + odds.mid) outcomeKey = 'mid';
+    else if (r < odds.bad + odds.mid + odds.good) outcomeKey = 'good';
+    else outcomeKey = 'crit';
+
+    let face;
+    if (outcomeKey === 'bad') face = Math.random() < 0.5 ? 1 : 2;
+    else if (outcomeKey === 'mid') face = Math.random() < 0.5 ? 3 : 4;
+    else if (outcomeKey === 'good') face = 5;
+    else face = 6;
+    diceEl.textContent = face;
+
+    setTimeout(() => showOutcome(dest, choice, outcomeKey, face), 700);
+  }, 1400);
+}
+
+function showOutcome(dest, choice, outcomeKey, face) {
+  // Pick best available outcome (some choices don't have all keys)
+  let outcome = choice.outcomes[outcomeKey];
+  if (!outcome) {
+    const fallback = { bad: ['mid', 'good'], crit: ['good', 'mid'], good: ['mid', 'crit'], mid: ['good', 'bad'] };
+    for (const fb of (fallback[outcomeKey] || [])) {
+      if (choice.outcomes[fb]) { outcome = choice.outcomes[fb]; outcomeKey = fb; break; }
+    }
+  }
+  if (!outcome) outcome = { und: 0, trade: 0, rep: 0, text: 'Ingenting spesielt skjedde.' };
+
+  // Apply scores
+  state.scores.understanding += outcome.und || 0;
+  state.scores.trade += outcome.trade || 0;
+  state.scores.reputation += outcome.rep || 0;
+
+  // Apply skill rewards
+  let skillRewardText = '';
+  if (choice.skillReward) {
+    Object.entries(choice.skillReward).forEach(([skill, gain]) => {
+      const before = state.skills[skill] || 0;
+      const after = Math.min(3, before + gain);
+      state.skills[skill] = after;
+      if (after > before) {
+        if (after === 1) {
+          skillRewardText += ' Dere lærte grunnleggende ' + SKILL_TREE[skill].name.toLowerCase() + '.';
+        } else if (after === 2) {
+          skillRewardText += ' ' + SKILL_TREE[skill].name + ' nådde nivå 2 — ' + SKILL_TREE[skill].tiers[1].name + '.';
+        } else if (after === 3) {
+          skillRewardText += ' ' + SKILL_TREE[skill].name + ' er nå mestret — ' + SKILL_TREE[skill].tiers[2].name + '.';
+        }
+      }
+    });
+  }
+
+  // Mark visited
+  state.visited[dest.id] = {
+    choiceId: choice.id,
+    taskCompleted: state.currentTaskCompleted,
+    taskBonus: state.currentTaskBonus,
+    diceRoll: face,
+    outcome: outcomeKey
+  };
+
+  // Add to log
+  state.log.push({
+    dest: dest.name,
+    region: dest.region,
+    color: dest.color,
+    choiceTitle: choice.title,
+    result: outcome.text,
+    lesson: choice.lesson
+  });
+
+  saveState();
+
+  const icon = { bad: '⚠️', mid: '⚖️', good: '🌿', crit: '✨' }[outcomeKey];
+  const headLabel = {
+    bad: 'Katastrofe',
+    mid: 'Det går så som så',
+    good: 'Det går bra',
+    crit: 'Trumf — historiens øyeblikk'
+  }[outcomeKey];
+
+  const undS = (outcome.und || 0) > 0 ? '+' : '';
+  const trS = (outcome.trade || 0) > 0 ? '+' : '';
+  const rpS = (outcome.rep || 0) > 0 ? '+' : '';
+
+  modalBody.innerHTML =
+    '<div class="result">' +
+      '<div class="result-icon">' + icon + '</div>' +
+      '<h3>' + headLabel + '</h3>' +
+      '<p class="result-text">' + outcome.text + skillRewardText + '</p>' +
+      '<div class="points-earned">' +
+        '<span class="point-pill ' + ((outcome.und||0) >= 0 ? 'pp-understanding' : 'pp-loss') + '">' +
+          undS + (outcome.und || 0) + ' kulturforståelse</span>' +
+        '<span class="point-pill ' + ((outcome.trade||0) >= 0 ? 'pp-trade' : 'pp-loss') + '">' +
+          trS + (outcome.trade || 0) + ' handel</span>' +
+        '<span class="point-pill ' + ((outcome.rep||0) >= 0 ? 'pp-rep' : 'pp-loss') + '">' +
+          rpS + (outcome.rep || 0) + ' rykte</span>' +
+      '</div>' +
+      '<div class="lesson-box">' +
+        '<div class="lesson-head">⚓ Slik lærte vikingene</div>' +
+        choice.lesson +
+      '</div>' +
+      '<button class="primary-btn" id="resultBackBtn">Tilbake til skipet</button>' +
+    '</div>';
+
+  updateScores();
+  renderSkillBranches();
+  renderDestinations();
+  renderLog();
+
+  document.getElementById('resultBackBtn').addEventListener('click', closeModal);
+}
+</script>
+<script>
+/* =============================================================================
+   SKILL TREE MODAL (display-only for now; quiz-unlocking comes in prompt 3)
+   ============================================================================= */
+document.getElementById('skillTreeOpen').addEventListener('click', openSkillTreeModal);
+
+function openSkillTreeModal() {
+  modalTitle.textContent = 'Ferdighetstre';
+  modalSub.textContent = 'Hva dere har lært på reisen';
+  modalHead.style.background = '#1A2744';
+
+  const visitedCount = Object.keys(state.visited).length;
+
+  let html = '<p style="font-size: 13px; color: #5a6378; margin-bottom: 16px; line-height: 1.55;">' +
+    'Hver ferdighet har tre nivåer. Nivå 1 valgte dere ved start. Nivå 2 og 3 låses opp ved å bestå en quiz om det dere har lært.' +
+    '</p>';
+
+  Object.entries(SKILL_TREE).forEach(([key, info]) => {
+    const tier = state.skills[key] || 0;
+    html += '<div style="margin-bottom: 16px; padding: 12px 14px; background: ' +
+      (tier >= 1 ? '#FFF8E8' : '#F5F0E8') +
+      '; border-radius: 8px; border-left: 3px solid ' + info.color + ';">' +
+      '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">' +
+        '<span style="font-size: 22px;">' + info.icon + '</span>' +
+        '<strong style="font-family: \'Iowan Old Style\', Georgia, serif; font-size: 15px; color: var(--ink);">' +
+          info.name +
+        '</strong>' +
+        '<span style="margin-left: auto; font-size: 11px; color: #888; letter-spacing: 0.1em; text-transform: uppercase;">' +
+          'Nivå ' + tier + ' / 3' +
+        '</span>' +
+      '</div>';
+
+    [1, 2, 3].forEach(t => {
+      const unlocked = tier >= t;
+      const isNextTier = (t === tier + 1);
+      const dotStyle = unlocked
+        ? 'background: ' + info.color + '; border-color: ' + info.color + '; box-shadow: 0 0 8px ' + info.color + '99;'
+        : 'background: #ddd; border-color: #aaa;';
+
+      html += '<div class="skill-tier-row ' + (unlocked ? '' : 'locked') + '">' +
+        '<div class="tier-dot" style="' + dotStyle + '"></div>' +
+        '<div class="tier-content">' +
+          '<strong>Nivå ' + t + ': ' + info.tiers[t-1].name + '</strong>' +
+          '<span class="desc">' + info.tiers[t-1].desc + '</span>';
+
+      // If this is the next tier to unlock (and tier 2 or 3), show quiz button or lock message
+      if (isNextTier && t >= 2) {
+        const quizCheck = canAttemptQuiz(key, t);
+        if (quizCheck.canTake) {
+          html += '<button class="quiz-unlock-btn" data-skill="' + key + '" data-tier="' + t + '">' +
+            'Ta quiz for å låse opp</button>';
+        } else {
+          html += '<div class="quiz-locked-msg">' + quizCheck.message + '</div>';
+        }
+      }
+
+      html += '</div></div>';
+    });
+
+    html += '</div>';
+  });
+
+  modalBody.innerHTML = html;
+
+  // Wire up quiz buttons
+  modalBody.querySelectorAll('.quiz-unlock-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      startQuiz(btn.dataset.skill, parseInt(btn.dataset.tier, 10));
+    });
+  });
+
+  openModal('#1A2744');
+}
+
+/* =============================================================================
+   QUIZ SYSTEM
+   - Tier 2 quiz: 3 questions, must get 2/3 right
+   - Tier 3 quiz: 4 questions, must get 3/4 right
+   - Questions filtered by visited destinations
+   - Failed attempts: must visit at least 1 new destination before retry
+   ============================================================================= */
+const QUIZ_CONFIG = {
+  2: { count: 3, required: 2, minVisited: 2 },
+  3: { count: 4, required: 3, minVisited: 6 }
+};
+
+// Track failed attempts: state.failedQuizAttempts[skillKey + '_t' + tier] = visitCountAtFail
+function getFailureKey(skill, tier) { return skill + '_t' + tier; }
+
+function canAttemptQuiz(skill, tier) {
+  const cfg = QUIZ_CONFIG[tier];
+  if (!cfg) return { canTake: false, message: 'Ugyldig nivå' };
+
+  const visitedCount = Object.keys(state.visited).length;
+  if (visitedCount < cfg.minVisited) {
+    const need = cfg.minVisited - visitedCount;
+    return { canTake: false, message: 'Krever ' + cfg.minVisited + ' besøkte stasjoner (mangler ' + need + ')' };
+  }
+
+  // Check failure cooldown
+  const failures = state.failedQuizAttempts || {};
+  const lastFail = failures[getFailureKey(skill, tier)];
+  if (lastFail !== undefined && lastFail >= visitedCount) {
+    return { canTake: false, message: 'Reis videre og besøk minst ett nytt sted før dere prøver igjen' };
+  }
+
+  // Check that at least one question matches visited destinations
+  const pool = filterQuizPool(skill, tier);
+  if (pool.length < cfg.count) {
+    return { canTake: false, message: 'For få relevante spørsmål — besøk flere steder først' };
+  }
+
+  return { canTake: true };
+}
+
+function filterQuizPool(skill, tier) {
+  const allQs = (QUIZ_BANK[skill] && QUIZ_BANK[skill]['tier' + tier]) || [];
+  const visitedIds = Object.keys(state.visited);
+  return allQs.filter(q => q.source.some(s => visitedIds.includes(s)));
+}
+
+// Quiz state (transient)
+let quizState = null;
+
+function startQuiz(skill, tier) {
+  const cfg = QUIZ_CONFIG[tier];
+  const pool = filterQuizPool(skill, tier);
+  // Shuffle and pick required number of questions
+  const shuffled = pool.slice().sort(() => Math.random() - 0.5);
+  const questions = shuffled.slice(0, cfg.count);
+
+  quizState = {
+    skill: skill,
+    tier: tier,
+    questions: questions,
+    currentIdx: 0,
+    answers: [], // array of { correct: bool, selectedIdx, q }
+    info: SKILL_TREE[skill]
+  };
+
+  modalTitle.textContent = quizState.info.name + ' — Nivå ' + tier;
+  modalSub.textContent = 'Bestå ' + cfg.required + ' av ' + cfg.count + ' for å låse opp';
+  modalHead.style.background = quizState.info.color;
+
+  showQuizIntro();
+}
+
+function showQuizIntro() {
+  const cfg = QUIZ_CONFIG[quizState.tier];
+  const tierInfo = quizState.info.tiers[quizState.tier - 1];
+
+  modalBody.innerHTML =
+    '<div class="quiz-intro">' +
+      '<h4>' + quizState.info.icon + ' Lås opp: ' + tierInfo.name + '</h4>' +
+      '<p>' + tierInfo.desc + '</p>' +
+    '</div>' +
+    '<p style="font-size: 13px; color: #5a6378; margin-bottom: 14px; line-height: 1.55;">' +
+      'Dere får ' + cfg.count + ' spørsmål om ting dere har lært på reisen så langt. Dere må svare riktig på minst <strong>' + cfg.required + '</strong> for å bestå. Det er feedback etter hvert spørsmål.' +
+    '</p>' +
+    '<button class="primary-btn" id="quizStartBtn">Start quizen</button>';
+
+  document.getElementById('quizStartBtn').addEventListener('click', showQuizQuestion);
+}
+
+function showQuizQuestion() {
+  const q = quizState.questions[quizState.currentIdx];
+  const cfg = QUIZ_CONFIG[quizState.tier];
+
+  // Progress dots
+  let dotsHtml = '<div class="quiz-progress">';
+  for (let i = 0; i < cfg.count; i++) {
+    let cls = 'qp-dot';
+    if (i < quizState.currentIdx) {
+      cls += quizState.answers[i] && quizState.answers[i].correct ? ' correct' : ' wrong';
+    } else if (i === quizState.currentIdx) {
+      cls += ' current';
+    }
+    dotsHtml += '<div class="' + cls + '"></div>';
+  }
+  dotsHtml += '</div>';
+
+  // Question
+  let optsHtml = '<div class="quiz-options">';
+  q.opts.forEach((opt, i) => {
+    optsHtml += '<button class="quiz-option" data-idx="' + i + '">' + opt + '</button>';
+  });
+  optsHtml += '</div>';
+
+  modalBody.innerHTML =
+    dotsHtml +
+    '<div class="quiz-question">' +
+      '<div class="q-num">Spørsmål ' + (quizState.currentIdx + 1) + ' av ' + cfg.count + '</div>' +
+      '<div class="q-text">' + q.q + '</div>' +
+    '</div>' +
+    optsHtml +
+    '<div id="quizFeedbackArea"></div>';
+
+  modalBody.querySelectorAll('.quiz-option').forEach(btn => {
+    btn.addEventListener('click', () => handleQuizAnswer(parseInt(btn.dataset.idx, 10)));
+  });
+
+  modalBody.scrollTop = 0;
+}
+
+function handleQuizAnswer(selectedIdx) {
+  const q = quizState.questions[quizState.currentIdx];
+  const isCorrect = (selectedIdx === q.correct);
+
+  // Record answer
+  quizState.answers.push({
+    correct: isCorrect,
+    selectedIdx: selectedIdx,
+    q: q
+  });
+
+  // Mark options visually, disable all
+  modalBody.querySelectorAll('.quiz-option').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add(isCorrect ? 'correct' : 'was-correct');
+    if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  // Show feedback
+  const feedback = document.getElementById('quizFeedbackArea');
+  feedback.innerHTML =
+    '<div class="quiz-feedback ' + (isCorrect ? 'success' : 'fail') + '">' +
+      '<div class="fb-head">' + (isCorrect ? '✓ Riktig' : '✗ Galt') + '</div>' +
+      q.feedback +
+    '</div>' +
+    '<button class="primary-btn" id="quizNextBtn" style="margin-top: 14px;">' +
+      (quizState.currentIdx + 1 < quizState.questions.length ? 'Neste spørsmål' : 'Se resultatet') +
+    '</button>';
+
+  document.getElementById('quizNextBtn').addEventListener('click', () => {
+    quizState.currentIdx++;
+    if (quizState.currentIdx < quizState.questions.length) {
+      showQuizQuestion();
+    } else {
+      finishQuiz();
+    }
+  });
+
+  feedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function finishQuiz() {
+  const correctCount = quizState.answers.filter(a => a.correct).length;
+  const total = quizState.questions.length;
+  const cfg = QUIZ_CONFIG[quizState.tier];
+  const passed = correctCount >= cfg.required;
+
+  if (passed) {
+    state.skills[quizState.skill] = quizState.tier;
+    // Clear any previous failure record for this skill+tier
+    if (state.failedQuizAttempts) {
+      delete state.failedQuizAttempts[getFailureKey(quizState.skill, quizState.tier)];
+    }
+    saveState();
+  } else {
+    // Record failure: need to visit a new destination before retry
+    if (!state.failedQuizAttempts) state.failedQuizAttempts = {};
+    state.failedQuizAttempts[getFailureKey(quizState.skill, quizState.tier)] = Object.keys(state.visited).length;
+    saveState();
+  }
+
+  const tierInfo = quizState.info.tiers[quizState.tier - 1];
+  const icon = passed ? '🌿' : '⚠️';
+  const headLabel = passed ? 'Bestått!' : 'Ikke bestått';
+
+  let resultText;
+  if (passed) {
+    resultText = 'Dere har låst opp <strong>' + tierInfo.name + '</strong>! ' + tierInfo.desc;
+  } else {
+    resultText = 'Dere fikk ' + correctCount + ' av ' + total + ' riktig. Reis videre og besøk minst ett nytt sted før dere prøver igjen — kanskje finner dere svaret underveis.';
+  }
+
+  modalBody.innerHTML =
+    '<div class="quiz-result">' +
+      '<div class="qr-icon">' + icon + '</div>' +
+      '<h3>' + headLabel + '</h3>' +
+      '<div class="qr-score">' + correctCount + ' / ' + total + ' riktig (krav: ' + cfg.required + ')</div>' +
+      '<p>' + resultText + '</p>' +
+      '<button class="primary-btn" id="quizDoneBtn">Tilbake til reisen</button>' +
+    '</div>';
+
+  document.getElementById('quizDoneBtn').addEventListener('click', () => {
+    quizState = null;
+    closeModal();
+    renderSkillBranches();
+    updateQuizAvailableHint();
+  });
+}
+
+/* =============================================================================
+   QUIZ AVAILABLE HINT — make the skill tree button glow when a quiz is ready
+   ============================================================================= */
+function updateQuizAvailableHint() {
+  const btn = document.getElementById('skillTreeOpen');
+  let anyAvailable = false;
+
+  Object.keys(SKILL_TREE).forEach(key => {
+    const tier = state.skills[key] || 0;
+    if (tier < 3) {
+      const next = tier + 1;
+      if (next >= 2) {
+        const check = canAttemptQuiz(key, next);
+        if (check.canTake) anyAvailable = true;
+      }
+    }
+  });
+
+  if (anyAvailable) {
+    btn.classList.add('has-quiz');
+    btn.textContent = 'Quiz tilgjengelig!';
+  } else {
+    btn.classList.remove('has-quiz');
+    btn.textContent = 'Se ferdigheter';
+  }
+}
+
+// Hook into renderAll so the hint updates after every change
+const _origRenderAll = renderAll;
+renderAll = function() {
+  _origRenderAll();
+  updateQuizAvailableHint();
+};
+
+/* =============================================================================
+   FINAL SUMMARY
+   ============================================================================= */
+function showFinalSummary() {
+  const final = document.getElementById('finalSection');
+  const total = state.scores.understanding + state.scores.trade + state.scores.reputation;
+
+  // Determine archetype based on profile
+  const arch = determineArchetype();
+
+  let html =
+    '<div class="summary-screen">' +
+      '<h2>Reisen er over</h2>' +
+      '<div class="ship-name-display">«' + state.shipName + '» har vendt hjem</div>' +
+      '<div class="total-score">' +
+        '<div class="total-label">Total poengsum</div>' +
+        '<div class="total-value">' + total + '</div>' +
+      '</div>' +
+      '<div class="archetype">' +
+        '<div class="arch-label">Dere ble</div>' +
+        '<div class="arch-name">' + arch.name + '</div>' +
+        '<div class="arch-desc">' + arch.desc + '</div>' +
+      '</div>' +
+      '<div class="stats-row">' +
+        '<div class="stat-card understanding">' +
+          '<div class="label">Kulturforståelse</div>' +
+          '<div class="value">' + state.scores.understanding + '</div>' +
+        '</div>' +
+        '<div class="stat-card trade">' +
+          '<div class="label">Handelsutbytte</div>' +
+          '<div class="value">' + state.scores.trade + '</div>' +
+        '</div>' +
+        '<div class="stat-card reputation">' +
+          '<div class="label">Rykte</div>' +
+          '<div class="value">' + state.scores.reputation + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<h3>Hva vikingene lærte å møte nye kulturer</h3>' +
+      '<ul class="lessons-list">';
+
+  state.log.forEach(entry => {
+    html += '<li style="--col: ' + entry.color + ';">' +
+      '<strong>' + entry.dest + '</strong>' + entry.lesson +
+    '</li>';
+  });
+
+  html += '</ul>' +
+    '<p style="margin-top: 18px; font-size: 12px; color: rgba(245, 240, 232, 0.5); text-align: center; font-style: italic;">' +
+      'Vis denne skjermen til læreren for å registrere gruppens resultat.' +
+    '</p>' +
+  '</div>';
+
+  final.innerHTML = html;
+  final.classList.remove('hidden');
+  final.scrollIntoView({ behavior: 'smooth' });
+}
+
+function determineArchetype() {
+  const u = state.scores.understanding;
+  const t = state.scores.trade;
+  const r = state.scores.reputation;
+
+  // Find dominant trait
+  if (u >= 25 && r >= 8) {
+    return {
+      name: 'Brobyggerne',
+      desc: 'Dere etterlot dere et nettverk av venner i halve verden. Generasjoner etter dere kunne reise tryggere fordi dere viste vei.'
+    };
+  }
+  if (t >= 35 && r <= 0) {
+    return {
+      name: 'Sølvkongene',
+      desc: 'Dere ble rikere enn noen andre — men prisen var høy. Halve Europa lukket dørene for dere, og barna deres måtte begynne forfra.'
+    };
+  }
+  if (u >= 20 && t >= 20) {
+    return {
+      name: 'Verdensreisende',
+      desc: 'Dere viste at vikingene kunne være både kjøpmenn og kulturmøtere. Dere satte spor i flere kulturer — og hver av dem etterlot spor i dere.'
+    };
+  }
+  if (r <= -8 && t >= 20) {
+    return {
+      name: 'De fryktede',
+      desc: 'Sagaene husker dere. Folkene dere møtte gjør det også. Dere ble rike på frykt — men den som lever av frykten, dør ofte av den.'
+    };
+  }
+  if (u >= 18 && r >= 4) {
+    return {
+      name: 'Diplomatene',
+      desc: 'Dere foretrakk ord fremfor sverd. Mange syntes dere var en skuffelse hjemme — men i Bagdad, Miklagard og Dublin huskes dere som ærverdige menn.'
+    };
+  }
+  if (t >= 25) {
+    return {
+      name: 'Handelsmennene',
+      desc: 'Dere fant alltid en pris og et marked. Pengene rant inn. Men når dere så tilbake på reisen, måtte dere lure: hva mer kunne dere ha tatt med hjem enn varer?'
+    };
+  }
+  if (u >= 15) {
+    return {
+      name: 'Lærerne',
+      desc: 'Dere brakte hjem mer kunnskap enn sølv — om språk, tro, sjømannskap og fremmede skikker. Bygda forstod dere ikke alltid, men barna deres tjente på det.'
+    };
+  }
+  return {
+    name: 'Reisende',
+    desc: 'Dere så mer enn de fleste. Hva dere gjorde med det, er fortsatt et åpent spørsmål — kanskje for selve sagaen som vil bli skrevet om dere.'
+  };
+}
+
+/* =============================================================================
+   EXPORT STATUS — for lærerversjonen
+   ============================================================================= */
+document.getElementById('exportStatusBtn').addEventListener('click', () => {
+  if (!state.groupId) {
+    alert('Dere må starte en reise først.');
+    return;
+  }
+  const exportData = {
+    groupId: state.groupId,
+    shipName: state.shipName,
+    scores: state.scores,
+    skills: state.skills,
+    visited: state.visited,
+    log: state.log,
+    status: state.status,
+    initialSkillChosen: state.initialSkillChosen,
+    lastUpdated: new Date().toISOString()
+  };
+  const json = JSON.stringify(exportData);
+
+  // Open a small modal showing the code, with copy button
+  modalTitle.textContent = 'Eksporter status';
+  modalSub.textContent = 'Send denne koden til læreren';
+  modalHead.style.background = '#1A2744';
+
+  modalBody.innerHTML =
+    '<p style="font-size: 13px; color: #5a6378; margin-bottom: 14px; line-height: 1.55;">' +
+      'Læreren kan importere denne koden i Lærerpanelet for å se reisen deres. Trykk «Kopier» og send via Teams, e-post eller vis skjermen til læreren.' +
+    '</p>' +
+    '<textarea id="exportTextarea" readonly style="width: 100%; min-height: 140px; background: #f5f5f5; border: 1px solid #ccc; border-radius: 6px; padding: 10px; font-family: \'Courier New\', monospace; font-size: 11px; color: #333; resize: vertical;">' + json + '</textarea>' +
+    '<div style="display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end;">' +
+      '<button class="secondary-btn" style="color: #888; border-color: #ccc;" onclick="closeModal()">Lukk</button>' +
+      '<button class="primary-btn" id="copyExportBtn">Kopier til utklippstavle</button>' +
+    '</div>';
+
+  openModal('#1A2744');
+
+  document.getElementById('copyExportBtn').addEventListener('click', async () => {
+    const ta = document.getElementById('exportTextarea');
+    ta.select();
+    try {
+      await navigator.clipboard.writeText(ta.value);
+      const btn = document.getElementById('copyExportBtn');
+      btn.textContent = '✓ Kopiert!';
+      setTimeout(() => { btn.textContent = 'Kopier til utklippstavle'; }, 1500);
+    } catch (e) {
+      // fallback: use document.execCommand
+      try { document.execCommand('copy'); } catch (e2) {}
+      alert('Marker teksten og kopier manuelt (Ctrl+C / Cmd+C)');
+    }
+  });
+});
+
+</script>
+</body>
+</html>
