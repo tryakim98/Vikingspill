@@ -125,3 +125,38 @@ export function subscribeTrial(code: string, callback: (trial: Trial | null) => 
     callback((snap.val() as Trial | null) ?? null);
   });
 }
+
+// === Sjøslag — «Holmgang på bølgene» (§7.2) =======================================
+// To-sidig: A utfordrer B → B aksepterer → vinner rapporteres → begge får utfall.
+
+export interface DuelActivity {
+  navn: string;
+  desc: string;
+  ferdighet: SkillKey;
+}
+
+export interface Duel {
+  id: string;
+  challengerId: string;
+  challengerName: string;
+  defenderId: string;
+  defenderName: string;
+  activity: DuelActivity;
+  status: 'pending' | 'active' | 'resolved' | 'declined';
+  winnerId?: string;
+  at: number;
+}
+
+export function createDuel(code: string, duel: Duel): Promise<void> {
+  return set(ref(db, `games/${code}/duels/${duel.id}`), duel);
+}
+
+export function updateDuel(code: string, duelId: string, partial: Partial<Duel>): Promise<void> {
+  return update(ref(db, `games/${code}/duels/${duelId}`), partial);
+}
+
+export function subscribeDuels(code: string, callback: (duels: Record<string, Duel>) => void): Unsubscribe {
+  return onValue(ref(db, `games/${code}/duels`), (snap) => {
+    callback((snap.val() as Record<string, Duel> | null) ?? {});
+  });
+}

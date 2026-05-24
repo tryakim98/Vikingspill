@@ -86,6 +86,7 @@ export default function TeacherPanel() {
             <p className="mb-8 font-inter text-viking-paper/85">Du får en spillkode som elevene taster inn for å bli med.</p>
             <button onClick={() => void createNew()} className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">Opprett spill</button>
           </div>
+          <button onClick={switchRole} className="mt-6 rounded border-2 border-viking-gold/50 px-5 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Bytt rolle</button>
         </div>
       </div>
     );

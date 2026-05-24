@@ -17,6 +17,7 @@ import EndCeremony from '../ceremony/EndCeremony';
 import type { Session } from '../../hooks/useSession';
 import { removeGroup, requestApproval, subscribeTrial, type Trial } from '../../lib/gameSync';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
+import SeaBattle from '../duel/SeaBattle';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -188,6 +189,13 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           >
             ⚓ Seil hjem til Avaldsnes
           </button>
+        )}
+
+        {/* §7.2 Sjøslag (kun online — krever andre grupper) */}
+        {session.mode === 'online' && (
+          <div className="mb-8">
+            <SeaBattle code={session.gameCode} myGroupId={session.groupId} myShipName={setup.shipName} mySkills={state.skills} onResult={addReward} />
+          </div>
         )}
 
         {/* Dev-modus */}

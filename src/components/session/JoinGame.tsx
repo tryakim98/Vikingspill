@@ -11,9 +11,10 @@ import { normalizeGameCode } from '../../lib/gameCode';
 interface Props {
   onJoin: (code: string) => void;
   onOffline: () => void;
+  onSwitchRole: () => void;
 }
 
-export default function JoinGame({ onJoin, onOffline }: Props) {
+export default function JoinGame({ onJoin, onOffline, onSwitchRole }: Props) {
   const [code, setCode] = useState('');
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +76,15 @@ export default function JoinGame({ onJoin, onOffline }: Props) {
         >
           Spill offline (uten kode)
         </button>
+
+        <div className="mt-8">
+          <button
+            onClick={onSwitchRole}
+            className="font-inter text-xs text-viking-gold-soft/60 hover:text-viking-gold-soft"
+          >
+            ← Bytt rolle (tilbake til rollevalg)
+          </button>
+        </div>
       </div>
     </div>
   );

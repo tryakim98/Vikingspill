@@ -23,18 +23,18 @@ export default function StudentGame() {
   // Unngå flimmer mens localStorage leses
   if (!sLoaded || !gLoaded) return null;
 
+  const handleSwitchRole = () => {
+    clearRole();
+    navigate('/', { replace: true });
+  };
+
   if (!session) {
-    return <JoinGame onJoin={join} onOffline={playOffline} />;
+    return <JoinGame onJoin={join} onOffline={playOffline} onSwitchRole={handleSwitchRole} />;
   }
 
   if (!setup) {
     return <SetupFlow onComplete={saveSetup} />;
   }
-
-  const handleSwitchRole = () => {
-    clearRole();
-    navigate('/', { replace: true });
-  };
 
   return (
     <GameDashboard
