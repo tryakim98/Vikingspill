@@ -7,6 +7,8 @@
 import { useState, useEffect } from 'react';
 import type { SkillKey } from '../types';
 import type { GroupSetup } from './useGroupSetup';
+import type { Session } from './useSession';
+import { writeGroup } from '../lib/gameSync';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const KEY = 'vikingspill_state';
@@ -36,7 +38,7 @@ function seed(setup: GroupSetup): GameProgress {
   };
 }
 
-export function useGameState(setup: GroupSetup) {
+export function useGameState(setup: GroupSetup, session: Session | null) {
   const [state, setState] = useState<GameProgress | null>(null);
 
   useEffect(() => {
@@ -48,6 +50,23 @@ export function useGameState(setup: GroupSetup) {
     }
     // Seedes kun ved første montering; setup er stabil fra localStorage.
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Speil gruppens identitet + tilstand til Firebase når økten er online.
+  // localStorage er alltid kilden; dette er «best effort»-sync (feiler stille offline).
+  useEffect(() => {
+    if (!state || session?.mode !== 'online') return;
+    writeGroup(session.gameCode, session.groupId, {
+      shipName: setup.shipName,
+      shipSymbol: setup.shipSymbol,
+      shipColor: setup.shipColor,
+      startSkill: setup.startSkill,
+      scores: state.scores,
+      skills: state.skills,
+      visited: state.visited,
+      locked: state.locked,
+      updatedAt: Date.now(),
+    }).catch(() => { /* offline-fallback: localStorage beholder tilstanden */ });
+  }, [state, session, setup]);
 
   const persist = (next: GameProgress) => {
     setState(next);

@@ -14,6 +14,8 @@ import VikingShip from '../ship/VikingShip';
 import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
+import type { Session } from '../../hooks/useSession';
+import { removeGroup } from '../../lib/gameSync';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -21,12 +23,14 @@ const DIFFICULTY_COLOR: Record<string, string> = { trygg: '#5B7553', middels: '#
 
 interface Props {
   setup: GroupSetup;
+  session: Session;
   onResetSetup: () => void;
+  onLeaveGame: () => void;
   onSwitchRole: () => void;
 }
 
-export default function GameDashboard({ setup, onResetSetup, onSwitchRole }: Props) {
-  const { state, applyOutcome, setSkillLevel, resetProgress } = useGameState(setup);
+export default function GameDashboard({ setup, session, onResetSetup, onLeaveGame, onSwitchRole }: Props) {
+  const { state, applyOutcome, setSkillLevel, resetProgress } = useGameState(setup, session);
   const [activeDest, setActiveDest] = useState<Destination | null>(null);
   const [activeSkill, setActiveSkill] = useState<SkillKey | null>(null);
   const [showCeremony, setShowCeremony] = useState(false);
@@ -82,6 +86,9 @@ export default function GameDashboard({ setup, onResetSetup, onSwitchRole }: Pro
           <div>
             <h1 className="font-cinzel text-3xl text-viking-gold">{setup.shipName}</h1>
             <p className="font-inter text-sm text-viking-gold-soft">{SYMBOL_LABEL[setup.shipSymbol]} · {state.visited.length}/{destinations.length} destinasjoner besøkt</p>
+            <p className="mt-1 font-mono text-xs text-viking-gold-soft/70">
+              {session.mode === 'online' ? `🟢 Tilkoblet · ${session.gameCode}` : '⚪ Offline-modus'}
+            </p>
           </div>
         </div>
 
@@ -158,6 +165,7 @@ export default function GameDashboard({ setup, onResetSetup, onSwitchRole }: Pro
             <button onClick={resetProgress} className="rounded border-2 border-viking-gold bg-viking-teal px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-teal/80">Nullstill reise</button>
             <button onClick={() => setShowCeremony(true)} className="rounded border-2 border-viking-gold bg-viking-gold/80 px-4 py-2 text-sm font-bold text-viking-darkblue hover:bg-viking-gold">Sluttseremoni</button>
             <button onClick={onResetSetup} className="rounded border-2 border-viking-gold bg-viking-rust px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-rust/80">Start oppsett på nytt</button>
+            <button onClick={() => { if (session.mode === 'online') removeGroup(session.gameCode, session.groupId).catch(() => {}); onLeaveGame(); }} className="rounded border-2 border-viking-gold bg-viking-crimson px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-crimson/80">Forlat spill</button>
             <button onClick={onSwitchRole} className="rounded border-2 border-viking-gold bg-viking-plum px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-plum/80">Bytt rolle</button>
           </div>
         </div>

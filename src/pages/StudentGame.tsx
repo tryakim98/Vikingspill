@@ -1,25 +1,32 @@
 /**
  * StudentGame.tsx
- * Elev-skjermen. Fase 1:
- *  - Ingen gruppe lagret → kjør gruppeoppsettet (SetupFlow, §9.1).
- *  - Gruppe lagret → vis dashbordet med encounter-flyten (GameDashboard).
+ * Elev-skjermen. Fase 1+2:
+ *  - Ingen økt → JoinGame (tast spillkode, eller spill offline).
+ *  - Økt, men ingen gruppe → SetupFlow (§9.1).
+ *  - Gruppe klar → GameDashboard (med encounter-flyt + sanntidssync når online).
  */
 
 import { useNavigate } from 'react-router-dom';
 import { useRole } from '../hooks/useRole';
+import { useSession } from '../hooks/useSession';
 import { useGroupSetup } from '../hooks/useGroupSetup';
+import JoinGame from '../components/session/JoinGame';
 import SetupFlow from '../components/setup/SetupFlow';
 import GameDashboard from '../components/dashboard/GameDashboard';
 
 export default function StudentGame() {
   const navigate = useNavigate();
   const { clearRole } = useRole();
-  const { setup, loaded, saveSetup, clearSetup } = useGroupSetup();
+  const { session, loaded: sLoaded, join, playOffline, leave } = useSession();
+  const { setup, loaded: gLoaded, saveSetup, clearSetup } = useGroupSetup();
 
   // Unngå flimmer mens localStorage leses
-  if (!loaded) return null;
+  if (!sLoaded || !gLoaded) return null;
 
-  // Gruppe ikke satt opp ennå → kjør oppsettsflyten
+  if (!session) {
+    return <JoinGame onJoin={join} onOffline={playOffline} />;
+  }
+
   if (!setup) {
     return <SetupFlow onComplete={saveSetup} />;
   }
@@ -32,7 +39,9 @@ export default function StudentGame() {
   return (
     <GameDashboard
       setup={setup}
+      session={session}
       onResetSetup={clearSetup}
+      onLeaveGame={leave}
       onSwitchRole={handleSwitchRole}
     />
   );
