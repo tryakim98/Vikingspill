@@ -1,68 +1,80 @@
 /**
  * StudentGame.tsx
- * Elev-skjermen — hvor elevene spiller
- * 
- * FASE 1: Setup-modus med skip-valg (kommer i neste steg)
- * Viser foreløpig bare en plassholder
+ * Elev-skjermen. Fase 1:
+ *  - Ingen gruppe lagret → kjør gruppeoppsettet (SetupFlow, §9.1).
+ *  - Gruppe lagret → vis en dashboard-plassholder (kart/stats/logg kommer i neste steg).
+ * Valget huskes i localStorage via useGroupSetup.
  */
 
-import { useRole } from '../hooks/useRole';
 import { useNavigate } from 'react-router-dom';
+import { useRole } from '../hooks/useRole';
+import { useGroupSetup } from '../hooks/useGroupSetup';
+import { skillTreeData } from '../data';
+import VikingShip from '../components/ship/VikingShip';
+import SetupFlow from '../components/setup/SetupFlow';
+
+const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
 
 export default function StudentGame() {
   const navigate = useNavigate();
   const { clearRole } = useRole();
+  const { setup, loaded, saveSetup, clearSetup } = useGroupSetup();
+
+  // Unngå flimmer mens localStorage leses
+  if (!loaded) return null;
+
+  // Gruppe ikke satt opp ennå → kjør oppsettsflyten
+  if (!setup) {
+    return <SetupFlow onComplete={saveSetup} />;
+  }
 
   const handleSwitchRole = () => {
     clearRole();
     navigate('/', { replace: true });
   };
 
+  // Gruppe klar → dashboard-plassholder
   return (
     <div className="min-h-screen bg-gradient-to-b from-viking-darkblue to-viking-surface text-viking-paper p-6">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="font-cinzel text-4xl text-viking-gold mb-2">⛵ ELEVSPILLET</h1>
-          <p className="text-viking-gold-soft italic">Fase 1: Setup og skip-valg kommer neste</p>
-        </div>
-
-        {/* Innhold */}
-        <div className="bg-viking-surface border-2 border-viking-gold rounded-lg p-8 mb-8">
-          <h2 className="font-cinzel text-2xl text-viking-gold mb-4">Neste steg: Setup-flyten</h2>
-          <ul className="font-inter text-viking-paper/90 space-y-3 list-disc list-inside">
-            <li><strong>Angi spillkode:</strong> Koble til samme spill som læreren (fase 2)</li>
-            <li><strong>Skip-valg:</strong> Klikk på vikingskip som gynger på bølger</li>
-            <li><strong>Gruppe-info:</strong> Gi skip navn, velg symbol (drage/ulv/ravn) og farge</li>
-            <li><strong>Startferdighet:</strong> Velg første ferdighet (språk/sjømannskap/krigskunst/diplomati/tro)</li>
-            <li><strong>Dashboard:</strong> Se stats, kart, og logg</li>
-          </ul>
-        </div>
-
-        {/* Feature-liste */}
-        <div className="bg-viking-teal/30 border-2 border-viking-teal rounded-lg p-6 mb-8">
-          <h3 className="font-cinzel text-lg text-viking-gold mb-3">Spillmekanikk (kommer senere)</h3>
-          <div className="grid grid-cols-2 gap-4 font-inter text-viking-paper/90 text-sm">
-            <div>✓ 12 destinasjoner</div>
-            <div>✓ Episke kulturmøter</div>
-            <div>✓ Oppgaver (foto/innspilling/nav)</div>
-            <div>✓ Quiz & terningkast</div>
-            <div>✓ Valg med konsekvenser</div>
-            <div>✓ Ferdighetstre (5 grener)</div>
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-8 flex items-center gap-4 border-b-4 border-viking-gold pb-6">
+          <VikingShip color={setup.shipColor} symbol={setup.shipSymbol} size={110} />
+          <div>
+            <h1 className="font-cinzel text-3xl text-viking-gold">{setup.shipName}</h1>
+            <p className="font-inter text-viking-gold-soft">
+              {SYMBOL_LABEL[setup.shipSymbol]} · Startferdighet: {skillTreeData[setup.startSkill].icon} {skillTreeData[setup.startSkill].name}
+            </p>
           </div>
         </div>
 
-        {/* Utvikler-seksjonen */}
-        <div className="bg-viking-plum/20 border-2 border-viking-plum rounded-lg p-6">
-          <h3 className="font-cinzel text-lg text-viking-plum mb-4">👨‍💻 Utvikler-modus</h3>
-          <button
-            onClick={handleSwitchRole}
-            className="bg-viking-plum hover:bg-viking-plum/90 text-viking-paper font-bold py-2 px-6 rounded border-2 border-viking-gold transition-colors"
-          >
-            Bytt rolle (gå tilbake til rollevalg)
-          </button>
-          <p className="font-mono text-sm text-viking-gold-soft mt-4">
-            localStorage.getItem('vikingspill_role') = 'student'
+        <div className="mb-8 rounded-lg border-2 border-viking-gold bg-viking-surface p-8">
+          <h2 className="mb-4 font-cinzel text-2xl text-viking-gold">Neste steg: Dashbordet</h2>
+          <ul className="list-inside list-disc space-y-3 font-inter text-viking-paper/90">
+            <li><strong>Kart:</strong> Seil mellom de 12 destinasjonene</li>
+            <li><strong>Stats:</strong> Kulturforståelse, handelsutbytte og rykte</li>
+            <li><strong>Logg:</strong> Valgene og terningkastene deres</li>
+            <li><strong>Encounter-flyt:</strong> Historie → kulturmøte → oppgave → quiz → valg → terning</li>
+          </ul>
+        </div>
+
+        <div className="rounded-lg border-2 border-viking-plum/60 bg-viking-plum/15 p-6">
+          <h3 className="mb-4 font-cinzel text-lg text-viking-plum">👨‍💻 Utvikler-modus</h3>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={clearSetup}
+              className="rounded border-2 border-viking-gold bg-viking-teal px-5 py-2 font-bold text-viking-paper transition-colors hover:bg-viking-teal/80"
+            >
+              Start oppsett på nytt
+            </button>
+            <button
+              onClick={handleSwitchRole}
+              className="rounded border-2 border-viking-gold bg-viking-plum px-5 py-2 font-bold text-viking-paper transition-colors hover:bg-viking-plum/80"
+            >
+              Bytt rolle
+            </button>
+          </div>
+          <p className="mt-4 font-mono text-sm text-viking-gold-soft">
+            localStorage: vikingspill_role='student', vikingspill_group=&#123;…&#125;
           </p>
         </div>
       </div>

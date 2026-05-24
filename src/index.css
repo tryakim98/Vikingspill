@@ -31,3 +31,22 @@ code {
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
 }
+
+/* === Setup-flyt: hav- og skip-animasjoner === */
+@keyframes viking-bob {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50%      { transform: translateY(-10px) rotate(1.5deg); }
+}
+.animate-bob { animation: viking-bob 4s ease-in-out infinite; }
+
+/* Bølgelag er 200% brede (mønsteret gjentatt) → translateX(-50%) gir sømløs loop */
+@keyframes viking-wave {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-wave      { animation: viking-wave 14s linear infinite; }
+.animate-wave-slow { animation: viking-wave 22s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-bob, .animate-wave, .animate-wave-slow { animation: none; }
+}

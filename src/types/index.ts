@@ -13,6 +13,9 @@
 
 export type SkillKey = 'språk' | 'sjømannskap' | 'krigskunst' | 'diplomati' | 'tro';
 
+// Skipssymbol elevene velger ved gruppeoppsett (§9.1).
+export type ShipSymbol = 'drage' | 'ulv' | 'ravn';
+
 export interface SkillTier {
   name: string;
   desc: string;
@@ -173,7 +176,7 @@ export type SkillQuizBank = {
 export interface GroupState {
   groupId: string;
   shipName: string;
-  shipSymbol: 'drage' | 'ulv' | 'ravn';
+  shipSymbol: ShipSymbol;
   shipColor: string;
   
   // Poeng
