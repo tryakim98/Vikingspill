@@ -102,3 +102,26 @@ export function subscribeApprovals(
     callback((snap.val() as Record<string, ApprovalRequest> | null) ?? {});
   });
 }
+
+// === Gudenes prøve (§3.4 / §8.5) ==================================================
+// Lærer trykker én knapp; spillet trekker utfordring + ferdighet og kringkaster den
+// likt til alle grupper via /games/{code}/trial (overskrives ved hver utløsning).
+
+export interface Trial {
+  id: string;          // unik pr. utløsning, så elevene vet når en NY prøve kommer
+  challengeId: string;
+  navn: string;
+  desc: string;
+  skill: SkillKey;     // ferdigheten som gir bonus
+  at: number;
+}
+
+export function triggerTrial(code: string, trial: Trial): Promise<void> {
+  return set(ref(db, `games/${code}/trial`), trial);
+}
+
+export function subscribeTrial(code: string, callback: (trial: Trial | null) => void): Unsubscribe {
+  return onValue(ref(db, `games/${code}/trial`), (snap) => {
+    callback((snap.val() as Trial | null) ?? null);
+  });
+}

@@ -5,7 +5,7 @@
  * (§8.1) kommer senere. Rendres kun med en gyldig gruppe (gyldig hooks-bruk).
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Destination, SkillKey } from '../../types';
 import { destinations, skillTreeData } from '../../data';
 import { useGameState } from '../../hooks/useGameState';
@@ -15,7 +15,8 @@ import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeTrial, type Trial } from '../../lib/gameSync';
+import GudenesProveOverlay from '../trial/GudenesProveOverlay';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -30,12 +31,40 @@ interface Props {
 }
 
 export default function GameDashboard({ setup, session, onResetSetup, onLeaveGame, onSwitchRole }: Props) {
-  const { state, applyOutcome, setSkillLevel, resetProgress } = useGameState(setup, session);
+  const { state, applyOutcome, setSkillLevel, addReward, resetProgress } = useGameState(setup, session);
   const [activeDest, setActiveDest] = useState<Destination | null>(null);
   const [activeSkill, setActiveSkill] = useState<SkillKey | null>(null);
   const [showCeremony, setShowCeremony] = useState(false);
+  const [activeTrial, setActiveTrial] = useState<Trial | null>(null);
+  const seenTrial = useRef<string | null>(null);
+
+  // Gudenes prøve (§3.4): lytt på utløsning og avbryt skjermen for alle online-grupper.
+  useEffect(() => {
+    if (session.mode !== 'online') return;
+    let first = true;
+    const unsub = subscribeTrial(session.gameCode, (trial) => {
+      if (first) { first = false; seenTrial.current = trial?.id ?? null; return; } // ignorer prøve som finnes ved oppkobling
+      if (trial && trial.id !== seenTrial.current) { seenTrial.current = trial.id; setActiveTrial(trial); }
+    });
+    return () => unsub();
+  }, [session]);
 
   if (!state) return null;
+
+  if (activeTrial) {
+    return (
+      <GudenesProveOverlay
+        navn={activeTrial.navn}
+        desc={activeTrial.desc}
+        skill={activeTrial.skill}
+        skillLevel={state.skills[activeTrial.skill] ?? 0}
+        onDone={() => {
+          addReward({ und: 0, trade: 0, rep: 1 + (state.skills[activeTrial.skill] ?? 0) });
+          setActiveTrial(null);
+        }}
+      />
+    );
+  }
 
   if (activeDest) {
     return (

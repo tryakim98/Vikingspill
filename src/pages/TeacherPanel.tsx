@@ -16,10 +16,14 @@ import {
   subscribeGroups,
   subscribeApprovals,
   setApprovalStatus,
+  triggerTrial,
+  subscribeTrial,
   type SyncedGroup,
   type ApprovalRequest,
   type ApprovalStatus,
+  type Trial,
 } from '../lib/gameSync';
+import { gudenesProveChallenges } from '../data';
 import SeaMap from '../components/teacher/SeaMap';
 import VikingShip from '../components/ship/VikingShip';
 import type { ShipSymbol } from '../types';
@@ -33,13 +37,28 @@ export default function TeacherPanel() {
   const [code, setCode] = useState<string | null>(() => localStorage.getItem(CODE_KEY));
   const [groups, setGroups] = useState<Record<string, SyncedGroup>>({});
   const [approvals, setApprovals] = useState<Record<string, ApprovalRequest>>({});
+  const [trial, setTrial] = useState<Trial | null>(null);
 
   useEffect(() => {
-    if (!code) { setGroups({}); setApprovals({}); return; }
+    if (!code) { setGroups({}); setApprovals({}); setTrial(null); return; }
     const unsubG = subscribeGroups(code, setGroups);
     const unsubA = subscribeApprovals(code, setApprovals);
-    return () => { unsubG(); unsubA(); };
+    const unsubT = subscribeTrial(code, setTrial);
+    return () => { unsubG(); unsubA(); unsubT(); };
   }, [code]);
+
+  const triggerGudenesProve = () => {
+    if (!code) return;
+    const c = gudenesProveChallenges[Math.floor(Math.random() * gudenesProveChallenges.length)];
+    triggerTrial(code, {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      challengeId: c.id,
+      navn: c.navn,
+      desc: c.desc,
+      skill: c.ferdighet,
+      at: Date.now(),
+    }).catch(() => {});
+  };
 
   const createNew = async () => {
     const c = generateGameCode();
@@ -87,6 +106,16 @@ export default function TeacherPanel() {
         {/* §8.1 Sjøkart */}
         <div className="mb-6">
           <SeaMap groups={groups} />
+        </div>
+
+        {/* §3.4/§8.5 Gudenes prøve — læreren bestemmer KUN når */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-viking-plum/60 bg-viking-plum/15 p-4">
+          <div>
+            <h2 className="font-cinzel text-xl text-viking-gold">⚡ Gudenes prøve</h2>
+            <p className="font-inter text-sm text-viking-paper/80">Du bestemmer kun <strong>når</strong>. Spillet trekker utfordring og ferdighet — likt for alle grupper.</p>
+            {trial && <p className="mt-1 font-mono text-xs text-viking-gold-soft">Sist sendt: {trial.navn} — ferdighet «{trial.skill}»</p>}
+          </div>
+          <button onClick={triggerGudenesProve} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-3 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">⚡ Utløs Gudenes prøve</button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">

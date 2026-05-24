@@ -99,7 +99,20 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     persist({ ...base, skills: { ...base.skills, [skill]: level } });
   };
 
+  // Legg til poeng uten å endre besøkt/låst/ferdigheter (f.eks. Gudenes prøve-belønning).
+  const addReward = (deltas: { und: number; trade: number; rep: number }) => {
+    const base = state ?? seed(setup);
+    persist({
+      ...base,
+      scores: {
+        culturalUnderstanding: base.scores.culturalUnderstanding + deltas.und,
+        tradeGain: base.scores.tradeGain + deltas.trade,
+        reputation: base.scores.reputation + deltas.rep,
+      },
+    });
+  };
+
   const resetProgress = () => persist(seed(setup));
 
-  return { state, applyOutcome, setSkillLevel, resetProgress };
+  return { state, applyOutcome, setSkillLevel, addReward, resetProgress };
 }
