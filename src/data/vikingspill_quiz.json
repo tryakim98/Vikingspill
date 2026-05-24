@@ -1,0 +1,1021 @@
+{
+  "_meta": {
+    "title": "Vikingspill — Quiz-banken",
+    "version": "1.0",
+    "totalSkillPaths": 5,
+    "totalQuizPacks": 10,
+    "description": "Quiz-spørsmål for å låse opp ferdighetsnivå 2 og 3. Hvert spørsmål er merket med kildedestinasjon(er) slik at spillet kan filtrere ut spørsmål om steder gruppen ikke har besøkt."
+  },
+  "_schema": {
+    "structure": "skillKey → tier2 | tier3 → array of questions",
+    "passing": {
+      "tier2": "Trenger 2 av 3 spørsmål riktig",
+      "tier3": "Trenger 3 av 4 spørsmål riktig"
+    },
+    "question": {
+      "q": "Selve spørsmålet (kan inneholde HTML-tags)",
+      "opts": "Array med 4 svaralternativer",
+      "correct": "Indeks 0-3 for riktig svar",
+      "feedback": "Forklaring som vises etter svaret — alltid, både ved riktig og galt",
+      "source": "Liste over destinasjons-IDer spørsmålet handler om. Quizen filtrerer slik at elever ikke får spørsmål om steder de ikke har vært."
+    },
+    "filteringRule": "Spillet velger spørsmål kun fra de hvor MINST ÉN av destinasjonene i 'source' er besøkt. Hvis ingen spørsmål oppfyller dette, vises en melding om at gruppen må besøke flere steder først."
+  },
+  "språk": {
+    "tier2": [
+      {
+        "q": "Hva betyr hilsenen «As-salamu alaykum» som vikingene lærte i Bagdad?",
+        "opts": [
+          "«Lykke til med handelen»",
+          "«Fred være med dere»",
+          "«Vi kommer i fred»",
+          "«Allah er stor»"
+        ],
+        "correct": 1,
+        "feedback": "«As-salamu alaykum» er arabisk for «fred være med dere». Det riktige svaret når noen sier det til deg er «Wa alaykum as-salam» — «og fred være med deg».",
+        "source": [
+          "baghdad"
+        ]
+      },
+      {
+        "q": "Vikingene som styrte Novgorod ble kalt noe spesielt av slaverne. Hva?",
+        "opts": [
+          "Væringer",
+          "Skrælinger",
+          "Rus",
+          "Normannere"
+        ],
+        "correct": 2,
+        "feedback": "Rus — det er derfor selve landet kalles «Russland». Selv det moderne navnet på et helt land kommer fra det slaviske ordet for de svenske vikingene.",
+        "source": [
+          "novgorod"
+        ]
+      },
+      {
+        "q": "På Hebridene oppstod en blandet kultur som snakket både norrønt og gælisk. Hva ble dette folket kalt?",
+        "opts": [
+          "Rus",
+          "Væringer",
+          "Gall-Gàidheal",
+          "Skrælinger"
+        ],
+        "correct": 2,
+        "feedback": "Gall-Gàidheal — «de utenlandske gæliske». En blanding av norrøn og keltisk kultur som varte i over 400 år.",
+        "source": [
+          "hebrides"
+        ]
+      },
+      {
+        "q": "Hva betyr ordet «Miklagard» — det norrøne navnet på Konstantinopel?",
+        "opts": [
+          "Den hellige byen",
+          "Den store byen",
+          "Den gylne byen",
+          "Den rike byen"
+        ],
+        "correct": 1,
+        "feedback": "«Miklagard» betyr «den store byen» (mikla = stor, garðr = by/gård). Vikingene var imponert over størrelsen — Konstantinopel hadde over en halv million innbyggere på 900-tallet.",
+        "source": [
+          "miklagard"
+        ]
+      },
+      {
+        "q": "Den norrøne hilsenen «Doxa to Theo» som vikingene måtte lære ved keiserhoffet er ikke norrøn — den er på et annet språk. Hvilket?",
+        "opts": [
+          "Latin",
+          "Arabisk",
+          "Gresk",
+          "Slavisk"
+        ],
+        "correct": 2,
+        "feedback": "«Doxa to Theo» er gresk og betyr «ære være Gud». Bysants-rikets offisielle språk var gresk, ikke latin — selv om de regnet seg som arvtakere etter Romerriket.",
+        "source": [
+          "miklagard"
+        ]
+      },
+      {
+        "q": "Den jødiske handelsmannen som beskrev Hedeby kom fra et område der mange språk møttes. Hvor var han fra?",
+        "opts": [
+          "Bagdad",
+          "Konstantinopel",
+          "Andalusia (muslimsk Spania)",
+          "Roma"
+        ],
+        "correct": 2,
+        "feedback": "Ibrahim ibn Yaqub var sefardisk jøde fra al-Andalus — det muslimske Spania. Han snakket arabisk, hebraisk og latin, og hans Hedeby-beskrivelse er en sjelden utenforstående kilde.",
+        "source": [
+          "hedeby"
+        ]
+      },
+      {
+        "q": "Vikingene som plyndret Lindisfarne i 793 ga ord til moderne engelsk. Hvilket av disse engelske ordene er IKKE av norrønt opphav?",
+        "opts": [
+          "Sky",
+          "Egg",
+          "Bread",
+          "Knife"
+        ],
+        "correct": 2,
+        "feedback": "Bread er anglo-saksisk. De andre tre — sky, egg, knife — er alle norrøne. Også happy, law, give og they kommer fra norrønt og endte opp i hverdags-engelsk.",
+        "source": [
+          "lindisfarne"
+        ]
+      },
+      {
+        "q": "På Hebridene møtte vikingene et keltisk folk som snakket et språk som fortsatt finnes. Hvilket?",
+        "opts": [
+          "Walisisk",
+          "Gælisk",
+          "Bretonsk",
+          "Cornisk"
+        ],
+        "correct": 1,
+        "feedback": "Skotsk gælisk. Det snakkes fortsatt på Hebridene i dag. På 800-tallet var det det dominerende språket der, og vikingene måtte lære det for å handle.",
+        "source": [
+          "hebrides"
+        ]
+      }
+    ],
+    "tier3": [
+      {
+        "q": "Hvilket av disse engelske ordene har norrønt opphav?",
+        "opts": [
+          "Bread",
+          "Window",
+          "Tree",
+          "Bird"
+        ],
+        "correct": 1,
+        "feedback": "«Window» kommer fra norrønt «vindauga» — vind-øye. Også egg, sky, happy, knife, law, skill, give, take og they er norrøne ord i moderne engelsk.",
+        "source": [
+          "lindisfarne",
+          "dublin",
+          "paris"
+        ]
+      },
+      {
+        "q": "Det russiske kvinnenavnet «Olga» har norrønt opphav. Hva er det opprinnelige norrøne navnet?",
+        "opts": [
+          "Ingrid",
+          "Helga",
+          "Astrid",
+          "Sigrid"
+        ],
+        "correct": 1,
+        "feedback": "Olga = slavisk form av Helga. Tilsvarende: Igor (Yngvarr), Oleg (Helgi), Vladimir (Valdemar). Hele rekken med tidlige russiske herskere bar norrøne navn i slavisk drakt.",
+        "source": [
+          "novgorod"
+        ]
+      },
+      {
+        "q": "Hva skjedde med vikingene som etablerte seg i Normandie etter Rollos avtale i 911?",
+        "opts": [
+          "De holdt på det norrøne språket i 500 år",
+          "De ble tospråklige (norrønt + fransk) permanent",
+          "De mistet norrønt og snakket fransk innen 100 år",
+          "De vekslet mellom språkene avhengig av sosial klasse"
+        ],
+        "correct": 2,
+        "feedback": "På fire generasjoner var norrønt nesten borte i Normandie. På 1000-tallet snakket «normannerne» fransk. Da Vilhelm Erobreren tok England i 1066, brakte han FRANSK med seg — ikke norrønt.",
+        "source": [
+          "paris"
+        ]
+      },
+      {
+        "q": "På Færøyene fant DNA-tester noe overraskende om de tidlige bosetterne. Hva?",
+        "opts": [
+          "De var rene nordmenn",
+          "De var rene irer",
+          "De hadde betydelig keltisk innslag fra slavekvinner brakt fra Irland",
+          "De var samer"
+        ],
+        "correct": 2,
+        "feedback": "Mens mennene som bosatte Færøyene var hovedsakelig norrøne, var en stor del av kvinnene keltiske — sannsynligvis brakt med fra Irland og Skottland som slaver. Færøysk DNA viser dette tydelig den dag i dag.",
+        "source": [
+          "faroyene",
+          "dublin"
+        ]
+      },
+      {
+        "q": "Selve ordet «slave» på engelsk og flere andre europeiske språk har en mørk etymologisk rot. Hvilken?",
+        "opts": [
+          "Det kommer fra latin «servus» (tjener)",
+          "Det kommer fra «slaver» — det slaviske folket — fordi så mange ble solgt i fangenskap",
+          "Det kommer fra norrønt «þræll» (træl)",
+          "Det kommer fra arabisk «abd» (slave)"
+        ],
+        "correct": 1,
+        "feedback": "«Slave» kommer fra «slav». Vikingenes handel sørover Volga til Bagdad omfattet enorme mengder slaviske mennesker — så mange at folkenavnet ble til selve ordet for fangenskap. En av historiens mørkere etymologier.",
+        "source": [
+          "novgorod",
+          "baghdad"
+        ]
+      },
+      {
+        "q": "Hvilket av disse var IKKE et språk vikingene faktisk lærte og brukte under reisene sine?",
+        "opts": [
+          "Frisisk (Hedeby)",
+          "Gresk (Miklagard)",
+          "Mandarin (Kina)",
+          "Gælisk (Hebridene/Irland)"
+        ],
+        "correct": 2,
+        "feedback": "Vikingene rakk aldri Kina. Men silke fra Kina nådde dem via Konstantinopel og Volgaruten. Frisisk, gresk, gælisk, slavisk og arabisk lærte mange vikinger — Skandinavia var faktisk Europas mest kosmopolittiske region på 900-tallet.",
+        "source": [
+          "hedeby",
+          "miklagard",
+          "hebrides"
+        ]
+      }
+    ]
+  },
+  "sjømannskap": {
+    "tier2": [
+      {
+        "q": "Med god vind, hvor lang tid tok det vikingene å seile fra Norge til Island?",
+        "opts": [
+          "1-2 dager",
+          "3-7 dager",
+          "2-3 uker",
+          "Over en måned"
+        ],
+        "correct": 1,
+        "feedback": "Med god vind tok turen 3-7 dager. Vikingene var blant Europas beste sjømenn — ingen andre kunne seile så langt på åpent hav på den tida.",
+        "source": [
+          "island",
+          "faroyene"
+        ]
+      },
+      {
+        "q": "På Færøyene oppdaget vikingene at noen allerede bodde der. Hvem?",
+        "opts": [
+          "Irer (vanlige bønder)",
+          "Skotter",
+          "Irske munker",
+          "Samer"
+        ],
+        "correct": 2,
+        "feedback": "Irske munker hadde levd der i 100 år som eneboere før vikingene kom. De flyktet — eller ble drept. Det samme gjentok seg på Island. «Oppdagelse» er sjelden virkelig oppdagelse.",
+        "source": [
+          "faroyene"
+        ]
+      },
+      {
+        "q": "Vinland-bosetningen i Nord-Amerika varte ikke lenge. Hvor lenge omtrent?",
+        "opts": [
+          "Bare noen få år",
+          "Rundt 50 år",
+          "Over 100 år",
+          "Vikingene ble der permanent"
+        ],
+        "correct": 0,
+        "feedback": "Bare noen få år. Konflikten med skrælingene gjorde det umulig å fortsette. Det er den eldste eksakt daterte europeiske bosetningen i Amerika (år 1021), men også en av de korteste.",
+        "source": [
+          "vinland"
+        ]
+      },
+      {
+        "q": "Hva var det største problemet for vikingene som krysset åpent hav?",
+        "opts": [
+          "Sykdom om bord",
+          "Mangel på drikkevann og navigasjon i overskyet vær",
+          "Sjørøvere",
+          "Dårlige skip"
+        ],
+        "correct": 1,
+        "feedback": "Drikkevann og navigasjon. Skipene var glimrende — det var menneskene som kunne svikte. På åpent hav uten landemerker, og uten kompass, var solen og stjernene eneste hjelp. Når det var tåke, var de blinde.",
+        "source": [
+          "faroyene",
+          "vinland",
+          "island"
+        ]
+      },
+      {
+        "q": "Vikingene som dro til Vinland kom fra et sted som var enda lenger fra Europa. Hvor?",
+        "opts": [
+          "Færøyene",
+          "Island",
+          "Grønland",
+          "Hebridene"
+        ],
+        "correct": 2,
+        "feedback": "Grønland. Leif Erikssons far Erik den Røde grunnla Grønland-koloniene rundt 985, og Leif seilte derfra mot vest til Vinland. Vesten ble erobret etappevis: Færøyene → Island → Grønland → Vinland.",
+        "source": [
+          "vinland"
+        ]
+      },
+      {
+        "q": "Hvilket skipsdesign gjorde det mulig for vikingene å seile både i åpent hav og opp grunne elver som Seinen?",
+        "opts": [
+          "Et tungt skip med dyp kjøl",
+          "Et lett, klinkbygd skip med flat bunn",
+          "En romersk galei",
+          "Et arabisk dhowskip"
+        ],
+        "correct": 1,
+        "feedback": "Vikingskipet var klinkbygd (overlappende bord), lett og hadde flat bunn. Det kunne både krysse Atlanterhavet OG seile oppover elver til Paris. Få andre skip i historien har vært så allsidige.",
+        "source": [
+          "paris",
+          "lindisfarne"
+        ]
+      },
+      {
+        "q": "Da vikingene seilte oppover Seinen i 845, hvor mange skip førte de med seg?",
+        "opts": [
+          "Rundt 30",
+          "Rundt 60",
+          "Rundt 120",
+          "Rundt 200"
+        ],
+        "correct": 2,
+        "feedback": "Hele 120 skip seilte oppover Seinen i 845 under høvding Ragnar. Det var en av tidens største flåteoperasjoner. Karl den skallede betalte 7000 pund sølv for å få dem til å dra.",
+        "source": [
+          "paris"
+        ]
+      },
+      {
+        "q": "Da vikingene seilte fra Norge til Lindisfarne i 793, krysset de hvilket havområde?",
+        "opts": [
+          "Nordsjøen",
+          "Norskehavet",
+          "Atlanterhavet",
+          "Skagerrak"
+        ],
+        "correct": 0,
+        "feedback": "Nordsjøen — den åpne strekningen fra norske kyst til Northumbria. Det er ikke det lengste havet vikingene krysset, men det krevde åpent-hav-navigasjon.",
+        "source": [
+          "lindisfarne"
+        ]
+      },
+      {
+        "q": "Hvilken irsk havneby grunnla vikingene i 841 og brukte som handelsbase i 200 år?",
+        "opts": [
+          "Cork",
+          "Dublin",
+          "Galway",
+          "Belfast"
+        ],
+        "correct": 1,
+        "feedback": "Dublin — eller Dyflinn, som vikingene kalte det. Det er en ren norrøn grunnleggelse. I dag er Irlands hovedstad bygget på en vikingeboslag.",
+        "source": [
+          "dublin"
+        ]
+      }
+    ],
+    "tier3": [
+      {
+        "q": "Hva var en «solstein» (sólarsteinn) i vikingnavigasjon?",
+        "opts": [
+          "En stein de la i kjølen for ballast",
+          "En stein de slipte sokner med",
+          "En kalsittkrystall som viste solens posisjon selv i overskyet vær",
+          "En markeringsstein de plasserte på land"
+        ],
+        "correct": 2,
+        "feedback": "Kalsitt («islandsk spat») polariserer lys og kan vise solens retning gjennom skyer. Beskrevet i sagaer, og forskere har bekreftet at det fungerer. En genial lavteknologisk løsning på et reelt problem.",
+        "source": [
+          "island",
+          "faroyene"
+        ]
+      },
+      {
+        "q": "Hvilket dyr brukte vikingene som «kompass» på åpent hav?",
+        "opts": [
+          "Hund",
+          "Ravn",
+          "Falk",
+          "Geit"
+        ],
+        "correct": 1,
+        "feedback": "Ravner. Floke Vilgerdarsson tok med tre ravner til Island. Når de slapp en og den ikke kom tilbake, visste de at land var nær. Da en kom tilbake, var det ikke land i nærheten ennå.",
+        "source": [
+          "island",
+          "faroyene"
+        ]
+      },
+      {
+        "q": "Hvorfor var Færøyene så viktige strategisk for vikingenes ekspansjon vestover?",
+        "opts": [
+          "De hadde gull og sølv",
+          "De var et springbrett — kort hvile før den lange seilasen til Island",
+          "De hadde en stor flåte vikingene kunne kuppe",
+          "De var en militær festning"
+        ],
+        "correct": 1,
+        "feedback": "Springbrett. Skipene måtte hvile, forsyninger måtte fylles, mannskapet måtte sove på fast grunn. Få seilte rett fra Norge til Island — Færøyene gjorde det mulig.",
+        "source": [
+          "faroyene"
+        ]
+      },
+      {
+        "q": "Hva betyr det at vikingenes ekspedisjoner var bygget på «leg-by-leg»?",
+        "opts": [
+          "De seilte i bein-formet rute",
+          "De hoppet fra øy til øy, ikke direkte over åpent hav",
+          "De tok pauser for å sove",
+          "De konkurrerte i løping"
+        ],
+        "correct": 1,
+        "feedback": "Leg-by-leg = etappe-for-etappe. Norge → Færøyene → Island → Grønland → Vinland. Hver etappe var håndterbar, men den totale reisen ble enorm. Ingen andre på 1000-tallet kunne gjøre dette.",
+        "source": [
+          "faroyene",
+          "island",
+          "vinland"
+        ]
+      },
+      {
+        "q": "I 2021 publiserte forskere en EKSAKT datering for vikingenes tilstedeværelse i Nord-Amerika. Hvilket år?",
+        "opts": [
+          "År 982",
+          "År 1000",
+          "År 1021",
+          "År 1066"
+        ],
+        "correct": 2,
+        "feedback": "1021. Daterningen ble gjort ved å analysere en kosmisk hendelse (solstorm) bevart i tre fra L'Anse aux Meadows. 471 år før Columbus.",
+        "source": [
+          "vinland"
+        ]
+      },
+      {
+        "q": "På hvilken østlig handelsrute kunne vikingene reise fra Østersjøen helt ned til Svartehavet og videre?",
+        "opts": [
+          "Volgaruten",
+          "Donau-ruten",
+          "Donruten",
+          "Atlanterhavsruten"
+        ],
+        "correct": 0,
+        "feedback": "Volgaruten — mest brukt — gikk fra Østersjøen via Novgorod og elvenettverket sørover Volga til Det kaspiske havet og videre til Bagdad. Det var elver, ikke åpent hav, men det var det arkitektoniske mesterverket.",
+        "source": [
+          "novgorod",
+          "baghdad"
+        ]
+      }
+    ]
+  },
+  "krigskunst": {
+    "tier2": [
+      {
+        "q": "Hva var en «berserker»?",
+        "opts": [
+          "En leiesoldat som brukte bjørneskinn og gikk i kampraseri",
+          "En type vikingskip",
+          "En lederrolle på skipet",
+          "En type sverd"
+        ],
+        "correct": 0,
+        "feedback": "Berserkere gikk i kamp i raseri, ofte i bjørneskinn. Ordet kommer fra «ber-serkr» = bjørneskjorte. De ble fryktet, men også sett som upålitelige og halvgale av sine egne.",
+        "source": [
+          "lindisfarne",
+          "paris",
+          "island"
+        ]
+      },
+      {
+        "q": "I Lindisfarne 793: hvorfor var klosteret et perfekt angrepsmål?",
+        "opts": [
+          "Munkene var krigere som måtte stoppes",
+          "Klosteret hadde mye ubeskyttet sølv og ingen forsvarere",
+          "Munkene var fiender av Norge",
+          "Klosteret blokkerte handelen til havs"
+        ],
+        "correct": 1,
+        "feedback": "Klosteret hadde generasjoner av kirkesølv, gull og edelstener — og det var ingen krigere der. Et perfekt mål for vikinger som ville bli rike fort.",
+        "source": [
+          "lindisfarne"
+        ]
+      },
+      {
+        "q": "I Paris-beleiringen 885-86 kjempet vikingene i ett år utenfor byen. Hvordan endte det historisk?",
+        "opts": [
+          "Vikingene tok byen og brente den ned",
+          "Beleiringen feilet — dysenteri og forsvar slo dem tilbake",
+          "Keiser Karl betalte dem for å dra",
+          "Pariserne overga seg uten kamp"
+        ],
+        "correct": 1,
+        "feedback": "Beleiringen feilet historisk. Sykdom rev gjennom vikingleiren, og Odo (greven av Paris) ble en helt for å ha holdt stand. Det er denne suksessen som senere gjorde Odo til konge av Frankrike.",
+        "source": [
+          "paris"
+        ]
+      },
+      {
+        "q": "Hva betyr begrepet «Danegeld»?",
+        "opts": [
+          "Norrøn valuta",
+          "En hedensk gud",
+          "Sølv betalt til vikingene for at de skulle dra",
+          "Et type vikingskip"
+        ],
+        "correct": 2,
+        "feedback": "Danegeld = sølv betalt til vikingene for å unngå plyndring. England betalte 48 000 pund i ett enkelt år (1012) — en enorm sum. Det fungerte ikke i lengden; vikingene kom bare tilbake.",
+        "source": [
+          "lindisfarne",
+          "paris"
+        ]
+      },
+      {
+        "q": "På Island vedtok bøndene en «hevn-praksis» som holdt rettsorden. Hva het systemet?",
+        "opts": [
+          "Tinging",
+          "Blodfeider",
+          "Holmgang",
+          "Berserkergang"
+        ],
+        "correct": 1,
+        "feedback": "Blodfeider. Når sentralmakt manglet, måtte slekten selv hevne drap — eller miste posisjon. Systemet holdt Island i sjakk i 200 år før det kollapset i borgerkrig på 1200-tallet.",
+        "source": [
+          "island"
+        ]
+      },
+      {
+        "q": "I irsk slavehandel — som vikingene drev fra Dublin — ble keltiske mennesker primært solgt til hvilket marked?",
+        "opts": [
+          "Italia",
+          "Bagdad og det muslimske markedet",
+          "Skottland",
+          "Frankrike"
+        ],
+        "correct": 1,
+        "feedback": "Bagdad. Volgaruten knyttet Dublin til arabermarkedet via Norden. Slavehandel var et helt nettverk: irske slaver fanget i Dublin endte opp tjent som tjenere i Bagdad — over 6000 km unna.",
+        "source": [
+          "dublin",
+          "baghdad"
+        ]
+      },
+      {
+        "q": "Hva slags krigerformasjon ga vikinger styrke i kamp mot tunge frankiske riddere ved beleiringen av Paris?",
+        "opts": [
+          "Romersk falanks",
+          "Skjoldborg (skjaldborg)",
+          "Mongolsk kavaleri-rotasjon",
+          "Engelsk langbueformasjon"
+        ],
+        "correct": 1,
+        "feedback": "Skjoldborgen — vegg av overlappende skjold — ga vikingene en defensiv struktur som var svært vanskelig å bryte. Den ble også brukt under Slaget ved Hastings i 1066, hvor anglosakserne under Harold Godwinson kjempet mot normannerne.",
+        "source": [
+          "paris"
+        ]
+      }
+    ],
+    "tier3": [
+      {
+        "q": "Hva var Væringgardens hovedoppgave i Konstantinopel?",
+        "opts": [
+          "Bygge skip for keiseren",
+          "Personlig livvakt for keiseren",
+          "Politi i bygatene",
+          "Forsvare havnen mot pirater"
+        ],
+        "correct": 1,
+        "feedback": "Personlig livvakt. De ble valgt nettopp fordi de IKKE hadde lokale lojaliteter. Bysantinske kupper var vanlige; keiseren ville ha menn som ikke kunne kjøpes med bestikkelser fra hans rivaler.",
+        "source": [
+          "miklagard"
+        ]
+      },
+      {
+        "q": "Harald Hardråde døde ved Stamford Bridge i 1066, og dette markerer et symbolsk skille. Hva?",
+        "opts": [
+          "Vikingtidens slutt",
+          "Begynnelsen på korstogene",
+          "Slutten på den engelske tronen",
+          "Slutten på Bysants"
+        ],
+        "correct": 0,
+        "feedback": "Slaget ved Stamford Bridge regnes ofte som vikingtidens symbolske slutt — tre uker før Vilhelm Erobreren landet i England. Etter Harald drev ingen flere store norrøne erobringskampanjer.",
+        "source": [
+          "miklagard"
+        ]
+      },
+      {
+        "q": "I Vinland kostet feilet kulturmøte vikingene noe stort. Hva?",
+        "opts": [
+          "Et sølvskip",
+          "En hel kongerekke",
+          "Tilgang til en hel verdensdel i nesten 500 år",
+          "Hele Grønland-kolonien"
+        ],
+        "correct": 2,
+        "feedback": "Da vikingene måtte gi opp Vinland, var Nord-Amerika stengt for europeere i nesten 500 år — fram til Columbus 1492. Det er en av historiens største «hva-hvis»-historier: hva om de hadde forstått skrælingene?",
+        "source": [
+          "vinland"
+        ]
+      },
+      {
+        "q": "Hvorfor virket vikingenes våpenmakt så dårlig akkurat i Vinland — sammenlignet med f.eks. Lindisfarne?",
+        "opts": [
+          "De hadde dårligere våpen denne gangen",
+          "Skrælingene var mange flere og kjente landet bedre",
+          "Vikingene var trette etter den lange reisen",
+          "Lederen Thorvald gjorde tabber"
+        ],
+        "correct": 1,
+        "feedback": "Skrælingene var mange flere, og kjente landet. På steder som Lindisfarne var vikingene i overtall lokalt. I Amerika var det motsatt — og våpen alene var ikke nok.",
+        "source": [
+          "vinland"
+        ]
+      },
+      {
+        "q": "På Island ble berømte sagaer skrevet om hevnsykluser. Hvilken er mest kjent?",
+        "opts": [
+          "Heimskringla",
+          "Njålssaga",
+          "Egil Skallagrimssons saga",
+          "Eddaen"
+        ],
+        "correct": 1,
+        "feedback": "Njålssaga (ca. 1280) er den mest kjente — en hevnsyklus som ender med at hele slekten brennes inne. Den regnes som en av middelalderens største litterære verk, og leses på islandske skoler den dag i dag.",
+        "source": [
+          "island"
+        ]
+      },
+      {
+        "q": "Hvorfor måtte den norske kongen Magnus Berrføtt seile til Hebridene i 1098?",
+        "opts": [
+          "For å handle med engelskmenn",
+          "For å lære gælisk",
+          "For å rydde opp blant sine egne menn — vikingene der drev sjørøveri som plaget hele Norge",
+          "For å konvertere lokalbefolkningen"
+        ],
+        "correct": 2,
+        "feedback": "Hebrid-vikingene drev sjørøveri som skadet ALL norsk handel. Magnus måtte seile vest med en hær for å disiplinere dem. Sjørøveri lønner seg sjelden i lengden, særlig ikke for hjemlandet.",
+        "source": [
+          "hebrides"
+        ]
+      }
+    ]
+  },
+  "diplomati": {
+    "tier2": [
+      {
+        "q": "Hva betydde gjensidighet i samisk handel?",
+        "opts": [
+          "Vikingene måtte gi like mye som de fikk",
+          "Samene bestemte alle priser ensidig",
+          "Handelen ble gjort uten ord",
+          "Vikingene måtte betale en avgift først"
+        ],
+        "correct": 0,
+        "feedback": "Samene godtok ikke ujevn handel. Tilbød du for lite, ble du avvist — uten forhandling. Gjensidighet var en kjerneverdi som vikingene måtte respektere for å få tilgang til samiske varer.",
+        "source": [
+          "sameland"
+        ]
+      },
+      {
+        "q": "Hva var Rollos avtale i 911?",
+        "opts": [
+          "Han ble keiser i Roma",
+          "Han fikk Normandie mot å bli kristen og forsvare Frankrike",
+          "Han fikk lov å plyndre fritt",
+          "Han ble konge i Norge"
+        ],
+        "correct": 1,
+        "feedback": "Rollo (Gange-Rolv) fikk Normandie i 911 mot å konvertere og BESKYTTE Frankrike mot ANDRE vikinger. Avtalen forvandlet hans etterkommere til franske aristokrater på fire generasjoner.",
+        "source": [
+          "paris"
+        ]
+      },
+      {
+        "q": "Hva fikk Aud den Djuptenkte til å forlate Dublin og dra vestover?",
+        "opts": [
+          "Hun ble drevet ut etter mannens død",
+          "Hun ville oppdage Vinland",
+          "Hun ledet en flåte til Skottland og Færøyene før hun grunnla en koloni på Island",
+          "Hun ble kidnappet"
+        ],
+        "correct": 2,
+        "feedback": "Aud var en av få kvinner som er hovedperson i en saga (Laxdœla saga). Etter mannens død førte hun en hel flåte med 20 frigitte slaver vestover og ble en av Islands grunnleggere.",
+        "source": [
+          "dublin",
+          "island"
+        ]
+      },
+      {
+        "q": "Kong Harald Hårfagre giftet seg med en kvinne fra et folk vikingene ofte handlet med. Hvilket folk?",
+        "opts": [
+          "Engelskmennene",
+          "Samene",
+          "Frankerne",
+          "Skottene"
+        ],
+        "correct": 1,
+        "feedback": "Han giftet seg med Snøfrid, datter av samisk høvding Svåse. Etter hennes død skal han ha sittet ved kista hennes i tre år før han kom til seg selv. Norrønt og samisk blod blandet seg helt på toppen av samfunnet.",
+        "source": [
+          "sameland"
+        ]
+      },
+      {
+        "q": "På Hebridene oppstod blandingskulturen Gall-Gàidheal. Hva var det viktigste som muliggjorde dette?",
+        "opts": [
+          "Krig og erobring",
+          "Tospråklighet og blandingsekteskap mellom norrøne og keltere",
+          "En sentral konge styrte begge folkene",
+          "Religion"
+        ],
+        "correct": 1,
+        "feedback": "Tospråklighet og blandingsekteskap. Hverdagskulturen smeltet sammen — barna lærte begge språk hjemme, og foreldrene kom fra ulike folk. Krig kan ikke skape den slags kultur; bare hverdag kan det.",
+        "source": [
+          "hebrides"
+        ]
+      },
+      {
+        "q": "Hvorfor var løsepenger (gisselholding) ofte en mer LØNNSOM strategi enn ren plyndring for vikinger?",
+        "opts": [
+          "Det var lettere å transportere",
+          "Man fikk bedre rykte hjemme",
+          "Et levende gissel kunne bringe inn mer sølv enn et plyndret kloster — og munkene kunne returneres uten å starte krig",
+          "Det var lov etter norrøn lov"
+        ],
+        "correct": 2,
+        "feedback": "Et gissel kunne være verdt mer enn alt sølvet i et kloster — særlig hvis det var en høyættet munk eller bisp. I tillegg skapte det mindre langsiktig fiendskap enn massakrer. Det er klassisk «win-win»-økonomi.",
+        "source": [
+          "lindisfarne"
+        ]
+      }
+    ],
+    "tier3": [
+      {
+        "q": "Hva var en «lovsigemann» (lögsögumaðr) på det islandske Alltinget?",
+        "opts": [
+          "En slags konge",
+          "En lederfor en bondestyrke",
+          "En person som måtte huske og resitere alle lovene utenat — ettersom de ikke var skrevet ned",
+          "En soldat"
+        ],
+        "correct": 2,
+        "feedback": "Lovsigemannen måtte huske 130+ lover utenat og resitere dem. Han var samfunnets juridiske hukommelse. Da Þorgeirr Ljósvetningagoði i år 1000 måtte avgjøre om Island skulle bli kristent, var det LOVSIGEMANNEN, ikke en konge, som tok beslutningen.",
+        "source": [
+          "island"
+        ]
+      },
+      {
+        "q": "Hvorfor ble vikingene som invaderte Russland (Rus-vikingene) ASSIMILERT av slaverne — i stedet for omvendt?",
+        "opts": [
+          "Slaverne var militært sterkere",
+          "Vikingene var få i antall, og de tok navn, religion og språk fra dem de styrte",
+          "Bysants tvang dem til det",
+          "De ville ikke styre"
+        ],
+        "correct": 1,
+        "feedback": "Et særtilfelle i historien: erobreren ble assimilert mer enn de erobrede. På tre generasjoner var Rurik-dynastiet språklig og religiøst slavisk. Det viser hvor mye mindretallets identitet kan vannes ut når man styrer en stor majoritet.",
+        "source": [
+          "novgorod"
+        ]
+      },
+      {
+        "q": "Hva var det som først og fremst skapte tillit mellom vikinger og fremmede folkeslag — mer enn handel og ord?",
+        "opts": [
+          "Felles religion",
+          "Slektsbånd og giftermål",
+          "Felles fiender",
+          "Samme språk"
+        ],
+        "correct": 1,
+        "feedback": "Slektsbånd. Norrøn samfunnsstruktur var bygget på slekt. Når en av deres giftet seg inn i en annen kultur, ble de slekt for evig. Dette var en sterkere «traktat» enn noen skreven avtale, og det forklarer hvor raskt vikinger ble normannere, irer, færøyinger.",
+        "source": [
+          "dublin",
+          "sameland",
+          "hebrides",
+          "novgorod"
+        ]
+      },
+      {
+        "q": "I 911 sa Rollo angivelig nei til å kysse kong Karls fot under avtaleseremonien. Hva er den apokryfe historien?",
+        "opts": [
+          "Han kysset foten direkte",
+          "Han fikk en av sine menn til å gjøre det — som løftet kongens fot så høyt at kongen falt",
+          "Han nektet helt og fikk straff",
+          "Det skjedde aldri"
+        ],
+        "correct": 1,
+        "feedback": "Den fortelles i krønikene: Rollo nektet å bøye seg for noen, så han fikk en av mennene til å løfte foten i stedet — og han løftet den så høyt at Karl falt bakover. En perfekt parodisk seremoni som viste at avtalen var mellom likemenn.",
+        "source": [
+          "paris"
+        ]
+      },
+      {
+        "q": "Hvilken av disse er det MEST eksempel på vellykket diplomati gjennom historien?",
+        "opts": [
+          "Lindisfarne 793 — plyndringen",
+          "Paris 885-86 — beleiringen",
+          "Normandie 911 — Rollos landavtale",
+          "Vinland 1021 — kontakten med skrælinger"
+        ],
+        "correct": 2,
+        "feedback": "Rollos avtale forvandlet brutale plyndrere til franske aristokrater på 100 år, og hans tipp-tipp-oldebarn ble Vilhelm Erobreren. Få diplomatiske avtaler i verdenshistorien har hatt slik avkastning over så lang tid.",
+        "source": [
+          "paris",
+          "lindisfarne",
+          "vinland"
+        ]
+      },
+      {
+        "q": "Hvorfor er den såkalte «finnskatten» fortsatt et politisk betent tema i Norge i dag?",
+        "opts": [
+          "Den var bare et historisk fenomen uten dagens betydning",
+          "Den var begynnelsen på en lang fornorsknings-historie som Sannhets- og forsoningskommisjonen leverte rapport om i 2023",
+          "Den finnes fortsatt som en skatt",
+          "Samene avviser at den fant sted"
+        ],
+        "correct": 1,
+        "feedback": "Finnskatten var første skritt i en lang fornorskning av samene. Sannhets- og forsoningskommisjonen leverte i 2023 sin rapport — over tusen år etter at det startet. Vikingtidens valg har lange ettervirkninger.",
+        "source": [
+          "sameland"
+        ]
+      }
+    ]
+  },
+  "tro": {
+    "tier2": [
+      {
+        "q": "Hvem var noaiden i samisk kultur?",
+        "opts": [
+          "Høvdingen i en samisk siida",
+          "Sjamanen / spirituell leder, brukte runebomme (govadas) til transe",
+          "Skipsbyggemesteren",
+          "Kjøpmannen"
+        ],
+        "correct": 1,
+        "feedback": "Noaiden var samisk sjaman. Vikingene anså noaider som mektigere enn sine egne seidmenn — derfor handlet de respektfullt med samene når de kunne, og fryktet samiske forbannelser når de ikke kunne.",
+        "source": [
+          "sameland"
+        ]
+      },
+      {
+        "q": "Hva skjedde på Þingvellir i år 1000?",
+        "opts": [
+          "Island ble et kongedømme",
+          "Vikingene oppdaget Vinland",
+          "Island vedtok å bli kristent",
+          "Alltinget ble oppløst"
+        ],
+        "correct": 2,
+        "feedback": "Lovsigemann Þorgeirr Ljósvetningagoði la seg under en kappe i ett døgn og kom ut med kompromisset: alle skulle døpes, men hedendom kunne praktiseres privat. En av historiens mest pragmatiske religionskifter.",
+        "source": [
+          "island"
+        ]
+      },
+      {
+        "q": "Hva er en «runesigemann» eller «runerister»?",
+        "opts": [
+          "En kriger",
+          "En person som kunne risse og tolke runer — alfabetet",
+          "En sjakkspiller",
+          "En seilsetter"
+        ],
+        "correct": 1,
+        "feedback": "Runer var ikke bare bokstaver, men også et system for varsling, magi og minne. En væring som het Halvdan risset sitt navn i Hagia Sophia rundt år 900 — det står der ennå.",
+        "source": [
+          "miklagard"
+        ]
+      },
+      {
+        "q": "I Bagdad var én skikk arabere praktiserte daglig som sjokkerte vikingene mest. Hvilken?",
+        "opts": [
+          "Bønn fem ganger om dagen",
+          "Faste i ramadan",
+          "Hyppig hygiene — vasking flere ganger om dagen",
+          "Avstå fra svinekjøtt"
+        ],
+        "correct": 2,
+        "feedback": "Hygiene. Ibn Fadlan ble sjokkert over at vikingene bare vasket seg én gang i uken. Men vikingene ble like sjokkert over at araberne vasket seg så ofte! Hva som er «sivilisert» avhenger helt av hvor du står.",
+        "source": [
+          "baghdad"
+        ]
+      },
+      {
+        "q": "Olga av Kiev gjorde noe oppsiktsvekkende etter mannens død. Hva er hun mest kjent for?",
+        "opts": [
+          "Å frafalle vikingsk tro og bli kristen — og senere å starte kristningen av Russland",
+          "Å seile til Vinland",
+          "Å gifte seg med en gresk keiser",
+          "Å bygge en flåte for Rurik"
+        ],
+        "correct": 0,
+        "feedback": "Olga ble kristen — den første kristne herskeren i Russland. Hennes barnebarn Vladimir gjennomførte kristningen av hele riket. Hun ble senere helgenkåret. (Hun hevnet også mannen sin ved å brenne ned en hel by, men hun ble likevel helgen.)",
+        "source": [
+          "novgorod"
+        ]
+      },
+      {
+        "q": "På Lindisfarne i 793 var klosteret hellig for kristne — men hva var vikingenes hovedreligion da?",
+        "opts": [
+          "Islam",
+          "Keltisk druidkultus",
+          "Tor, Odin, og åsatru",
+          "De var allerede kristne"
+        ],
+        "correct": 2,
+        "feedback": "Norrøn hedendom: Tor, Odin, Frøya, Loke, og hele panteonet. Mange vikinger anså kristendommen som dårligere fordi den ba folk «vende det andre kinnet til» — det stred mot æreskodeksen.",
+        "source": [
+          "lindisfarne"
+        ]
+      },
+      {
+        "q": "På Hebridene møtte vikingene noe i den keltiske kristendommen som var ANNERLEDES enn romerkatolsk. Hva?",
+        "opts": [
+          "De ba til andre guder",
+          "De var en mer selvstendig, asketisk munkkultur som hadde overlevd uten Romas innflytelse",
+          "De var ikke kristne i det hele tatt",
+          "De brukte ikke latin"
+        ],
+        "correct": 1,
+        "feedback": "Den keltiske kirken var lenge selvstendig fra Roma — egne tradisjoner, mer asketiske munker, andre kalkylene for påsken. Iona-klosteret på Hebridene var et av sentrene. Det er én grunn til at kontakt med dem endret vikingene mer enn omvendt.",
+        "source": [
+          "hebrides"
+        ]
+      }
+    ],
+    "tier3": [
+      {
+        "q": "Hvorfor er Snorre Sturlason så viktig for vår kunnskap om norrøn mytologi?",
+        "opts": [
+          "Han var den siste hedenske presten",
+          "Han skrev ned mytologien (Eddaen) på 1200-tallet — 200 år etter at folk sluttet å tro på den",
+          "Han fant Tors hammer arkeologisk",
+          "Han konverterte Island til kristendommen"
+        ],
+        "correct": 1,
+        "feedback": "Snorre skrev Eddaen ca. 1220. Uten ham ville Tor, Odin, Loke og Ragnarok vært glemt. Hele vår moderne kunnskap om norrøn religion — og dermed alle Marvel-filmer om Tor — kommer fra ÉN islandsk forfatter på 1200-tallet.",
+        "source": [
+          "island"
+        ]
+      },
+      {
+        "q": "Hva er det historisk paradokset med Olga av Kiev?",
+        "opts": [
+          "Hun var ikke virkelig kristen",
+          "Hun ble helgenkåret samtidig som hun beordret massedrap (brente en hel by for å hevne mannen)",
+          "Hun var aldri vikingvitva",
+          "Hun var faktisk to forskjellige kvinner"
+        ],
+        "correct": 1,
+        "feedback": "Hun ble helgenkåret som «likeapostlene Olga» — den russiske ortodokse kirken regner henne som hellig. Likevel brente hun en hel by ned ved å feste fakler til duer som fløy hjem til reir. Helgenstatus tar ikke alltid hensyn til CV-en.",
+        "source": [
+          "novgorod"
+        ]
+      },
+      {
+        "q": "Vikinger handlet med både muslimer (Bagdad) og kristne (Konstantinopel) på samme reise. Hva betydde dette for deres egen tro?",
+        "opts": [
+          "De holdt strengt på Tor og Odin",
+          "Mange ble synkretistiske — kombinerte elementer fra flere troer; en støpeform i Jorvik laget både Tors hammer og kristne kors",
+          "De valgte én tro og ble enten kristne eller muslimer fullt ut",
+          "De avskaffet all religion"
+        ],
+        "correct": 1,
+        "feedback": "Synkretisme — kombinasjon av troer — var vanlig blant reisende vikinger. En støpeform fra Jorvik (York) viser produksjon av BÅDE Tors hammer OG kristne kors fra samme verksted. Folkene tilpasset troen til marked og situasjon.",
+        "source": [
+          "baghdad",
+          "miklagard",
+          "lindisfarne"
+        ]
+      },
+      {
+        "q": "Ibn Fadlans beretning beskriver et begravelsesritual i detalj. Hva er den ENESTE delen vi har øyenvitnebeskrivelse av?",
+        "opts": [
+          "Begravelsen i et gravkammer",
+          "Et likbål",
+          "En skip-brenning der en frivillig slavinne ble drept som offer",
+          "Begravelse til havs"
+        ],
+        "correct": 2,
+        "feedback": "Skip-brenningen ved Volga, ca. 921. Inkludert det som senere ble fortalt i sagaer som vanlig: en frivillig slavinne ofret. Saga-rekonstruksjoner var alle SENERE — Ibn Fadlan så det selv. Samtidskilden er gull verdt.",
+        "source": [
+          "baghdad"
+        ]
+      },
+      {
+        "q": "Hva var en seidmann i norrøn tro?",
+        "opts": [
+          "En vanlig kriger",
+          "En spåmann / mann som praktiserte magi — ofte sett ned på fordi det var ansett som «kvinnelig»",
+          "En skipsstyrer",
+          "En islandsk kjøpmann"
+        ],
+        "correct": 1,
+        "feedback": "Seid var magi — å påvirke fremtiden eller andres vilje. Det ble regnet som «kvinnefag», så menn som praktiserte det fikk dårlig rykte. Selv Odin, gudenes far, ble ledd av for sin seid-praksis.",
+        "source": [
+          "sameland",
+          "island"
+        ]
+      },
+      {
+        "q": "Vikingene som kom til Hebridene møtte irske munker som hadde noe vikingene IKKE hadde. Hva ga munkene dem som varig kunnskap?",
+        "opts": [
+          "Penger og gull",
+          "Latinsk skriftkultur, astronomi og bøker",
+          "Bedre våpen",
+          "Slaver"
+        ],
+        "correct": 1,
+        "feedback": "Bøker, latinsk grammatikk, astronomi. Munkene var lærde i en grad som fantes få andre steder i Europa. Mange vikinger ble kristne på Hebridene IKKE av tvang, men fordi munkene var fascinerende lærere.",
+        "source": [
+          "hebrides",
+          "faroyene"
+        ]
+      }
+    ]
+  }
+}
