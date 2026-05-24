@@ -10,19 +10,19 @@
 import { Howl, Howler } from 'howler';
 
 export type SoundKey =
-  | 'waves'    // bølger ved seiling
   | 'horn'     // krigshorn ved quiz-overgang (fakta forsegles)
   | 'dice'     // terning mot trebord
   | 'silver'   // sølvklirr ved bra utfall
-  | 'thunder'  // torden ved katastrofe
+  | 'thunder'  // torden ved katastrofe / skjebne-kort
   | 'trial'    // torden + varsel ved Gudenes prøve
   | 'fanfare'  // episk fanfare ved trumf
   | 'bell';    // klokkeklang ved ny ferdighet
 
+// NB: waves.mp3 og background.mp3 er lange bakgrunnsspor — håndteres av lib/music.ts, ikke her.
+
 interface SoundDef { file: string; volume: number; loop?: boolean }
 
 const SOUNDS: Record<SoundKey, SoundDef> = {
-  waves:   { file: 'waves.mp3',        volume: 0.35 },
   horn:    { file: 'war-horn.mp3',     volume: 0.7 },
   dice:    { file: 'dice-roll.mp3',    volume: 0.7 },
   silver:  { file: 'silver-clink.mp3', volume: 0.7 },

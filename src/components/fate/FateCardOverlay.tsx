@@ -5,7 +5,9 @@
  * gruppa godtar skjebnen.
  */
 
+import { useEffect } from 'react';
 import type { FateEvent } from '../../lib/gameSync';
+import { playSound } from '../../lib/sound';
 
 interface Props {
   event: FateEvent;
@@ -14,6 +16,8 @@ interface Props {
 }
 
 export default function FateCardOverlay({ event, affected, onDone }: Props) {
+  // Torden idet skjebnen slår til (§10) — musikken dempes samtidig (styres i GameDashboard).
+  useEffect(() => { playSound('thunder'); }, []);
   const whoLabel = event.targetMode === 'group' ? event.targetName : event.conditionLabel;
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-viking-darkblue/95 px-4 text-center text-viking-paper">

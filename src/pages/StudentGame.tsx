@@ -14,6 +14,7 @@ import JoinGame from '../components/session/JoinGame';
 import SetupFlow from '../components/setup/SetupFlow';
 import GameDashboard from '../components/dashboard/GameDashboard';
 import LoadingScreen from '../components/common/LoadingScreen';
+import MuteButton from '../components/common/MuteButton';
 
 export default function StudentGame() {
   const navigate = useNavigate();
@@ -38,12 +39,16 @@ export default function StudentGame() {
   }
 
   return (
-    <GameDashboard
-      setup={setup}
-      session={session}
-      onResetSetup={clearSetup}
-      onLeaveGame={leave}
-      onSwitchRole={handleSwitchRole}
-    />
+    <>
+      <GameDashboard
+        setup={setup}
+        session={session}
+        onResetSetup={clearSetup}
+        onLeaveGame={leave}
+        onSwitchRole={handleSwitchRole}
+      />
+      {/* Flytende lyd av/på i hjørnet — over alle visninger i spillet (§10) */}
+      <MuteButton />
+    </>
   );
 }

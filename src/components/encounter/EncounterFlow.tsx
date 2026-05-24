@@ -24,6 +24,7 @@ import {
 } from '../../lib/oddsEngine';
 import type { OutcomeApply } from '../../hooks/useGameState';
 import { playSound } from '../../lib/sound';
+import { playMusic } from '../../lib/music';
 import QuestionCard from '../quiz/QuestionCard';
 import DiceRoll from '../dice/DiceRoll';
 
@@ -94,8 +95,12 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
   const [choice, setChoice] = useState<Choice | null>(null);
   const [roll, setRoll] = useState<RollResult | null>(null);
 
-  // Bølger når vi seiler inn til destinasjonen (§10).
-  useEffect(() => { playSound('waves'); }, []);
+  // Bakgrunnsmusikk per kontekst (§10): reflekterende under kulturmøte/oppgave/quiz,
+  // ellers det eventyrlige seilas-sporet. lib/music.ts crossfader mykt mellom dem.
+  useEffect(() => {
+    const reflective = step === 'kulturmote' || step === 'oppgave' || step === 'transition' || step === 'quiz';
+    playMusic(reflective ? 'reflective' : 'adventure');
+  }, [step]);
 
   // Quiz-overgang: krigshorn + fakta forsegles, så vises quizen.
   useEffect(() => {
