@@ -1,0 +1,60 @@
+{
+  "_meta": {
+    "title": "Vikingspill — Quiz-banken",
+    "version": "1.0",
+    "totalSkillPaths": 5,
+    "totalQuizPacks": 10,
+    "description": "Quiz-spørsmål for å låse opp ferdighetsnivå 2 og 3. Hvert spørsmål er merket med kildedestinasjon(er) slik at spillet kan filtrere ut spørsmål om steder gruppen ikke har besøkt."
+  },
+  "_schema": {
+    "structure": "skillKey → tier2 | tier3 → array of questions",
+    "passing": {
+      "tier2": "Trenger 2 av 3 spørsmål riktig",
+      "tier3": "Trenger 3 av 4 spørsmål riktig"
+    },
+    "question": {
+      "q": "Selve spørsmålet (kan inneholde HTML-tags)",
+      "opts": "Array med 4 svaralternativer",
+      "correct": "Indeks 0-3 for riktig svar",
+      "feedback": "Forklaring som vises etter svaret — alltid, både ved riktig og galt",
+      "source": "Liste over destinasjons-IDer spørsmålet handler om. Quizen filtrerer slik at elever ikke får spørsmål om steder de ikke har vært."
+    },
+    "filteringRule": "Spillet velger spørsmål kun fra de hvor MINST ÉN av destinasjonene i 'source' er besøkt. Hvis ingen spørsmål oppfyller dette, vises en melding om at gruppen må besøke flere steder først."
+  },
+  "språk": {
+    "tier2": [
+      {
+        "q": "Hva betyr hilsenen «As-salamu alaykum» som vikingene lærte i Bagdad?",
+        "opts": ["«Lykke til med handelen»", "«Fred være med dere»", "«Vi kommer i fred»", "«Allah er stor»"],
+        "correct": 1,
+        "feedback": "«As-salamu alaykum» er arabisk for «fred være med dere». Det riktige svaret når noen sier det til deg er «Wa alaykum as-salam» — «og fred være med deg».",
+        "source": ["baghdad"]
+      }
+    ],
+    "tier3": [
+      {
+        "q": "Hvilket av disse engelske ordene har norrønt opphav?",
+        "opts": ["Bread", "Window", "Tree", "Bird"],
+        "correct": 1,
+        "feedback": "«Window» kommer fra norrønt «vindauga» — vind-øye. Også egg, sky, happy, knife, law, skill, give, take og they er norrøne ord i moderne engelsk.",
+        "source": ["lindisfarne", "hedeby"]
+      }
+    ]
+  },
+  "sjømannskap": {
+    "tier2": [],
+    "tier3": []
+  },
+  "krigskunst": {
+    "tier2": [],
+    "tier3": []
+  },
+  "diplomati": {
+    "tier2": [],
+    "tier3": []
+  },
+  "tro": {
+    "tier2": [],
+    "tier3": []
+  }
+}

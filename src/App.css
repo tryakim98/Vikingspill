@@ -1,0 +1,9 @@
+/* Vikingspill CSS */
+/* Tailwind importeres én gang i index.css. Her ligger kun egendefinerte stiler. */
+
+/* Custom utilities for Viking theme */
+@layer components {
+  .viking-border-pattern {
+    border-image: linear-gradient(45deg, #D4A843, #E8C97A, #D4A843) 1;
+  }
+}
