@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Lokale miljøvariabler (Firebase-nøkler) — skal ALDRI til GitHub
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
