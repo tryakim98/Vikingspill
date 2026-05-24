@@ -47,6 +47,24 @@ code {
 .animate-wave      { animation: viking-wave 14s linear infinite; }
 .animate-wave-slow { animation: viking-wave 22s linear infinite; }
 
+/* Nordlys bak arketype-avsløringen i sluttseremonien (§8.6) */
+@keyframes viking-aurora {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.aurora {
+  background: linear-gradient(120deg, #2B6B6B, #5B7553, #6B3FA0, #2B6B6B);
+  background-size: 300% 300%;
+  animation: viking-aurora 9s ease infinite;
+}
+
+@keyframes viking-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: viking-rise 0.7s ease both; }
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-bob, .animate-wave, .animate-wave-slow { animation: none; }
+  .animate-bob, .animate-wave, .animate-wave-slow, .aurora, .animate-rise { animation: none; }
 }

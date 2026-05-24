@@ -13,6 +13,7 @@ import type { GroupSetup } from '../../hooks/useGroupSetup';
 import VikingShip from '../ship/VikingShip';
 import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
+import EndCeremony from '../ceremony/EndCeremony';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -28,6 +29,7 @@ export default function GameDashboard({ setup, onResetSetup, onSwitchRole }: Pro
   const { state, applyOutcome, setSkillLevel, resetProgress } = useGameState(setup);
   const [activeDest, setActiveDest] = useState<Destination | null>(null);
   const [activeSkill, setActiveSkill] = useState<SkillKey | null>(null);
+  const [showCeremony, setShowCeremony] = useState(false);
 
   if (!state) return null;
 
@@ -50,6 +52,17 @@ export default function GameDashboard({ setup, onResetSetup, onSwitchRole }: Pro
         visited={state.visited}
         onPass={(lvl) => { setSkillLevel(activeSkill, lvl); setActiveSkill(null); }}
         onClose={() => setActiveSkill(null)}
+      />
+    );
+  }
+
+  if (showCeremony) {
+    return (
+      <EndCeremony
+        setup={setup}
+        scores={state.scores}
+        skills={state.skills}
+        onClose={() => setShowCeremony(false)}
       />
     );
   }
@@ -128,11 +141,22 @@ export default function GameDashboard({ setup, onResetSetup, onSwitchRole }: Pro
           })}
         </div>
 
+        {/* Sluttseremoni når hele reisen er fullført */}
+        {state.visited.length === destinations.length && (
+          <button
+            onClick={() => setShowCeremony(true)}
+            className="mb-8 w-full rounded-lg border-2 border-viking-gold bg-viking-gold px-6 py-4 font-cinzel text-xl font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft hover:scale-[1.01]"
+          >
+            ⚓ Seil hjem til Avaldsnes
+          </button>
+        )}
+
         {/* Dev-modus */}
         <div className="rounded-lg border-2 border-viking-plum/60 bg-viking-plum/15 p-5">
           <h3 className="mb-3 font-cinzel text-lg text-viking-plum">👨‍💻 Utvikler-modus</h3>
           <div className="flex flex-wrap gap-3">
             <button onClick={resetProgress} className="rounded border-2 border-viking-gold bg-viking-teal px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-teal/80">Nullstill reise</button>
+            <button onClick={() => setShowCeremony(true)} className="rounded border-2 border-viking-gold bg-viking-gold/80 px-4 py-2 text-sm font-bold text-viking-darkblue hover:bg-viking-gold">Sluttseremoni</button>
             <button onClick={onResetSetup} className="rounded border-2 border-viking-gold bg-viking-rust px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-rust/80">Start oppsett på nytt</button>
             <button onClick={onSwitchRole} className="rounded border-2 border-viking-gold bg-viking-plum px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-plum/80">Bytt rolle</button>
           </div>
