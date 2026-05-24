@@ -24,7 +24,7 @@ export default function TeacherPanel() {
         {/* Header */}
         <div className="border-b-4 border-viking-gold pb-6 mb-8">
           <h1 className="font-cinzel text-4xl text-viking-gold mb-2">📜 SPILLMASTERKONSOLL</h1>
-          <p className="text-viking-gold-soft italic">Fase 1: Placeholder</p>
+          <p className="text-viking-gold-soft italic">Lærerkonsoll kommer i fase 2</p>
         </div>
 
         {/* Innhold */}

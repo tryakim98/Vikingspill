@@ -64,7 +64,7 @@ export default function RoleSelect() {
           <div className="relative">
             <div className="text-6xl mb-4">📜</div>
             <h2 className="font-cinzel text-3xl font-bold text-viking-paper mb-3">
-              Lærer
+              Jeg er lærer
             </h2>
             <p className="font-inter text-viking-paper/90 text-sm">
               Åpne spillmasterkonsollen. Se alle grupper, godkjenn oppgaver, og utløs Gudenes prøve.
@@ -84,7 +84,7 @@ export default function RoleSelect() {
           <div className="relative">
             <div className="text-6xl mb-4">⛵</div>
             <h2 className="font-cinzel text-3xl font-bold text-viking-paper mb-3">
-              Elev
+              Jeg er elev
             </h2>
             <p className="font-inter text-viking-paper/90 text-sm">
               Velg skip, styr gjennom 12 destinasjoner, gjør oppgaver, og ta valg som påvirker historien.
