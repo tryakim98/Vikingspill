@@ -74,7 +74,13 @@ export function useGameState(setup: GroupSetup) {
     });
   };
 
+  // Oppgrader en ferdighet etter en bestått verdighetsprøve (§3.2).
+  const setSkillLevel = (skill: SkillKey, level: number) => {
+    const base = state ?? seed(setup);
+    persist({ ...base, skills: { ...base.skills, [skill]: level } });
+  };
+
   const resetProgress = () => persist(seed(setup));
 
-  return { state, applyOutcome, resetProgress };
+  return { state, applyOutcome, setSkillLevel, resetProgress };
 }

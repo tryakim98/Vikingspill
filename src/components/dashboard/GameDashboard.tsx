@@ -12,6 +12,7 @@ import { useGameState } from '../../hooks/useGameState';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
 import VikingShip from '../ship/VikingShip';
 import EncounterFlow from '../encounter/EncounterFlow';
+import SkillTrial from '../skilltree/SkillTrial';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -24,8 +25,9 @@ interface Props {
 }
 
 export default function GameDashboard({ setup, onResetSetup, onSwitchRole }: Props) {
-  const { state, applyOutcome, resetProgress } = useGameState(setup);
+  const { state, applyOutcome, setSkillLevel, resetProgress } = useGameState(setup);
   const [activeDest, setActiveDest] = useState<Destination | null>(null);
+  const [activeSkill, setActiveSkill] = useState<SkillKey | null>(null);
 
   if (!state) return null;
 
@@ -36,6 +38,18 @@ export default function GameDashboard({ setup, onResetSetup, onSwitchRole }: Pro
         skills={state.skills}
         onComplete={(apply) => { applyOutcome(apply); setActiveDest(null); }}
         onExit={() => setActiveDest(null)}
+      />
+    );
+  }
+
+  if (activeSkill) {
+    return (
+      <SkillTrial
+        skill={activeSkill}
+        level={state.skills[activeSkill] ?? 0}
+        visited={state.visited}
+        onPass={(lvl) => { setSkillLevel(activeSkill, lvl); setActiveSkill(null); }}
+        onClose={() => setActiveSkill(null)}
       />
     );
   }
@@ -68,16 +82,25 @@ export default function GameDashboard({ setup, onResetSetup, onSwitchRole }: Pro
           ))}
         </div>
 
-        {/* Ferdigheter */}
+        {/* Ferdigheter — trykk en på nivå 1–2 for å ta verdighetsprøven (§3.2) */}
+        <p className="mb-2 font-inter text-xs text-viking-gold-soft/70">Ferdigheter — trykk en med ⚔ for å ta verdighetsprøven</p>
         <div className="mb-6 flex flex-wrap gap-2">
           {SKILL_KEYS.map((key) => {
             const lvl = state.skills[key] ?? 0;
+            const eligible = lvl === 1 || lvl === 2;
             return (
-              <div key={key} className={`flex items-center gap-2 rounded-full border-2 px-3 py-1 ${lvl > 0 ? 'border-viking-gold/60 bg-viking-gold/10' : 'border-viking-gold/20 opacity-60'}`}>
+              <button
+                key={key}
+                disabled={!eligible}
+                onClick={() => setActiveSkill(key)}
+                title={eligible ? 'Ta verdighetsprøven' : lvl >= 3 ? 'Mester (maks nivå)' : 'Ikke låst opp ennå'}
+                className={`flex items-center gap-2 rounded-full border-2 px-3 py-1 transition-all ${lvl > 0 ? 'border-viking-gold/60 bg-viking-gold/10' : 'border-viking-gold/20 opacity-60'} ${eligible ? 'cursor-pointer hover:border-viking-gold hover:bg-viking-gold/20' : 'cursor-default'}`}
+              >
                 <span style={{ color: skillTreeData[key].color }}>{skillTreeData[key].icon}</span>
                 <span className="font-inter text-xs text-viking-paper/90">{skillTreeData[key].name}</span>
                 <span className="font-mono text-xs text-viking-gold">{lvl}</span>
-              </div>
+                {eligible && <span className="text-xs">⚔</span>}
+              </button>
             );
           })}
         </div>
