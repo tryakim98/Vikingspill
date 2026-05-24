@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# Vikingenes kulturmøter ⚔️🛡️
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Et nettbasert klasseromsspill for VG2 yrkesfag (samfunnskunnskap / kulturmøter). 3–10
+grupper styrer hvert sitt vikingskip gjennom 12 historiske destinasjoner — Lindisfarne,
+Hedeby, Bagdad, Miklagard m.fl. Underveis møter de episke kulturmøter, gjør morsomme
+skoleoppgaver, bygger ferdigheter, kaster terning på valg med konsekvenser, og kappes på
+lærerens storskjerm i sanntid.
 
-Currently, two official plugins are available:
+Spilletid: ca. 75–120 min. Plattform: nettleser (telefon, iPad, laptop, projektor) — ingen
+installasjon for elevene.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+> Hele spillvisjonen og reglene ligger i [`CLAUDE.md`](./CLAUDE.md).
 
-## React Compiler
+## Én app, to roller
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Spillet er **én app** som åpner med et rollevalg:
 
-## Expanding the ESLint configuration
+- **Lærer** 👩‍🏫 — oppretter et spill og får en **spillkode** (f.eks. `VIKING-4L2N`). Får
+  spillmasterkonsollen: sjøkart med alle skip, leaderboard, oppgavegodkjenning, tidevannstimer,
+  «Gudenes prøve», skjebne-kort og Ragnarok. Vises typisk på **projektor/storskjerm**.
+- **Elev** 🧑‍🤝‍🧑 — taster inn spillkoden, velger og rigger skip, og spiller møte-flyten på
+  **egen telefon/iPad**. Flere grupper deler samme kode og vises alle på lærerens kart.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Rollen huskes i `localStorage`. «Bytt rolle» finnes nederst på begge skjermene.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Slik kobler lærer og elever sammen
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. **Læreren** åpner spillet → «Jeg er lærer» → **Opprett spill**. En spillkode vises øverst
+   på storskjermen.
+2. **Elevene** åpner samme nettadresse på sine enheter → «Jeg er elev» → taster inn
+   spillkoden → **Bli med**.
+3. Hver gruppe velger skip (farge, navn, symbol) og en startferdighet, og begynner seilasen.
+   Alle gruppene dukker opp på lærerens sjøkart i sanntid.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+> Uten nett kan elever velge **«Spill offline»** og spille lokalt (uten sanntidssync mot
+> lærerens skjerm).
+
+## Kom i gang (utvikling)
+
+Krever **Node 20.19+ eller 22+**.
+
+```bash
+npm install          # installer avhengigheter
+cp .env.example .env # opprett miljøfil for Firebase (se under)
+npm run dev          # start utviklingsserver (http://localhost:5173)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Andre kommandoer:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build    # produksjonsbygg (TypeScript-sjekk + Vite) → dist/
+npm run preview  # forhåndsvis produksjonsbygget lokalt
+npm run lint     # ESLint
 ```
+
+### Firebase (sanntidssync)
+
+Sanntidssync mellom lærer og elever bruker **Firebase Realtime Database**. Fyll inn dine egne
+verdier i `.env` (mal i [`.env.example`](./.env.example)) — hentes fra Firebase-konsollen under
+*Prosjektinnstillinger → Dine apper → web-app*. `.env` er gitignorert og lastes aldri opp.
+
+> ⚠️ **Før deploy:** Realtime Database-reglene må settes til skikkelige sikkerhetsregler.
+> Test-modus er åpent for alle og utløper automatisk.
+
+### Lyd (valgfritt)
+
+Spillet fungerer uten lyd. For full opplevelse: legg åtte `.mp3`-filer i
+[`public/sounds/`](./public/sounds/) — se `public/sounds/README.md` for nøyaktige filnavn og
+forslag til gratis lydkilder. Lyd kan slås av/på med 🔊-knappen i spillet.
+
+## Teknologi
+
+React 19 · TypeScript · Vite · Tailwind CSS · Firebase Realtime Database ·
+Howler.js (lyd) · Motion (animasjon) · React Router.
+
+## Lisens / opphav
+
+Laget av T. Ulriksen, lektor i norsk og samfunnskunnskap, i samarbeid med Claude (Anthropic).
