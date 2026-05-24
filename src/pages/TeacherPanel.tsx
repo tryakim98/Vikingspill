@@ -18,12 +18,15 @@ import {
   setApprovalStatus,
   triggerTrial,
   subscribeTrial,
+  triggerFate,
+  subscribeFate,
   type SyncedGroup,
   type ApprovalRequest,
   type ApprovalStatus,
   type Trial,
+  type FateEvent,
 } from '../lib/gameSync';
-import { gudenesProveChallenges } from '../data';
+import { gudenesProveChallenges, fateCards } from '../data';
 import SeaMap from '../components/teacher/SeaMap';
 import VikingShip from '../components/ship/VikingShip';
 import type { ShipSymbol } from '../types';
@@ -38,13 +41,15 @@ export default function TeacherPanel() {
   const [groups, setGroups] = useState<Record<string, SyncedGroup>>({});
   const [approvals, setApprovals] = useState<Record<string, ApprovalRequest>>({});
   const [trial, setTrial] = useState<Trial | null>(null);
+  const [fate, setFate] = useState<FateEvent | null>(null);
 
   useEffect(() => {
-    if (!code) { setGroups({}); setApprovals({}); setTrial(null); return; }
+    if (!code) { setGroups({}); setApprovals({}); setTrial(null); setFate(null); return; }
     const unsubG = subscribeGroups(code, setGroups);
     const unsubA = subscribeApprovals(code, setApprovals);
     const unsubT = subscribeTrial(code, setTrial);
-    return () => { unsubG(); unsubA(); unsubT(); };
+    const unsubF = subscribeFate(code, setFate);
+    return () => { unsubG(); unsubA(); unsubT(); unsubF(); };
   }, [code]);
 
   const triggerGudenesProve = () => {
@@ -58,6 +63,32 @@ export default function TeacherPanel() {
       skill: c.ferdighet,
       at: Date.now(),
     }).catch(() => {});
+  };
+
+  const triggerSkjebne = () => {
+    if (!code) return;
+    const card = fateCards[Math.floor(Math.random() * fateCards.length)];
+    const ev: FateEvent = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      icon: card.icon,
+      title: card.title,
+      text: card.text,
+      targetMode: card.targetMode,
+      effect: card.effect,
+      effectLabel: card.effectLabel,
+      at: Date.now(),
+    };
+    if (card.targetMode === 'group') {
+      const ids = Object.keys(groups);
+      if (ids.length === 0) return; // ingen grupper å ramme ennå
+      const tid = ids[Math.floor(Math.random() * ids.length)];
+      ev.targetGroupId = tid;
+      ev.targetName = groups[tid].shipName;
+    } else if (card.condition) {
+      ev.condition = { skill: card.condition.skill, below: card.condition.below };
+      ev.conditionLabel = card.condition.label;
+    }
+    triggerFate(code, ev).catch(() => {});
   };
 
   const createNew = async () => {
@@ -117,6 +148,16 @@ export default function TeacherPanel() {
             {trial && <p className="mt-1 font-mono text-xs text-viking-gold-soft">Sist sendt: {trial.navn} — ferdighet «{trial.skill}»</p>}
           </div>
           <button onClick={triggerGudenesProve} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-3 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">⚡ Utløs Gudenes prøve</button>
+        </div>
+
+        {/* §8.4 Skjebne-kort — læreren bestemmer KUN når */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-viking-rust/60 bg-viking-rust/15 p-4">
+          <div>
+            <h2 className="font-cinzel text-xl text-viking-gold">🎴 Skjebne-kort</h2>
+            <p className="font-inter text-sm text-viking-paper/80">Du bestemmer kun <strong>når</strong>. Spillet trekker kort og hvem som rammes — tilfeldig.</p>
+            {fate && <p className="mt-1 font-mono text-xs text-viking-gold-soft">Sist: {fate.title} → {fate.targetMode === 'group' ? fate.targetName : fate.conditionLabel}</p>}
+          </div>
+          <button onClick={triggerSkjebne} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-3 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">🎴 Utløs skjebne-kort</button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">

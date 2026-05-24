@@ -9,3 +9,4 @@ export { skillTreeData, getSkillName, getSkillIcon } from './skillTree';
 export { destinations, getDestinationById, getAllDestinations, getRandomDestination } from './destinations';
 export { skillQuizBank, getQuizQuestionsForSkill, isQuizPassed } from './quizBank';
 export { gudenesProveChallenges, holmgangDueller, randomGudenesProve, randomHolmgangDuell } from './mekanikk';
+export { fateCards } from './fateCards';

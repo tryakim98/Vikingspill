@@ -15,9 +15,10 @@ import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeTrial, type Trial } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeTrial, subscribeFate, type Trial, type FateEvent } from '../../lib/gameSync';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
 import SeaBattle from '../duel/SeaBattle';
+import FateCardOverlay from '../fate/FateCardOverlay';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -38,6 +39,8 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const [showCeremony, setShowCeremony] = useState(false);
   const [activeTrial, setActiveTrial] = useState<Trial | null>(null);
   const seenTrial = useRef<string | null>(null);
+  const [activeFate, setActiveFate] = useState<FateEvent | null>(null);
+  const seenFate = useRef<string | null>(null);
 
   // Gudenes prøve (§3.4): lytt på utløsning og avbryt skjermen for alle online-grupper.
   useEffect(() => {
@@ -46,6 +49,17 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     const unsub = subscribeTrial(session.gameCode, (trial) => {
       if (first) { first = false; seenTrial.current = trial?.id ?? null; return; } // ignorer prøve som finnes ved oppkobling
       if (trial && trial.id !== seenTrial.current) { seenTrial.current = trial.id; setActiveTrial(trial); }
+    });
+    return () => unsub();
+  }, [session]);
+
+  // Skjebne-kort (§8.4): lytt på utløsning og avbryt skjermen.
+  useEffect(() => {
+    if (session.mode !== 'online') return;
+    let first = true;
+    const unsub = subscribeFate(session.gameCode, (fate) => {
+      if (first) { first = false; seenFate.current = fate?.id ?? null; return; }
+      if (fate && fate.id !== seenFate.current) { seenFate.current = fate.id; setActiveFate(fate); }
     });
     return () => unsub();
   }, [session]);
@@ -62,6 +76,28 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         onDone={() => {
           addReward({ und: 0, trade: 0, rep: 1 + (state.skills[activeTrial.skill] ?? 0) });
           setActiveTrial(null);
+        }}
+      />
+    );
+  }
+
+  if (activeFate) {
+    const affected = activeFate.targetMode === 'group'
+      ? activeFate.targetGroupId === session.groupId
+      : (state.skills[activeFate.condition?.skill ?? 'tro'] ?? 0) < (activeFate.condition?.below ?? 0);
+    return (
+      <FateCardOverlay
+        event={activeFate}
+        affected={affected}
+        onDone={() => {
+          if (affected) {
+            if (activeFate.effect.kind === 'score') {
+              addReward({ und: activeFate.effect.und ?? 0, trade: activeFate.effect.trade ?? 0, rep: activeFate.effect.rep ?? 0 });
+            } else {
+              setSkillLevel(activeFate.effect.skill, Math.max(0, (state.skills[activeFate.effect.skill] ?? 0) + activeFate.effect.delta));
+            }
+          }
+          setActiveFate(null);
         }}
       />
     );

@@ -160,3 +160,32 @@ export function subscribeDuels(code: string, callback: (duels: Record<string, Du
     callback((snap.val() as Record<string, Duel> | null) ?? {});
   });
 }
+
+// === Skjebne-kort (§8.4) ==========================================================
+// Læreren bestemmer kun NÅR; kort + (for gruppe-kort) tilfeldig gruppe trekkes i koden
+// og kringkastes via /games/{code}/fate. Hver elev avgjør selv om de rammes.
+
+export interface FateEvent {
+  id: string;
+  icon: string;
+  title: string;
+  text: string;
+  targetMode: 'group' | 'condition';
+  targetGroupId?: string;
+  targetName?: string;
+  condition?: { skill: SkillKey; below: number };
+  conditionLabel?: string;
+  effect: { kind: 'score'; und?: number; trade?: number; rep?: number } | { kind: 'skill'; skill: SkillKey; delta: number };
+  effectLabel: string;
+  at: number;
+}
+
+export function triggerFate(code: string, event: FateEvent): Promise<void> {
+  return set(ref(db, `games/${code}/fate`), event);
+}
+
+export function subscribeFate(code: string, callback: (event: FateEvent | null) => void): Unsubscribe {
+  return onValue(ref(db, `games/${code}/fate`), (snap) => {
+    callback((snap.val() as FateEvent | null) ?? null);
+  });
+}
