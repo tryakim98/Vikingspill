@@ -20,6 +20,7 @@ import {
   subscribeTrial,
   triggerFate,
   subscribeFate,
+  triggerRagnarok,
   type SyncedGroup,
   type ApprovalRequest,
   type ApprovalStatus,
@@ -28,6 +29,7 @@ import {
 } from '../lib/gameSync';
 import { gudenesProveChallenges, fateCards } from '../data';
 import SeaMap from '../components/teacher/SeaMap';
+import TideTimer from '../components/teacher/TideTimer';
 import VikingShip from '../components/ship/VikingShip';
 import type { ShipSymbol } from '../types';
 
@@ -91,6 +93,11 @@ export default function TeacherPanel() {
     triggerFate(code, ev).catch(() => {});
   };
 
+  const triggerRagnarokNow = () => {
+    if (!code) return;
+    triggerRagnarok(code, { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, at: Date.now() }).catch(() => {});
+  };
+
   const createNew = async () => {
     const c = generateGameCode();
     try { await createGame(c); } catch { /* vis koden uansett; sync er best effort */ }
@@ -105,6 +112,9 @@ export default function TeacherPanel() {
 
   const ranked = Object.entries(groups).sort((a, b) => total(b[1]) - total(a[1]));
   const pending = Object.entries(approvals).filter(([, a]) => a.status === 'pending');
+  // §6.3 Ragnarok blir tilgjengelig når avstanden mellom 1. og siste gruppe > 15 poeng.
+  const leadGap = ranked.length >= 2 ? total(ranked[0][1]) - total(ranked[ranked.length - 1][1]) : 0;
+  const ragnarokReady = ranked.length >= 2 && leadGap > 15;
 
   if (!code) {
     return (
@@ -140,6 +150,11 @@ export default function TeacherPanel() {
           <SeaMap groups={groups} />
         </div>
 
+        {/* §6.5 Tidevannstimer — læreren styrer rammene pr. kapittel */}
+        <div className="mb-6">
+          <TideTimer code={code} groups={groups} />
+        </div>
+
         {/* §3.4/§8.5 Gudenes prøve — læreren bestemmer KUN når */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-viking-plum/60 bg-viking-plum/15 p-4">
           <div>
@@ -158,6 +173,26 @@ export default function TeacherPanel() {
             {fate && <p className="mt-1 font-mono text-xs text-viking-gold-soft">Sist: {fate.title} → {fate.targetMode === 'group' ? fate.targetName : fate.conditionLabel}</p>}
           </div>
           <button onClick={triggerSkjebne} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-3 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">🎴 Utløs skjebne-kort</button>
+        </div>
+
+        {/* §6.3 Ragnarok — catch-up når avstanden blir for stor (> 15 poeng) */}
+        <div className={`mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 p-4 ${ragnarokReady ? 'border-viking-crimson bg-viking-crimson/15' : 'border-viking-gold/20 bg-viking-surface/40 opacity-70'}`}>
+          <div>
+            <h2 className="font-cinzel text-xl text-viking-gold">⚡ Ragnarok</h2>
+            <p className="font-inter text-sm text-viking-paper/80">
+              Når avstanden mellom 1. og siste gruppe passerer <strong>15 poeng</strong> kan du slippe Ragnarok løs — alle mister halve handelspoeng.
+            </p>
+            <p className="mt-1 font-mono text-xs text-viking-gold-soft">
+              Største avstand nå: {leadGap} poeng {ragnarokReady ? '— gudene er rasende!' : '(under 15 — feltet er jevnt)'}
+            </p>
+          </div>
+          <button
+            onClick={triggerRagnarokNow}
+            disabled={!ragnarokReady}
+            className="rounded-md border-2 border-viking-gold bg-viking-crimson px-6 py-3 font-cinzel font-bold text-viking-paper hover:bg-viking-crimson/80 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            ⚡ Slipp Ragnarok løs
+          </button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">

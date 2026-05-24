@@ -15,10 +15,14 @@ import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeTrial, subscribeFate, type Trial, type FateEvent } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeTrial, subscribeFate, subscribeTideTurn, subscribeRagnarok, type Trial, type FateEvent, type TideTurn, type RagnarokEvent } from '../../lib/gameSync';
+import { chapters, chapterCompleted } from '../../data/chapters';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
 import SeaBattle from '../duel/SeaBattle';
 import FateCardOverlay from '../fate/FateCardOverlay';
+import TideBanner from '../tide/TideBanner';
+import TideTurnOverlay from '../tide/TideTurnOverlay';
+import RagnarokOverlay from '../ragnarok/RagnarokOverlay';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -41,6 +45,10 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const seenTrial = useRef<string | null>(null);
   const [activeFate, setActiveFate] = useState<FateEvent | null>(null);
   const seenFate = useRef<string | null>(null);
+  const [activeTideTurn, setActiveTideTurn] = useState<TideTurn | null>(null);
+  const seenTideTurn = useRef<string | null>(null);
+  const [activeRagnarok, setActiveRagnarok] = useState<RagnarokEvent | null>(null);
+  const seenRagnarok = useRef<string | null>(null);
 
   // Gudenes prøve (§3.4): lytt på utløsning og avbryt skjermen for alle online-grupper.
   useEffect(() => {
@@ -60,6 +68,28 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     const unsub = subscribeFate(session.gameCode, (fate) => {
       if (first) { first = false; seenFate.current = fate?.id ?? null; return; }
       if (fate && fate.id !== seenFate.current) { seenFate.current = fate.id; setActiveFate(fate); }
+    });
+    return () => unsub();
+  }, [session]);
+
+  // Tidevannet snur (§6.5): grupper som ikke har fullført kapitlet mister handelspoeng.
+  useEffect(() => {
+    if (session.mode !== 'online') return;
+    let first = true;
+    const unsub = subscribeTideTurn(session.gameCode, (turn) => {
+      if (first) { first = false; seenTideTurn.current = turn?.id ?? null; return; }
+      if (turn && turn.id !== seenTideTurn.current) { seenTideTurn.current = turn.id; setActiveTideTurn(turn); }
+    });
+    return () => unsub();
+  }, [session]);
+
+  // Ragnarok (§6.3): alle mister halve handelspoeng når læreren slipper den løs.
+  useEffect(() => {
+    if (session.mode !== 'online') return;
+    let first = true;
+    const unsub = subscribeRagnarok(session.gameCode, (ev) => {
+      if (first) { first = false; seenRagnarok.current = ev?.id ?? null; return; }
+      if (ev && ev.id !== seenRagnarok.current) { seenRagnarok.current = ev.id; setActiveRagnarok(ev); }
     });
     return () => unsub();
   }, [session]);
@@ -98,6 +128,34 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             }
           }
           setActiveFate(null);
+        }}
+      />
+    );
+  }
+
+  if (activeTideTurn) {
+    const affected = !chapterCompleted(activeTideTurn.chapterIndex, state.visited);
+    return (
+      <TideTurnOverlay
+        chapterNavn={chapters[activeTideTurn.chapterIndex]?.navn ?? ''}
+        affected={affected}
+        penalty={activeTideTurn.penaltyTrade}
+        onDone={() => {
+          if (affected) addReward({ und: 0, trade: -activeTideTurn.penaltyTrade, rep: 0 });
+          setActiveTideTurn(null);
+        }}
+      />
+    );
+  }
+
+  if (activeRagnarok) {
+    const lost = state.scores.tradeGain > 0 ? Math.floor(state.scores.tradeGain / 2) : 0;
+    return (
+      <RagnarokOverlay
+        lost={lost}
+        onDone={() => {
+          if (lost > 0) addReward({ und: 0, trade: -lost, rep: 0 });
+          setActiveRagnarok(null);
         }}
       />
     );
@@ -149,6 +207,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   return (
     <div className="min-h-screen bg-gradient-to-b from-viking-darkblue to-viking-surface text-viking-paper p-6">
       <div className="mx-auto max-w-3xl">
+        {/* §6.5 Tidevanns-nedtelling (kun online — læreren styrer timeren) */}
+        {session.mode === 'online' && <TideBanner code={session.gameCode} />}
+
         {/* Header */}
         <div className="mb-6 flex items-center gap-4 border-b-4 border-viking-gold pb-5">
           <VikingShip color={setup.shipColor} symbol={setup.shipSymbol} size={96} />
