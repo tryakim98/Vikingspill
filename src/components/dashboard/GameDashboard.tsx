@@ -15,7 +15,7 @@ import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup } from '../../lib/gameSync';
+import { removeGroup, requestApproval } from '../../lib/gameSync';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -44,6 +44,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         skills={state.skills}
         onComplete={(apply) => { applyOutcome(apply); setActiveDest(null); }}
         onExit={() => setActiveDest(null)}
+        onRequestApproval={session.mode === 'online'
+          ? (destId, taskTitle) => requestApproval(session.gameCode, session.groupId, { destId, taskTitle, shipName: setup.shipName }).catch(() => {})
+          : undefined}
       />
     );
   }

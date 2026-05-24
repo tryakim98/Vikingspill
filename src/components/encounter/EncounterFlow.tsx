@@ -31,6 +31,8 @@ interface EncounterFlowProps {
   skills: Record<SkillKey, number>;
   onComplete: (apply: OutcomeApply) => void;
   onExit: () => void;
+  /** Sett kun når online — viser «Be om godkjenning» på oppgavesiden (§8.3). */
+  onRequestApproval?: (destId: string, taskTitle: string) => void;
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -77,9 +79,10 @@ function OddsBar({ baseRoll }: { baseRoll: RollOdds }) {
   );
 }
 
-export default function EncounterFlow({ destination, skills, onComplete, onExit }: EncounterFlowProps) {
+export default function EncounterFlow({ destination, skills, onComplete, onExit, onRequestApproval }: EncounterFlowProps) {
   const d = destination;
   const [step, setStep] = useState<Step>('history');
+  const [approvalSent, setApprovalSent] = useState(false);
   const [kmAnswer, setKmAnswer] = useState<number | null>(null);
   const [quizIdx, setQuizIdx] = useState(0);
   const [quizCorrect, setQuizCorrect] = useState(0);
@@ -157,6 +160,20 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit 
             <h3 className="mb-2 font-cinzel text-xl text-viking-gold">{d.task.title}</h3>
             <p className="mb-3 font-inter text-sm text-viking-paper/90">{d.task.desc}</p>
             <p className="font-inter text-xs italic text-viking-paper/60">{d.task.rationale}</p>
+            {onRequestApproval && (
+              <div className="mt-4 border-t border-viking-gold/20 pt-3">
+                {approvalSent ? (
+                  <p className="font-inter text-sm text-viking-moss">✋ Sendt til læreren — venter på godkjenning</p>
+                ) : (
+                  <button
+                    onClick={() => { onRequestApproval(d.id, d.task.title); setApprovalSent(true); }}
+                    className="rounded-md border-2 border-viking-gold/60 px-4 py-1.5 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold"
+                  >
+                    ✋ Be læreren om godkjenning
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <div className="mt-7 flex flex-wrap gap-3">

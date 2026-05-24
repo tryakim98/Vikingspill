@@ -8,7 +8,7 @@
  * Alle skriv er «best effort» — feiler de (offline), beholder appen localStorage.
  */
 
-import { ref, set, get, remove, onValue, type Unsubscribe } from 'firebase/database';
+import { ref, set, get, remove, update, onValue, type Unsubscribe } from 'firebase/database';
 import { db } from './firebase';
 import type { SkillKey } from '../types';
 
@@ -59,5 +59,46 @@ export function subscribeGroups(
       g.locked = g.locked ?? [];
     }
     callback(groups);
+  });
+}
+
+// === Oppgavegodkjenning (§8.3) ====================================================
+// Egen node /games/{code}/approvals/{groupId} så elevens group-skriv ikke overskriver den.
+
+export type ApprovalStatus = 'pending' | 'approved' | 'partial' | 'rejected';
+
+export interface ApprovalRequest {
+  destId: string;
+  taskTitle: string;
+  shipName: string;
+  status: ApprovalStatus;
+  requestedAt: number;
+}
+
+/** Elev: be læreren om å godkjenne oppgaven. */
+export function requestApproval(
+  code: string,
+  groupId: string,
+  data: { destId: string; taskTitle: string; shipName: string },
+): Promise<void> {
+  return set(ref(db, `games/${code}/approvals/${groupId}`), {
+    ...data,
+    status: 'pending' as ApprovalStatus,
+    requestedAt: Date.now(),
+  });
+}
+
+/** Lærer: sett resultat (godkjent/delvis/avvist). */
+export function setApprovalStatus(code: string, groupId: string, status: ApprovalStatus): Promise<void> {
+  return update(ref(db, `games/${code}/approvals/${groupId}`), { status });
+}
+
+/** Lærer: lytt på alle godkjenningsforespørsler. */
+export function subscribeApprovals(
+  code: string,
+  callback: (approvals: Record<string, ApprovalRequest>) => void,
+): Unsubscribe {
+  return onValue(ref(db, `games/${code}/approvals`), (snap) => {
+    callback((snap.val() as Record<string, ApprovalRequest> | null) ?? {});
   });
 }
