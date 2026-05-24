@@ -7,7 +7,7 @@ appen krasjer ikke. Bruk royalty-frie / CC0-lyder.
 
 | Filnavn | Når | Forslag til søk |
 |---|---|---|
-| `waves.mp3` | «Eventyr»-sporet — under seiling/kart/dashboard. Bør være langt (~3–4 min) | «sea / ocean ambient music» |
+| `background-sea.mp3` | «Eventyr»-sporet — under seiling/kart/dashboard. Langt (~3–4 min) | «sea / ocean ambient music» |
 | `background.mp3` | «Reflekterende» sporet — under kulturmøtet, oppgavesiden og stedsquizen (~2–3 min) | «viking folk ambient» |
 
 Begge looper, spiller på lavt volum (~25 %), crossfader mykt ved kontekstskifte, og dempes
@@ -17,6 +17,7 @@ under Gudenes prøve / skjebne-kort.
 
 | Filnavn | Når den spilles | Forslag til søk |
 |---|---|---|
+| `waves.mp3` | Kort bølgeplask ved ankomst til en destinasjon (~5 sek) | «ocean wave splash» |
 | `war-horn.mp3` | Quiz-overgangen (når fakta forsegles) | «viking war horn» |
 | `dice-roll.mp3` | Terning mot trebord | «dice roll wood» |
 | `silver-clink.mp3` | «Bra» utfall | «coins clink» |

@@ -1,8 +1,8 @@
 /**
  * music.ts
  * To lange bakgrunnsspor (§10) som crossfader mykt når eleven skifter kontekst:
- *  - 'adventure'  (waves.mp3, sjøsang)      under seiling/kart/dashboard — det eventyrlige
- *  - 'reflective' (background.mp3, vikingfolk) under kulturmøtet og oppgavesiden — det reflekterende
+ *  - 'adventure'  (background-sea.mp3, sjøsang) under seiling/kart/dashboard — det eventyrlige
+ *  - 'reflective' (background.mp3, vikingfolk)   under kulturmøtet og oppgavesiden — det reflekterende
  *
  * Begge looper på lavt volum. De dempes (duck) under Gudenes prøve / skjebne-kort, som har
  * egne effektlyder. Global mute (lib/sound.ts → Howler.mute) demper også musikken.
@@ -14,7 +14,7 @@ import { Howl } from 'howler';
 export type MusicTrack = 'adventure' | 'reflective';
 
 const FILES: Record<MusicTrack, string> = {
-  adventure: 'waves.mp3',
+  adventure: 'background-sea.mp3',
   reflective: 'background.mp3',
 };
 

@@ -95,6 +95,9 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
   const [choice, setChoice] = useState<Choice | null>(null);
   const [roll, setRoll] = useState<RollResult | null>(null);
 
+  // Kort bølgeeffekt idet vi seiler inn til destinasjonen (§10).
+  useEffect(() => { playSound('waves'); }, []);
+
   // Bakgrunnsmusikk per kontekst (§10): reflekterende under kulturmøte/oppgave/quiz,
   // ellers det eventyrlige seilas-sporet. lib/music.ts crossfader mykt mellom dem.
   useEffect(() => {
