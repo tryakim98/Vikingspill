@@ -24,6 +24,8 @@ import TideBanner from '../tide/TideBanner';
 import TideTurnOverlay from '../tide/TideTurnOverlay';
 import RagnarokOverlay from '../ragnarok/RagnarokOverlay';
 import { useMute } from '../../hooks/useMute';
+import LoadingScreen from '../common/LoadingScreen';
+import ConnectionBanner from '../common/ConnectionBanner';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -96,7 +98,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     return () => unsub();
   }, [session]);
 
-  if (!state) return null;
+  if (!state) return <LoadingScreen text="Henter skipets logg …" />;
 
   if (activeTrial) {
     return (
@@ -208,6 +210,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-viking-darkblue to-viking-surface text-viking-paper p-6">
+      <ConnectionBanner active={session.mode === 'online'} />
       <div className="mx-auto max-w-3xl">
         {/* §6.5 Tidevanns-nedtelling (kun online — læreren styrer timeren) */}
         {session.mode === 'online' && <TideBanner code={session.gameCode} />}

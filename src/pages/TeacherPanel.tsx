@@ -30,6 +30,7 @@ import {
 import { gudenesProveChallenges, fateCards } from '../data';
 import SeaMap from '../components/teacher/SeaMap';
 import TideTimer from '../components/teacher/TideTimer';
+import ConnectionBanner from '../components/common/ConnectionBanner';
 import VikingShip from '../components/ship/VikingShip';
 import type { ShipSymbol } from '../types';
 
@@ -98,11 +99,27 @@ export default function TeacherPanel() {
     triggerRagnarok(code, { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, at: Date.now() }).catch(() => {});
   };
 
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState(false);
+
   const createNew = async () => {
+    setCreating(true);
+    setCreateError(false);
     const c = generateGameCode();
-    try { await createGame(c); } catch { /* vis koden uansett; sync er best effort */ }
-    localStorage.setItem(CODE_KEY, c);
-    setCode(c);
+    try {
+      // Firebase køer skriv når man er offline (løses aldri før nett er tilbake), så vi
+      // gir opp etter 6 s og lar læreren prøve igjen i stedet for å spinne i det uendelige.
+      await Promise.race([
+        createGame(c), // må lykkes for at elevene skal kunne koble til
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 6000)),
+      ]);
+      localStorage.setItem(CODE_KEY, c);
+      setCode(c);
+    } catch {
+      setCreateError(true); // ingen kontakt med Firebase — la læreren prøve igjen
+    } finally {
+      setCreating(false);
+    }
   };
   const endGame = () => { localStorage.removeItem(CODE_KEY); setCode(null); };
   const switchRole = () => { clearRole(); navigate('/', { replace: true }); };
@@ -125,7 +142,18 @@ export default function TeacherPanel() {
           <div className="rounded-lg border-2 border-viking-gold bg-viking-surface p-10 text-center">
             <h2 className="mb-3 font-cinzel text-2xl text-viking-gold">Start et nytt spill</h2>
             <p className="mb-8 font-inter text-viking-paper/85">Du får en spillkode som elevene taster inn for å bli med.</p>
-            <button onClick={() => void createNew()} className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">Opprett spill</button>
+            <button
+              onClick={() => void createNew()}
+              disabled={creating}
+              className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-wait disabled:opacity-60"
+            >
+              {creating ? 'Oppretter spill …' : 'Opprett spill'}
+            </button>
+            {createError && (
+              <p className="mt-5 rounded-md border-2 border-viking-crimson bg-viking-crimson/15 p-3 font-inter text-sm text-viking-paper">
+                Fikk ikke kontakt med spilltjeneren. Sjekk nettet og prøv igjen.
+              </p>
+            )}
           </div>
           <button onClick={switchRole} className="mt-6 rounded border-2 border-viking-gold/50 px-5 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Bytt rolle</button>
         </div>
@@ -135,6 +163,7 @@ export default function TeacherPanel() {
 
   return (
     <div className="min-h-screen bg-viking-darkblue p-4 text-viking-paper sm:p-6 xl:p-8">
+      <ConnectionBanner active={!!code} />
       <div className="mx-auto w-full max-w-5xl xl:max-w-[1700px]">
         {/* Spillkode */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-viking-gold bg-viking-surface px-5 py-3 sm:px-6">

@@ -13,6 +13,7 @@ import { useGroupSetup } from '../hooks/useGroupSetup';
 import JoinGame from '../components/session/JoinGame';
 import SetupFlow from '../components/setup/SetupFlow';
 import GameDashboard from '../components/dashboard/GameDashboard';
+import LoadingScreen from '../components/common/LoadingScreen';
 
 export default function StudentGame() {
   const navigate = useNavigate();
@@ -20,8 +21,8 @@ export default function StudentGame() {
   const { session, loaded: sLoaded, join, playOffline, leave } = useSession();
   const { setup, loaded: gLoaded, saveSetup, clearSetup } = useGroupSetup();
 
-  // Unngå flimmer mens localStorage leses
-  if (!sLoaded || !gLoaded) return null;
+  // Viser lasteskjerm mens localStorage leses (unngår blank skjerm)
+  if (!sLoaded || !gLoaded) return <LoadingScreen />;
 
   const handleSwitchRole = () => {
     clearRole();

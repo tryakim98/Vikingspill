@@ -251,3 +251,11 @@ export function subscribeRagnarok(code: string, callback: (ev: RagnarokEvent | n
     callback((snap.val() as RagnarokEvent | null) ?? null);
   });
 }
+
+// === Tilkoblingsstatus ============================================================
+// Firebase RTDB eksponerer en spesiell `.info/connected`-node som er true når klienten
+// har kontakt med serveren. Brukes til å varsle ved tapt nett (§13 error states).
+
+export function subscribeConnection(callback: (connected: boolean) => void): Unsubscribe {
+  return onValue(ref(db, '.info/connected'), (snap) => callback(snap.val() === true));
+}
