@@ -8,6 +8,7 @@
  * et gjenkjennelig kart: vest = Vinland, nord = Sameland/Island, øst = Novgorod, sør = Miklagard/Bagdad.
  */
 
+import { motion } from 'motion/react';
 import type { SyncedGroup } from '../../lib/gameSync';
 import type { ShipSymbol } from '../../types';
 import { destinations } from '../../data';
@@ -72,17 +73,19 @@ export default function SeaMap({ groups }: { groups: Record<string, SyncedGroup>
         </div>
       ))}
 
-      {/* Skip (glir mellom posisjoner) */}
+      {/* Skip (glir mykt mellom posisjoner langs rutene, §8.1/§10) */}
       {ships.map((s) => (
-        <div
+        <motion.div
           key={s.id}
-          className="absolute z-10 -translate-x-1/2 -translate-y-1/2 transition-all duration-[1500ms] ease-in-out"
-          style={{ left: `${s.x}%`, top: `${s.y}%` }}
+          className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
+          initial={false}
+          animate={{ left: `${s.x}%`, top: `${s.y}%` }}
+          transition={{ type: 'spring', stiffness: 38, damping: 14 }}
           title={s.g.shipName}
         >
           <VikingShip color={s.g.shipColor} symbol={s.g.shipSymbol as ShipSymbol} size={44} bob />
           <span className="absolute left-1/2 top-full -translate-x-1/2 whitespace-nowrap rounded bg-viking-darkblue/80 px-1.5 font-cinzel text-[10px] text-viking-paper">{s.g.shipName}</span>
-        </div>
+        </motion.div>
       ))}
 
       {ships.length === 0 && (

@@ -9,6 +9,7 @@
  */
 
 import { useState, useEffect, type ReactNode } from 'react';
+import { motion } from 'motion/react';
 import type { Destination, Choice, RollOdds, SkillKey } from '../../types';
 import { skillTreeData } from '../../data';
 import {
@@ -22,9 +23,11 @@ import {
   type RollResult,
 } from '../../lib/oddsEngine';
 import type { OutcomeApply } from '../../hooks/useGameState';
+import { playSound } from '../../lib/sound';
 import QuestionCard from '../quiz/QuestionCard';
+import DiceRoll from '../dice/DiceRoll';
 
-type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'valg' | 'roll' | 'resultat';
+type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'valg' | 'roll' | 'rolling' | 'resultat';
 
 interface EncounterFlowProps {
   destination: Destination;
@@ -91,10 +94,14 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
   const [choice, setChoice] = useState<Choice | null>(null);
   const [roll, setRoll] = useState<RollResult | null>(null);
 
-  // Quiz-overgang: fakta forsegles, så vises quizen
+  // Bølger når vi seiler inn til destinasjonen (§10).
+  useEffect(() => { playSound('waves'); }, []);
+
+  // Quiz-overgang: krigshorn + fakta forsegles, så vises quizen.
   useEffect(() => {
     if (step !== 'transition') return;
-    const t = setTimeout(() => setStep('quiz'), 1300);
+    playSound('horn');
+    const t = setTimeout(() => setStep('quiz'), 1500);
     return () => clearTimeout(t);
   }, [step]);
 
@@ -184,13 +191,42 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
     );
   }
 
-  // 4a) QUIZ-OVERGANG (fakta forsegles)
+  // 4a) QUIZ-OVERGANG (fakta forsegles bak skjold + sjøtåke, §6.6/§10)
   if (step === 'transition') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-viking-darkblue text-viking-gold">
-        <div className="animate-bob text-7xl">🛡️</div>
-        <p className="mt-6 font-cinzel text-2xl tracking-widest">ᚦ Fakta forsegles ᚱ</p>
-        <p className="mt-2 font-inter text-sm italic text-viking-gold-soft/70">Nå tester vi hva dere husker …</p>
+      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-viking-darkblue text-viking-gold">
+        {/* Sjøtåke som legger seg over faktaene */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.1 }}
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-viking-surface via-viking-surface/60 to-transparent"
+        />
+        {/* Skjold som glir inn ovenfra og forsegler */}
+        <motion.div
+          initial={{ y: '-130%', rotate: -25, opacity: 0 }}
+          animate={{ y: 0, rotate: 0, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 90, damping: 11 }}
+          className="relative text-8xl drop-shadow-[0_0_28px_rgba(212,168,67,0.65)]"
+        >
+          🛡️
+        </motion.div>
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="relative mt-6 font-cinzel text-2xl tracking-widest"
+        >
+          ᚦ Fakta forsegles ᚱ
+        </motion.p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="relative mt-2 font-inter text-sm italic text-viking-gold-soft/70"
+        >
+          Nå tester vi hva dere husker …
+        </motion.p>
       </div>
     );
   }
@@ -288,12 +324,26 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
           </div>
         </div>
         <button
-          onClick={() => { setRoll(rollDice(choice.baseRoll, modifier)); setStep('resultat'); }}
+          onClick={() => { setRoll(rollDice(choice.baseRoll, modifier)); playSound('dice'); setStep('rolling'); }}
           className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
         >
           ⚄ Kast terningen
         </button>
       </Shell>
+    );
+  }
+
+  // 5b-ii) TERNINGRULL-ANIMASJON → utfallslyd → resultat
+  if (step === 'rolling' && roll) {
+    return (
+      <DiceRoll
+        value={roll.raw}
+        onDone={() => {
+          const s = roll.tier === 'crit' ? 'fanfare' : roll.tier === 'good' ? 'silver' : roll.tier === 'bad' ? 'thunder' : null;
+          if (s) playSound(s);
+          setStep('resultat');
+        }}
+      />
     );
   }
 
@@ -307,7 +357,15 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
     return (
       <Shell name={d.name} onExit={onExit}>
         <div className="mb-5 flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-lg border-4 border-viking-gold bg-viking-darkblue font-cinzel text-3xl font-bold text-viking-gold">{roll.effective}</div>
+          <motion.div
+            initial={{ scale: 0.3, rotate: -25, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 14 }}
+            className="flex h-16 w-16 items-center justify-center rounded-lg border-4 font-cinzel text-3xl font-bold text-viking-gold"
+            style={{ borderColor: TIER_COLOR[roll.tier], backgroundColor: '#0B1426' }}
+          >
+            {roll.effective}
+          </motion.div>
           <div>
             <p className="font-mono text-xs text-viking-paper/60">Terning {roll.raw} {roll.modifier ? `(+${roll.modifier})` : ''}</p>
             <p className="font-cinzel text-2xl font-bold" style={{ color: TIER_COLOR[roll.tier] }}>{TIER_LABEL[roll.tier]}</p>

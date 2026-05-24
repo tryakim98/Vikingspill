@@ -23,6 +23,7 @@ import FateCardOverlay from '../fate/FateCardOverlay';
 import TideBanner from '../tide/TideBanner';
 import TideTurnOverlay from '../tide/TideTurnOverlay';
 import RagnarokOverlay from '../ragnarok/RagnarokOverlay';
+import { useMute } from '../../hooks/useMute';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -38,6 +39,7 @@ interface Props {
 
 export default function GameDashboard({ setup, session, onResetSetup, onLeaveGame, onSwitchRole }: Props) {
   const { state, applyOutcome, setSkillLevel, addReward, resetProgress } = useGameState(setup, session);
+  const { muted, toggle: toggleMute } = useMute();
   const [activeDest, setActiveDest] = useState<Destination | null>(null);
   const [activeSkill, setActiveSkill] = useState<SkillKey | null>(null);
   const [showCeremony, setShowCeremony] = useState(false);
@@ -220,6 +222,14 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
               {session.mode === 'online' ? `🟢 Tilkoblet · ${session.gameCode}` : '⚪ Offline-modus'}
             </p>
           </div>
+          <button
+            onClick={toggleMute}
+            aria-label={muted ? 'Slå på lyd' : 'Slå av lyd'}
+            title={muted ? 'Slå på lyd' : 'Slå av lyd'}
+            className="ml-auto self-start rounded-full border-2 border-viking-gold/50 px-3 py-2 text-xl hover:border-viking-gold"
+          >
+            {muted ? '🔇' : '🔊'}
+          </button>
         </div>
 
         {/* Poeng */}

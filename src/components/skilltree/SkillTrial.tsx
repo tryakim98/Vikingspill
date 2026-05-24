@@ -7,9 +7,11 @@
  * besøkte destinasjoner — IKKE stedsquizen.
  */
 
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
+import { motion } from 'motion/react';
 import type { SkillKey } from '../../types';
 import { skillTreeData, getQuizQuestionsForSkill, isQuizPassed } from '../../data';
+import { playSound } from '../../lib/sound';
 import QuestionCard from '../quiz/QuestionCard';
 
 const MASTER_ACTION: Record<SkillKey, string> = {
@@ -58,6 +60,9 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
   const [correct, setCorrect] = useState(0);
   const [answer, setAnswer] = useState<number | null>(null);
   const [phase, setPhase] = useState<Phase>('quiz');
+
+  // Klokkeklang når nivå 2 er bestått (§10). Nivå 3 ringer ved lærergodkjenning under.
+  useEffect(() => { if (phase === 'passed') playSound('bell'); }, [phase]);
 
   // Ikke nok spørsmål om besøkte steder (§6.4 filtreringsregel)
   if (questions.length < count) {
@@ -137,7 +142,14 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
   if (phase === 'passed') {
     return (
       <TrialShell title={title} onClose={onClose}>
-        <p className="mb-3 font-cinzel text-3xl text-viking-gold">✦ Bestått!</p>
+        <motion.p
+          initial={{ scale: 0.6, opacity: 0, textShadow: '0 0 0px rgba(212,168,67,0)' }}
+          animate={{ scale: 1, opacity: 1, textShadow: ['0 0 0px rgba(212,168,67,0)', '0 0 26px rgba(212,168,67,0.9)', '0 0 10px rgba(212,168,67,0.5)'] }}
+          transition={{ duration: 1.1, type: 'spring', stiffness: 180, damping: 12 }}
+          className="mb-3 font-cinzel text-3xl text-viking-gold"
+        >
+          ✦ Bestått!
+        </motion.p>
         <p className="mb-6 font-inter text-viking-paper/90">Dere fikk {correct} av {count} riktige og har låst opp <strong className="text-viking-gold-soft">{targetTierName}</strong> (nivå 2) i {branch.name}.</p>
         <button onClick={() => onPass(2)} className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">Fullfør</button>
       </TrialShell>
@@ -154,7 +166,7 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
         <p className="font-inter text-viking-paper/90">{MASTER_ACTION[skill]}</p>
       </div>
       <div className="mt-7 flex gap-3">
-        <button onClick={() => onPass(3)} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2.5 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Læreren godkjenner ✓</button>
+        <button onClick={() => { playSound('bell'); onPass(3); }} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2.5 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Læreren godkjenner ✓</button>
         <button onClick={onClose} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Avbryt</button>
       </div>
     </TrialShell>
