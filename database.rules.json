@@ -1,0 +1,67 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "games": {
+      ".read": false,
+      ".write": false,
+
+      "$code": {
+        ".read": "$code.matches(/^VIKING-[A-Z0-9]{3,12}$/)",
+        ".write": "$code.matches(/^VIKING-[A-Z0-9]{3,12}$/)",
+
+        "meta": {
+          "createdAt": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
+        },
+
+        "groups": {
+          "$groupId": {
+            "shipName":   { ".validate": "newData.isString() && newData.val().length <= 60" },
+            "shipSymbol": { ".validate": "newData.isString() && newData.val().length <= 24" },
+            "shipColor":  { ".validate": "newData.isString() && newData.val().length <= 24" },
+            "startSkill": { ".validate": "newData.isString() && newData.val().length <= 24" },
+            "scores": {
+              "culturalUnderstanding": { ".validate": "newData.isNumber()" },
+              "tradeGain":             { ".validate": "newData.isNumber()" },
+              "reputation":            { ".validate": "newData.isNumber()" },
+              "$other": { ".validate": false }
+            },
+            "skills":  { "$skill": { ".validate": "newData.isNumber()" } },
+            "visited": { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
+            "locked":  { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
+            "updatedAt": { ".validate": "newData.isNumber()" },
+            "$other": { ".validate": false }
+          }
+        },
+
+        "approvals": {
+          "$groupId": {
+            "destId":      { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "taskTitle":   { ".validate": "newData.isString() && newData.val().length <= 200" },
+            "shipName":    { ".validate": "newData.isString() && newData.val().length <= 60" },
+            "status":      { ".validate": "newData.isString() && newData.val().length <= 20" },
+            "requestedAt": { ".validate": "newData.isNumber()" },
+            "$other": { ".validate": false }
+          }
+        },
+
+        "trial":    { ".validate": "newData.hasChildren(['id'])",          "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
+        "fate":     { ".validate": "newData.hasChildren(['id'])",          "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
+        "tide":     { ".validate": "newData.hasChildren(['chapterIndex'])","$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
+        "tideTurn": { ".validate": "newData.hasChildren(['id'])",          "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
+        "ragnarok": { ".validate": "newData.hasChildren(['id'])",          "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
+
+        "duels": {
+          "$duelId": {
+            ".validate": "newData.hasChildren(['id'])",
+            "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" }
+          }
+        },
+
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}
