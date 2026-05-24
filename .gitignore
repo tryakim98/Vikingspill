@@ -17,6 +17,10 @@ dist-ssr
 .env.*
 !.env.example
 
+# Deploy-hemmeligheter og lokal Vercel-prosjektkobling — ALDRI til GitHub
+.vercel
+.vercel-token
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
