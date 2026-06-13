@@ -16,6 +16,7 @@ import { v2Destinasjoner } from './v2Content';
 import baseRaw from './vikingspill_data.json';
 import { GOODS_BY_DEST } from './tradeGoods';
 import { MAIN_ROUTE, SIDE_UNLOCKS } from './routes';
+import { HIDDEN_CHOICES } from './hiddenChoices';
 
 /** Hvilket valg på hver destinasjon som er historisk korrekt — det vikingene faktisk
  *  gjorde. Gir +2 kulturforståelse som bonus (§6.1). Bevisst utelatt: Vinland (de
@@ -74,6 +75,7 @@ export const destinations: Destination[] = baseDestinations.map((base): Destinat
     route: MAIN_ROUTE.has(base.id) ? 'main' : 'side',
     unlocks: SIDE_UNLOCKS[base.id],
     historicalChoiceId: HISTORICAL_CHOICES[base.id],
+    hiddenChoice: HIDDEN_CHOICES[base.id],
   };
 });
 

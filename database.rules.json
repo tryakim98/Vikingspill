@@ -75,6 +75,9 @@
               "quizBonus":    { ".validate": "newData.isNumber()" },
               "choiceId":     { ".validate": "newData.isString() && newData.val().length <= 40" },
               "reason":       { ".validate": "newData.isString() && newData.val().length <= 600" },
+              "hiddenAnswered":  { ".validate": "newData.isBoolean()" },
+              "hiddenCorrect":   { ".validate": "newData.isBoolean()" },
+              "hiddenAnswerIdx": { ".validate": "newData.isNumber()" },
               "roll": {
                 "raw":       { ".validate": "newData.isNumber()" },
                 "effective": { ".validate": "newData.isNumber()" },

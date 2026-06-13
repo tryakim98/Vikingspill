@@ -114,6 +114,13 @@ export default function EncounterFlow({
   const [_choice, _setChoice] = useState<Choice | null>(null);
   const [_roll, _setRoll] = useState<RollResult | null>(null);
   const [_reason, _setReason] = useState('');
+  const [_hiddenAnswered, _setHiddenAnswered] = useState(false);
+  const [_hiddenCorrect, _setHiddenCorrect] = useState(false);
+  const [_hiddenAnswerIdx, _setHiddenAnswerIdx] = useState<number | undefined>(undefined);
+
+  // Alle valg å slå opp i når et choice-id må mappes til Choice-objekt — inkluderer
+  // det skjulte valget hvis destinasjonen har et og lesetesten ble svart riktig på.
+  const allChoices = d.hiddenChoice ? [...d.choices, d.hiddenChoice.choice] : d.choices;
 
   const step = syncMode ? (syncedEncounter?.step ?? 'history') : _step;
   const approvalSent = syncMode ? (syncedEncounter?.approvalSent ?? false) : _approvalSent;
@@ -123,13 +130,16 @@ export default function EncounterFlow({
   const quizAnswer = syncMode ? (syncedEncounter?.quizAnswer ?? null) : _quizAnswer;
   const quizBonus = syncMode ? (syncedEncounter?.quizBonus ?? 0) : _quizBonus;
   const choiceId = syncMode ? (syncedEncounter?.choiceId ?? null) : (_choice?.id ?? null);
-  const choice = choiceId ? d.choices.find((c) => c.id === choiceId) ?? null : null;
+  const choice = choiceId ? allChoices.find((c) => c.id === choiceId) ?? null : null;
   const rollSync = syncMode ? syncedEncounter?.roll ?? null : null;
   const roll: RollResult | null = syncMode
     ? (rollSync ? { raw: rollSync.raw, effective: rollSync.effective, modifier: rollSync.modifier, tier: rollSync.tier as RollResult['tier'] } : null)
     : _roll;
   const reason = syncMode ? (syncedEncounter?.reason ?? '') : _reason;
   const setReason = (v: string) => syncMode ? onUpdateEncounter?.({ reason: v }) : _setReason(v);
+  const hiddenAnswered = syncMode ? !!syncedEncounter?.hiddenAnswered : _hiddenAnswered;
+  const hiddenCorrect = syncMode ? !!syncedEncounter?.hiddenCorrect : _hiddenCorrect;
+  const hiddenAnswerIdx = syncMode ? syncedEncounter?.hiddenAnswerIdx : _hiddenAnswerIdx;
 
   // Setter-wrappere: skriver til Firebase i synkmodus, ellers oppdaterer lokal state.
   // Ikke-høvding må uansett ikke trigge skriv — vi gater på UI-nivå.
@@ -151,12 +161,15 @@ export default function EncounterFlow({
     if (partial.quizAnswer !== undefined) _setQuizAnswer(partial.quizAnswer);
     if (partial.quizBonus !== undefined) _setQuizBonus(partial.quizBonus);
     if (partial.choiceId !== undefined) {
-      const c = partial.choiceId ? d.choices.find((ch) => ch.id === partial.choiceId) ?? null : null;
+      const c = partial.choiceId ? allChoices.find((ch) => ch.id === partial.choiceId) ?? null : null;
       _setChoice(c);
     }
     if (partial.roll !== undefined) {
       _setRoll(partial.roll ? { raw: partial.roll.raw, effective: partial.roll.effective, modifier: partial.roll.modifier, tier: partial.roll.tier as RollResult['tier'] } : null);
     }
+    if (partial.hiddenAnswered !== undefined) _setHiddenAnswered(partial.hiddenAnswered);
+    if (partial.hiddenCorrect !== undefined) _setHiddenCorrect(partial.hiddenCorrect);
+    if (partial.hiddenAnswerIdx !== undefined) _setHiddenAnswerIdx(partial.hiddenAnswerIdx);
   };
 
   // Kort bølgeeffekt idet vi seiler inn til destinasjonen (§10).
@@ -353,56 +366,108 @@ export default function EncounterFlow({
 
   // 5a) VALG
   if (step === 'valg') {
+    const hidden = d.hiddenChoice;
+    const test = hidden?.test;
+    const renderChoiceCard = (c: typeof d.choices[number], isHidden = false) => {
+      const meets = meetsRequirement(c, skills);
+      const lateAvailable = lateGame && !meets;
+      const available = meets || lateAvailable;
+      const reqText = c.skillReq
+        ? (Object.entries(c.skillReq) as [SkillKey, number][]).map(([s, n]) => `${skillName(s)} ${n}`).join(', ')
+        : null;
+      const cardCls = isHidden
+        ? 'border-viking-gold bg-viking-gold/10 ring-2 ring-viking-gold/50 shadow-[0_0_18px_rgba(212,168,67,0.25)]'
+        : !available ? 'border-viking-crimson/40 bg-viking-darkblue/40 opacity-70'
+        : lateAvailable ? 'border-viking-gold-soft/70 bg-viking-surface ring-2 ring-viking-gold-soft/20'
+        : 'border-viking-gold/40 bg-viking-surface';
+      return (
+        <div key={c.id} className={`rounded-lg border-2 p-4 ${cardCls}`} data-testid={`valg-${c.id}`}>
+          <div className="mb-1 flex items-center gap-2">
+            {isHidden && <span className="rounded bg-viking-gold px-2 py-0.5 font-mono text-[10px] uppercase text-viking-darkblue">📖 Skjult valg</span>}
+            <h3 className="font-cinzel text-lg text-viking-gold">{c.title}</h3>
+            <span className="rounded bg-viking-darkblue/70 px-2 py-0.5 font-mono text-[10px] uppercase text-viking-gold-soft/80">{c.tag}</span>
+          </div>
+          <p className="mb-3 font-inter text-sm text-viking-paper/85">{c.desc}</p>
+          {reqText && (
+            meets ? (
+              <p className="mb-2 font-mono text-xs text-viking-moss">✓ Krever {reqText}</p>
+            ) : lateAvailable ? (
+              <p className="mb-2 font-mono text-xs text-viking-gold-soft" data-testid={`late-warning-${c.id}`}>
+                ⚠ Krever {reqText} — dere mangler den, og det straffer seg sent i reisen (−2 på terningen).
+              </p>
+            ) : (
+              <p className="mb-2 font-mono text-xs text-viking-crimson">🔒 Krever {reqText}</p>
+            )
+          )}
+          <OddsBar baseRoll={c.baseRoll} />
+          {isChief ? (
+            <button
+              disabled={!available}
+              onClick={() => updateMany({ choiceId: c.id, roll: null, step: requireSaga ? 'saga' : 'roll', reason: '' })}
+              data-testid={`pick-${c.id}`}
+              className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Velg dette
+            </button>
+          ) : null}
+        </div>
+      );
+    };
+
     return (
       <Shell name={d.name} onExit={onExit}>
         <h1 className="mb-1 font-cinzel text-2xl font-bold text-viking-gold">Hva gjør dere?</h1>
-        <p className="mb-5 font-inter text-sm text-viking-gold-soft">
+        <p className="mb-3 font-inter text-sm text-viking-gold-soft">
           Terningbonus fra quiz: <strong className="text-viking-gold">+{quizBonus}</strong>
         </p>
+
+        {/* Lesetest for skjult valg — kun hvis destinasjonen har et og ikke er forsøkt */}
+        {hidden && test && !hiddenAnswered && (
+          <div className="mb-5 rounded-lg border-2 border-viking-gold/60 bg-viking-darkblue/60 p-4" data-testid="reading-test">
+            <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">📖 Et skjult valg venter</p>
+            <p className="mb-3 font-inter text-base text-viking-paper">{test.q}</p>
+            <div className="grid gap-2">
+              {test.opts.map((opt, i) => (
+                <button
+                  key={i}
+                  disabled={!isChief}
+                  onClick={() => updateMany({ hiddenAnswered: true, hiddenCorrect: i === test.correct, hiddenAnswerIdx: i })}
+                  data-testid={`reading-opt-${i}`}
+                  className="rounded-md border-2 border-viking-gold/40 bg-viking-surface px-3 py-2 text-left font-inter text-sm text-viking-paper hover:border-viking-gold disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            {!isChief && <p className="mt-2 text-center font-cinzel text-xs text-viking-gold-soft">⚓ Høvdingen svarer for gruppa.</p>}
+          </div>
+        )}
+
+        {/* Resultat av lesetesten — to varianter */}
+        {hidden && hiddenAnswered && hiddenCorrect && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
+            className="mb-5 rounded-md border-2 border-viking-gold bg-viking-gold/15 px-3 py-2"
+            data-testid="reading-unlocked"
+          >
+            <p className="font-cinzel text-sm text-viking-gold">📖 Fordi dere leste nøye, ser dere en vei de andre ikke ser.</p>
+            {test?.feedback && <p className="mt-0.5 font-inter text-xs italic text-viking-paper/80">{test.feedback}</p>}
+          </motion.div>
+        )}
+        {hidden && hiddenAnswered && !hiddenCorrect && (
+          <div className="mb-5 rounded-md border border-viking-gold/30 bg-viking-darkblue/40 px-3 py-2" data-testid="reading-missed">
+            <p className="font-inter text-sm text-viking-paper/85">
+              Standardvalgene gjelder denne gangen — ingen straff.
+              {hiddenAnswerIdx !== undefined && test && (
+                <span className="ml-1 text-viking-gold-soft">Riktig svar var: <strong>{test.opts[test.correct]}</strong>.</span>
+              )}
+            </p>
+          </div>
+        )}
+
         <div className="space-y-4">
-          {d.choices.map((c) => {
-            const meets = meetsRequirement(c, skills);
-            const lateAvailable = lateGame && !meets;
-            const available = meets || lateAvailable;
-            const reqText = c.skillReq
-              ? (Object.entries(c.skillReq) as [SkillKey, number][]).map(([s, n]) => `${skillName(s)} ${n}`).join(', ')
-              : null;
-            const cardCls =
-              !available ? 'border-viking-crimson/40 bg-viking-darkblue/40 opacity-70' :
-              lateAvailable ? 'border-viking-gold-soft/70 bg-viking-surface ring-2 ring-viking-gold-soft/20' :
-              'border-viking-gold/40 bg-viking-surface';
-            return (
-              <div key={c.id} className={`rounded-lg border-2 p-4 ${cardCls}`} data-testid={`valg-${c.id}`}>
-                <div className="mb-1 flex items-center gap-2">
-                  <h3 className="font-cinzel text-lg text-viking-gold">{c.title}</h3>
-                  <span className="rounded bg-viking-darkblue/70 px-2 py-0.5 font-mono text-[10px] uppercase text-viking-gold-soft/80">{c.tag}</span>
-                </div>
-                <p className="mb-3 font-inter text-sm text-viking-paper/85">{c.desc}</p>
-                {reqText && (
-                  meets ? (
-                    <p className="mb-2 font-mono text-xs text-viking-moss">✓ Krever {reqText}</p>
-                  ) : lateAvailable ? (
-                    <p className="mb-2 font-mono text-xs text-viking-gold-soft" data-testid={`late-warning-${c.id}`}>
-                      ⚠ Krever {reqText} — dere mangler den, og det straffer seg sent i reisen (−2 på terningen).
-                    </p>
-                  ) : (
-                    <p className="mb-2 font-mono text-xs text-viking-crimson">🔒 Krever {reqText}</p>
-                  )
-                )}
-                <OddsBar baseRoll={c.baseRoll} />
-                {isChief ? (
-                  <button
-                    disabled={!available}
-                    onClick={() => updateMany({ choiceId: c.id, roll: null, step: requireSaga ? 'saga' : 'roll', reason: '' })}
-                    data-testid={`pick-${c.id}`}
-                    className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    Velg dette
-                  </button>
-                ) : null}
-              </div>
-            );
-          })}
+          {hidden && hiddenAnswered && hiddenCorrect && renderChoiceCard(hidden.choice, true)}
+          {d.choices.map((c) => renderChoiceCard(c, false))}
         </div>
         {!isChief && <ChiefBanner />}
       </Shell>

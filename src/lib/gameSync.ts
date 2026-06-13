@@ -31,6 +31,9 @@ export interface SyncedEncounter {
   choiceId?: string | null;
   roll?: { raw: number; effective: number; modifier: number; tier: string } | null;
   reason?: string; // saga-tekst som høvdingen skriver før terningen kastes
+  hiddenAnswered?: boolean;     // lesetesten for det skjulte valget er forsøkt
+  hiddenCorrect?: boolean;      // svaret var riktig (skjult valg er låst opp)
+  hiddenAnswerIdx?: number;     // synket valgindeks så alle medlemmer ser samme klikk
 }
 
 export interface SyncedGroup {

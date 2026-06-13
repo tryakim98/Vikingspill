@@ -139,6 +139,13 @@ export interface Destination {
   // det vikingene faktisk gjorde her. Når gruppa velger det får de +2 kulturforståelse
   // og en note i utfallet. Mangler på destinasjoner der ingen klar historisk fasit fins.
   historicalChoiceId?: string;
+
+  // Skjult valg som låses opp ved riktig svar på et lesespørsmål om historien.
+  // Feil svar = bare standardvalgene, ingen straff. Se data/hiddenChoices.ts.
+  hiddenChoice?: {
+    test: { q: string; opts: string[]; correct: number; feedback?: string };
+    choice: Choice;
+  };
 }
 
 export type TradeGoodId =
