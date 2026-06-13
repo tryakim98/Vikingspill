@@ -227,8 +227,18 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           <div>
             <h1 className="font-cinzel text-3xl text-viking-gold">{setup.shipName}</h1>
             <p className="font-inter text-sm text-viking-gold-soft">{SYMBOL_LABEL[setup.shipSymbol]} · {state.visited.length}/{destinations.length} destinasjoner besøkt</p>
-            <p className="mt-1 font-mono text-xs text-viking-gold-soft/70">
-              {session.mode === 'online' ? `🟢 Tilkoblet · ${session.gameCode}` : '⚪ Offline-modus'}
+            <p className="mt-1.5">
+              {session.mode === 'online' ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-viking-moss/60 bg-viking-moss/15 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-viking-moss" data-testid="mode-badge">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-viking-moss" />
+                  Online · {session.gameCode}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-viking-gold-soft/40 bg-viking-darkblue/40 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-viking-gold-soft/80" data-testid="mode-badge">
+                  <span className="h-1.5 w-1.5 rounded-full bg-viking-gold-soft/60" />
+                  Offline-modus
+                </span>
+              )}
             </p>
           </div>
         </div>

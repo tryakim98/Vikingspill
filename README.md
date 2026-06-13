@@ -15,7 +15,7 @@ installasjon for elevene.
 
 Spillet er **én app** som åpner med et rollevalg:
 
-- **Lærer** 👩‍🏫 — oppretter et spill og får en **spillkode** (f.eks. `VIKING-4L2N`). Får
+- **Lærer** 👩‍🏫 — oppretter et spill og får en **4-bokstavs spillkode** (f.eks. `RAVN`). Får
   spillmasterkonsollen: sjøkart med alle skip, leaderboard, oppgavegodkjenning, tidevannstimer,
   «Gudenes prøve», skjebne-kort og Ragnarok. Vises typisk på **projektor/storskjerm**.
 - **Elev** 🧑‍🤝‍🧑 — taster inn spillkoden, velger og rigger skip, og spiller møte-flyten på

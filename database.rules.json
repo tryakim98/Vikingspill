@@ -8,8 +8,8 @@
       ".write": false,
 
       "$code": {
-        ".read": "$code.matches(/^VIKING-[A-Z0-9]{3,12}$/)",
-        ".write": "$code.matches(/^VIKING-[A-Z0-9]{3,12}$/)",
+        ".read": "$code.matches(/^[A-HJ-NP-Z]{4}$/) || $code.matches(/^VIKING-[A-Z0-9]{3,12}$/)",
+        ".write": "$code.matches(/^[A-HJ-NP-Z]{4}$/) || $code.matches(/^VIKING-[A-Z0-9]{3,12}$/)",
 
         "meta": {
           "createdAt": { ".validate": "newData.isNumber()" },

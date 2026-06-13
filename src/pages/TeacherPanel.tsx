@@ -10,9 +10,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRole } from '../hooks/useRole';
-import { generateGameCode } from '../lib/gameCode';
+import { generateUniqueGameCode } from '../lib/gameCode';
 import {
   createGame,
+  gameExists,
   subscribeGroups,
   subscribeApprovals,
   setApprovalStatus,
@@ -105,8 +106,9 @@ export default function TeacherPanel() {
   const createNew = async () => {
     setCreating(true);
     setCreateError(false);
-    const c = generateGameCode();
     try {
+      // Generer en kode som ikke alt er tatt av et annet aktivt spill.
+      const c = await generateUniqueGameCode(gameExists);
       // Firebase køer skriv når man er offline (løses aldri før nett er tilbake), så vi
       // gir opp etter 6 s og lar læreren prøve igjen i stedet for å spinne i det uendelige.
       await Promise.race([
