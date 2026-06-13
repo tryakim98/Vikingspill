@@ -15,7 +15,7 @@ import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeTrial, subscribeFate, subscribeTideTurn, subscribeRagnarok, type Trial, type FateEvent, type TideTurn, type RagnarokEvent } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent } from '../../lib/gameSync';
 import { chapters, chapterCompleted } from '../../data/chapters';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
 import SeaBattle from '../duel/SeaBattle';
@@ -46,6 +46,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const [showCeremony, setShowCeremony] = useState(false);
   const [activeTrial, setActiveTrial] = useState<Trial | null>(null);
   const seenTrial = useRef<string | null>(null);
+  const [trialResult, setTrialResult] = useState<TrialResult | null>(null);
   const [activeFate, setActiveFate] = useState<FateEvent | null>(null);
   const seenFate = useRef<string | null>(null);
   const [activeTideTurn, setActiveTideTurn] = useState<TideTurn | null>(null);
@@ -59,7 +60,16 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     let first = true;
     const unsub = subscribeTrial(session.gameCode, (trial) => {
       if (first) { first = false; seenTrial.current = trial?.id ?? null; return; } // ignorer prøve som finnes ved oppkobling
-      if (trial && trial.id !== seenTrial.current) { seenTrial.current = trial.id; setActiveTrial(trial); }
+      if (trial && trial.id !== seenTrial.current) { seenTrial.current = trial.id; setActiveTrial(trial); setTrialResult(null); }
+    });
+    return () => unsub();
+  }, [session]);
+
+  // Dommen fra læreren (§3.4): når den kommer, viser overlayen plassering + belønning.
+  useEffect(() => {
+    if (session.mode !== 'online') return;
+    const unsub = subscribeTrialResult(session.gameCode, (result) => {
+      setTrialResult(result);
     });
     return () => unsub();
   }, [session]);
@@ -107,14 +117,18 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   if (!state) return <LoadingScreen text="Henter skipets logg …" />;
 
   if (activeTrial) {
+    // Vis bare dommen hvis den matcher den aktive prøven (ellers er det en gammel rest).
+    const matchedResult = trialResult && trialResult.trialId === activeTrial.id ? trialResult : null;
     return (
       <GudenesProveOverlay
         navn={activeTrial.navn}
         desc={activeTrial.desc}
         skill={activeTrial.skill}
         skillLevel={state.skills[activeTrial.skill] ?? 0}
-        onDone={() => {
-          addReward({ und: 0, trade: 0, rep: 1 + (state.skills[activeTrial.skill] ?? 0) });
+        result={matchedResult}
+        myGroupId={session.groupId}
+        onClose={(reward) => {
+          addReward({ und: 0, trade: 0, rep: reward.rep });
           setActiveTrial(null);
         }}
       />

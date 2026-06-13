@@ -116,13 +116,36 @@ export interface Trial {
   at: number;
 }
 
+/** Læreren utløser ny prøve. Vi rydder samtidig bort eventuelt gammelt resultat,
+ *  så elevene ikke ved et uhell viser fjorårets dom på en fersk prøve. */
 export function triggerTrial(code: string, trial: Trial): Promise<void> {
-  return set(ref(db, `games/${code}/trial`), trial);
+  return update(ref(db, `games/${code}`), { trial, trialResult: null });
 }
 
 export function subscribeTrial(code: string, callback: (trial: Trial | null) => void): Unsubscribe {
   return onValue(ref(db, `games/${code}/trial`), (snap) => {
     callback((snap.val() as Trial | null) ?? null);
+  });
+}
+
+/** Lærerens dom etter at klassen har gjort utfordringen fysisk. Elevene leser
+ *  resultatet og avgjør plassering (vinner/2.-plass/trøst) for egen gruppe. */
+export interface TrialResult {
+  trialId: string;            // matcher Trial.id — så stale resultater ignoreres
+  winnerId: string;
+  winnerName: string;
+  runnerUpId?: string;
+  runnerUpName?: string;
+  at: number;
+}
+
+export function triggerTrialResult(code: string, result: TrialResult): Promise<void> {
+  return set(ref(db, `games/${code}/trialResult`), result);
+}
+
+export function subscribeTrialResult(code: string, callback: (result: TrialResult | null) => void): Unsubscribe {
+  return onValue(ref(db, `games/${code}/trialResult`), (snap) => {
+    callback((snap.val() as TrialResult | null) ?? null);
   });
 }
 

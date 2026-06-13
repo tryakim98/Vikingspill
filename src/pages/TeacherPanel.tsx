@@ -19,6 +19,8 @@ import {
   setApprovalStatus,
   triggerTrial,
   subscribeTrial,
+  triggerTrialResult,
+  subscribeTrialResult,
   triggerFate,
   subscribeFate,
   triggerRagnarok,
@@ -26,6 +28,7 @@ import {
   type ApprovalRequest,
   type ApprovalStatus,
   type Trial,
+  type TrialResult,
   type FateEvent,
 } from '../lib/gameSync';
 import { gudenesProveChallenges, fateCards } from '../data';
@@ -45,16 +48,23 @@ export default function TeacherPanel() {
   const [groups, setGroups] = useState<Record<string, SyncedGroup>>({});
   const [approvals, setApprovals] = useState<Record<string, ApprovalRequest>>({});
   const [trial, setTrial] = useState<Trial | null>(null);
+  const [trialResult, setTrialResult] = useState<TrialResult | null>(null);
+  const [trialWinner, setTrialWinner] = useState<string | null>(null);
+  const [trialRunnerUp, setTrialRunnerUp] = useState<string | null>(null);
   const [fate, setFate] = useState<FateEvent | null>(null);
 
   useEffect(() => {
-    if (!code) { setGroups({}); setApprovals({}); setTrial(null); setFate(null); return; }
+    if (!code) { setGroups({}); setApprovals({}); setTrial(null); setTrialResult(null); setFate(null); return; }
     const unsubG = subscribeGroups(code, setGroups);
     const unsubA = subscribeApprovals(code, setApprovals);
     const unsubT = subscribeTrial(code, setTrial);
+    const unsubR = subscribeTrialResult(code, setTrialResult);
     const unsubF = subscribeFate(code, setFate);
-    return () => { unsubG(); unsubA(); unsubT(); unsubF(); };
+    return () => { unsubG(); unsubA(); unsubT(); unsubR(); unsubF(); };
   }, [code]);
+
+  // Nullstill kåringsvalg når en ny prøve utløses, så fjorårets valg ikke henger igjen.
+  useEffect(() => { setTrialWinner(null); setTrialRunnerUp(null); }, [trial?.id]);
 
   const triggerGudenesProve = () => {
     if (!code) return;
@@ -67,6 +77,21 @@ export default function TeacherPanel() {
       skill: c.ferdighet,
       at: Date.now(),
     }).catch(() => {});
+  };
+
+  const settleTrial = () => {
+    if (!code || !trial || !trialWinner) return;
+    const winnerGroup = groups[trialWinner];
+    if (!winnerGroup) return;
+    const runnerUpGroup = trialRunnerUp ? groups[trialRunnerUp] : undefined;
+    const result: TrialResult = {
+      trialId: trial.id,
+      winnerId: trialWinner,
+      winnerName: winnerGroup.shipName,
+      at: Date.now(),
+      ...(runnerUpGroup ? { runnerUpId: trialRunnerUp!, runnerUpName: runnerUpGroup.shipName } : {}),
+    };
+    triggerTrialResult(code, result).catch(() => {});
   };
 
   const triggerSkjebne = () => {
@@ -216,14 +241,82 @@ export default function TeacherPanel() {
             {/* §6.5 Tidevannstimer — læreren styrer rammene pr. kapittel */}
             <TideTimer code={code} groups={groups} />
 
-        {/* §3.4/§8.5 Gudenes prøve — læreren bestemmer KUN når */}
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-viking-plum/60 bg-viking-plum/15 p-4">
-          <div>
-            <h2 className="font-cinzel text-xl text-viking-gold">⚡ Gudenes prøve</h2>
-            <p className="font-inter text-sm text-viking-paper/80">Du bestemmer kun <strong>når</strong>. Spillet trekker utfordring og ferdighet — likt for alle grupper.</p>
-            {trial && <p className="mt-1 font-mono text-xs text-viking-gold-soft">Sist sendt: {trial.navn} — ferdighet «{trial.skill}»</p>}
+        {/* §3.4/§8.5 Gudenes prøve — læreren bestemmer KUN når, og kårer vinner etter at klassen har gjort utfordringen fysisk */}
+        <div className="rounded-lg border-2 border-viking-plum/60 bg-viking-plum/15 p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="font-cinzel text-xl text-viking-gold">⚡ Gudenes prøve</h2>
+              <p className="font-inter text-sm text-viking-paper/80">Du bestemmer kun <strong>når</strong>. Spillet trekker utfordring og ferdighet — likt for alle grupper.</p>
+            </div>
+            <button onClick={triggerGudenesProve} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-3 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">
+              {trial ? '⚡ Utløs ny prøve' : '⚡ Utløs Gudenes prøve'}
+            </button>
           </div>
-          <button onClick={triggerGudenesProve} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-3 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">⚡ Utløs Gudenes prøve</button>
+
+          {trial && (
+            <div className="mt-4 rounded-md border border-viking-gold/40 bg-viking-darkblue/40 p-4">
+              <p className="font-cinzel text-viking-gold">{trial.navn}</p>
+              <p className="mt-1 font-inter text-sm text-viking-paper/80">{trial.desc}</p>
+              <p className="mt-1 font-mono text-xs text-viking-gold-soft">Ferdighet som teller: {trial.skill}</p>
+            </div>
+          )}
+
+          {/* Kåring etter den fysiske utfordringen */}
+          {trial && trialResult?.trialId !== trial.id && (
+            <div className="mt-4" data-testid="trial-settle">
+              <p className="mb-2 font-cinzel text-sm text-viking-gold-soft">Kåre vinner</p>
+              {Object.keys(groups).length === 0 ? (
+                <p className="rounded-md border-2 border-dashed border-viking-gold/30 p-4 font-inter text-sm italic text-viking-paper/60">Ingen grupper å kåre fra ennå.</p>
+              ) : (
+                <>
+                  <div className="space-y-1.5">
+                    {ranked.map(([id, g]) => {
+                      const isWinner = trialWinner === id;
+                      const isRunnerUp = trialRunnerUp === id;
+                      return (
+                        <div key={id} className={`flex items-center gap-2 rounded-md border-2 p-2 transition-all ${isWinner ? 'border-viking-gold bg-viking-gold/20' : isRunnerUp ? 'border-viking-gold-soft bg-viking-gold-soft/15' : 'border-viking-gold/20 bg-viking-surface/40'}`}>
+                          <VikingShip color={g.shipColor} symbol={g.shipSymbol as ShipSymbol} size={28} />
+                          <span className="flex-1 font-cinzel text-sm text-viking-paper">{g.shipName}</span>
+                          <button
+                            onClick={() => { setTrialWinner(id); if (trialRunnerUp === id) setTrialRunnerUp(null); }}
+                            data-testid={`pick-winner-${id}`}
+                            className={`rounded px-2 py-1 font-cinzel text-xs ${isWinner ? 'bg-viking-gold text-viking-darkblue' : 'border border-viking-gold/40 text-viking-gold-soft hover:border-viking-gold'}`}
+                          >🏆 Vinner</button>
+                          <button
+                            onClick={() => { setTrialRunnerUp(isRunnerUp ? null : id); if (trialWinner === id) setTrialWinner(null); }}
+                            disabled={trialWinner === id}
+                            className={`rounded px-2 py-1 font-cinzel text-xs ${isRunnerUp ? 'bg-viking-gold-soft text-viking-darkblue' : 'border border-viking-gold/40 text-viking-gold-soft hover:border-viking-gold disabled:opacity-30'}`}
+                          >🥈 2.</button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                    <p className="font-mono text-xs text-viking-gold-soft/80">Belønning: vinner +5 rykte · 2.-plass +3 · andre +1</p>
+                    <button
+                      onClick={settleTrial}
+                      disabled={!trialWinner}
+                      data-testid="trial-settle-button"
+                      className="rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-2 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Avgjør prøven
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Avgjort */}
+          {trial && trialResult?.trialId === trial.id && (
+            <div className="mt-4 rounded-md border-2 border-viking-moss/60 bg-viking-moss/15 p-3" data-testid="trial-resolved">
+              <p className="font-cinzel text-sm text-viking-gold-soft">Avgjort — belønningen er sendt til alle skip</p>
+              <p className="mt-1 font-inter text-sm text-viking-paper">
+                🏆 Vinner: <strong>{trialResult.winnerName}</strong>
+                {trialResult.runnerUpName && <> · 🥈 2. plass: <strong>{trialResult.runnerUpName}</strong></>}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* §8.4 Skjebne-kort — læreren bestemmer KUN når */}
