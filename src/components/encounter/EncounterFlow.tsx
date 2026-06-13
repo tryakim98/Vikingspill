@@ -345,7 +345,7 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
   if (step === 'rolling' && roll) {
     return (
       <DiceRoll
-        value={roll.raw}
+        value={roll.effective}
         onDone={() => {
           const s = roll.tier === 'crit' ? 'fanfare' : roll.tier === 'good' ? 'silver' : roll.tier === 'bad' ? 'thunder' : null;
           if (s) playSound(s);
