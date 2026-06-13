@@ -11,8 +11,9 @@
  */
 
 import { motion } from 'motion/react';
-import type { Destination, ShipSymbol } from '../../types';
+import type { Destination, ShipSymbol, SkillKey, TradeGoodId } from '../../types';
 import VikingShip from '../ship/VikingShip';
+import { isAccessible, describeRequirement, missingForRequirement, meetsRequirement } from '../../lib/unlocks';
 
 const MAP_POS: Record<string, { x: number; y: number }> = {
   vinland: { x: 8, y: 40 },
@@ -62,15 +63,20 @@ interface Props {
   destinations: Destination[];
   visited: string[];
   locked: string[];
+  goods: Partial<Record<TradeGoodId, number>>;
+  skills: Record<SkillKey, number>;
+  scores: { culturalUnderstanding: number; tradeGain: number; reputation: number };
+  unlockedSides: string[];
   ship: { color: string; symbol: ShipSymbol; name: string };
   isChief: boolean;
   previewDestId: string | null;
   sailingTo: string | null;
   onSelect: (destId: string | null) => void;
   onConfirm: (destId: string) => void;
+  onStartSvenneprove: (destId: string, skill: SkillKey) => void;
 }
 
-export default function SeaJourney({ destinations, visited, locked, ship, isChief, previewDestId, sailingTo, onSelect, onConfirm }: Props) {
+export default function SeaJourney({ destinations, visited, locked, goods, skills, scores, unlockedSides, ship, isChief, previewDestId, sailingTo, onSelect, onConfirm, onStartSvenneprove }: Props) {
   const previewDest = previewDestId ? destinations.find((d) => d.id === previewDestId) ?? null : null;
   const lastVisited = visited[visited.length - 1];
   const shipStart = (lastVisited && MAP_POS[lastVisited]) || HOME;
@@ -78,11 +84,17 @@ export default function SeaJourney({ destinations, visited, locked, ship, isChie
   const sailingPos = sailingDest ? MAP_POS[sailingDest.id] : null;
 
   const stationaryShipPos = shipStart;
+  const stateForLogic = { scores, skills, goods, locked, unlockedSides };
+
+  const accessibleNow = (d: Destination) => isAccessible(d, stateForLogic);
+  const isSideLocked = (d: Destination) => d.route === 'side' && !accessibleNow(d) && !locked.includes(d.id);
 
   const previewStatus = (d: Destination) =>
-    locked.includes(d.id) ? { label: '🔒 Låst', color: 'text-viking-crimson' } :
+    locked.includes(d.id) ? { label: '🔒 Stengt', color: 'text-viking-crimson' } :
     visited.includes(d.id) ? { label: '✓ Besøkt', color: 'text-viking-moss' } :
-    { label: '⛵ Tilgjengelig', color: 'text-viking-gold' };
+    isSideLocked(d) ? { label: '🔒 Sidested — låst', color: 'text-viking-gold-soft' } :
+    d.route === 'side' ? { label: '⛵ Sidested — åpent', color: 'text-viking-gold' } :
+    { label: '⛵ Hovedrute', color: 'text-viking-gold' };
 
   return (
     <div>
@@ -132,13 +144,16 @@ export default function SeaJourney({ destinations, visited, locked, ship, isChie
           if (!p) return null;
           const isVisited = visited.includes(d.id);
           const isLocked = locked.includes(d.id);
+          const sideLocked = isSideLocked(d);
           const isSelected = previewDestId === d.id;
+          const dimmed = isLocked || sideLocked;
           const dotColor =
             isSelected ? '#E8C97A' :
             isVisited ? '#5B7553' :
             isLocked ? '#3a4d54' :
+            sideLocked ? '#594a35' :
             '#D4A843';
-          const dotShadow = isLocked ? 'none' : (isSelected ? '0 0 14px 4px rgba(232,201,122,0.85)' : '0 0 8px 2px rgba(212,168,67,0.55)');
+          const dotShadow = dimmed ? 'none' : (isSelected ? '0 0 14px 4px rgba(232,201,122,0.85)' : '0 0 8px 2px rgba(212,168,67,0.55)');
           return (
             <button
               key={d.id}
@@ -150,12 +165,12 @@ export default function SeaJourney({ destinations, visited, locked, ship, isChie
               style={{ left: `${p.x}%`, top: `${p.y}%` }}
             >
               <motion.div
-                animate={isLocked ? { scale: 1 } : (isSelected ? { scale: [1, 1.25, 1.1] } : { scale: [1, 1.12, 1] })}
-                transition={isLocked ? { duration: 0 } : { duration: isSelected ? 0.6 : 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                animate={dimmed ? { scale: 1 } : (isSelected ? { scale: [1, 1.25, 1.1] } : { scale: [1, 1.12, 1] })}
+                transition={dimmed ? { duration: 0 } : { duration: isSelected ? 0.6 : 2.2, repeat: Infinity, ease: 'easeInOut' }}
                 className="relative flex h-3.5 w-3.5 items-center justify-center rounded-full"
-                style={{ backgroundColor: dotColor, boxShadow: dotShadow }}
+                style={{ backgroundColor: dotColor, boxShadow: dotShadow, opacity: dimmed && !isSelected ? 0.7 : 1 }}
               >
-                {isLocked && <span className="absolute -top-3 text-[10px]">🔒</span>}
+                {(isLocked || sideLocked) && <span className="absolute -top-3 text-[10px]">🔒</span>}
                 {isVisited && <span className="absolute -top-3 text-[9px]">✓</span>}
               </motion.div>
               <span className={`absolute left-1/2 top-4 -translate-x-1/2 whitespace-nowrap font-inter text-[10px] ${isSelected ? 'text-viking-gold' : 'text-viking-gold-soft/80'}`}>
@@ -231,41 +246,82 @@ export default function SeaJourney({ destinations, visited, locked, ship, isChie
       </div>
 
       {/* Info-kort */}
-      {previewDest && (
-        <div className="mt-3 rounded-lg border-2 border-viking-gold bg-viking-surface p-4" data-testid="dest-info-card">
-          <div className="mb-1 flex items-center justify-between">
-            <div>
-              <h3 className="font-cinzel text-xl text-viking-gold">{previewDest.name}</h3>
-              <p className="font-inter text-xs text-viking-gold-soft/80">{previewDest.region}</p>
+      {previewDest && (() => {
+        const dest = previewDest;
+        const sideLocked = isSideLocked(dest);
+        const stedStengt = locked.includes(dest.id);
+        const kanSeile = !stedStengt && !sideLocked && !sailingTo;
+        return (
+          <div className="mt-3 rounded-lg border-2 border-viking-gold bg-viking-surface p-4" data-testid="dest-info-card">
+            <div className="mb-1 flex items-center justify-between">
+              <div>
+                <h3 className="font-cinzel text-xl text-viking-gold">{dest.name}</h3>
+                <p className="font-inter text-xs text-viking-gold-soft/80">{dest.region}</p>
+              </div>
+              <p className={`font-mono text-xs ${previewStatus(dest).color}`} data-testid="dest-status">{previewStatus(dest).label}</p>
             </div>
-            <p className={`font-mono text-xs ${previewStatus(previewDest).color}`}>{previewStatus(previewDest).label}</p>
-          </div>
-          <p className="mt-2 font-inter text-sm italic leading-relaxed text-viking-paper/85">«{makeTeaser(previewDest.history)}»</p>
-          <div className="mt-3 flex gap-2">
-            {isChief && !locked.includes(previewDest.id) && !sailingTo ? (
-              <button
-                onClick={() => onConfirm(previewDest.id)}
-                data-testid="confirm-sailing"
-                className="rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
-              >
-                ⚓ Bekreft seilas →
-              </button>
-            ) : isChief && locked.includes(previewDest.id) ? (
-              <p className="font-inter text-sm italic text-viking-crimson">Stedet er stengt for dere — tidligere valg har låst det.</p>
-            ) : !isChief ? (
-              <p className="font-inter text-sm text-viking-gold-soft/70">⚓ Høvdingen bestemmer om dere skal seile dit.</p>
-            ) : null}
-            {isChief && !sailingTo && (
-              <button
-                onClick={() => onSelect(null)}
-                className="rounded-md border-2 border-viking-gold/50 px-4 py-1.5 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold"
-              >
-                Lukk
-              </button>
+            <p className="mt-2 font-inter text-sm italic leading-relaxed text-viking-paper/85">«{makeTeaser(dest.history)}»</p>
+
+            {/* Opplåsingsveier for låste sidesteder */}
+            {sideLocked && dest.unlocks && (
+              <div className="mt-3 rounded-md border border-viking-gold-soft/40 bg-viking-darkblue/50 p-3" data-testid="unlock-paths">
+                <p className="mb-2 font-cinzel text-xs text-viking-gold-soft">Veier å låse opp dette sidestedet (én er nok):</p>
+                <ul className="space-y-1.5">
+                  {dest.unlocks.map((req, i) => {
+                    const satisfied = req.type !== 'svenneprove' && meetsRequirement(req, stateForLogic);
+                    const description = describeRequirement(req);
+                    const missing = missingForRequirement(req, stateForLogic);
+                    return (
+                      <li key={i} className="flex items-center gap-2 font-inter text-xs">
+                        <span>{satisfied ? '✅' : req.type === 'svenneprove' ? '📜' : '◻️'}</span>
+                        <span className={satisfied ? 'text-viking-moss' : 'text-viking-paper/85'}>
+                          <strong>{description}</strong>
+                          {!satisfied && req.type !== 'svenneprove' && missing && (
+                            <span className="text-viking-gold-soft/80"> — mangler {missing}</span>
+                          )}
+                        </span>
+                        {req.type === 'svenneprove' && isChief && (
+                          <button
+                            onClick={() => onStartSvenneprove(dest.id, req.skill)}
+                            data-testid={`take-svenneprove-${dest.id}`}
+                            className="ml-auto rounded border border-viking-gold/60 px-2 py-0.5 font-cinzel text-xs text-viking-gold hover:bg-viking-gold/15"
+                          >
+                            Ta prøven
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             )}
+
+            <div className="mt-3 flex gap-2">
+              {isChief && kanSeile ? (
+                <button
+                  onClick={() => onConfirm(dest.id)}
+                  data-testid="confirm-sailing"
+                  className="rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+                >
+                  ⚓ Bekreft seilas →
+                </button>
+              ) : isChief && stedStengt ? (
+                <p className="font-inter text-sm italic text-viking-crimson">Stedet er stengt for dere — tidligere valg har låst det.</p>
+              ) : !isChief ? (
+                <p className="font-inter text-sm text-viking-gold-soft/70">⚓ Høvdingen bestemmer om dere skal seile dit.</p>
+              ) : null}
+              {isChief && !sailingTo && (
+                <button
+                  onClick={() => onSelect(null)}
+                  className="rounded-md border-2 border-viking-gold/50 px-4 py-1.5 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold"
+                >
+                  Lukk
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

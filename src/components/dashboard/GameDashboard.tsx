@@ -16,6 +16,7 @@ import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
 import SeaJourney, { SAILING_DURATION_S } from './SeaJourney';
 import TradeGoodsPanel from './TradeGoodsPanel';
+import SvenneproveTrial from './SvenneproveTrial';
 import type { Session } from '../../hooks/useSession';
 import { removeGroup, requestApproval, subscribeGroup, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent } from '../../lib/gameSync';
 import { chapters, chapterCompleted } from '../../data/chapters';
@@ -41,7 +42,8 @@ interface Props {
 }
 
 export default function GameDashboard({ setup, session, onResetSetup, onLeaveGame, onSwitchRole }: Props) {
-  const { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, resetProgress } = useGameState(setup, session);
+  const { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, unlockSide, resetProgress } = useGameState(setup, session);
+  const [svenneprove, setSvenneprove] = useState<{ destId: string; skill: SkillKey } | null>(null);
 
   // I online-modus er gruppe-tilstanden delt blant alle medlemmer. Vi lytter på hele
   // gruppe-noden her (parallelt med useGameState) for å få chief-status, medlemsliste
@@ -206,6 +208,20 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   useEffect(() => () => stopMusic(), []);
 
   if (!state) return <LoadingScreen text="Henter skipets logg …" />;
+
+  if (svenneprove) {
+    const dest = destinations.find((d) => d.id === svenneprove.destId);
+    return (
+      <SvenneproveTrial
+        skill={svenneprove.skill}
+        destName={dest?.name ?? svenneprove.destId}
+        visited={state.visited}
+        isChief={isChief}
+        onPass={() => { unlockSide(svenneprove.destId); setSvenneprove(null); }}
+        onClose={() => setSvenneprove(null)}
+      />
+    );
+  }
 
   if (activeTrial) {
     // Vis bare dommen hvis den matcher den aktive prøven (ellers er det en gammel rest).
@@ -432,12 +448,17 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             destinations={destinations}
             visited={state.visited}
             locked={state.locked}
+            goods={state.goods ?? {}}
+            skills={state.skills}
+            scores={state.scores}
+            unlockedSides={state.unlockedSides ?? []}
             ship={{ color: setup.shipColor, symbol: setup.shipSymbol, name: setup.shipName }}
             isChief={isChief}
             previewDestId={previewDestId}
             sailingTo={sailingTo}
             onSelect={setPreviewDestId}
             onConfirm={confirmSailingTo}
+            onStartSvenneprove={(destId, skill) => setSvenneprove({ destId, skill })}
           />
         </div>
 

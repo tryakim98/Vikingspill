@@ -15,6 +15,7 @@ import type { Destination, Choice, Difficulty } from '../types';
 import { v2Destinasjoner } from './v2Content';
 import baseRaw from './vikingspill_data.json';
 import { GOODS_BY_DEST } from './tradeGoods';
+import { MAIN_ROUTE, SIDE_UNLOCKS } from './routes';
 
 /** Basisdata pr. destinasjon (prototypens `task` ignoreres — v2-oppgaven vinner, §14). */
 interface BaseDestination {
@@ -53,6 +54,8 @@ export const destinations: Destination[] = baseDestinations.map((base): Destinat
     episkeKulturmote: v2.episkeKulturmote,
     stedsquiz: v2.stedsquiz,
     goodsReward: GOODS_BY_DEST[base.id] ?? [],
+    route: MAIN_ROUTE.has(base.id) ? 'main' : 'side',
+    unlocks: SIDE_UNLOCKS[base.id],
   };
 });
 

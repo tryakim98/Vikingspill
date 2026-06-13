@@ -29,8 +29,9 @@
               "$other": { ".validate": false }
             },
             "skills":  { "$skill": { ".validate": "newData.isNumber()" } },
-            "visited": { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
-            "locked":  { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
+            "visited":       { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
+            "locked":        { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
+            "unlockedSides": { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
             "goods": {
               "$good": {
                 ".validate": "$good.matches(/^(pelsverk|solv|jern|rav|silke|hvalrosstann|krydder|salt)$/) && newData.isNumber()"

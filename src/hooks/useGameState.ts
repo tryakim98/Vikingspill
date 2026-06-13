@@ -27,6 +27,7 @@ export interface GameProgress {
   visited: string[];
   locked: string[];
   goods: Partial<Record<TradeGoodId, number>>;
+  unlockedSides: string[];
 }
 
 export interface OutcomeApply {
@@ -46,6 +47,7 @@ function seed(setup: GroupSetup): GameProgress {
     visited: [],
     locked: [],
     goods: {},
+    unlockedSides: [],
   };
 }
 
@@ -64,6 +66,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         visited: g.visited ?? [],
         locked: g.locked ?? [],
         goods: g.goods ?? {},
+        unlockedSides: g.unlockedSides ?? [],
       });
     });
     return () => unsub();
@@ -94,6 +97,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       visited: state.visited,
       locked: state.locked,
       goods: state.goods,
+      unlockedSides: state.unlockedSides,
       updatedAt: Date.now(),
     }).catch(() => {});
   }, [state, session, setup, isOnline]);
@@ -107,6 +111,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         visited: next.visited,
         locked: next.locked,
         goods: next.goods,
+        unlockedSides: next.unlockedSides,
       }).catch(() => {});
     } else {
       localStorage.setItem(KEY, JSON.stringify(next));
@@ -137,6 +142,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       visited: base.visited.includes(a.destId) ? base.visited : [...base.visited, a.destId],
       locked: [...new Set([...base.locked, ...a.locks])],
       goods,
+      unlockedSides: base.unlockedSides ?? [],
     });
   };
 
@@ -177,5 +183,12 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
 
   const resetProgress = () => persist(seed(setup));
 
-  return { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, resetProgress };
+  /** Markér et sidested som låst opp via svenneprøve (vedvarer i state). */
+  const unlockSide = (destId: string) => {
+    const base = state ?? seed(setup);
+    if (base.unlockedSides.includes(destId)) return;
+    persist({ ...base, unlockedSides: [...base.unlockedSides, destId] });
+  };
+
+  return { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, unlockSide, resetProgress };
 }

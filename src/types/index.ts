@@ -130,11 +130,26 @@ export interface Destination {
   // Handelsvarer som tildeles ved fullføring (1-2 per destinasjon, tematisk autentiske).
   // IKKE inkludert: mennesker/treller/slaver — bare materielle varer (se data/tradeGoods.ts).
   goodsReward: TradeGoodId[];
+
+  // Hovedrute (alltid åpen) eller sidested (låst, krever en av flere veier — se data/routes.ts).
+  route: RouteKind;
+  unlocks?: UnlockRequirement[];
 }
 
 export type TradeGoodId =
   | 'pelsverk' | 'solv' | 'jern' | 'rav'
   | 'silke' | 'hvalrosstann' | 'krydder' | 'salt';
+
+export type RouteKind = 'main' | 'side';
+export type ScoreKey = 'culturalUnderstanding' | 'tradeGain' | 'reputation';
+
+/** Én vei å låse opp et sidested. Et sidested har FLERE slike — gruppa velger
+ *  den de har forutsetning for. */
+export type UnlockRequirement =
+  | { type: 'svenneprove'; skill: SkillKey }
+  | { type: 'skill'; key: SkillKey; min: number }
+  | { type: 'score'; key: ScoreKey; min: number }
+  | { type: 'goods'; goods: Partial<Record<TradeGoodId, number>> };
 
 // ========================
 // EPISK KULTURMØTE (v2)
