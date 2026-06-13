@@ -30,6 +30,26 @@ const MAP_POS: Record<string, { x: number; y: number }> = {
 };
 const HOME = { x: 52, y: 22 }; // Avaldsnes
 
+/** Varighet i sekunder for seilas-animasjonen. GameDashboard's setTimeout ligger
+ *  litt over dette så vi rekker å se animasjonen ferdig før encounter åpner. */
+export const SAILING_DURATION_S = 3.0;
+
+/** Samples 13 punkter langs en kvadratisk bezier-kurve fra (x1,y1) til (x2,y2)
+ *  med en kontrollpunkt som ligger litt over midten — gir et buet, naturlig spor. */
+function bezierKeyframes(x1: number, y1: number, x2: number, y2: number, lift = 10, steps = 12) {
+  const cx = (x1 + x2) / 2;
+  const cy = Math.min(y1, y2) - lift;
+  const xs: number[] = [];
+  const ys: number[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const omt = 1 - t;
+    xs.push(omt * omt * x1 + 2 * omt * t * cx + t * t * x2);
+    ys.push(omt * omt * y1 + 2 * omt * t * cy + t * t * y2);
+  }
+  return { xs, ys, cx, cy };
+}
+
 /** Lager en kort teaser-tekst fra førsteperson-historien. */
 function makeTeaser(history: string): string {
   const stripped = history.replace(/<[^>]+>/g, '').trim();
@@ -155,19 +175,59 @@ export default function SeaJourney({ destinations, visited, locked, ship, isChie
           </div>
         )}
 
-        {/* Seilende skip (animasjon fra siste posisjon til mål) */}
-        {sailingTo && sailingPos && (
-          <motion.div
-            key={sailingTo}
-            initial={{ left: `${shipStart.x}%`, top: `${shipStart.y}%`, opacity: 0.95 }}
-            animate={{ left: `${sailingPos.x}%`, top: `${sailingPos.y}%`, opacity: 1 }}
-            transition={{ duration: 1.6, ease: 'easeInOut' }}
-            className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2"
-            data-testid="sailing-ship"
-          >
-            <VikingShip color={ship.color} symbol={ship.symbol} size={44} bob />
-          </motion.div>
-        )}
+        {/* Seilende skip + kjølvann (kurvet bane fra siste posisjon mot målet) */}
+        {sailingTo && sailingPos && (() => {
+          const bz = bezierKeyframes(shipStart.x, shipStart.y, sailingPos.x, sailingPos.y);
+          const path = `M ${shipStart.x} ${shipStart.y} Q ${bz.cx} ${bz.cy} ${sailingPos.x} ${sailingPos.y}`;
+          return (
+            <>
+              {/* Animert kjølvann — SVG-bane som tegnes etterhvert som skipet seiler */}
+              <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 56" preserveAspectRatio="none">
+                <motion.path
+                  d={path}
+                  fill="none"
+                  stroke="rgba(255,255,255,0.55)"
+                  strokeWidth={0.35}
+                  strokeDasharray="1.5 1"
+                  strokeLinecap="round"
+                  initial={{ pathLength: 0, opacity: 0.8 }}
+                  animate={{ pathLength: 1, opacity: 0.5 }}
+                  transition={{ duration: SAILING_DURATION_S, ease: 'easeInOut' }}
+                />
+              </svg>
+
+              <motion.div
+                key={sailingTo}
+                initial={{ left: `${shipStart.x}%`, top: `${shipStart.y}%`, opacity: 0.95 }}
+                animate={{
+                  left: bz.xs.map((x) => `${x}%`),
+                  top: bz.ys.map((y) => `${y}%`),
+                  opacity: 1,
+                  rotate: [0, -4, 3, -3, 2, 0],
+                }}
+                transition={{ duration: SAILING_DURATION_S, ease: 'easeInOut' }}
+                className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2"
+                data-testid="sailing-ship"
+              >
+                <VikingShip color={ship.color} symbol={ship.symbol} size={44} bob />
+              </motion.div>
+
+              {/* Tekstboble — «Seiler mot X …» — synket via sailingTo */}
+              {sailingDest && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35 }}
+                  className="pointer-events-none absolute left-1/2 top-2 z-30 -translate-x-1/2 rounded-md border border-viking-gold/60 bg-viking-darkblue/90 px-3 py-1 font-cinzel text-xs text-viking-gold shadow-lg sm:text-sm"
+                  data-testid="sailing-bubble"
+                >
+                  ⚓ Seiler mot {sailingDest.name} …
+                </motion.div>
+              )}
+            </>
+          );
+        })()}
       </div>
 
       {/* Info-kort */}

@@ -14,7 +14,7 @@ import VikingShip from '../ship/VikingShip';
 import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
-import SeaJourney from './SeaJourney';
+import SeaJourney, { SAILING_DURATION_S } from './SeaJourney';
 import type { Session } from '../../hooks/useSession';
 import { removeGroup, requestApproval, subscribeGroup, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent } from '../../lib/gameSync';
 import { chapters, chapterCompleted } from '../../data/chapters';
@@ -111,7 +111,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         setLocalSailingTo(null);
         setLocalActiveDestId(destId);
       }
-    }, 1700);
+    }, SAILING_DURATION_S * 1000 + 200); // 200 ms buffer så animasjonen rekker å fullføre
   };
 
   // Aktiv verdighetsprøve og sluttseremoni: synket i online, lokal ellers.
