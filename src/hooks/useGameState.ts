@@ -17,6 +17,7 @@ import type { GroupSetup } from './useGroupSetup';
 import type { Session } from './useSession';
 import { patchGroup, subscribeGroup, writeGroup } from '../lib/gameSync';
 import type { FateEffect } from '../data/fateCards';
+import type { SpecialAction } from '../data/specialActions';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const KEY = 'vikingspill_state';
@@ -28,6 +29,7 @@ export interface GameProgress {
   locked: string[];
   goods: Partial<Record<TradeGoodId, number>>;
   unlockedSides: string[];
+  performedActions: string[];
 }
 
 export interface OutcomeApply {
@@ -48,6 +50,7 @@ function seed(setup: GroupSetup): GameProgress {
     locked: [],
     goods: {},
     unlockedSides: [],
+    performedActions: [],
   };
 }
 
@@ -67,6 +70,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         locked: g.locked ?? [],
         goods: g.goods ?? {},
         unlockedSides: g.unlockedSides ?? [],
+        performedActions: g.performedActions ?? [],
       });
     });
     return () => unsub();
@@ -98,6 +102,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       locked: state.locked,
       goods: state.goods,
       unlockedSides: state.unlockedSides,
+      performedActions: state.performedActions,
       updatedAt: Date.now(),
     }).catch(() => {});
   }, [state, session, setup, isOnline]);
@@ -112,6 +117,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         locked: next.locked,
         goods: next.goods,
         unlockedSides: next.unlockedSides,
+        performedActions: next.performedActions,
       }).catch(() => {});
     } else {
       localStorage.setItem(KEY, JSON.stringify(next));
@@ -143,6 +149,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       locked: [...new Set([...base.locked, ...a.locks])],
       goods,
       unlockedSides: base.unlockedSides ?? [],
+      performedActions: base.performedActions ?? [],
     });
   };
 
@@ -190,5 +197,51 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     persist({ ...base, unlockedSides: [...base.unlockedSides, destId] });
   };
 
-  return { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, unlockSide, resetProgress };
+  /** Utfør en spesialhandling: trekk kostnad, legg til effekt, marker som utført.
+   *  Henter ressurser fra gruppens nåværende tilstand og oppdaterer alt i ÉN persist. */
+  const performAction = (action: SpecialAction) => {
+    const base = state ?? seed(setup);
+    if (base.performedActions.includes(action.id)) return;
+    const scores = { ...base.scores };
+    const skills = { ...base.skills };
+    const goods: Partial<Record<TradeGoodId, number>> = { ...base.goods };
+    let unlockedSides = base.unlockedSides;
+
+    if (action.cost) {
+      if (action.cost.rep) scores.reputation -= action.cost.rep;
+      if (action.cost.trade) scores.tradeGain -= action.cost.trade;
+      if (action.cost.und) scores.culturalUnderstanding -= action.cost.und;
+      if (action.cost.goods) {
+        for (const [g, n] of Object.entries(action.cost.goods)) {
+          goods[g as TradeGoodId] = Math.max(0, (goods[g as TradeGoodId] ?? 0) - (n ?? 0));
+        }
+      }
+    }
+    if (action.effect.rep) scores.reputation += action.effect.rep;
+    if (action.effect.trade) scores.tradeGain += action.effect.trade;
+    if (action.effect.und) scores.culturalUnderstanding += action.effect.und;
+    if (action.effect.goods) {
+      for (const [g, n] of Object.entries(action.effect.goods)) {
+        goods[g as TradeGoodId] = (goods[g as TradeGoodId] ?? 0) + (n ?? 0);
+      }
+    }
+    if (action.effect.skill) {
+      const cur = skills[action.effect.skill.key] ?? 0;
+      skills[action.effect.skill.key] = Math.max(0, Math.min(3, cur + action.effect.skill.delta));
+    }
+    if (action.effect.unlocks?.length) {
+      unlockedSides = [...new Set([...unlockedSides, ...action.effect.unlocks])];
+    }
+
+    persist({
+      ...base,
+      scores,
+      skills,
+      goods,
+      unlockedSides,
+      performedActions: [...base.performedActions, action.id],
+    });
+  };
+
+  return { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, unlockSide, performAction, resetProgress };
 }

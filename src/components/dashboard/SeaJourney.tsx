@@ -14,6 +14,8 @@ import { motion } from 'motion/react';
 import type { Destination, ShipSymbol, SkillKey, TradeGoodId } from '../../types';
 import VikingShip from '../ship/VikingShip';
 import { isAccessible, describeRequirement, missingForRequirement, meetsRequirement } from '../../lib/unlocks';
+import { ACTIONS_BY_DEST, type SpecialAction, type ActionCategory } from '../../data/specialActions';
+import { evaluateAction, describeCost, describeEffect } from '../../lib/specialActions';
 
 const MAP_POS: Record<string, { x: number; y: number }> = {
   vinland: { x: 8, y: 40 },
@@ -67,6 +69,7 @@ interface Props {
   skills: Record<SkillKey, number>;
   scores: { culturalUnderstanding: number; tradeGain: number; reputation: number };
   unlockedSides: string[];
+  performedActions: string[];
   ship: { color: string; symbol: ShipSymbol; name: string };
   isChief: boolean;
   previewDestId: string | null;
@@ -74,9 +77,21 @@ interface Props {
   onSelect: (destId: string | null) => void;
   onConfirm: (destId: string) => void;
   onStartSvenneprove: (destId: string, skill: SkillKey) => void;
+  onPerformAction: (action: SpecialAction) => void;
 }
 
-export default function SeaJourney({ destinations, visited, locked, goods, skills, scores, unlockedSides, ship, isChief, previewDestId, sailingTo, onSelect, onConfirm, onStartSvenneprove }: Props) {
+const CATEGORY_LABEL: Record<ActionCategory, string> = {
+  rykte: 'RYKTE',
+  handel: 'HANDEL',
+  diplomati: 'DIPLOMATI',
+};
+const CATEGORY_COLOR: Record<ActionCategory, string> = {
+  rykte: 'text-viking-crimson',
+  handel: 'text-viking-gold',
+  diplomati: 'text-viking-teal',
+};
+
+export default function SeaJourney({ destinations, visited, locked, goods, skills, scores, unlockedSides, performedActions, ship, isChief, previewDestId, sailingTo, onSelect, onConfirm, onStartSvenneprove, onPerformAction }: Props) {
   const previewDest = previewDestId ? destinations.find((d) => d.id === previewDestId) ?? null : null;
   const lastVisited = visited[visited.length - 1];
   const shipStart = (lastVisited && MAP_POS[lastVisited]) || HOME;
@@ -261,6 +276,53 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
               <p className={`font-mono text-xs ${previewStatus(dest).color}`} data-testid="dest-status">{previewStatus(dest).label}</p>
             </div>
             <p className="mt-2 font-inter text-sm italic leading-relaxed text-viking-paper/85">«{makeTeaser(dest.history)}»</p>
+
+            {/* Spesialhandlinger — bruk ressurser her */}
+            {ACTIONS_BY_DEST[dest.id]?.length > 0 && (
+              <div className="mt-3 rounded-md border border-viking-gold-soft/40 bg-viking-darkblue/50 p-3" data-testid="special-actions">
+                <p className="mb-2 font-cinzel text-xs text-viking-gold-soft">Spesielle handlinger her:</p>
+                <ul className="space-y-2.5">
+                  {ACTIONS_BY_DEST[dest.id].map((a) => {
+                    const av = evaluateAction(a, { scores, skills, goods }, performedActions);
+                    return (
+                      <li key={a.id} className="rounded border border-viking-gold/30 bg-viking-surface/40 p-2.5" data-testid={`action-${a.id}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <p className="font-cinzel text-sm text-viking-gold">
+                              <span className={`mr-1.5 text-[10px] font-bold ${CATEGORY_COLOR[a.category]}`}>{CATEGORY_LABEL[a.category]}</span>
+                              {a.label}
+                            </p>
+                            <p className="mt-0.5 font-inter text-xs italic text-viking-paper/75">{a.description}</p>
+                            <p className="mt-1 font-mono text-[11px] text-viking-gold-soft/90">
+                              <span className="text-viking-crimson/90">Koster:</span> <strong>{describeCost(a.cost)}</strong>
+                              <span className="mx-1.5">·</span>
+                              <span className="text-viking-moss">Gir:</span> <strong>{describeEffect(a.effect)}</strong>
+                            </p>
+                          </div>
+                          <div className="shrink-0">
+                            {av.performed ? (
+                              <span className="rounded bg-viking-moss/20 px-2 py-0.5 font-cinzel text-xs text-viking-moss">✓ Utført</span>
+                            ) : isChief && av.available ? (
+                              <button
+                                onClick={() => onPerformAction(a)}
+                                data-testid={`do-action-${a.id}`}
+                                className="rounded border-2 border-viking-gold bg-viking-gold/20 px-3 py-1 font-cinzel text-xs font-bold text-viking-gold hover:bg-viking-gold/40"
+                              >
+                                Utfør →
+                              </button>
+                            ) : (
+                              <span className="block max-w-[14ch] text-right font-mono text-[10px] text-viking-crimson/90" title={av.missing.join(', ')}>
+                                Mangler {av.missing[0]}{av.missing.length > 1 ? ' …' : ''}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
 
             {/* Opplåsingsveier for låste sidesteder */}
             {sideLocked && dest.unlocks && (

@@ -42,7 +42,7 @@ interface Props {
 }
 
 export default function GameDashboard({ setup, session, onResetSetup, onLeaveGame, onSwitchRole }: Props) {
-  const { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, unlockSide, resetProgress } = useGameState(setup, session);
+  const { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, unlockSide, performAction, resetProgress } = useGameState(setup, session);
   const [svenneprove, setSvenneprove] = useState<{ destId: string; skill: SkillKey } | null>(null);
 
   // I online-modus er gruppe-tilstanden delt blant alle medlemmer. Vi lytter på hele
@@ -452,6 +452,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             skills={state.skills}
             scores={state.scores}
             unlockedSides={state.unlockedSides ?? []}
+            performedActions={state.performedActions ?? []}
             ship={{ color: setup.shipColor, symbol: setup.shipSymbol, name: setup.shipName }}
             isChief={isChief}
             previewDestId={previewDestId}
@@ -459,6 +460,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             onSelect={setPreviewDestId}
             onConfirm={confirmSailingTo}
             onStartSvenneprove={(destId, skill) => setSvenneprove({ destId, skill })}
+            onPerformAction={performAction}
           />
         </div>
 

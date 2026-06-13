@@ -43,6 +43,7 @@ export interface SyncedGroup {
   locked: string[];
   goods?: Partial<Record<TradeGoodId, number>>;
   unlockedSides?: string[];
+  performedActions?: string[];
   updatedAt: number;
   // Multi-enhet-felt (§ multi-enhet med høvding-rolle):
   chiefId?: string;                     // memberId til høvdingen
