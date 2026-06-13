@@ -367,16 +367,28 @@ export default function TeacherPanel() {
               📖 Les sagaer
             </button>
           </div>
-          <label className="mt-3 inline-flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={!!settings.requireSaga}
-              onChange={(e) => { if (code) setGameSettings(code, { requireSaga: e.target.checked }).catch(() => {}); }}
-              data-testid="require-saga-toggle"
-              className="h-4 w-4 accent-viking-gold"
-            />
-            <span className="font-cinzel text-sm text-viking-gold-soft">Krev begrunnelse: <strong>{settings.requireSaga ? 'PÅ' : 'AV'}</strong></span>
-          </label>
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+            <label className="inline-flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={!!settings.requireSaga}
+                onChange={(e) => { if (code) setGameSettings(code, { requireSaga: e.target.checked }).catch(() => {}); }}
+                data-testid="require-saga-toggle"
+                className="h-4 w-4 accent-viking-gold"
+              />
+              <span className="font-cinzel text-sm text-viking-gold-soft">Krev begrunnelse: <strong>{settings.requireSaga ? 'PÅ' : 'AV'}</strong></span>
+            </label>
+            <label className="inline-flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={!!settings.requirePerspective}
+                onChange={(e) => { if (code) setGameSettings(code, { requirePerspective: e.target.checked }).catch(() => {}); }}
+                data-testid="require-perspective-toggle"
+                className="h-4 w-4 accent-viking-gold"
+              />
+              <span className="font-cinzel text-sm text-viking-gold-soft">Krev perspektivskifte: <strong>{settings.requirePerspective ? 'PÅ' : 'AV'}</strong></span>
+            </label>
+          </div>
         </div>
 
         {/* Handelstorg — kompakt aktivitetspanel */}

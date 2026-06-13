@@ -73,6 +73,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     return () => unsub();
   }, [isOnline, session]);
   const requireSaga = !!gameSettings.requireSaga;
+  const requirePerspective = !!gameSettings.requirePerspective;
   const [showOwnSaga, setShowOwnSaga] = useState(false);
   const [syncedGroup, setSyncedGroup] = useState<SyncedGroup | null>(null);
   useEffect(() => {
@@ -362,6 +363,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         isChief={isChief}
         lateGame={state.visited.length >= 6}
         requireSaga={requireSaga}
+        requirePerspective={requirePerspective}
         syncedEncounter={isOnline ? syncedGroup?.encounter ?? null : null}
         onUpdateEncounter={isOnline && isChief
           ? (partial) => {

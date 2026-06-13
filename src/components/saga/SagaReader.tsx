@@ -60,13 +60,29 @@ export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props)
                     >
                       <p className="font-cinzel text-xs uppercase tracking-widest text-viking-rust">Kapittel {i + 1} — {e.destName}</p>
                       <p className="mt-1 font-cinzel text-lg text-viking-darkblue">«{e.choiceTitle}»</p>
-                      <p
-                        className="mt-2 whitespace-pre-wrap text-base leading-relaxed text-viking-darkblue"
-                        style={{ fontFamily: 'serif' }}
-                        data-testid="saga-reason"
-                      >
-                        {e.reason}
-                      </p>
+                      {e.reason && (
+                        <p
+                          className="mt-2 whitespace-pre-wrap text-base leading-relaxed text-viking-darkblue"
+                          style={{ fontFamily: 'serif' }}
+                          data-testid="saga-reason"
+                        >
+                          {e.reason}
+                        </p>
+                      )}
+                      {(e.vikingPerspective || e.otherPerspective) && (
+                        <div className="mt-3 space-y-1.5 border-t border-viking-rust/30 pt-2" data-testid="saga-perspectives">
+                          {e.vikingPerspective && (
+                            <p className="text-sm text-viking-darkblue" style={{ fontFamily: 'serif' }}>
+                              <span className="font-cinzel text-xs text-viking-rust">⚔️ Vikingenes side:</span> {e.vikingPerspective}
+                            </p>
+                          )}
+                          {e.otherPerspective && (
+                            <p className="text-sm text-viking-darkblue" style={{ fontFamily: 'serif' }}>
+                              <span className="font-cinzel text-xs text-viking-rust">👁️ {e.otherLabel ?? 'De andres'} side:</span> {e.otherPerspective}
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </li>
                 ))}

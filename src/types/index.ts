@@ -146,6 +146,13 @@ export interface Destination {
     test: { q: string; opts: string[]; correct: number; feedback?: string };
     choice: Choice;
   };
+
+  // Perspektivskifte før valget (4 utvalgte steder). Lærer-styrt via requirePerspective.
+  perspectivePrompt?: {
+    vikingQuestion: string;
+    otherQuestion: string;
+    otherLabel: string;
+  };
 }
 
 export type TradeGoodId =
@@ -165,6 +172,9 @@ export interface SagaEntry {
   choiceTitle: string;
   reason: string;
   at: number;
+  vikingPerspective?: string;
+  otherPerspective?: string;
+  otherLabel?: string;       // hvem «de andre» var (munkene, irene, samene, araberne)
 }
 
 /** Én vei å låse opp et sidested. Et sidested har FLERE slike — gruppa velger

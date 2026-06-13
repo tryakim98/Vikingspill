@@ -17,8 +17,9 @@
         },
 
         "settings": {
-          "requireSaga": { ".validate": "newData.isBoolean()" },
-          "$other":      { ".validate": false }
+          "requireSaga":        { ".validate": "newData.isBoolean()" },
+          "requirePerspective": { ".validate": "newData.isBoolean()" },
+          "$other":             { ".validate": false }
         },
 
         "groups": {
@@ -66,7 +67,7 @@
             "encounter": {
               ".validate": "newData.hasChildren(['destId','step'])",
               "destId":       { ".validate": "newData.isString() && newData.val().length <= 40" },
-              "step":         { ".validate": "newData.isString() && newData.val().matches(/^(history|kulturmote|oppgave|transition|quiz|valg|saga|roll|rolling|resultat)$/)" },
+              "step":         { ".validate": "newData.isString() && newData.val().matches(/^(history|kulturmote|oppgave|transition|quiz|perspektiv|valg|saga|roll|rolling|resultat)$/)" },
               "approvalSent": { ".validate": "newData.isBoolean()" },
               "kmAnswer":     { ".validate": "newData.isNumber()" },
               "quizIdx":      { ".validate": "newData.isNumber()" },
@@ -78,6 +79,8 @@
               "hiddenAnswered":  { ".validate": "newData.isBoolean()" },
               "hiddenCorrect":   { ".validate": "newData.isBoolean()" },
               "hiddenAnswerIdx": { ".validate": "newData.isNumber()" },
+              "vikingPerspective": { ".validate": "newData.isString() && newData.val().length <= 600" },
+              "otherPerspective":  { ".validate": "newData.isString() && newData.val().length <= 600" },
               "roll": {
                 "raw":       { ".validate": "newData.isNumber()" },
                 "effective": { ".validate": "newData.isNumber()" },

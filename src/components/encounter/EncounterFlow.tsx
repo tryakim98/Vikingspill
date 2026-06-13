@@ -30,7 +30,7 @@ import { playMusic } from '../../lib/music';
 import QuestionCard from '../quiz/QuestionCard';
 import DiceRoll from '../dice/DiceRoll';
 
-type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat';
+type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat';
 
 interface EncounterFlowProps {
   destination: Destination;
@@ -49,6 +49,8 @@ interface EncounterFlowProps {
   lateGame?: boolean;
   /** Lærer-styrt: krev en saga-begrunnelse mellom valg og terningkast. */
   requireSaga?: boolean;
+  /** Lærer-styrt: krev perspektivskifte før valg på destinasjoner som har prompts. */
+  requirePerspective?: boolean;
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -98,7 +100,7 @@ function OddsBar({ baseRoll }: { baseRoll: RollOdds }) {
 export default function EncounterFlow({
   destination, skills, onComplete, onExit, onRequestApproval,
   isChief = true, syncedEncounter = null, onUpdateEncounter,
-  lateGame = false, requireSaga = false,
+  lateGame = false, requireSaga = false, requirePerspective = false,
 }: EncounterFlowProps) {
   const d = destination;
   const syncMode = !!syncedEncounter;
@@ -117,6 +119,8 @@ export default function EncounterFlow({
   const [_hiddenAnswered, _setHiddenAnswered] = useState(false);
   const [_hiddenCorrect, _setHiddenCorrect] = useState(false);
   const [_hiddenAnswerIdx, _setHiddenAnswerIdx] = useState<number | undefined>(undefined);
+  const [_vikingPerspective, _setVikingPerspective] = useState('');
+  const [_otherPerspective, _setOtherPerspective] = useState('');
 
   // Alle valg å slå opp i når et choice-id må mappes til Choice-objekt — inkluderer
   // det skjulte valget hvis destinasjonen har et og lesetesten ble svart riktig på.
@@ -140,6 +144,13 @@ export default function EncounterFlow({
   const hiddenAnswered = syncMode ? !!syncedEncounter?.hiddenAnswered : _hiddenAnswered;
   const hiddenCorrect = syncMode ? !!syncedEncounter?.hiddenCorrect : _hiddenCorrect;
   const hiddenAnswerIdx = syncMode ? syncedEncounter?.hiddenAnswerIdx : _hiddenAnswerIdx;
+  const vikingPerspective = syncMode ? (syncedEncounter?.vikingPerspective ?? '') : _vikingPerspective;
+  const otherPerspective = syncMode ? (syncedEncounter?.otherPerspective ?? '') : _otherPerspective;
+  const setVikingPerspective = (v: string) => syncMode ? onUpdateEncounter?.({ vikingPerspective: v }) : _setVikingPerspective(v);
+  const setOtherPerspective = (v: string) => syncMode ? onUpdateEncounter?.({ otherPerspective: v }) : _setOtherPerspective(v);
+
+  // Hvor skal vi gå når vi er ferdige med oppgave/quiz og inn mot valgene?
+  const preValgStep: Step = (requirePerspective && d.perspectivePrompt) ? 'perspektiv' : 'valg';
 
   // Setter-wrappere: skriver til Firebase i synkmodus, ellers oppdaterer lokal state.
   // Ikke-høvding må uansett ikke trigge skriv — vi gater på UI-nivå.
@@ -170,6 +181,8 @@ export default function EncounterFlow({
     if (partial.hiddenAnswered !== undefined) _setHiddenAnswered(partial.hiddenAnswered);
     if (partial.hiddenCorrect !== undefined) _setHiddenCorrect(partial.hiddenCorrect);
     if (partial.hiddenAnswerIdx !== undefined) _setHiddenAnswerIdx(partial.hiddenAnswerIdx);
+    if (partial.vikingPerspective !== undefined) _setVikingPerspective(partial.vikingPerspective);
+    if (partial.otherPerspective !== undefined) _setOtherPerspective(partial.otherPerspective);
   };
 
   // Kort bølgeeffekt idet vi seiler inn til destinasjonen (§10).
@@ -282,7 +295,7 @@ export default function EncounterFlow({
         {isChief ? (
           <div className="mt-7 flex flex-wrap gap-3">
             <button onClick={() => setStep('transition')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Start stedsquiz →</button>
-            <button onClick={() => updateMany({ quizBonus: 0, step: 'valg' })} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Hopp til valgene</button>
+            <button onClick={() => updateMany({ quizBonus: 0, step: preValgStep })} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Hopp til valgene</button>
           </div>
         ) : <ChiefBanner />}
       </Shell>
@@ -352,7 +365,7 @@ export default function EncounterFlow({
         {quizAnswer !== null && (isChief ? (
           <button
             onClick={() => {
-              if (last) updateMany({ quizBonus: Math.min(2, quizCorrect), step: 'valg' });
+              if (last) updateMany({ quizBonus: Math.min(2, quizCorrect), step: preValgStep });
               else updateMany({ quizIdx: quizIdx + 1, quizAnswer: null });
             }}
             className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
@@ -360,6 +373,70 @@ export default function EncounterFlow({
             {last ? 'Til valgene →' : 'Neste spørsmål →'}
           </button>
         ) : <ChiefBanner />)}
+      </Shell>
+    );
+  }
+
+  // 5a-i) PERSPEKTIVSKIFTE (lærer-styrt, 4 utvalgte destinasjoner)
+  if (step === 'perspektiv' && d.perspectivePrompt) {
+    const p = d.perspectivePrompt;
+    const canContinue = vikingPerspective.trim().length > 0 && otherPerspective.trim().length > 0;
+    const Pergament = ({ children, ...rest }: React.PropsWithChildren<{ 'data-testid'?: string }>) => (
+      <div
+        className="rounded-lg border-4 border-viking-gold/60 p-3 shadow-[0_0_18px_rgba(212,168,67,0.18)]"
+        style={{
+          background: 'linear-gradient(135deg, #FDFBF6 0%, #F4EDDC 100%)',
+          backgroundImage: 'repeating-linear-gradient(0deg, transparent 0 23px, rgba(160,82,45,0.07) 23px 24px)',
+        }}
+        {...rest}
+      >{children}</div>
+    );
+    return (
+      <Shell name={d.name} onExit={onExit}>
+        <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft/80">Perspektivskifte</p>
+        <h1 className="mb-2 font-cinzel text-2xl font-bold text-viking-gold">🪟 To sider av samme strand</h1>
+        <p className="mb-4 font-inter text-sm italic text-viking-paper/75">Skriv kort — bare 1–2 setninger på hvert spørsmål.</p>
+
+        <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">⚔️ {p.vikingQuestion}</p>
+        <Pergament data-testid="viking-pergament">
+          <textarea
+            value={vikingPerspective}
+            onChange={(e) => isChief && setVikingPerspective(e.target.value.slice(0, 600))}
+            placeholder={isChief ? 'Skriv vikingenes egen begrunnelse …' : 'Høvdingen skriver …'}
+            readOnly={!isChief}
+            rows={3}
+            data-testid="viking-perspective"
+            className="w-full resize-none bg-transparent font-inter text-sm leading-relaxed text-viking-darkblue placeholder:italic placeholder:text-viking-darkblue/40 focus:outline-none"
+            style={{ fontFamily: 'serif' }}
+          />
+        </Pergament>
+
+        <p className="mb-1 mt-4 font-cinzel text-sm text-viking-gold-soft">👁️ {p.otherQuestion}</p>
+        <Pergament data-testid="other-pergament">
+          <textarea
+            value={otherPerspective}
+            onChange={(e) => isChief && setOtherPerspective(e.target.value.slice(0, 600))}
+            placeholder={isChief ? `Skriv hvordan ${p.otherLabel} kanskje opplever det …` : 'Høvdingen skriver …'}
+            readOnly={!isChief}
+            rows={3}
+            data-testid="other-perspective"
+            className="w-full resize-none bg-transparent font-inter text-sm leading-relaxed text-viking-darkblue placeholder:italic placeholder:text-viking-darkblue/40 focus:outline-none"
+            style={{ fontFamily: 'serif' }}
+          />
+        </Pergament>
+
+        {isChief ? (
+          <button
+            onClick={() => updateMany({ step: 'valg' })}
+            disabled={!canContinue}
+            data-testid="perspective-continue"
+            className="mt-5 rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Til valgene →
+          </button>
+        ) : (
+          <ChiefBanner />
+        )}
       </Shell>
     );
   }
@@ -636,10 +713,13 @@ export default function EncounterFlow({
               skillReward: choice.skillReward,
               locks: choice.locks ?? [],
               goodsReward: d.goodsReward,
-              sagaEntry: reason.trim() ? {
+              sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim()) ? {
                 destId: d.id, destName: d.name,
                 choiceId: choice.id, choiceTitle: choice.title,
                 reason: reason.trim(), at: Date.now(),
+                ...(vikingPerspective.trim() ? { vikingPerspective: vikingPerspective.trim() } : {}),
+                ...(otherPerspective.trim() ? { otherPerspective: otherPerspective.trim() } : {}),
+                ...(d.perspectivePrompt ? { otherLabel: d.perspectivePrompt.otherLabel } : {}),
               } : undefined,
             })}
             className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
