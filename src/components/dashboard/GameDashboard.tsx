@@ -17,6 +17,7 @@ import EndCeremony from '../ceremony/EndCeremony';
 import SeaJourney, { SAILING_DURATION_S } from './SeaJourney';
 import TradeGoodsPanel from './TradeGoodsPanel';
 import SvenneproveTrial from './SvenneproveTrial';
+import SvennepoverPanel from './SvennepoverPanel';
 import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
 import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
@@ -602,6 +603,14 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         <div className="mb-6">
           <TradeGoodsPanel goods={state.goods ?? {}} />
         </div>
+
+        {/* Svenneprøver — fast panel så funksjonen er synlig og lett å finne */}
+        <SvennepoverPanel
+          destinations={destinations}
+          unlockedSides={state.unlockedSides ?? []}
+          isChief={isChief}
+          onStartSvenneprove={(destId, skill) => setSvenneprove({ destId, skill })}
+        />
 
         {/* Ferdigheter — trykk en på nivå 1–2 for å ta verdighetsprøven (§3.2) */}
         <p className="mb-2 font-inter text-xs text-viking-gold-soft/70">Ferdigheter{isChief ? ' — trykk en med ⚔ for å ta verdighetsprøven' : ''}</p>

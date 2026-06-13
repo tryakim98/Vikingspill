@@ -16,6 +16,7 @@ import VikingShip from '../ship/VikingShip';
 import { isAccessible, describeRequirement, missingForRequirement, meetsRequirement } from '../../lib/unlocks';
 import { ACTIONS_BY_DEST, type SpecialAction, type ActionCategory } from '../../data/specialActions';
 import { evaluateAction, describeCost, describeEffect } from '../../lib/specialActions';
+import { skillTreeData } from '../../data/skillTree';
 
 const MAP_POS: Record<string, { x: number; y: number }> = {
   vinland: { x: 8, y: 40 },
@@ -108,6 +109,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
     locked.includes(d.id) ? { label: '🔒 Stengt', color: 'text-viking-crimson' } :
     visited.includes(d.id) ? { label: '✓ Besøkt', color: 'text-viking-moss' } :
     isSideLocked(d) ? { label: '🔒 Sidested — låst', color: 'text-viking-gold-soft' } :
+    d.route === 'side' && unlockedSides.includes(d.id) ? { label: '🔓 Låst opp!', color: 'text-viking-moss' } :
     d.route === 'side' ? { label: '⛵ Sidested — åpent', color: 'text-viking-gold' } :
     { label: '⛵ Hovedrute', color: 'text-viking-gold' };
 
@@ -325,36 +327,53 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
             )}
 
             {/* Opplåsingsveier for låste sidesteder */}
-            {sideLocked && dest.unlocks && (
-              <div className="mt-3 rounded-md border border-viking-gold-soft/40 bg-viking-darkblue/50 p-3" data-testid="unlock-paths">
-                <p className="mb-2 font-cinzel text-xs text-viking-gold-soft">Veier å låse opp dette sidestedet (én er nok):</p>
-                <ul className="space-y-1.5">
-                  {dest.unlocks.map((req, i) => {
-                    const satisfied = req.type !== 'svenneprove' && meetsRequirement(req, stateForLogic);
-                    const description = describeRequirement(req);
-                    const missing = missingForRequirement(req, stateForLogic);
-                    return (
-                      <li key={i} className="flex items-center gap-2 font-inter text-xs">
-                        <span>{satisfied ? '✅' : req.type === 'svenneprove' ? '📜' : '◻️'}</span>
-                        <span className={satisfied ? 'text-viking-moss' : 'text-viking-paper/85'}>
-                          <strong>{description}</strong>
-                          {!satisfied && req.type !== 'svenneprove' && missing && (
-                            <span className="text-viking-gold-soft/80"> — mangler {missing}</span>
-                          )}
-                        </span>
-                        {req.type === 'svenneprove' && isChief && (
-                          <button
-                            onClick={() => onStartSvenneprove(dest.id, req.skill)}
-                            data-testid={`take-svenneprove-${dest.id}`}
-                            className="ml-auto rounded border border-viking-gold/60 px-2 py-0.5 font-cinzel text-xs text-viking-gold hover:bg-viking-gold/15"
-                          >
-                            Ta prøven
-                          </button>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+            {sideLocked && dest.unlocks && (() => {
+              const svenneReq = dest.unlocks.find((r) => r.type === 'svenneprove');
+              return (
+                <div className="mt-3 rounded-md border border-viking-gold-soft/40 bg-viking-darkblue/50 p-3" data-testid="unlock-paths">
+                  <p className="mb-2 font-cinzel text-xs text-viking-gold-soft">Krever (én er nok):</p>
+                  <ul className="space-y-1.5">
+                    {dest.unlocks.map((req, i) => {
+                      const satisfied = req.type !== 'svenneprove' && meetsRequirement(req, stateForLogic);
+                      const description = describeRequirement(req);
+                      const missing = missingForRequirement(req, stateForLogic);
+                      return (
+                        <li key={i} className="flex items-center gap-2 font-inter text-xs">
+                          <span>{satisfied ? '✅' : req.type === 'svenneprove' ? '📜' : '◻️'}</span>
+                          <span className={satisfied ? 'text-viking-moss' : 'text-viking-paper/85'}>
+                            <strong>{description}</strong>
+                            {!satisfied && req.type !== 'svenneprove' && missing && (
+                              <span className="text-viking-gold-soft/80"> — mangler {missing}</span>
+                            )}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  {/* Stor, tydelig knapp for å ta svenneprøven direkte */}
+                  {svenneReq && svenneReq.type === 'svenneprove' && isChief && (
+                    <button
+                      onClick={() => onStartSvenneprove(dest.id, svenneReq.skill)}
+                      data-testid={`take-svenneprove-${dest.id}`}
+                      className="mt-3 w-full rounded-md border-2 border-viking-gold bg-viking-gold/15 px-4 py-2.5 font-cinzel text-sm font-bold text-viking-gold transition hover:bg-viking-gold hover:text-viking-darkblue"
+                    >
+                      📜 Ta svenneprøven i {skillTreeData[svenneReq.skill].name} →
+                    </button>
+                  )}
+                  {svenneReq && svenneReq.type === 'svenneprove' && !isChief && (
+                    <p className="mt-3 rounded-md border border-viking-gold/30 bg-viking-darkblue/40 px-3 py-2 font-cinzel text-xs italic text-viking-gold-soft/80">
+                      📜 Høvdingen kan ta svenneprøven i {skillTreeData[svenneReq.skill].name}
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* "Låst opp!"-merke når sidestedet ER låst opp men ikke besøkt */}
+            {dest.route === 'side' && unlockedSides.includes(dest.id) && !visited.includes(dest.id) && !locked.includes(dest.id) && (
+              <div className="mt-3 rounded-md border-2 border-viking-moss/60 bg-viking-moss/15 p-3 text-center" data-testid="just-unlocked">
+                <p className="font-cinzel text-sm font-bold text-viking-moss">🔓 Låst opp!</p>
+                <p className="mt-0.5 font-inter text-xs text-viking-paper/85">Sidestedet er tilgjengelig — bekreft seilas under.</p>
               </div>
             )}
 
