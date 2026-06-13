@@ -31,20 +31,37 @@
             "skills":  { "$skill": { ".validate": "newData.isNumber()" } },
             "visited": { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
             "locked":  { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
-            "updatedAt":     { ".validate": "newData.isNumber()" },
-            "chiefId":       { ".validate": "newData.isString() && newData.val().length <= 40" },
-            "activeDestId":  { ".validate": "newData.isString() && newData.val().length <= 40" },
-            "activeSkillKey":{ ".validate": "newData.isString() && newData.val().length <= 24" },
-            "showCeremony":  { ".validate": "newData.isBoolean()" },
+            "updatedAt":      { ".validate": "newData.isNumber()" },
+            "chiefId":        { ".validate": "newData.isString() && newData.val().matches(/^m-[a-z0-9]{1,16}$/) && newData.parent().child('members').child(newData.val()).exists()" },
+            "activeDestId":   { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "activeSkillKey": { ".validate": "newData.isString() && newData.val().length <= 24" },
+            "showCeremony":   { ".validate": "newData.isBoolean()" },
             "members": {
               "$memberId": {
-                "joinedAt": { ".validate": "newData.isNumber()" },
-                "$other":   { ".validate": false }
+                ".validate": "$memberId.matches(/^m-[a-z0-9]{1,16}$/)",
+                "joinedAt":   { ".validate": "newData.isNumber()" },
+                "$other":     { ".validate": false }
               }
             },
             "encounter": {
               ".validate": "newData.hasChildren(['destId','step'])",
-              "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" }
+              "destId":       { ".validate": "newData.isString() && newData.val().length <= 40" },
+              "step":         { ".validate": "newData.isString() && newData.val().matches(/^(history|kulturmote|oppgave|transition|quiz|valg|roll|rolling|resultat)$/)" },
+              "approvalSent": { ".validate": "newData.isBoolean()" },
+              "kmAnswer":     { ".validate": "newData.isNumber()" },
+              "quizIdx":      { ".validate": "newData.isNumber()" },
+              "quizCorrect":  { ".validate": "newData.isNumber()" },
+              "quizAnswer":   { ".validate": "newData.isNumber()" },
+              "quizBonus":    { ".validate": "newData.isNumber()" },
+              "choiceId":     { ".validate": "newData.isString() && newData.val().length <= 40" },
+              "roll": {
+                "raw":       { ".validate": "newData.isNumber()" },
+                "effective": { ".validate": "newData.isNumber()" },
+                "modifier":  { ".validate": "newData.isNumber()" },
+                "tier":      { ".validate": "newData.isString() && newData.val().matches(/^(bad|mid|good|crit)$/)" },
+                "$other":    { ".validate": false }
+              },
+              "$other": { ".validate": false }
             },
             "$other": { ".validate": false }
           }
