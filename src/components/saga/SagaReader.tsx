@@ -83,6 +83,13 @@ export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props)
                           )}
                         </div>
                       )}
+                      {e.bridgeReflection && (
+                        <div className="mt-3 border-t border-viking-rust/30 pt-2" data-testid="saga-bridge">
+                          <p className="text-sm text-viking-darkblue" style={{ fontFamily: 'serif' }}>
+                            <span className="font-cinzel text-xs text-viking-rust">🌉 Bro til i dag{e.bridgeTopic ? ` (${e.bridgeTopic})` : ''}:</span> {e.bridgeReflection}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </li>
                 ))}

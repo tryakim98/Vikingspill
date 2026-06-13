@@ -17,7 +17,7 @@ export interface GroupMember {
   joinedAt: number;
 }
 
-export type EncounterStep = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat';
+export type EncounterStep = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
 
 export interface SyncedEncounter {
   destId: string;
@@ -36,6 +36,7 @@ export interface SyncedEncounter {
   hiddenAnswerIdx?: number;     // synket valgindeks så alle medlemmer ser samme klikk
   vikingPerspective?: string;   // perspektivskifte: vikingenes side
   otherPerspective?: string;    // perspektivskifte: de andres side
+  bridgeReflection?: string;    // bro til i dag: refleksjonstekst
 }
 
 export interface SyncedGroup {
@@ -73,6 +74,7 @@ export function createGame(code: string): Promise<void> {
 export interface GameSettings {
   requireSaga?: boolean;
   requirePerspective?: boolean;
+  requireBridge?: boolean;
 }
 
 export function setGameSettings(code: string, settings: Partial<GameSettings>): Promise<void> {

@@ -19,6 +19,7 @@
         "settings": {
           "requireSaga":        { ".validate": "newData.isBoolean()" },
           "requirePerspective": { ".validate": "newData.isBoolean()" },
+          "requireBridge":      { ".validate": "newData.isBoolean()" },
           "$other":             { ".validate": false }
         },
 
@@ -67,7 +68,7 @@
             "encounter": {
               ".validate": "newData.hasChildren(['destId','step'])",
               "destId":       { ".validate": "newData.isString() && newData.val().length <= 40" },
-              "step":         { ".validate": "newData.isString() && newData.val().matches(/^(history|kulturmote|oppgave|transition|quiz|perspektiv|valg|saga|roll|rolling|resultat)$/)" },
+              "step":         { ".validate": "newData.isString() && newData.val().matches(/^(history|kulturmote|oppgave|transition|quiz|perspektiv|valg|saga|roll|rolling|resultat|refleksjon)$/)" },
               "approvalSent": { ".validate": "newData.isBoolean()" },
               "kmAnswer":     { ".validate": "newData.isNumber()" },
               "quizIdx":      { ".validate": "newData.isNumber()" },
@@ -81,6 +82,7 @@
               "hiddenAnswerIdx": { ".validate": "newData.isNumber()" },
               "vikingPerspective": { ".validate": "newData.isString() && newData.val().length <= 600" },
               "otherPerspective":  { ".validate": "newData.isString() && newData.val().length <= 600" },
+              "bridgeReflection":  { ".validate": "newData.isString() && newData.val().length <= 600" },
               "roll": {
                 "raw":       { ".validate": "newData.isNumber()" },
                 "effective": { ".validate": "newData.isNumber()" },

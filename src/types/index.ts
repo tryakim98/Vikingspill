@@ -153,6 +153,14 @@ export interface Destination {
     otherQuestion: string;
     otherLabel: string;
   };
+
+  // Bro til i dag — kobler kulturmøtet til en samtidssak. Lærer-styrt via requireBridge.
+  modernBridge?: {
+    topic: string;
+    context: string;
+    prompt: string;
+    options: string[];
+  };
 }
 
 export type TradeGoodId =
@@ -175,6 +183,8 @@ export interface SagaEntry {
   vikingPerspective?: string;
   otherPerspective?: string;
   otherLabel?: string;       // hvem «de andre» var (munkene, irene, samene, araberne)
+  bridgeTopic?: string;      // navnet på samtidsbroen (f.eks. «Sannhetskommisjonen»)
+  bridgeReflection?: string; // gruppens refleksjon
 }
 
 /** Én vei å låse opp et sidested. Et sidested har FLERE slike — gruppa velger

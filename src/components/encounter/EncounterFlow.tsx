@@ -30,7 +30,7 @@ import { playMusic } from '../../lib/music';
 import QuestionCard from '../quiz/QuestionCard';
 import DiceRoll from '../dice/DiceRoll';
 
-type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat';
+type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
 
 interface EncounterFlowProps {
   destination: Destination;
@@ -51,6 +51,8 @@ interface EncounterFlowProps {
   requireSaga?: boolean;
   /** Lærer-styrt: krev perspektivskifte før valg på destinasjoner som har prompts. */
   requirePerspective?: boolean;
+  /** Lærer-styrt: bro til i dag — refleksjon etter utfallet på destinasjoner med modernBridge. */
+  requireBridge?: boolean;
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -100,7 +102,7 @@ function OddsBar({ baseRoll }: { baseRoll: RollOdds }) {
 export default function EncounterFlow({
   destination, skills, onComplete, onExit, onRequestApproval,
   isChief = true, syncedEncounter = null, onUpdateEncounter,
-  lateGame = false, requireSaga = false, requirePerspective = false,
+  lateGame = false, requireSaga = false, requirePerspective = false, requireBridge = false,
 }: EncounterFlowProps) {
   const d = destination;
   const syncMode = !!syncedEncounter;
@@ -121,6 +123,7 @@ export default function EncounterFlow({
   const [_hiddenAnswerIdx, _setHiddenAnswerIdx] = useState<number | undefined>(undefined);
   const [_vikingPerspective, _setVikingPerspective] = useState('');
   const [_otherPerspective, _setOtherPerspective] = useState('');
+  const [_bridgeReflection, _setBridgeReflection] = useState('');
 
   // Alle valg å slå opp i når et choice-id må mappes til Choice-objekt — inkluderer
   // det skjulte valget hvis destinasjonen har et og lesetesten ble svart riktig på.
@@ -148,6 +151,8 @@ export default function EncounterFlow({
   const otherPerspective = syncMode ? (syncedEncounter?.otherPerspective ?? '') : _otherPerspective;
   const setVikingPerspective = (v: string) => syncMode ? onUpdateEncounter?.({ vikingPerspective: v }) : _setVikingPerspective(v);
   const setOtherPerspective = (v: string) => syncMode ? onUpdateEncounter?.({ otherPerspective: v }) : _setOtherPerspective(v);
+  const bridgeReflection = syncMode ? (syncedEncounter?.bridgeReflection ?? '') : _bridgeReflection;
+  const setBridgeReflection = (v: string) => syncMode ? onUpdateEncounter?.({ bridgeReflection: v }) : _setBridgeReflection(v);
 
   // Hvor skal vi gå når vi er ferdige med oppgave/quiz og inn mot valgene?
   const preValgStep: Step = (requirePerspective && d.perspectivePrompt) ? 'perspektiv' : 'valg';
@@ -183,6 +188,7 @@ export default function EncounterFlow({
     if (partial.hiddenAnswerIdx !== undefined) _setHiddenAnswerIdx(partial.hiddenAnswerIdx);
     if (partial.vikingPerspective !== undefined) _setVikingPerspective(partial.vikingPerspective);
     if (partial.otherPerspective !== undefined) _setOtherPerspective(partial.otherPerspective);
+    if (partial.bridgeReflection !== undefined) _setBridgeReflection(partial.bridgeReflection);
   };
 
   // Kort bølgeeffekt idet vi seiler inn til destinasjonen (§10).
@@ -706,6 +712,95 @@ export default function EncounterFlow({
           <p className="font-inter text-sm italic text-viking-paper/90">{choice.lesson}</p>
         </div>
         {isChief ? (
+          requireBridge && d.modernBridge ? (
+            <button
+              onClick={() => updateMany({ step: 'refleksjon' })}
+              data-testid="to-refleksjon"
+              className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+            >
+              🌉 Til refleksjonen →
+            </button>
+          ) : (
+            <button
+              onClick={() => onComplete({
+                destId: d.id,
+                deltas: { und: undWithBonus, trade: outcome.trade, rep: outcome.rep },
+                skillReward: choice.skillReward,
+                locks: choice.locks ?? [],
+                goodsReward: d.goodsReward,
+                sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim()) ? {
+                  destId: d.id, destName: d.name,
+                  choiceId: choice.id, choiceTitle: choice.title,
+                  reason: reason.trim(), at: Date.now(),
+                  ...(vikingPerspective.trim() ? { vikingPerspective: vikingPerspective.trim() } : {}),
+                  ...(otherPerspective.trim() ? { otherPerspective: otherPerspective.trim() } : {}),
+                  ...(d.perspectivePrompt ? { otherLabel: d.perspectivePrompt.otherLabel } : {}),
+                } : undefined,
+              })}
+              className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+            >
+              ⛵ Seil videre
+            </button>
+          )
+        ) : <ChiefBanner />}
+      </Shell>
+    );
+  }
+
+  // 6) BRO TIL I DAG — kort refleksjon som kobler kulturmøtet til samtiden
+  if (step === 'refleksjon' && choice && roll && outcome && d.modernBridge) {
+    const br = d.modernBridge;
+    const canContinue = bridgeReflection.trim().length > 0;
+    // Samme historisk-bonus som vises i resultat-steget
+    const refIsHistorical = !!d.historicalChoiceId && d.historicalChoiceId === choice.id;
+    const undWithBonus = outcome.und + (refIsHistorical ? 2 : 0);
+    return (
+      <Shell name={d.name} onExit={onExit}>
+        <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft/80">Bro til i dag</p>
+        <h1 className="mb-2 font-cinzel text-2xl font-bold text-viking-gold">🌉 {br.topic}</h1>
+        <p className="mb-4 font-inter text-sm leading-relaxed text-viking-paper/90">{br.context}</p>
+
+        <div className="mb-3 rounded-md border-2 border-viking-gold/40 bg-viking-darkblue/40 p-3">
+          <p className="font-cinzel text-sm text-viking-gold-soft">Refleksjonsspørsmål:</p>
+          <p className="mt-1 font-inter text-base text-viking-paper">{br.prompt}</p>
+        </div>
+
+        {isChief && (
+          <div className="mb-3 space-y-1.5" data-testid="bridge-options">
+            <p className="font-cinzel text-xs text-viking-gold-soft/80">Velg en ferdig refleksjon eller skriv egen:</p>
+            {br.options.map((opt, i) => (
+              <button
+                key={i}
+                onClick={() => setBridgeReflection(opt)}
+                data-testid={`bridge-option-${i}`}
+                className="block w-full rounded-md border-2 border-viking-gold/30 bg-viking-surface/60 px-3 py-2 text-left font-inter text-sm text-viking-paper/90 hover:border-viking-gold hover:bg-viking-surface"
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div
+          className="mb-3 rounded-lg border-4 border-viking-gold/60 p-3 shadow-[0_0_18px_rgba(212,168,67,0.18)]"
+          style={{
+            background: 'linear-gradient(135deg, #FDFBF6 0%, #F4EDDC 100%)',
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent 0 23px, rgba(160,82,45,0.07) 23px 24px)',
+          }}
+        >
+          <textarea
+            value={bridgeReflection}
+            onChange={(e) => isChief && setBridgeReflection(e.target.value.slice(0, 600))}
+            placeholder={isChief ? 'Skriv en refleksjon, eller klikk én av forslagene over for å starte …' : 'Høvdingen skriver refleksjonen …'}
+            readOnly={!isChief}
+            rows={4}
+            data-testid="bridge-textarea"
+            className="w-full resize-none bg-transparent font-inter text-sm leading-relaxed text-viking-darkblue placeholder:italic placeholder:text-viking-darkblue/40 focus:outline-none"
+            style={{ fontFamily: 'serif' }}
+          />
+        </div>
+
+        {isChief ? (
           <button
             onClick={() => onComplete({
               destId: d.id,
@@ -713,16 +808,19 @@ export default function EncounterFlow({
               skillReward: choice.skillReward,
               locks: choice.locks ?? [],
               goodsReward: d.goodsReward,
-              sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim()) ? {
+              sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim() || bridgeReflection.trim()) ? {
                 destId: d.id, destName: d.name,
                 choiceId: choice.id, choiceTitle: choice.title,
                 reason: reason.trim(), at: Date.now(),
                 ...(vikingPerspective.trim() ? { vikingPerspective: vikingPerspective.trim() } : {}),
                 ...(otherPerspective.trim() ? { otherPerspective: otherPerspective.trim() } : {}),
                 ...(d.perspectivePrompt ? { otherLabel: d.perspectivePrompt.otherLabel } : {}),
+                ...(bridgeReflection.trim() ? { bridgeReflection: bridgeReflection.trim(), bridgeTopic: br.topic } : {}),
               } : undefined,
             })}
-            className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+            disabled={!canContinue}
+            data-testid="bridge-continue"
+            className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
             ⛵ Seil videre
           </button>

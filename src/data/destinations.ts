@@ -18,6 +18,7 @@ import { GOODS_BY_DEST } from './tradeGoods';
 import { MAIN_ROUTE, SIDE_UNLOCKS } from './routes';
 import { HIDDEN_CHOICES } from './hiddenChoices';
 import { PERSPECTIVE_PROMPTS } from './perspectives';
+import { MODERN_BRIDGES } from './modernBridges';
 
 /** Hvilket valg på hver destinasjon som er historisk korrekt — det vikingene faktisk
  *  gjorde. Gir +2 kulturforståelse som bonus (§6.1). Bevisst utelatt: Vinland (de
@@ -78,6 +79,7 @@ export const destinations: Destination[] = baseDestinations.map((base): Destinat
     historicalChoiceId: HISTORICAL_CHOICES[base.id],
     hiddenChoice: HIDDEN_CHOICES[base.id],
     perspectivePrompt: PERSPECTIVE_PROMPTS[base.id],
+    modernBridge: MODERN_BRIDGES[base.id],
   };
 });
 

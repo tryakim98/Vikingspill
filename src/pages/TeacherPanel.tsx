@@ -388,6 +388,16 @@ export default function TeacherPanel() {
               />
               <span className="font-cinzel text-sm text-viking-gold-soft">Krev perspektivskifte: <strong>{settings.requirePerspective ? 'PÅ' : 'AV'}</strong></span>
             </label>
+            <label className="inline-flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={!!settings.requireBridge}
+                onChange={(e) => { if (code) setGameSettings(code, { requireBridge: e.target.checked }).catch(() => {}); }}
+                data-testid="require-bridge-toggle"
+                className="h-4 w-4 accent-viking-gold"
+              />
+              <span className="font-cinzel text-sm text-viking-gold-soft">Bro til i dag: <strong>{settings.requireBridge ? 'PÅ' : 'AV'}</strong></span>
+            </label>
           </div>
         </div>
 
