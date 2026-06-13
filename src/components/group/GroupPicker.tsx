@@ -32,7 +32,7 @@ export default function GroupPicker({ gameCode, myMemberId, onCreateNew, onJoinE
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-viking-darkblue to-viking-surface px-4 py-8 text-viking-paper">
       <div className="w-full max-w-md space-y-5">
         <div className="text-center">
-          <h1 className="font-cinzel text-3xl font-bold text-viking-gold sm:text-4xl">Velg skip</h1>
+          <h1 className="font-saga text-3xl viking-engraved-large sm:text-5xl">Velg skip</h1>
           <p className="mt-2 font-inter italic text-viking-gold-soft">Bli med i en eksisterende gruppe, eller opprett en ny.</p>
           <p className="mt-1 font-mono text-xs text-viking-gold-soft/70">Spillkode: {gameCode}</p>
         </div>

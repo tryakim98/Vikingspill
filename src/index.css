@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Cinzel+Decorative:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
@@ -67,4 +67,63 @@ code {
 
 @media (prefers-reduced-motion: reduce) {
   .animate-bob, .animate-wave, .animate-wave-slow, .aurora, .animate-rise { animation: none; }
+}
+
+/* === Norrøn estetikk: teksturer og graveringer ===================================== */
+
+/* Subtil pergament/lærtekstur — påføres paneler og kort som skal se håndlaget ut.
+   SVG-støy gir et organisk «fiberpreg» som ikke kan oppnås med rene gradienter. */
+.viking-card {
+  background-color: #182846;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(212, 168, 67, 0.10) 0%, transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.05  0 0 0 0 0.05  0 0 0 0 0.02  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: auto, 180px 180px;
+  border: 2px solid rgba(212, 168, 67, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4), 0 6px 18px rgba(0,0,0,0.45);
+}
+.viking-card-wood {
+  background-color: #3A2615;
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.25)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='160'><filter id='w'><feTurbulence type='turbulence' baseFrequency='0.015 0.6' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.22  0 0 0 0 0.10  0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
+  background-size: auto, 300px 160px;
+  border: 2px solid #5C3E22;
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.6);
+}
+.viking-card-leather {
+  background-color: #2A1810;
+  background-image:
+    radial-gradient(circle at 30% 20%, rgba(212,168,67,0.08), transparent 50%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' seed='11'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.05  0 0 0 0 0.02  0 0 0 0.4 0'/></filter><rect width='100%' height='100%' filter='url(%23l)'/></svg>");
+  background-size: auto, 220px 220px;
+  border: 2px solid #5C3E22;
+}
+
+/* Inngravert overskrift — gylden tekst med inset shadow + drop shadow, ser hugget
+   inn i metall ut. Brukes på spillets store titler. */
+.viking-engraved {
+  color: #D4A843;
+  text-shadow:
+    0 1px 0 rgba(0,0,0,0.85),
+    0 2px 4px rgba(0,0,0,0.6),
+    0 0 14px rgba(212,168,67,0.18);
+  letter-spacing: 0.04em;
+}
+.viking-engraved-large {
+  color: transparent;
+  background: linear-gradient(180deg, #F2DC8A 0%, #D4A843 45%, #8B6914 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow:
+    0 3px 6px rgba(0,0,0,0.55),
+    0 0 22px rgba(212,168,67,0.20);
+  letter-spacing: 0.045em;
+}
+
+/* Runebånd som horisontal divider. Settes som background-image så fargen kan justeres
+   via filter. Bruk i kombinasjon med RuneDivider-komponenten for ornament + tekst. */
+.viking-rune-strip {
+  background-image: linear-gradient(90deg, transparent, rgba(212,168,67,0.5), transparent);
+  height: 1px;
 }

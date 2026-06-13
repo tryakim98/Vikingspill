@@ -42,6 +42,7 @@ import { STORM_FATE_IDS, GAVE_FATE_IDS, VIND_FATE_ID, type WheelFieldId } from '
 import { patchGroup } from '../lib/gameSync';
 import SeaMap from '../components/teacher/SeaMap';
 import SkjebneHjul from '../components/teacher/SkjebneHjul';
+import { ThorHammer, Raven, RuneDivider } from '../components/decor';
 import TideTimer from '../components/teacher/TideTimer';
 import ConnectionBanner from '../components/common/ConnectionBanner';
 import VikingShip from '../components/ship/VikingShip';
@@ -229,7 +230,12 @@ export default function TeacherPanel() {
       <div className="relative min-h-screen bg-viking-darkblue p-6 text-viking-paper">
         <HelpButton onClick={() => setShowRules(true)} className="absolute right-4 top-4" />
         <div className="mx-auto max-w-4xl">
-          <h1 className="mb-2 font-cinzel text-4xl text-viking-gold">⚡ Tors utsyn over Midgard</h1>
+          <div className="mb-2 flex items-center justify-center gap-4">
+            <ThorHammer size={42} color="#D4A843" />
+            <h1 className="font-saga text-4xl viking-engraved-large md:text-5xl">Tors utsyn over Midgard</h1>
+            <ThorHammer size={42} color="#D4A843" />
+          </div>
+          <RuneDivider className="mb-6 mx-auto max-w-md" />
           <p className="mb-8 font-inter italic text-viking-gold-soft">Fra Åsgard ser tordenguden ut over flåten — storskjerm for hele klassen</p>
           <div className="rounded-lg border-2 border-viking-gold bg-viking-surface p-10 text-center">
             <h2 className="mb-3 font-cinzel text-2xl text-viking-gold">Slipp en ny flåte på sjøen</h2>
@@ -309,9 +315,13 @@ export default function TeacherPanel() {
 
         {/* §3.4/§8.5 Skjebnehjulet — én dramatisk mekanikk som erstatter de spredte trigger-knappene.
             Læreren bestemmer kun NÅR (spinner); hjulet avgjør HVA og HVEM. */}
-        <div className="rounded-lg border-2 border-viking-gold/60 bg-gradient-to-b from-viking-darkblue/70 to-viking-surface p-5" data-testid="wheel-panel">
+        <div className="viking-card relative rounded-lg p-5" data-testid="wheel-panel">
           <div className="mb-3 text-center">
-            <h2 className="font-cinzel text-2xl text-viking-gold">🎡 Skjebnehjulet</h2>
+            <div className="mb-1 flex items-center justify-center gap-3">
+              <Raven size={36} facing="right" color="#D4A843" />
+              <h2 className="font-saga text-3xl viking-engraved">Skjebnehjulet</h2>
+              <Raven size={36} facing="left" color="#D4A843" />
+            </div>
             <p className="mx-auto mt-1 max-w-md font-inter text-sm italic text-viking-paper/80">
               Du bestemmer kun <strong>når</strong> du spinner. Nornene avgjør hvilken kraft som rammer flåten — og hvem.
             </p>

@@ -81,7 +81,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
         {/* STEG 1 — SKIP-VALG */}
         {step === 'ship' && (
           <div className="text-center">
-            <h1 className="font-cinzel text-3xl md:text-4xl font-bold text-viking-gold mb-2">Velg skipet deres</h1>
+            <h1 className="font-saga text-3xl md:text-5xl viking-engraved-large mb-2">Velg skipet deres</h1>
             <p className="font-inter text-viking-gold-soft italic mb-10">Trykk på vikingskipet dere vil seile med</p>
             <div className="flex flex-wrap items-end justify-center gap-x-2 gap-y-6">
               {SHIP_COLORS.map((c, i) => (
@@ -103,7 +103,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
         {/* STEG 2 — SKIP-INFO */}
         {step === 'info' && (
           <div className="text-center">
-            <h1 className="font-cinzel text-3xl md:text-4xl font-bold text-viking-gold mb-6">Rust ut skipet</h1>
+            <h1 className="font-saga text-3xl md:text-5xl viking-engraved-large mb-6">Rust ut skipet</h1>
             <div className="mb-6 flex justify-center">
               <VikingShip color={color} symbol={symbol} size={200} bob />
             </div>
@@ -173,7 +173,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
         {/* STEG 3 — STARTFERDIGHET */}
         {step === 'skill' && (
           <div className="text-center">
-            <h1 className="font-cinzel text-3xl md:text-4xl font-bold text-viking-gold mb-2">Velg startferdighet</h1>
+            <h1 className="font-saga text-3xl md:text-5xl viking-engraved-large mb-2">Velg startferdighet</h1>
             <p className="font-inter text-viking-gold-soft italic mb-8">Hvor er skipet deres sterkest fra start?</p>
             <div className="grid gap-3 md:grid-cols-2">
               {SKILL_KEYS.map((key) => {
@@ -210,7 +210,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
         {/* STEG 4 — KLAR */}
         {step === 'summary' && startSkill && (
           <div className="text-center">
-            <h1 className="font-cinzel text-3xl md:text-4xl font-bold text-viking-gold mb-6">Klar til å seile</h1>
+            <h1 className="font-saga text-3xl md:text-5xl viking-engraved-large mb-6">Klar til å seile</h1>
             <div className="mb-6 flex justify-center">
               <VikingShip color={color} symbol={symbol} size={220} bob />
             </div>
