@@ -837,11 +837,12 @@
         "6. Vinner: +3 handel. Taper: −2 handel. Begge: −1 rykte (kamp koster ære)."
       ],
       "duellAktiviteter": [
-        { "navn": "Flaskeflipp-duell", "desc": "Først til 3 vellykkede flaskeflipp vinner.", "ferdighet": "krigskunst" },
-        { "navn": "Stirrekamp", "desc": "Først som blunker eller ler taper.", "ferdighet": "tro" },
-        { "navn": "Balansedyst", "desc": "Stå på ett ben lengst — siste stående vinner.", "ferdighet": "sjømannskap" },
-        { "navn": "Tungebrekker", "desc": "Si en norrøn-inspirert regle tre ganger raskt uten feil.", "ferdighet": "språk" },
-        { "navn": "Sten-saks-papir, beste av 5", "desc": "Klassisk, men med vikingnavn: Sverd (saks) – Skjold (stein) – Seil (papir).", "ferdighet": "diplomati" }
+        { "navn": "Tapping-konkurranse", "desc": "Flest skjermtrykk på 10 sekunder. Appen teller automatisk og kårer vinneren.", "ferdighet": "krigskunst", "kind": "tapping" },
+        { "navn": "Reaksjonstest", "desc": "Vent — og trykk så raskt som mulig når skjermen blir grønn. Raskest reaksjonstid vinner. Avgjøres i appen.", "ferdighet": "sjømannskap", "kind": "reaksjon" },
+        { "navn": "Hurtig hoderegning", "desc": "Flest riktige regnestykker på 20 sekunder. Appen teller, raskest hode vinner.", "ferdighet": "språk", "kind": "regning" },
+        { "navn": "Tungebrekker", "desc": "Si «sju sjøsyke sjømenn syder seks salte sild» tre ganger raskt uten feil. Læreren kårer raskeste rene gjennomføring.", "ferdighet": "språk", "kind": "manuell" },
+        { "navn": "Stein-saks-papir — beste av 5", "desc": "Vikingvariant: Sverd (saks) – Skjold (stein) – Seil (papir). Beste av 5, dere holder styr selv. Vinner trykker «Vi vant».", "ferdighet": "diplomati", "kind": "manuell" },
+        { "navn": "Herme-mønster", "desc": "Forkjemper A viser et 5-stegs mønster (klapp/snap/stamp/uh). B hermer. Bytte side. Lengst korrekt sekvens vinner. Læreren dømmer.", "ferdighet": "tro", "kind": "manuell" }
       ],
       "holmgangsmann_forklaring": "I vikingtiden var 'holmgang' en formell tvekamp, ofte på en liten holme (øy), for å avgjøre tvister. Forkjemperen kjempet på vegne av hele saken. Her er det en morsom, ufarlig variant — men begrepet er historisk ekte."
     }

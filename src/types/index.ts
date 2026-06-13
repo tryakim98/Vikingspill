@@ -244,10 +244,17 @@ export interface GudenesProveChallenge {
 
 // Sjøslag — «Holmgang på bølgene» (§7.2).
 // Kilde: vikingspill_innhold_v2.json → _mekanikk.sjøslag.duellAktiviteter
+export type HolmgangKind =
+  | 'manuell'   // lærer eller gruppene selv kårer vinner — eksisterende «Vi vant»-knapper
+  | 'tapping'   // flest skjermtrykk på 10 sek
+  | 'reaksjon'  // raskest reaksjonstid når skjermen blir grønn
+  | 'regning';  // flest riktige hoderegninger på 20 sek
+
 export interface HolmgangDuel {
   navn: string;
   desc: string;
-  ferdighet: SkillKey;            // ferdigheten som gir bonus i duellen
+  ferdighet: SkillKey;            // ferdigheten som gir bonus (vises som info)
+  kind: HolmgangKind;
 }
 
 export interface FateCard {

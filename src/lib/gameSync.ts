@@ -157,6 +157,15 @@ export interface DuelActivity {
   navn: string;
   desc: string;
   ferdighet: SkillKey;
+  kind?: 'manuell' | 'tapping' | 'reaksjon' | 'regning'; // valgfri for backward compat
+}
+
+/** Resultat fra én forkjemper i en in-app duell. Skrives under
+ *  /games/{code}/duels/{duelId}/championResults/{groupId}. */
+export interface DuelChampionResult {
+  score?: number;      // tapping (klikk), regning (riktige svar)
+  reactionMs?: number; // reaksjon (lavere er bedre)
+  finishedAt: number;
 }
 
 export interface Duel {
@@ -168,7 +177,14 @@ export interface Duel {
   activity: DuelActivity;
   status: 'pending' | 'active' | 'resolved' | 'declined';
   winnerId?: string;
+  championResults?: Record<string, DuelChampionResult>;
   at: number;
+}
+
+export function submitChampionResult(
+  code: string, duelId: string, groupId: string, result: DuelChampionResult,
+): Promise<void> {
+  return set(ref(db, `games/${code}/duels/${duelId}/championResults/${groupId}`), result);
 }
 
 export function createDuel(code: string, duel: Duel): Promise<void> {
