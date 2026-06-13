@@ -60,6 +60,15 @@
             "showCeremony":   { ".validate": "newData.isBoolean()" },
             "previewDestId":  { ".validate": "newData.isString() && newData.val().length <= 40" },
             "sailingTo":      { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "lastSkjebneAtVisited": { ".validate": "newData.isNumber()" },
+            "seenSkjebne":   { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
+            "activeSkjebne": {
+              ".validate": "newData.hasChildren(['id','pendingDestId'])",
+              "id":            { ".validate": "newData.isString() && newData.val().length <= 40" },
+              "pendingDestId": { ".validate": "newData.isString() && newData.val().length <= 40" },
+              "choiceId":      { ".validate": "newData.isString() && newData.val().length <= 40" },
+              "$other": { ".validate": false }
+            },
             "members": {
               "$memberId": {
                 ".validate": "$memberId.matches(/^m-[a-z0-9]{1,16}$/)",

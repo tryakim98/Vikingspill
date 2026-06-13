@@ -63,6 +63,17 @@ export interface SyncedGroup {
   encounter?: SyncedEncounter | null;    // encounter-state synket til alle medlemmer
   previewDestId?: string | null;         // destinasjonen høvdingen har valgt på kartet
   sailingTo?: string | null;             // pågående seilas-animasjon mot dette stedet
+  // Skjebnemøter (valgfrie ekstra-oppdrag under seiling) — §Skjebnemøter
+  activeSkjebne?: ActiveSkjebne | null;  // pågående Skjebnemøte (sett av høvdingen)
+  seenSkjebne?: string[];                // Skjebnemøte-ID-er gruppa har sett før
+  lastSkjebneAtVisited?: number;         // visited.length da forrige ble utløst
+}
+
+/** Skjebnemøte i pågående tilstand. Høvdingen skriver choiceId; alle ser. */
+export interface ActiveSkjebne {
+  id: string;
+  pendingDestId: string; // destinasjonen høvdingen seilte mot
+  choiceId?: string;     // satt når høvdingen velger
 }
 
 /** Lærer: opprett et nytt spill. */

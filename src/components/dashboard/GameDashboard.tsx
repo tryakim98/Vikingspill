@@ -31,6 +31,8 @@ import RagnarokOverlay from '../ragnarok/RagnarokOverlay';
 import LoadingScreen from '../common/LoadingScreen';
 import ConnectionBanner from '../common/ConnectionBanner';
 import { playMusic, duckMusic, stopMusic } from '../../lib/music';
+import { SkjebneMoteModal } from '../skjebnemote/SkjebneMoteModal';
+import { shouldTriggerSkjebneMote, pickSkjebneMote, getSkjebneMoteById, type SkjebneMoteChoice } from '../../data/skjebnemoter';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -128,8 +130,16 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     }
   };
 
-  // Start seilas-animasjon, vent til den er ferdig, så åpne encounter. Bare høvdingen
-  // utløser denne flyten — alle medlemmer ser animasjonen via synket sailingTo.
+  // Skjebnemøter — valgfri quest under seiling. Synket online via SyncedGroup.
+  const [localActiveSkjebne, setLocalActiveSkjebne] = useState<{ id: string; pendingDestId: string; choiceId?: string } | null>(null);
+  const [localSeenSkjebne, setLocalSeenSkjebne] = useState<string[]>([]);
+  const [localLastSkjebneAtVisited, setLocalLastSkjebneAtVisited] = useState<number | undefined>(undefined);
+  const activeSkjebne = isOnline ? (syncedGroup?.activeSkjebne ?? null) : localActiveSkjebne;
+  const seenSkjebne = isOnline ? (syncedGroup?.seenSkjebne ?? []) : localSeenSkjebne;
+  const lastSkjebneAtVisited = isOnline ? syncedGroup?.lastSkjebneAtVisited : localLastSkjebneAtVisited;
+
+  // Start seilas-animasjon, vent til den er ferdig, så åpne encounter (eller utløs Skjebnemøte).
+  // Bare høvdingen utløser denne flyten — alle medlemmer ser animasjonen via synket sailingTo.
   const confirmSailingTo = (destId: string) => {
     const dest = destinations.find((d) => d.id === destId);
     if (!dest) return;
@@ -140,6 +150,20 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
       setLocalPreviewDestId(null);
     }
     window.setTimeout(() => {
+      // Vurder Skjebnemøte før encounter åpnes. Bare høvdingen trekker; alle andre ser via sync.
+      const visitedCount = (state?.visited ?? []).length;
+      const trigger = shouldTriggerSkjebneMote(visitedCount, lastSkjebneAtVisited);
+      const quest = trigger ? pickSkjebneMote(seenSkjebne) : null;
+      if (quest) {
+        const skj = { id: quest.id, pendingDestId: destId };
+        if (isOnline) {
+          patchGroup(session.gameCode, myGroupId, { sailingTo: null, activeSkjebne: skj }).catch(() => {});
+        } else {
+          setLocalSailingTo(null);
+          setLocalActiveSkjebne(skj);
+        }
+        return;
+      }
       if (isOnline) {
         patchGroup(session.gameCode, myGroupId, {
           activeDestId: destId,
@@ -151,6 +175,42 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         setLocalActiveDestId(destId);
       }
     }, SAILING_DURATION_S * 1000 + 200); // 200 ms buffer så animasjonen rekker å fullføre
+  };
+
+  // Skjebnemøte — høvdingen velger; alle ser via sync.
+  const handleSkjebneChoose = (choice: SkjebneMoteChoice) => {
+    if (!activeSkjebne) return;
+    const e = choice.effects ?? {};
+    addReward({
+      und:   e.culturalUnderstanding ?? 0,
+      trade: e.tradeGain ?? 0,
+      rep:   e.reputation ?? 0,
+    });
+    if (isOnline) {
+      patchGroup(session.gameCode, myGroupId, { activeSkjebne: { ...activeSkjebne, choiceId: choice.id } }).catch(() => {});
+    } else {
+      setLocalActiveSkjebne({ ...activeSkjebne, choiceId: choice.id });
+    }
+  };
+  const handleSkjebneDismiss = () => {
+    if (!activeSkjebne) return;
+    const destId = activeSkjebne.pendingDestId;
+    const visitedCount = (state?.visited ?? []).length;
+    const nextSeen = Array.from(new Set([...(seenSkjebne ?? []), activeSkjebne.id]));
+    if (isOnline) {
+      patchGroup(session.gameCode, myGroupId, {
+        activeSkjebne: null,
+        seenSkjebne: nextSeen,
+        lastSkjebneAtVisited: visitedCount,
+        activeDestId: destId,
+        encounter: { destId, step: 'history' },
+      }).catch(() => {});
+    } else {
+      setLocalActiveSkjebne(null);
+      setLocalSeenSkjebne(nextSeen);
+      setLocalLastSkjebneAtVisited(visitedCount);
+      setLocalActiveDestId(destId);
+    }
   };
 
   // Aktiv verdighetsprøve og sluttseremoni: synket i online, lokal ellers.
@@ -359,6 +419,21 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         }}
       />
     );
+  }
+
+  if (activeSkjebne) {
+    const quest = getSkjebneMoteById(activeSkjebne.id);
+    if (quest) {
+      return (
+        <SkjebneMoteModal
+          quest={quest}
+          isChief={isChief}
+          selectedChoiceId={activeSkjebne.choiceId}
+          onChoose={handleSkjebneChoose}
+          onDismiss={handleSkjebneDismiss}
+        />
+      );
+    }
   }
 
   if (activeDest) {
