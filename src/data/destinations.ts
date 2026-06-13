@@ -17,6 +17,23 @@ import baseRaw from './vikingspill_data.json';
 import { GOODS_BY_DEST } from './tradeGoods';
 import { MAIN_ROUTE, SIDE_UNLOCKS } from './routes';
 
+/** Hvilket valg på hver destinasjon som er historisk korrekt — det vikingene faktisk
+ *  gjorde. Gir +2 kulturforståelse som bonus (§6.1). Bevisst utelatt: Vinland (de
+ *  faktisk dro derfra, ingen utfall var spesielt klokt) og Bagdad (kulturmøtet er
+ *  fokuset, ikke et «riktig svar»). */
+const HISTORICAL_CHOICES: Record<string, string> = {
+  lindisfarne: 'plunder',     // 8. juni 793 — første store vikingangrep, plyndret klosteret
+  hedeby:      'merchant',    // Hedeby = vikingtidens største handelsby
+  dublin:      'marriage',    // 200 år med norrønt-gælisk slekt + assimilering
+  paris:       'normandy',    // Rollo fikk Normandie i 911, ble normannere — det varigste utfallet
+  hebrides:    'hybrid',      // Gall-Gàidheal — norrønt-gælisk blanding faktisk skjedde
+  sameland:    'reciprocity', // Ottars beretning beskriver bytte i gjensidig respekt
+  faroyene:    'settle',      // Norrøne bosatte øyene; etterkommerne bor der ennå
+  island:      'lawspeaker',  // Alltinget 930 — verdens eldste parlament, lovsigemann sentralt
+  novgorod:    'rule',        // Rurik aksepterte invitasjonen 862 og grunnla Rus-dynastiet
+  miklagard:   'guard',       // Væringgarden i Bysants — vikinger som keiserens livvakt
+};
+
 /** Basisdata pr. destinasjon (prototypens `task` ignoreres — v2-oppgaven vinner, §14). */
 interface BaseDestination {
   id: string;
@@ -56,6 +73,7 @@ export const destinations: Destination[] = baseDestinations.map((base): Destinat
     goodsReward: GOODS_BY_DEST[base.id] ?? [],
     route: MAIN_ROUTE.has(base.id) ? 'main' : 'side',
     unlocks: SIDE_UNLOCKS[base.id],
+    historicalChoiceId: HISTORICAL_CHOICES[base.id],
   };
 });
 

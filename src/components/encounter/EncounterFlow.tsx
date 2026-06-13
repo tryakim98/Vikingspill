@@ -427,8 +427,12 @@ export default function EncounterFlow({
 
   // 5c) RESULTAT
   if (step === 'resultat' && choice && roll && outcome) {
+    // Historisk-nøyaktighet-bonus (§6.1): +2 kulturforståelse hvis dette valget
+    // ligner det vikingene faktisk gjorde — flagget i destinasjons-dataen.
+    const isHistorical = !!d.historicalChoiceId && d.historicalChoiceId === choice.id;
+    const undWithBonus = outcome.und + (isHistorical ? 2 : 0);
     const deltas: { label: string; v: number }[] = [
-      { label: 'Kulturforståelse', v: outcome.und },
+      { label: 'Kulturforståelse', v: undWithBonus },
       { label: 'Handelsutbytte', v: outcome.trade },
       { label: 'Rykte', v: outcome.rep },
     ];
@@ -450,6 +454,20 @@ export default function EncounterFlow({
           </div>
         </div>
         <p className="mb-5 font-inter leading-relaxed text-viking-paper/90">{outcome.text}</p>
+
+        {isHistorical && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="mb-5 rounded-md border-2 border-viking-gold bg-viking-gold/15 px-3 py-2"
+            data-testid="historical-bonus"
+          >
+            <p className="font-cinzel text-sm text-viking-gold">📜 Historisk klokt — dette ligner det vikingene faktisk gjorde.</p>
+            <p className="mt-0.5 font-inter text-xs italic text-viking-paper/85">+2 kulturforståelse i bonus.</p>
+          </motion.div>
+        )}
+
         <div className="mb-5 grid grid-cols-3 gap-3">
           {deltas.map((x) => (
             <div key={x.label} className="rounded-lg border-2 border-viking-gold/30 bg-viking-darkblue/50 p-3 text-center">
@@ -466,7 +484,7 @@ export default function EncounterFlow({
           <button
             onClick={() => onComplete({
               destId: d.id,
-              deltas: { und: outcome.und, trade: outcome.trade, rep: outcome.rep },
+              deltas: { und: undWithBonus, trade: outcome.trade, rep: outcome.rep },
               skillReward: choice.skillReward,
               locks: choice.locks ?? [],
               goodsReward: d.goodsReward,

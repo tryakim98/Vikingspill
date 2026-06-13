@@ -134,6 +134,11 @@ export interface Destination {
   // Hovedrute (alltid åpen) eller sidested (låst, krever en av flere veier — se data/routes.ts).
   route: RouteKind;
   unlocks?: UnlockRequirement[];
+
+  // Historisk korrekte valg (§6.1). ID-en til det av destinasjonens choices som ligner
+  // det vikingene faktisk gjorde her. Når gruppa velger det får de +2 kulturforståelse
+  // og en note i utfallet. Mangler på destinasjoner der ingen klar historisk fasit fins.
+  historicalChoiceId?: string;
 }
 
 export type TradeGoodId =
