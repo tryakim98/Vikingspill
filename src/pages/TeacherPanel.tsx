@@ -25,6 +25,8 @@ import {
   subscribeFate,
   triggerRagnarok,
   subscribeTrades,
+  subscribeGameSettings,
+  setGameSettings,
   type SyncedGroup,
   type ApprovalRequest,
   type ApprovalStatus,
@@ -32,7 +34,9 @@ import {
   type TrialResult,
   type FateEvent,
   type TradeOffer,
+  type GameSettings,
 } from '../lib/gameSync';
+import SagaReader from '../components/saga/SagaReader';
 import { gudenesProveChallenges, fateCards } from '../data';
 import SeaMap from '../components/teacher/SeaMap';
 import TideTimer from '../components/teacher/TideTimer';
@@ -67,16 +71,19 @@ export default function TeacherPanel() {
   const [trialRunnerUp, setTrialRunnerUp] = useState<string | null>(null);
   const [fate, setFate] = useState<FateEvent | null>(null);
   const [trades, setTrades] = useState<Record<string, TradeOffer>>({});
+  const [settings, setSettings] = useState<GameSettings>({});
+  const [showSagas, setShowSagas] = useState(false);
 
   useEffect(() => {
-    if (!code) { setGroups({}); setApprovals({}); setTrial(null); setTrialResult(null); setFate(null); setTrades({}); return; }
+    if (!code) { setGroups({}); setApprovals({}); setTrial(null); setTrialResult(null); setFate(null); setTrades({}); setSettings({}); return; }
     const unsubG = subscribeGroups(code, setGroups);
     const unsubA = subscribeApprovals(code, setApprovals);
     const unsubT = subscribeTrial(code, setTrial);
     const unsubR = subscribeTrialResult(code, setTrialResult);
     const unsubF = subscribeFate(code, setFate);
     const unsubTr = subscribeTrades(code, setTrades);
-    return () => { unsubG(); unsubA(); unsubT(); unsubR(); unsubF(); unsubTr(); };
+    const unsubS = subscribeGameSettings(code, setSettings);
+    return () => { unsubG(); unsubA(); unsubT(); unsubR(); unsubF(); unsubTr(); unsubS(); };
   }, [code]);
 
   // Nullstill kåringsvalg når en ny prøve utløses, så fjorårets valg ikke henger igjen.
@@ -170,6 +177,13 @@ export default function TeacherPanel() {
   };
 
   if (showRules) return <RulesScreen role="teacher" onDone={dismissRules} />;
+
+  if (showSagas) {
+    const sagaGroups = Object.values(groups)
+      .filter((g) => (g.saga?.length ?? 0) > 0)
+      .map((g) => ({ shipName: g.shipName, shipSymbol: g.shipSymbol, entries: g.saga ?? [] }));
+    return <SagaReader title="Klassens sagaer" groups={sagaGroups} onClose={() => setShowSagas(false)} />;
+  }
 
   const ranked = Object.entries(groups).sort((a, b) => total(b[1]) - total(a[1]));
   const pending = Object.entries(approvals).filter(([, a]) => a.status === 'pending');
@@ -336,6 +350,33 @@ export default function TeacherPanel() {
               </p>
             </div>
           )}
+        </div>
+
+        {/* Saga-innstilling + lese-knapp */}
+        <div className="rounded-lg border-2 border-viking-rust/60 bg-viking-rust/15 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-cinzel text-xl text-viking-gold">📜 Saga-logg</h2>
+              <p className="font-inter text-sm text-viking-paper/80">Gruppene begrunner valgene sine før terningen kastes. Brukes til etterarbeid og vurdering.</p>
+            </div>
+            <button
+              onClick={() => setShowSagas(true)}
+              data-testid="open-sagas"
+              className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+            >
+              📖 Les sagaer
+            </button>
+          </div>
+          <label className="mt-3 inline-flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={!!settings.requireSaga}
+              onChange={(e) => { if (code) setGameSettings(code, { requireSaga: e.target.checked }).catch(() => {}); }}
+              data-testid="require-saga-toggle"
+              className="h-4 w-4 accent-viking-gold"
+            />
+            <span className="font-cinzel text-sm text-viking-gold-soft">Krev begrunnelse: <strong>{settings.requireSaga ? 'PÅ' : 'AV'}</strong></span>
+          </label>
         </div>
 
         {/* Handelstorg — kompakt aktivitetspanel */}

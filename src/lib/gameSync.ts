@@ -10,14 +10,14 @@
 
 import { ref, set, get, remove, update, runTransaction, onValue, type Unsubscribe } from 'firebase/database';
 import { db } from './firebase';
-import type { SkillKey, TradeGoodId } from '../types';
+import type { SkillKey, TradeGoodId, SagaEntry } from '../types';
 import type { FateEffect } from '../data/fateCards';
 
 export interface GroupMember {
   joinedAt: number;
 }
 
-export type EncounterStep = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'valg' | 'roll' | 'rolling' | 'resultat';
+export type EncounterStep = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat';
 
 export interface SyncedEncounter {
   destId: string;
@@ -30,6 +30,7 @@ export interface SyncedEncounter {
   quizBonus?: number;
   choiceId?: string | null;
   roll?: { raw: number; effective: number; modifier: number; tier: string } | null;
+  reason?: string; // saga-tekst som høvdingen skriver før terningen kastes
 }
 
 export interface SyncedGroup {
@@ -44,6 +45,7 @@ export interface SyncedGroup {
   goods?: Partial<Record<TradeGoodId, number>>;
   unlockedSides?: string[];
   performedActions?: string[];
+  saga?: SagaEntry[];
   updatedAt: number;
   // Multi-enhet-felt (§ multi-enhet med høvding-rolle):
   chiefId?: string;                     // memberId til høvdingen
@@ -59,6 +61,22 @@ export interface SyncedGroup {
 /** Lærer: opprett et nytt spill. */
 export function createGame(code: string): Promise<void> {
   return set(ref(db, `games/${code}/meta`), { createdAt: Date.now() });
+}
+
+// === Spillinnstillinger (lærer-styrt) ============================================
+
+export interface GameSettings {
+  requireSaga?: boolean;
+}
+
+export function setGameSettings(code: string, settings: Partial<GameSettings>): Promise<void> {
+  return update(ref(db, `games/${code}/settings`), settings);
+}
+
+export function subscribeGameSettings(code: string, callback: (s: GameSettings) => void): Unsubscribe {
+  return onValue(ref(db, `games/${code}/settings`), (snap) => {
+    callback((snap.val() as GameSettings | null) ?? {});
+  });
 }
 
 /** Elev: sjekk at spillkoden finnes før tilkobling. */

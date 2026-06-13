@@ -19,7 +19,8 @@ import TradeGoodsPanel from './TradeGoodsPanel';
 import SvenneproveTrial from './SvenneproveTrial';
 import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent, type TradeOffer } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
+import SagaReader from '../saga/SagaReader';
 import { chapters, chapterCompleted } from '../../data/chapters';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
 import SeaBattle from '../duel/SeaBattle';
@@ -63,6 +64,16 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     return () => { unsubG(); unsubT(); };
   }, [isOnline, session]);
   const incomingPending = Object.values(trades).filter((t) => t.status === 'pending' && t.toGroupId === myGroupId).length;
+
+  // Spillinnstillinger (lærer-styrt). Saga-krav default av.
+  const [gameSettings, setGameSettings] = useState<GameSettings>({});
+  useEffect(() => {
+    if (!isOnline) return;
+    const unsub = subscribeGameSettings(session.gameCode, setGameSettings);
+    return () => unsub();
+  }, [isOnline, session]);
+  const requireSaga = !!gameSettings.requireSaga;
+  const [showOwnSaga, setShowOwnSaga] = useState(false);
   const [syncedGroup, setSyncedGroup] = useState<SyncedGroup | null>(null);
   useEffect(() => {
     if (!isOnline) return;
@@ -222,6 +233,16 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
 
   if (!state) return <LoadingScreen text="Henter skipets logg …" />;
 
+  if (showOwnSaga) {
+    return (
+      <SagaReader
+        title={`${setup.shipName}s saga`}
+        groups={[{ shipName: setup.shipName, shipSymbol: setup.shipSymbol, entries: state.saga ?? [] }]}
+        onClose={() => setShowOwnSaga(false)}
+      />
+    );
+  }
+
   if (showTradeMarket && isOnline) {
     return (
       <TradeMarket
@@ -340,6 +361,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           : undefined}
         isChief={isChief}
         lateGame={state.visited.length >= 6}
+        requireSaga={requireSaga}
         syncedEncounter={isOnline ? syncedGroup?.encounter ?? null : null}
         onUpdateEncounter={isOnline && isChief
           ? (partial) => {
@@ -484,6 +506,19 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             );
           })}
         </div>
+
+        {/* Saga-knapp — les vår egen reisefortelling så langt */}
+        {(state.saga?.length ?? 0) > 0 && (
+          <div className="mb-3">
+            <button
+              onClick={() => setShowOwnSaga(true)}
+              data-testid="open-own-saga"
+              className="w-full rounded-lg border-2 border-viking-gold/60 bg-viking-darkblue/60 px-4 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold"
+            >
+              📜 Les vår saga ({state.saga.length} {state.saga.length === 1 ? 'kapittel' : 'kapitler'})
+            </button>
+          </div>
+        )}
 
         {/* Handelstorg-knapp (kun online — krever andre grupper) */}
         {isOnline && (

@@ -16,6 +16,11 @@
           "$other": { ".validate": false }
         },
 
+        "settings": {
+          "requireSaga": { ".validate": "newData.isBoolean()" },
+          "$other":      { ".validate": false }
+        },
+
         "groups": {
           "$groupId": {
             "shipName":   { ".validate": "newData.isString() && newData.val().length <= 60" },
@@ -33,6 +38,12 @@
             "locked":        { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
             "unlockedSides":    { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
             "performedActions": { "$i": { ".validate": "newData.isString() && newData.val().length <= 60" } },
+            "saga": {
+              "$i": {
+                ".validate": "newData.hasChildren(['destId','choiceId'])",
+                "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" }
+              }
+            },
             "goods": {
               "$good": {
                 ".validate": "$good.matches(/^(pelsverk|solv|jern|rav|silke|hvalrosstann|krydder|salt)$/) && newData.isNumber()"
@@ -55,7 +66,7 @@
             "encounter": {
               ".validate": "newData.hasChildren(['destId','step'])",
               "destId":       { ".validate": "newData.isString() && newData.val().length <= 40" },
-              "step":         { ".validate": "newData.isString() && newData.val().matches(/^(history|kulturmote|oppgave|transition|quiz|valg|roll|rolling|resultat)$/)" },
+              "step":         { ".validate": "newData.isString() && newData.val().matches(/^(history|kulturmote|oppgave|transition|quiz|valg|saga|roll|rolling|resultat)$/)" },
               "approvalSent": { ".validate": "newData.isBoolean()" },
               "kmAnswer":     { ".validate": "newData.isNumber()" },
               "quizIdx":      { ".validate": "newData.isNumber()" },
@@ -63,6 +74,7 @@
               "quizAnswer":   { ".validate": "newData.isNumber()" },
               "quizBonus":    { ".validate": "newData.isNumber()" },
               "choiceId":     { ".validate": "newData.isString() && newData.val().length <= 40" },
+              "reason":       { ".validate": "newData.isString() && newData.val().length <= 600" },
               "roll": {
                 "raw":       { ".validate": "newData.isNumber()" },
                 "effective": { ".validate": "newData.isNumber()" },

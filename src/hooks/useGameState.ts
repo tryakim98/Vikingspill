@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import type { SkillKey, TradeGoodId } from '../types';
+import type { SkillKey, TradeGoodId, SagaEntry } from '../types';
 import type { GroupSetup } from './useGroupSetup';
 import type { Session } from './useSession';
 import { patchGroup, subscribeGroup, writeGroup } from '../lib/gameSync';
@@ -30,6 +30,7 @@ export interface GameProgress {
   goods: Partial<Record<TradeGoodId, number>>;
   unlockedSides: string[];
   performedActions: string[];
+  saga: SagaEntry[];
 }
 
 export interface OutcomeApply {
@@ -38,6 +39,7 @@ export interface OutcomeApply {
   skillReward: Partial<Record<SkillKey, number>> | null;
   locks: string[];
   goodsReward?: TradeGoodId[];
+  sagaEntry?: SagaEntry;
 }
 
 function seed(setup: GroupSetup): GameProgress {
@@ -51,6 +53,7 @@ function seed(setup: GroupSetup): GameProgress {
     goods: {},
     unlockedSides: [],
     performedActions: [],
+    saga: [],
   };
 }
 
@@ -71,6 +74,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         goods: g.goods ?? {},
         unlockedSides: g.unlockedSides ?? [],
         performedActions: g.performedActions ?? [],
+        saga: g.saga ?? [],
       });
     });
     return () => unsub();
@@ -103,6 +107,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       goods: state.goods,
       unlockedSides: state.unlockedSides,
       performedActions: state.performedActions,
+      saga: state.saga,
       updatedAt: Date.now(),
     }).catch(() => {});
   }, [state, session, setup, isOnline]);
@@ -118,6 +123,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         goods: next.goods,
         unlockedSides: next.unlockedSides,
         performedActions: next.performedActions,
+        saga: next.saga,
       }).catch(() => {});
     } else {
       localStorage.setItem(KEY, JSON.stringify(next));
@@ -138,6 +144,8 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         goods[g] = (goods[g] ?? 0) + 1;
       }
     }
+    const saga = [...(base.saga ?? [])];
+    if (a.sagaEntry) saga.push(a.sagaEntry);
     persist({
       scores: {
         culturalUnderstanding: base.scores.culturalUnderstanding + a.deltas.und,
@@ -150,6 +158,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       goods,
       unlockedSides: base.unlockedSides ?? [],
       performedActions: base.performedActions ?? [],
+      saga,
     });
   };
 

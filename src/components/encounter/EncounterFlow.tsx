@@ -30,7 +30,7 @@ import { playMusic } from '../../lib/music';
 import QuestionCard from '../quiz/QuestionCard';
 import DiceRoll from '../dice/DiceRoll';
 
-type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'valg' | 'roll' | 'rolling' | 'resultat';
+type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat';
 
 interface EncounterFlowProps {
   destination: Destination;
@@ -47,6 +47,8 @@ interface EncounterFlowProps {
   /** Sent i spillet (§3.3): valg som krever en ferdighet gruppa mangler blir
    *  tilgjengelige med −2 straff i stedet for å være låst. */
   lateGame?: boolean;
+  /** Lærer-styrt: krev en saga-begrunnelse mellom valg og terningkast. */
+  requireSaga?: boolean;
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -96,7 +98,7 @@ function OddsBar({ baseRoll }: { baseRoll: RollOdds }) {
 export default function EncounterFlow({
   destination, skills, onComplete, onExit, onRequestApproval,
   isChief = true, syncedEncounter = null, onUpdateEncounter,
-  lateGame = false,
+  lateGame = false, requireSaga = false,
 }: EncounterFlowProps) {
   const d = destination;
   const syncMode = !!syncedEncounter;
@@ -111,6 +113,7 @@ export default function EncounterFlow({
   const [_quizBonus, _setQuizBonus] = useState(0);
   const [_choice, _setChoice] = useState<Choice | null>(null);
   const [_roll, _setRoll] = useState<RollResult | null>(null);
+  const [_reason, _setReason] = useState('');
 
   const step = syncMode ? (syncedEncounter?.step ?? 'history') : _step;
   const approvalSent = syncMode ? (syncedEncounter?.approvalSent ?? false) : _approvalSent;
@@ -125,6 +128,8 @@ export default function EncounterFlow({
   const roll: RollResult | null = syncMode
     ? (rollSync ? { raw: rollSync.raw, effective: rollSync.effective, modifier: rollSync.modifier, tier: rollSync.tier as RollResult['tier'] } : null)
     : _roll;
+  const reason = syncMode ? (syncedEncounter?.reason ?? '') : _reason;
+  const setReason = (v: string) => syncMode ? onUpdateEncounter?.({ reason: v }) : _setReason(v);
 
   // Setter-wrappere: skriver til Firebase i synkmodus, ellers oppdaterer lokal state.
   // Ikke-høvding må uansett ikke trigge skriv — vi gater på UI-nivå.
@@ -388,7 +393,7 @@ export default function EncounterFlow({
                 {isChief ? (
                   <button
                     disabled={!available}
-                    onClick={() => updateMany({ choiceId: c.id, roll: null, step: 'roll' })}
+                    onClick={() => updateMany({ choiceId: c.id, roll: null, step: requireSaga ? 'saga' : 'roll', reason: '' })}
                     data-testid={`pick-${c.id}`}
                     className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -400,6 +405,56 @@ export default function EncounterFlow({
           })}
         </div>
         {!isChief && <ChiefBanner />}
+      </Shell>
+    );
+  }
+
+  // 5a-ii) SAGA — gruppens begrunnelse før terningen kastes
+  if (step === 'saga' && choice) {
+    const canContinue = reason.trim().length > 0;
+    return (
+      <Shell name={d.name} onExit={onExit}>
+        <div className="mb-4">
+          <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft/80">Sagaen skrives</p>
+          <h1 className="font-cinzel text-2xl font-bold text-viking-gold">📜 Hvorfor valgte dere dette?</h1>
+        </div>
+        <div className="mb-4 rounded-md border-2 border-viking-gold/40 bg-viking-darkblue/40 p-3">
+          <p className="font-mono text-xs text-viking-gold-soft">Valget:</p>
+          <p className="font-cinzel text-lg text-viking-gold">{choice.title}</p>
+          <p className="font-inter text-sm italic text-viking-paper/85">{choice.desc}</p>
+        </div>
+        {/* Pergamentinspirert tekstområde */}
+        <div
+          className="mb-3 rounded-lg border-4 border-viking-gold/60 p-3 shadow-[0_0_18px_rgba(212,168,67,0.18)]"
+          style={{
+            background: 'linear-gradient(135deg, #FDFBF6 0%, #F4EDDC 100%)',
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent 0 23px, rgba(160,82,45,0.07) 23px 24px)',
+          }}
+        >
+          <textarea
+            value={reason}
+            onChange={(e) => isChief && setReason(e.target.value.slice(0, 600))}
+            placeholder={isChief ? 'Skriv 1–2 setninger om hvorfor gruppen valgte dette …' : 'Høvdingen skriver i sagaen …'}
+            readOnly={!isChief}
+            rows={5}
+            data-testid="saga-textarea"
+            className="w-full resize-none bg-transparent font-inter text-base leading-relaxed text-viking-darkblue placeholder:italic placeholder:text-viking-darkblue/40 focus:outline-none"
+            style={{ fontFamily: 'serif' }}
+          />
+          <p className="mt-1 text-right font-mono text-[10px] text-viking-darkblue/50">{reason.length}/600</p>
+        </div>
+        {isChief ? (
+          <button
+            onClick={() => updateMany({ step: 'roll' })}
+            disabled={!canContinue}
+            data-testid="saga-continue"
+            className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Til terningkastet →
+          </button>
+        ) : (
+          <ChiefBanner />
+        )}
       </Shell>
     );
   }
@@ -516,6 +571,11 @@ export default function EncounterFlow({
               skillReward: choice.skillReward,
               locks: choice.locks ?? [],
               goodsReward: d.goodsReward,
+              sagaEntry: reason.trim() ? {
+                destId: d.id, destName: d.name,
+                choiceId: choice.id, choiceTitle: choice.title,
+                reason: reason.trim(), at: Date.now(),
+              } : undefined,
             })}
             className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
           >

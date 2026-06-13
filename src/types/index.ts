@@ -148,6 +148,18 @@ export type TradeGoodId =
 export type RouteKind = 'main' | 'side';
 export type ScoreKey = 'culturalUnderstanding' | 'tradeGain' | 'reputation';
 
+/** Saga-oppføring: gruppens begrunnelse for et valg på en destinasjon.
+ *  Skrevet av høvdingen før utfallet vises, vises på slutten som en sammenhengende
+ *  reisefortelling og kan leses av læreren til etterarbeid. */
+export interface SagaEntry {
+  destId: string;
+  destName: string;
+  choiceId: string;
+  choiceTitle: string;
+  reason: string;
+  at: number;
+}
+
 /** Én vei å låse opp et sidested. Et sidested har FLERE slike — gruppa velger
  *  den de har forutsetning for. */
 export type UnlockRequirement =
