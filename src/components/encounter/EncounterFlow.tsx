@@ -247,7 +247,23 @@ export default function EncounterFlow({
       <Shell name={d.name} onExit={onExit}>
         <p className="mb-1 font-inter text-xs uppercase tracking-widest text-viking-gold-soft/70">Episk kulturmøte</p>
         <h1 className="mb-4 font-cinzel text-2xl font-bold text-viking-gold">{km.tittel}</h1>
-        <p className="mb-6 whitespace-pre-line border-l-4 border-viking-gold/50 pl-4 font-inter italic leading-relaxed text-viking-paper/90" data-testid={textLength === 'short' && d.kulturmoteSceneShort ? 'scene-short' : 'scene-full'}>{textLength === 'short' && d.kulturmoteSceneShort ? d.kulturmoteSceneShort : km.scene}</p>
+        {/* Kulturmøte-scenen rendres som en runekjevle — tre med innrissede runer */}
+        <div className="viking-runepinne mb-6 px-10 py-6 sm:px-14" data-testid="runepinne">
+          {/* Venstre rune-kolonne */}
+          <span className="viking-runepinne-runes pointer-events-none absolute left-4 top-1/2 hidden -translate-y-1/2 flex-col gap-3 font-cinzel text-base sm:flex" aria-hidden="true">
+            <span>ᚦ</span><span>ᚱ</span><span>ᚾ</span><span>ᛏ</span>
+          </span>
+          {/* Høyre rune-kolonne */}
+          <span className="viking-runepinne-runes pointer-events-none absolute right-4 top-1/2 hidden -translate-y-1/2 flex-col gap-3 font-cinzel text-base sm:flex" aria-hidden="true">
+            <span>ᛚ</span><span>ᛟ</span><span>ᛒ</span><span>ᛇ</span>
+          </span>
+          <p
+            className="whitespace-pre-line font-inter italic leading-relaxed"
+            data-testid={textLength === 'short' && d.kulturmoteSceneShort ? 'scene-short' : 'scene-full'}
+          >
+            {textLength === 'short' && d.kulturmoteSceneShort ? d.kulturmoteSceneShort : km.scene}
+          </p>
+        </div>
         <div className="rounded-lg border-2 border-viking-gold/40 bg-viking-darkblue/50 p-5">
           <QuestionCard
             q={km.kulturmøteSpørsmål.q}
