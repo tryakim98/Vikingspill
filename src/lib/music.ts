@@ -27,6 +27,31 @@ const howls = new Map<MusicTrack, Howl>();
 let current: MusicTrack | null = null;
 let ducked = false;
 
+// Nettlesere blokkerer .play() før første brukerinteraksjon. Vi venter på første
+// klikk/tast og kjører eventuelt kømlagt spor først DA. Ellers ville musikken
+// dø stille hvis en elev lastet siden direkte inn på dashboardet (med lagret økt).
+let unlocked = false;
+let pendingTrack: MusicTrack | null = null;
+
+function unlock() {
+  if (unlocked) return;
+  unlocked = true;
+  document.removeEventListener('pointerdown', unlock);
+  document.removeEventListener('keydown', unlock);
+  document.removeEventListener('touchstart', unlock);
+  if (pendingTrack) {
+    const t = pendingTrack;
+    pendingTrack = null;
+    playMusic(t);
+  }
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('pointerdown', unlock);
+  document.addEventListener('keydown', unlock);
+  document.addEventListener('touchstart', unlock);
+}
+
 function instance(track: MusicTrack): Howl {
   let howl = howls.get(track);
   if (!howl) {
@@ -47,6 +72,7 @@ const targetVolume = () => (ducked ? DUCK_VOLUME : FULL_VOLUME);
 
 /** Bytt til et spor med mykt crossfade. Idempotent for sporet som allerede spiller. */
 export function playMusic(track: MusicTrack): void {
+  if (!unlocked) { pendingTrack = track; return; }
   if (current === track) {
     const h = instance(track);
     if (!h.playing()) { h.volume(0); h.play(); h.fade(0, targetVolume(), FADE_MS); }
@@ -82,4 +108,5 @@ export function stopMusic(): void {
   for (const h of howls.values()) h.stop();
   current = null;
   ducked = false;
+  pendingTrack = null;
 }
