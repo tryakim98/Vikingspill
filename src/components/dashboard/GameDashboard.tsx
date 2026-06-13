@@ -386,11 +386,17 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   }
 
   if (showCeremony) {
+    const acceptedTradesCount = Object.values(trades).filter(
+      (t) => t.status === 'accepted' && (t.fromGroupId === myGroupId || t.toGroupId === myGroupId),
+    ).length;
     return (
       <EndCeremony
         setup={setup}
         scores={state.scores}
         skills={state.skills}
+        saga={state.saga ?? []}
+        destinations={destinations}
+        acceptedTradesCount={acceptedTradesCount}
         onClose={() => setShowCeremony(false)}
       />
     );
