@@ -74,6 +74,7 @@ export interface ActiveSkjebne {
   id: string;
   pendingDestId: string; // destinasjonen høvdingen seilte mot
   choiceId?: string;     // satt når høvdingen velger
+  rollResult?: { roll: number; bonus: number; total: number; won: boolean }; // for terningvalg
 }
 
 /** Lærer: opprett et nytt spill. */

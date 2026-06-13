@@ -67,6 +67,13 @@
               "id":            { ".validate": "newData.isString() && newData.val().length <= 40" },
               "pendingDestId": { ".validate": "newData.isString() && newData.val().length <= 40" },
               "choiceId":      { ".validate": "newData.isString() && newData.val().length <= 40" },
+              "rollResult": {
+                "roll":     { ".validate": "newData.isNumber()" },
+                "bonus":    { ".validate": "newData.isNumber()" },
+                "total":    { ".validate": "newData.isNumber()" },
+                "won":      { ".validate": "newData.isBoolean()" },
+                "$other":   { ".validate": false }
+              },
               "$other": { ".validate": false }
             },
             "members": {

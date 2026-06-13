@@ -32,7 +32,7 @@ import LoadingScreen from '../common/LoadingScreen';
 import ConnectionBanner from '../common/ConnectionBanner';
 import { playMusic, duckMusic, stopMusic } from '../../lib/music';
 import { SkjebneMoteModal } from '../skjebnemote/SkjebneMoteModal';
-import { shouldTriggerSkjebneMote, pickSkjebneMote, getSkjebneMoteById, type SkjebneMoteChoice } from '../../data/skjebnemoter';
+import { shouldTriggerSkjebneMote, pickSkjebneMote, getSkjebneMoteById, rollSkjebne, type SkjebneMoteChoice, type SkjebneEffects, type RollResult } from '../../data/skjebnemoter';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
@@ -131,7 +131,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   };
 
   // Skjebnemøter — valgfri quest under seiling. Synket online via SyncedGroup.
-  const [localActiveSkjebne, setLocalActiveSkjebne] = useState<{ id: string; pendingDestId: string; choiceId?: string } | null>(null);
+  const [localActiveSkjebne, setLocalActiveSkjebne] = useState<{ id: string; pendingDestId: string; choiceId?: string; rollResult?: RollResult } | null>(null);
   const [localSeenSkjebne, setLocalSeenSkjebne] = useState<string[]>([]);
   const [localLastSkjebneAtVisited, setLocalLastSkjebneAtVisited] = useState<number | undefined>(undefined);
   const activeSkjebne = isOnline ? (syncedGroup?.activeSkjebne ?? null) : localActiveSkjebne;
@@ -178,18 +178,33 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   };
 
   // Skjebnemøte — høvdingen velger; alle ser via sync.
-  const handleSkjebneChoose = (choice: SkjebneMoteChoice) => {
-    if (!activeSkjebne) return;
-    const e = choice.effects ?? {};
+  const applySkjebneEffects = (e: SkjebneEffects | undefined) => {
+    if (!e) return;
     addReward({
       und:   e.culturalUnderstanding ?? 0,
       trade: e.tradeGain ?? 0,
       rep:   e.reputation ?? 0,
     });
-    if (isOnline) {
-      patchGroup(session.gameCode, myGroupId, { activeSkjebne: { ...activeSkjebne, choiceId: choice.id } }).catch(() => {});
+    if (e.skill) {
+      applyFateEffect({ skill: e.skill });
+    }
+  };
+  const handleSkjebneChoose = (choice: SkjebneMoteChoice) => {
+    if (!activeSkjebne) return;
+    let rollResult: RollResult | undefined;
+    if (choice.roll) {
+      const skillLevel = choice.roll.skill ? (state?.skills[choice.roll.skill] ?? 0) : 0;
+      rollResult = rollSkjebne(choice.roll, skillLevel);
+      const branch = rollResult.won ? choice.roll.win : choice.roll.lose;
+      applySkjebneEffects(branch.effects);
     } else {
-      setLocalActiveSkjebne({ ...activeSkjebne, choiceId: choice.id });
+      applySkjebneEffects(choice.effects);
+    }
+    const next = { ...activeSkjebne, choiceId: choice.id, ...(rollResult ? { rollResult } : {}) };
+    if (isOnline) {
+      patchGroup(session.gameCode, myGroupId, { activeSkjebne: next }).catch(() => {});
+    } else {
+      setLocalActiveSkjebne(next);
     }
   };
   const handleSkjebneDismiss = () => {
@@ -429,6 +444,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           quest={quest}
           isChief={isChief}
           selectedChoiceId={activeSkjebne.choiceId}
+          rollResult={activeSkjebne.rollResult}
           onChoose={handleSkjebneChoose}
           onDismiss={handleSkjebneDismiss}
         />
