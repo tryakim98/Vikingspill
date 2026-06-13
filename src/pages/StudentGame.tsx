@@ -19,7 +19,11 @@ import SetupFlow from '../components/setup/SetupFlow';
 import GameDashboard from '../components/dashboard/GameDashboard';
 import LoadingScreen from '../components/common/LoadingScreen';
 import MuteButton from '../components/common/MuteButton';
+import RulesScreen from '../components/rules/RulesScreen';
+import HelpButton from '../components/rules/HelpButton';
 import { joinGroupAsMember, leaveGroupAsMember, subscribeGroup, writeGroup, type SyncedGroup } from '../lib/gameSync';
+
+const RULES_KEY = 'vikingspill_rules_seen_student';
 
 const SKILL_KEYS = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'] as const;
 
@@ -32,6 +36,14 @@ export default function StudentGame() {
   const { clearRole } = useRole();
   const { session, loaded: sLoaded, join, setGroupId, playOffline, leave } = useSession();
   const { setup, loaded: gLoaded, saveSetup, clearSetup } = useGroupSetup();
+
+  const [showRules, setShowRules] = useState(() => {
+    try { return !localStorage.getItem(RULES_KEY); } catch { return true; }
+  });
+  const dismissRules = () => {
+    try { localStorage.setItem(RULES_KEY, '1'); } catch { /* ignore */ }
+    setShowRules(false);
+  };
 
   // Når vi er online med en valgt groupId, sjekker vi om Firebase-gruppa
   // allerede har et setup (= eksisterende gruppe vi har blitt med i).
@@ -48,20 +60,19 @@ export default function StudentGame() {
   }, [session]);
 
   if (!sLoaded || !gLoaded) return <LoadingScreen />;
+  if (showRules) return <RulesScreen role="student" onDone={dismissRules} />;
 
   const handleSwitchRole = () => {
     clearRole();
     navigate('/', { replace: true });
   };
 
-  // 1) Ingen økt → JoinGame
-  if (!session) {
-    return <JoinGame onJoin={join} onOffline={playOffline} onSwitchRole={handleSwitchRole} />;
-  }
+  let content: import('react').ReactNode;
 
-  // 2) Online uten valgt gruppe → GroupPicker
-  if (session.mode === 'online' && !session.groupId) {
-    return (
+  if (!session) {
+    content = <JoinGame onJoin={join} onOffline={playOffline} onSwitchRole={handleSwitchRole} />;
+  } else if (session.mode === 'online' && !session.groupId) {
+    content = (
       <GroupPicker
         gameCode={session.gameCode}
         myMemberId={session.memberId}
@@ -73,11 +84,8 @@ export default function StudentGame() {
         onLeave={leave}
       />
     );
-  }
-
-  // 3) Online + groupId men ingen Firebase-gruppe ennå → SetupFlow (chief rigger)
-  if (session.mode === 'online' && session.groupId && remoteGroup === null) {
-    return (
+  } else if (session.mode === 'online' && session.groupId && remoteGroup === null) {
+    content = (
       <SetupFlow
         onComplete={async (s) => {
           if (!session.groupId) return;
@@ -95,43 +103,33 @@ export default function StudentGame() {
             chiefId: session.memberId,
             members: { [session.memberId]: { joinedAt: Date.now() } },
           }).catch(() => {});
-          // Beholder lokal kopi for offline-fallback under sesjonen
           saveSetup(s);
         }}
       />
     );
-  }
-
-  // 4) Online + eksisterende gruppe i Firebase → Dashboard
-  if (session.mode === 'online' && session.groupId && remoteGroup) {
-    // Sørg for å være registrert som medlem (idempotent)
-    return (
-      <>
-        <GameDashboard
-          setup={{
-            shipName: remoteGroup.shipName,
-            shipSymbol: remoteGroup.shipSymbol as 'drage' | 'ulv' | 'ravn',
-            shipColor: remoteGroup.shipColor,
-            startSkill: remoteGroup.startSkill,
-          }}
-          session={session}
-          onResetSetup={clearSetup}
-          onLeaveGame={async () => {
-            if (session.groupId) await leaveGroupAsMember(session.gameCode, session.groupId, session.memberId).catch(() => {});
-            leave();
-          }}
-          onSwitchRole={handleSwitchRole}
-        />
-        <MuteButton />
-      </>
+  } else if (session.mode === 'online' && session.groupId && remoteGroup) {
+    content = (
+      <GameDashboard
+        setup={{
+          shipName: remoteGroup.shipName,
+          shipSymbol: remoteGroup.shipSymbol as 'drage' | 'ulv' | 'ravn',
+          shipColor: remoteGroup.shipColor,
+          startSkill: remoteGroup.startSkill,
+        }}
+        session={session}
+        onResetSetup={clearSetup}
+        onLeaveGame={async () => {
+          if (session.groupId) await leaveGroupAsMember(session.gameCode, session.groupId, session.memberId).catch(() => {});
+          leave();
+        }}
+        onSwitchRole={handleSwitchRole}
+      />
     );
-  }
-
-  // 5) Offline-flyt (uendret): localStorage-basert
-  if (session.mode === 'offline') {
-    if (!setup) return <SetupFlow onComplete={saveSetup} />;
-    return (
-      <>
+  } else if (session.mode === 'offline') {
+    if (!setup) {
+      content = <SetupFlow onComplete={saveSetup} />;
+    } else {
+      content = (
         <GameDashboard
           setup={setup}
           session={session}
@@ -139,11 +137,17 @@ export default function StudentGame() {
           onLeaveGame={leave}
           onSwitchRole={handleSwitchRole}
         />
-        <MuteButton />
-      </>
-    );
+      );
+    }
+  } else {
+    content = <LoadingScreen text="Forbereder skipets logg …" />;
   }
 
-  // Online, fortsatt å undersøke Firebase
-  return <LoadingScreen text="Forbereder skipets logg …" />;
+  return (
+    <>
+      {content}
+      <HelpButton onClick={() => setShowRules(true)} className="fixed right-4 top-4 z-[70]" />
+      <MuteButton />
+    </>
+  );
 }

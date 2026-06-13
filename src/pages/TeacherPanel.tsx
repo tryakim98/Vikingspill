@@ -36,7 +36,11 @@ import SeaMap from '../components/teacher/SeaMap';
 import TideTimer from '../components/teacher/TideTimer';
 import ConnectionBanner from '../components/common/ConnectionBanner';
 import VikingShip from '../components/ship/VikingShip';
+import RulesScreen from '../components/rules/RulesScreen';
+import HelpButton from '../components/rules/HelpButton';
 import type { ShipSymbol } from '../types';
+
+const RULES_KEY = 'vikingspill_rules_seen_teacher';
 
 const CODE_KEY = 'vikingspill_teacher_code';
 const total = (g: SyncedGroup) => g.scores.culturalUnderstanding + g.scores.tradeGain + g.scores.reputation;
@@ -47,6 +51,14 @@ export default function TeacherPanel() {
   const [code, setCode] = useState<string | null>(() => localStorage.getItem(CODE_KEY));
   const [groups, setGroups] = useState<Record<string, SyncedGroup>>({});
   const [approvals, setApprovals] = useState<Record<string, ApprovalRequest>>({});
+  const [showRules, setShowRules] = useState(() => {
+    try { return !localStorage.getItem(RULES_KEY); } catch { return true; }
+  });
+  const dismissRules = () => {
+    try { localStorage.setItem(RULES_KEY, '1'); } catch { /* ignore */ }
+    setShowRules(false);
+  };
+
   const [trial, setTrial] = useState<Trial | null>(null);
   const [trialResult, setTrialResult] = useState<TrialResult | null>(null);
   const [trialWinner, setTrialWinner] = useState<string | null>(null);
@@ -153,6 +165,8 @@ export default function TeacherPanel() {
     if (code) setApprovalStatus(code, groupId, status).catch(() => {});
   };
 
+  if (showRules) return <RulesScreen role="teacher" onDone={dismissRules} />;
+
   const ranked = Object.entries(groups).sort((a, b) => total(b[1]) - total(a[1]));
   const pending = Object.entries(approvals).filter(([, a]) => a.status === 'pending');
   // §6.3 Ragnarok blir tilgjengelig når avstanden mellom 1. og siste gruppe > 15 poeng.
@@ -161,7 +175,8 @@ export default function TeacherPanel() {
 
   if (!code) {
     return (
-      <div className="min-h-screen bg-viking-darkblue p-6 text-viking-paper">
+      <div className="relative min-h-screen bg-viking-darkblue p-6 text-viking-paper">
+        <HelpButton onClick={() => setShowRules(true)} className="absolute right-4 top-4" />
         <div className="mx-auto max-w-4xl">
           <h1 className="mb-2 font-cinzel text-4xl text-viking-gold">📜 Spillmasterkonsoll</h1>
           <p className="mb-8 font-inter italic text-viking-gold-soft">Storskjerm — elevene ser denne</p>
@@ -188,8 +203,9 @@ export default function TeacherPanel() {
   }
 
   return (
-    <div className="min-h-screen bg-viking-darkblue p-4 text-viking-paper sm:p-6 xl:p-8">
+    <div className="relative min-h-screen bg-viking-darkblue p-4 text-viking-paper sm:p-6 xl:p-8">
       <ConnectionBanner active={!!code} />
+      <HelpButton onClick={() => setShowRules(true)} className="absolute right-4 top-4 z-20" />
       <div className="mx-auto w-full max-w-5xl xl:max-w-[1700px]">
         {/* Spillkode */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-viking-gold bg-viking-surface px-5 py-3 sm:px-6">
