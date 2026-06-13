@@ -14,6 +14,7 @@ import VikingShip from '../ship/VikingShip';
 import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
+import SeaJourney from './SeaJourney';
 import type { Session } from '../../hooks/useSession';
 import { removeGroup, requestApproval, subscribeGroup, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent } from '../../lib/gameSync';
 import { chapters, chapterCompleted } from '../../data/chapters';
@@ -29,7 +30,6 @@ import { playMusic, duckMusic, stopMusic } from '../../lib/music';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
-const DIFFICULTY_COLOR: Record<string, string> = { trygg: '#5B7553', middels: '#D4A843', farlig: '#8B2929' };
 
 interface Props {
   setup: GroupSetup;
@@ -74,6 +74,44 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     } else {
       setLocalActiveDestId(d?.id ?? null);
     }
+  };
+
+  // Preview-valg + seilas-animasjon — synket online, lokal offline.
+  const [localPreviewDestId, setLocalPreviewDestId] = useState<string | null>(null);
+  const [localSailingTo, setLocalSailingTo] = useState<string | null>(null);
+  const previewDestId = isOnline ? syncedGroup?.previewDestId ?? null : localPreviewDestId;
+  const sailingTo = isOnline ? syncedGroup?.sailingTo ?? null : localSailingTo;
+  const setPreviewDestId = (id: string | null) => {
+    if (isOnline) {
+      patchGroup(session.gameCode, myGroupId, { previewDestId: id }).catch(() => {});
+    } else {
+      setLocalPreviewDestId(id);
+    }
+  };
+
+  // Start seilas-animasjon, vent til den er ferdig, så åpne encounter. Bare høvdingen
+  // utløser denne flyten — alle medlemmer ser animasjonen via synket sailingTo.
+  const confirmSailingTo = (destId: string) => {
+    const dest = destinations.find((d) => d.id === destId);
+    if (!dest) return;
+    if (isOnline) {
+      patchGroup(session.gameCode, myGroupId, { sailingTo: destId, previewDestId: null }).catch(() => {});
+    } else {
+      setLocalSailingTo(destId);
+      setLocalPreviewDestId(null);
+    }
+    window.setTimeout(() => {
+      if (isOnline) {
+        patchGroup(session.gameCode, myGroupId, {
+          activeDestId: destId,
+          encounter: { destId, step: 'history' },
+          sailingTo: null,
+        }).catch(() => {});
+      } else {
+        setLocalSailingTo(null);
+        setLocalActiveDestId(destId);
+      }
+    }, 1700);
   };
 
   // Aktiv verdighetsprøve og sluttseremoni: synket i online, lokal ellers.
@@ -382,30 +420,19 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           })}
         </div>
 
-        {/* Destinasjoner */}
-        <h2 className="mb-3 font-cinzel text-xl text-viking-gold">Seilas</h2>
-        <div className="mb-8 grid gap-2 sm:grid-cols-2">
-          {destinations.map((dest) => {
-            const visited = state.visited.includes(dest.id);
-            const locked = state.locked.includes(dest.id);
-            const clickable = isChief && !locked;
-            return (
-              <button
-                key={dest.id}
-                disabled={!clickable}
-                onClick={() => setActiveDest(dest)}
-                title={!isChief ? '⚓ Kun høvdingen styrer skipet' : undefined}
-                data-testid={`dest-${dest.id}`}
-                className={`flex items-center justify-between rounded-lg border-2 px-4 py-3 text-left transition-all ${locked ? 'cursor-not-allowed border-viking-crimson/30 opacity-50' : !isChief ? 'cursor-not-allowed border-viking-gold/20 opacity-60' : visited ? 'border-viking-moss/60 bg-viking-moss/10 hover:border-viking-moss' : 'border-viking-gold/40 bg-viking-surface hover:border-viking-gold hover:scale-[1.02]'}`}
-              >
-                <span className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: DIFFICULTY_COLOR[dest.difficulty ?? 'middels'] }} />
-                  <span className="font-cinzel text-viking-paper">{dest.name}</span>
-                </span>
-                <span className="font-mono text-xs text-viking-gold-soft">{locked ? '🔒' : visited ? '✓ besøkt' : '→'}</span>
-              </button>
-            );
-          })}
+        {/* Interaktivt sjøkart erstatter destinasjonslisten */}
+        <div className="mb-8">
+          <SeaJourney
+            destinations={destinations}
+            visited={state.visited}
+            locked={state.locked}
+            ship={{ color: setup.shipColor, symbol: setup.shipSymbol, name: setup.shipName }}
+            isChief={isChief}
+            previewDestId={previewDestId}
+            sailingTo={sailingTo}
+            onSelect={setPreviewDestId}
+            onConfirm={confirmSailingTo}
+          />
         </div>
 
         {/* Sluttseremoni når hele reisen er fullført */}

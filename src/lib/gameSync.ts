@@ -49,6 +49,8 @@ export interface SyncedGroup {
   activeSkillKey?: SkillKey | null;      // verdighetsprøve aktiv?
   showCeremony?: boolean;                // sluttseremoni vises?
   encounter?: SyncedEncounter | null;    // encounter-state synket til alle medlemmer
+  previewDestId?: string | null;         // destinasjonen høvdingen har valgt på kartet
+  sailingTo?: string | null;             // pågående seilas-animasjon mot dette stedet
 }
 
 /** Lærer: opprett et nytt spill. */

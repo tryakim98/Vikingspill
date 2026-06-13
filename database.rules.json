@@ -36,6 +36,8 @@
             "activeDestId":   { ".validate": "newData.isString() && newData.val().length <= 40" },
             "activeSkillKey": { ".validate": "newData.isString() && newData.val().length <= 24" },
             "showCeremony":   { ".validate": "newData.isBoolean()" },
+            "previewDestId":  { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "sailingTo":      { ".validate": "newData.isString() && newData.val().length <= 40" },
             "members": {
               "$memberId": {
                 ".validate": "$memberId.matches(/^m-[a-z0-9]{1,16}$/)",
