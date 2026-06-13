@@ -62,15 +62,15 @@ export default function RoleSelect() {
         >
           <div className="absolute inset-0 bg-gradient-to-br from-viking-gold/10 to-transparent group-hover:from-viking-gold/20 group-hover:to-transparent transition-all"></div>
           <div className="relative">
-            <div className="text-6xl mb-4">📜</div>
+            <div className="text-6xl mb-4">⚡</div>
             <h2 className="font-cinzel text-3xl font-bold text-viking-paper mb-3">
-              Jeg er lærer
+              Jeg er Tor ⚡
             </h2>
             <p className="font-inter text-viking-paper/90 text-sm">
-              Åpne spillmasterkonsollen. Se alle grupper, godkjenn oppgaver, og utløs Gudenes prøve.
+              Våk over flåten fra Åsgard. Følg med på de dødelige vikingenes ferd, gi din velsignelse, og slipp Gudenes prøve når tiden er moden.
             </p>
             <p className="font-inter text-viking-gold-soft text-xs mt-4 italic">
-              ↳ Storskjerm: alle ser denne skjermen
+              ↳ Tors utsyn over Midgard — vises på storskjermen
             </p>
           </div>
         </button>
@@ -84,10 +84,10 @@ export default function RoleSelect() {
           <div className="relative">
             <div className="text-6xl mb-4">⛵</div>
             <h2 className="font-cinzel text-3xl font-bold text-viking-paper mb-3">
-              Jeg er elev
+              Jeg er viking
             </h2>
             <p className="font-inter text-viking-paper/90 text-sm">
-              Velg skip, styr gjennom 12 destinasjoner, gjør oppgaver, og ta valg som påvirker historien.
+              Bli én av Midgards dødelige sjøfarere. Velg skip, styr gjennom 12 land, og håp at Tor våker over dere.
             </p>
             <p className="font-inter text-viking-gold-soft text-xs mt-4 italic">
               ↳ Mobiltelefon/iPad: hver gruppe sin private skjerm

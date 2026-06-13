@@ -196,21 +196,21 @@ export default function TeacherPanel() {
       <div className="relative min-h-screen bg-viking-darkblue p-6 text-viking-paper">
         <HelpButton onClick={() => setShowRules(true)} className="absolute right-4 top-4" />
         <div className="mx-auto max-w-4xl">
-          <h1 className="mb-2 font-cinzel text-4xl text-viking-gold">📜 Spillmasterkonsoll</h1>
-          <p className="mb-8 font-inter italic text-viking-gold-soft">Storskjerm — elevene ser denne</p>
+          <h1 className="mb-2 font-cinzel text-4xl text-viking-gold">⚡ Tors utsyn over Midgard</h1>
+          <p className="mb-8 font-inter italic text-viking-gold-soft">Fra Åsgard ser tordenguden ut over flåten — storskjerm for hele klassen</p>
           <div className="rounded-lg border-2 border-viking-gold bg-viking-surface p-10 text-center">
-            <h2 className="mb-3 font-cinzel text-2xl text-viking-gold">Start et nytt spill</h2>
-            <p className="mb-8 font-inter text-viking-paper/85">Du får en spillkode som elevene taster inn for å bli med.</p>
+            <h2 className="mb-3 font-cinzel text-2xl text-viking-gold">Slipp en ny flåte på sjøen</h2>
+            <p className="mb-8 font-inter text-viking-paper/85">Du får et runeord vikingene taster inn for å bli sett av deg.</p>
             <button
               onClick={() => void createNew()}
               disabled={creating}
               className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-wait disabled:opacity-60"
             >
-              {creating ? 'Oppretter spill …' : 'Opprett spill'}
+              {creating ? 'Reiser Åsgards porter …' : 'Åpne Åsgards porter ⚡'}
             </button>
             {createError && (
               <p className="mt-5 rounded-md border-2 border-viking-crimson bg-viking-crimson/15 p-3 font-inter text-sm text-viking-paper">
-                Fikk ikke kontakt med spilltjeneren. Sjekk nettet og prøv igjen.
+                Bifrost svarer ikke — broen mellom Åsgard og Midgard er tåkete. Sjekk nettet og prøv igjen.
               </p>
             )}
           </div>
@@ -228,10 +228,10 @@ export default function TeacherPanel() {
         {/* Spillkode */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-viking-gold bg-viking-surface px-5 py-3 sm:px-6">
           <div>
-            <span className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft">Spillkode</span>
+            <span className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft">Tors runeord</span>
             <p className="font-mono text-3xl font-bold tracking-[0.2em] text-viking-gold xl:text-4xl 2xl:text-5xl">{code}</p>
           </div>
-          <p className="max-w-xs font-inter text-sm text-viking-paper/80">Elevene velger «Jeg er elev» og taster inn koden.</p>
+          <p className="max-w-xs font-inter text-sm text-viking-paper/80">Vikingene velger «Jeg er viking» og taster inn runeordet.</p>
         </div>
 
         {/* Projektor: kart + leaderboard til venstre, kontroller til høyre på store skjermer; stables ellers. */}
@@ -279,7 +279,7 @@ export default function TeacherPanel() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="font-cinzel text-xl text-viking-gold">⚡ Gudenes prøve</h2>
-              <p className="font-inter text-sm text-viking-paper/80">Du bestemmer kun <strong>når</strong>. Spillet trekker utfordring og ferdighet — likt for alle grupper.</p>
+              <p className="font-inter text-sm text-viking-paper/80">Du bestemmer kun <strong>når</strong>. Gudene trekker utfordring og ferdighet — likt for alle skip.</p>
             </div>
             <button onClick={triggerGudenesProve} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-3 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">
               {trial ? '⚡ Utløs ny prøve' : '⚡ Utløs Gudenes prøve'}
@@ -460,11 +460,11 @@ export default function TeacherPanel() {
         {/* §8.4 Skjebne-kort — læreren bestemmer KUN når */}
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-viking-rust/60 bg-viking-rust/15 p-4">
           <div>
-            <h2 className="font-cinzel text-xl text-viking-gold">🎴 Skjebne-kort</h2>
-            <p className="font-inter text-sm text-viking-paper/80">Du bestemmer kun <strong>når</strong>. Spillet trekker kort og hvem som rammes — tilfeldig.</p>
-            {fate && <p className="mt-1 font-mono text-xs text-viking-gold-soft">Sist: {fate.title} → {fate.targetMode === 'group' ? fate.targetName : fate.conditionLabel}</p>}
+            <h2 className="font-cinzel text-xl text-viking-gold">🎴 Tors inngripen</h2>
+            <p className="font-inter text-sm text-viking-paper/80">Du bestemmer kun <strong>når</strong> du griper inn. Nornene trekker hva som skjer og hvilket skip det rammer — tilfeldig.</p>
+            {fate && <p className="mt-1 font-mono text-xs text-viking-gold-soft">Sist gripe: {fate.title} → {fate.targetMode === 'group' ? fate.targetName : fate.conditionLabel}</p>}
           </div>
-          <button onClick={triggerSkjebne} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-3 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">🎴 Utløs skjebne-kort</button>
+          <button onClick={triggerSkjebne} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-3 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">🎴 Grip inn i flåtens skjebne</button>
         </div>
 
         {/* §6.3 Ragnarok — catch-up når avstanden blir for stor (> 15 poeng) */}
@@ -472,10 +472,10 @@ export default function TeacherPanel() {
           <div>
             <h2 className="font-cinzel text-xl text-viking-gold">⚡ Ragnarok</h2>
             <p className="font-inter text-sm text-viking-paper/80">
-              Når avstanden mellom 1. og siste gruppe passerer <strong>15 poeng</strong> kan du slippe Ragnarok løs — alle mister halve handelspoeng.
+              Når avstanden mellom 1. og siste skip passerer <strong>15 poeng</strong> kan du la Tors vrede ramme alle — halve handelspoeng forsvinner.
             </p>
             <p className="mt-1 font-mono text-xs text-viking-gold-soft">
-              Største avstand nå: {leadGap} poeng {ragnarokReady ? '— gudene er rasende!' : '(under 15 — feltet er jevnt)'}
+              Største avstand nå: {leadGap} poeng {ragnarokReady ? '— Tor er rasende!' : '(under 15 — flåten er jevn)'}
             </p>
           </div>
           <button
@@ -490,11 +490,11 @@ export default function TeacherPanel() {
             {/* §8.3 Godkjenning */}
             <div>
               <div className="mb-3 flex items-baseline justify-between">
-                <h2 className="font-cinzel text-2xl text-viking-gold xl:text-3xl">Godkjenning</h2>
+                <h2 className="font-cinzel text-2xl text-viking-gold xl:text-3xl">Tors velsignelse</h2>
               {pending.length > 0 && <span className="rounded-full bg-viking-crimson px-2 py-0.5 font-mono text-xs text-viking-paper">{pending.length} venter</span>}
             </div>
             {pending.length === 0 ? (
-              <p className="rounded-lg border-2 border-dashed border-viking-gold/30 p-6 text-center font-inter italic text-viking-paper/60">Ingen oppgaver til godkjenning</p>
+              <p className="rounded-lg border-2 border-dashed border-viking-gold/30 p-6 text-center font-inter italic text-viking-paper/60">Ingen skip ber om velsignelse</p>
             ) : (
               <div className="space-y-2">
                 {pending.map(([groupId, a]) => (
@@ -502,9 +502,9 @@ export default function TeacherPanel() {
                     <p className="font-cinzel text-viking-gold">{a.shipName}</p>
                     <p className="mb-3 font-inter text-sm text-viking-paper/85">{a.taskTitle}</p>
                     <div className="flex gap-2">
-                      <button onClick={() => resolve(groupId, 'approved')} className="flex-1 rounded border-2 border-viking-moss bg-viking-moss/30 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-moss/50">Godkjenn</button>
-                      <button onClick={() => resolve(groupId, 'partial')} className="flex-1 rounded border-2 border-viking-gold bg-viking-gold/20 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-gold/40">Delvis</button>
-                      <button onClick={() => resolve(groupId, 'rejected')} className="flex-1 rounded border-2 border-viking-crimson bg-viking-crimson/30 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-crimson/50">Avvis</button>
+                      <button onClick={() => resolve(groupId, 'approved')} className="flex-1 rounded border-2 border-viking-moss bg-viking-moss/30 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-moss/50">Velsign ⚡</button>
+                      <button onClick={() => resolve(groupId, 'partial')} className="flex-1 rounded border-2 border-viking-gold bg-viking-gold/20 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-gold/40">Delvis nåde</button>
+                      <button onClick={() => resolve(groupId, 'rejected')} className="flex-1 rounded border-2 border-viking-crimson bg-viking-crimson/30 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-crimson/50">Forkast</button>
                     </div>
                   </div>
                 ))}
