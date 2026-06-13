@@ -161,6 +161,10 @@ export interface Destination {
     prompt: string;
     options: string[];
   };
+
+  // Kortversjoner (2-3 setninger) for differensiering. Lærer-styrt via textLength.
+  historyShort?: string;
+  kulturmoteSceneShort?: string;
 }
 
 export type TradeGoodId =

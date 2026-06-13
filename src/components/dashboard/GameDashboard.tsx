@@ -76,7 +76,17 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const requirePerspective = !!gameSettings.requirePerspective;
   const requireBridge = !!gameSettings.requireBridge;
   const [showOwnSaga, setShowOwnSaga] = useState(false);
+
   const [syncedGroup, setSyncedGroup] = useState<SyncedGroup | null>(null);
+
+  // Tekstlengde — lærer styrer (full/short), eller velger 'group' så hver gruppe velger
+  const teacherTextLength = gameSettings.textLength ?? 'full';
+  const groupTextLength = (syncedGroup?.textLength ?? 'full') as 'full' | 'short';
+  const effectiveTextLength: 'full' | 'short' = teacherTextLength === 'group' ? groupTextLength : (teacherTextLength === 'short' ? 'short' : 'full');
+  const setGroupTextLength = (v: 'full' | 'short') => {
+    if (!isOnline) return;
+    patchGroup(session.gameCode, myGroupId, { textLength: v }).catch(() => {});
+  };
   useEffect(() => {
     if (!isOnline) return;
     const unsub = subscribeGroup(session.gameCode, myGroupId, setSyncedGroup);
@@ -366,6 +376,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         requireSaga={requireSaga}
         requirePerspective={requirePerspective}
         requireBridge={requireBridge}
+        textLength={effectiveTextLength}
         syncedEncounter={isOnline ? syncedGroup?.encounter ?? null : null}
         onUpdateEncounter={isOnline && isChief
           ? (partial) => {
@@ -516,6 +527,27 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             );
           })}
         </div>
+
+        {/* Gruppe-styrt tekstlengde — vises bare når lærer har valgt "La gruppene velge" */}
+        {isOnline && teacherTextLength === 'group' && (
+          <div className="mb-3 flex items-center justify-between rounded-md border border-viking-gold/40 bg-viking-darkblue/40 px-3 py-2" data-testid="group-text-length">
+            <span className="font-cinzel text-xs text-viking-gold-soft">📖 Tekstlengde:</span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setGroupTextLength('full')}
+                disabled={!isChief}
+                data-testid="set-text-full"
+                className={`rounded px-2 py-0.5 font-cinzel text-xs ${effectiveTextLength === 'full' ? 'bg-viking-gold text-viking-darkblue' : 'border border-viking-gold/40 text-viking-gold-soft hover:border-viking-gold disabled:opacity-50'}`}
+              >Full</button>
+              <button
+                onClick={() => setGroupTextLength('short')}
+                disabled={!isChief}
+                data-testid="set-text-short"
+                className={`rounded px-2 py-0.5 font-cinzel text-xs ${effectiveTextLength === 'short' ? 'bg-viking-gold text-viking-darkblue' : 'border border-viking-gold/40 text-viking-gold-soft hover:border-viking-gold disabled:opacity-50'}`}
+              >Kort</button>
+            </div>
+          </div>
+        )}
 
         {/* Saga-knapp — les vår egen reisefortelling så langt */}
         {(state.saga?.length ?? 0) > 0 && (

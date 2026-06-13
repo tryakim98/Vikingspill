@@ -20,6 +20,7 @@
           "requireSaga":        { ".validate": "newData.isBoolean()" },
           "requirePerspective": { ".validate": "newData.isBoolean()" },
           "requireBridge":      { ".validate": "newData.isBoolean()" },
+          "textLength":         { ".validate": "newData.isString() && newData.val().matches(/^(full|short|group)$/)" },
           "$other":             { ".validate": false }
         },
 
@@ -46,6 +47,7 @@
                 "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" }
               }
             },
+            "textLength": { ".validate": "newData.isString() && newData.val().matches(/^(full|short)$/)" },
             "goods": {
               "$good": {
                 ".validate": "$good.matches(/^(pelsverk|solv|jern|rav|silke|hvalrosstann|krydder|salt)$/) && newData.isNumber()"

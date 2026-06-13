@@ -52,6 +52,7 @@ export interface SyncedGroup {
   unlockedSides?: string[];
   performedActions?: string[];
   saga?: SagaEntry[];
+  textLength?: 'full' | 'short'; // brukes når lærer har satt textLength='group'
   updatedAt: number;
   // Multi-enhet-felt (§ multi-enhet med høvding-rolle):
   chiefId?: string;                     // memberId til høvdingen
@@ -71,10 +72,13 @@ export function createGame(code: string): Promise<void> {
 
 // === Spillinnstillinger (lærer-styrt) ============================================
 
+export type TextLength = 'full' | 'short' | 'group';
+
 export interface GameSettings {
   requireSaga?: boolean;
   requirePerspective?: boolean;
   requireBridge?: boolean;
+  textLength?: TextLength; // 'full' = alle, 'short' = alle, 'group' = la hver gruppe velge
 }
 
 export function setGameSettings(code: string, settings: Partial<GameSettings>): Promise<void> {

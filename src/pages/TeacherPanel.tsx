@@ -399,6 +399,28 @@ export default function TeacherPanel() {
               <span className="font-cinzel text-sm text-viking-gold-soft">Bro til i dag: <strong>{settings.requireBridge ? 'PÅ' : 'AV'}</strong></span>
             </label>
           </div>
+
+          {/* Tekstlengde — differensiering for yrkesfag */}
+          <div className="mt-4 border-t border-viking-rust/30 pt-3" data-testid="text-length-controls">
+            <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">📖 Tekstmengde for klassen</p>
+            <p className="mb-2 font-inter text-xs text-viking-paper/65">Kortversjon = 2–3 setninger per historie og kulturmøte, beholder handlingen.</p>
+            <div className="flex flex-wrap gap-2">
+              {(['full', 'short', 'group'] as const).map((v) => {
+                const label = v === 'full' ? 'Full tekst' : v === 'short' ? 'Kortversjon' : 'La gruppene velge';
+                const current = (settings.textLength ?? 'full') === v;
+                return (
+                  <button
+                    key={v}
+                    onClick={() => { if (code) setGameSettings(code, { textLength: v }).catch(() => {}); }}
+                    data-testid={`text-length-${v}`}
+                    className={`rounded-md border-2 px-3 py-1 font-cinzel text-xs ${current ? 'border-viking-gold bg-viking-gold/20 text-viking-gold' : 'border-viking-gold/40 text-viking-gold-soft hover:border-viking-gold'}`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Handelstorg — kompakt aktivitetspanel */}

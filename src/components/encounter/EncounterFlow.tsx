@@ -53,6 +53,8 @@ interface EncounterFlowProps {
   requirePerspective?: boolean;
   /** Lærer-styrt: bro til i dag — refleksjon etter utfallet på destinasjoner med modernBridge. */
   requireBridge?: boolean;
+  /** Hvilken tekstlengde å rendre for historie + kulturmøte (differensiering). */
+  textLength?: 'full' | 'short';
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -102,7 +104,7 @@ function OddsBar({ baseRoll }: { baseRoll: RollOdds }) {
 export default function EncounterFlow({
   destination, skills, onComplete, onExit, onRequestApproval,
   isChief = true, syncedEncounter = null, onUpdateEncounter,
-  lateGame = false, requireSaga = false, requirePerspective = false, requireBridge = false,
+  lateGame = false, requireSaga = false, requirePerspective = false, requireBridge = false, textLength = 'full',
 }: EncounterFlowProps) {
   const d = destination;
   const syncMode = !!syncedEncounter;
@@ -230,7 +232,7 @@ export default function EncounterFlow({
           <span className="font-inter text-sm text-viking-gold-soft">{d.region}</span>
         </div>
         <h1 className="mb-4 font-cinzel text-3xl font-bold text-viking-gold">{d.name}</h1>
-        <Html html={d.history ?? ''} className="block font-inter leading-relaxed text-viking-paper/90 [&_strong]:text-viking-gold-soft" />
+        <Html html={(textLength === 'short' && d.historyShort ? d.historyShort : d.history) ?? ''} className="block font-inter leading-relaxed text-viking-paper/90 [&_strong]:text-viking-gold-soft" data-testid={textLength === 'short' && d.historyShort ? 'history-short' : 'history-full'} />
         {isChief ? (
           <button onClick={() => setStep('kulturmote')} className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
         ) : <ChiefBanner />}
@@ -245,7 +247,7 @@ export default function EncounterFlow({
       <Shell name={d.name} onExit={onExit}>
         <p className="mb-1 font-inter text-xs uppercase tracking-widest text-viking-gold-soft/70">Episk kulturmøte</p>
         <h1 className="mb-4 font-cinzel text-2xl font-bold text-viking-gold">{km.tittel}</h1>
-        <p className="mb-6 whitespace-pre-line border-l-4 border-viking-gold/50 pl-4 font-inter italic leading-relaxed text-viking-paper/90">{km.scene}</p>
+        <p className="mb-6 whitespace-pre-line border-l-4 border-viking-gold/50 pl-4 font-inter italic leading-relaxed text-viking-paper/90" data-testid={textLength === 'short' && d.kulturmoteSceneShort ? 'scene-short' : 'scene-full'}>{textLength === 'short' && d.kulturmoteSceneShort ? d.kulturmoteSceneShort : km.scene}</p>
         <div className="rounded-lg border-2 border-viking-gold/40 bg-viking-darkblue/50 p-5">
           <QuestionCard
             q={km.kulturmøteSpørsmål.q}
