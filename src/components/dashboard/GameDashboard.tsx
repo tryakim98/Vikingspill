@@ -15,7 +15,7 @@ import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeGroup, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent } from '../../lib/gameSync';
 import { chapters, chapterCompleted } from '../../data/chapters';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
 import SeaBattle from '../duel/SeaBattle';
@@ -41,9 +41,61 @@ interface Props {
 
 export default function GameDashboard({ setup, session, onResetSetup, onLeaveGame, onSwitchRole }: Props) {
   const { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, resetProgress } = useGameState(setup, session);
-  const [activeDest, setActiveDest] = useState<Destination | null>(null);
-  const [activeSkill, setActiveSkill] = useState<SkillKey | null>(null);
-  const [showCeremony, setShowCeremony] = useState(false);
+
+  // I online-modus er gruppe-tilstanden delt blant alle medlemmer. Vi lytter på hele
+  // gruppe-noden her (parallelt med useGameState) for å få chief-status, medlemsliste
+  // og synket UI-tilstand (aktiv destinasjon m.m.).
+  const isOnline = session.mode === 'online' && !!session.groupId;
+  const myGroupId = session.groupId ?? '';
+  const [syncedGroup, setSyncedGroup] = useState<SyncedGroup | null>(null);
+  useEffect(() => {
+    if (!isOnline) return;
+    const unsub = subscribeGroup(session.gameCode, myGroupId, setSyncedGroup);
+    return () => unsub();
+  }, [isOnline, myGroupId, session]);
+
+  const myMemberId = session.mode === 'online' ? session.memberId : session.memberId;
+  const chiefId = syncedGroup?.chiefId;
+  const isChief = !isOnline || chiefId === myMemberId || !chiefId;
+  const members = syncedGroup?.members ?? {};
+  const memberIds = Object.keys(members);
+
+  // Aktiv destinasjon: synket i online, lokal ellers.
+  const [localActiveDestId, setLocalActiveDestId] = useState<string | null>(null);
+  const activeDestId = isOnline ? syncedGroup?.activeDestId ?? null : localActiveDestId;
+  const activeDest = activeDestId ? destinations.find((d) => d.id === activeDestId) ?? null : null;
+  const setActiveDest = (d: Destination | null) => {
+    if (isOnline) {
+      patchGroup(session.gameCode, myGroupId, {
+        activeDestId: d?.id ?? null,
+        // Initialiser/rydd encounter-state slik at alle medlemmer ser samme første steg.
+        encounter: d ? { destId: d.id, step: 'history' } : null,
+      }).catch(() => {});
+    } else {
+      setLocalActiveDestId(d?.id ?? null);
+    }
+  };
+
+  // Aktiv verdighetsprøve og sluttseremoni: synket i online, lokal ellers.
+  const [localActiveSkill, setLocalActiveSkill] = useState<SkillKey | null>(null);
+  const activeSkill = isOnline ? (syncedGroup?.activeSkillKey ?? null) : localActiveSkill;
+  const setActiveSkill = (s: SkillKey | null) => {
+    if (isOnline) {
+      patchGroup(session.gameCode, myGroupId, { activeSkillKey: s }).catch(() => {});
+    } else {
+      setLocalActiveSkill(s);
+    }
+  };
+
+  const [localShowCeremony, setLocalShowCeremony] = useState(false);
+  const showCeremony = isOnline ? !!syncedGroup?.showCeremony : localShowCeremony;
+  const setShowCeremony = (b: boolean) => {
+    if (isOnline) {
+      patchGroup(session.gameCode, myGroupId, { showCeremony: b }).catch(() => {});
+    } else {
+      setLocalShowCeremony(b);
+    }
+  };
   const [activeTrial, setActiveTrial] = useState<Trial | null>(null);
   const seenTrial = useRef<string | null>(null);
   const [trialResult, setTrialResult] = useState<TrialResult | null>(null);
@@ -126,7 +178,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         skill={activeTrial.skill}
         skillLevel={state.skills[activeTrial.skill] ?? 0}
         result={matchedResult}
-        myGroupId={session.groupId}
+        myGroupId={myGroupId}
         onClose={(reward) => {
           addReward({ und: 0, trade: 0, rep: reward.rep });
           setActiveTrial(null);
@@ -137,7 +189,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
 
   if (activeFate) {
     const affected = activeFate.targetMode === 'group'
-      ? activeFate.targetGroupId === session.groupId
+      ? activeFate.targetGroupId === myGroupId
       : (state.skills[activeFate.condition?.skill ?? 'tro'] ?? 0) < (activeFate.condition?.below ?? 0);
     return (
       <FateCardOverlay
@@ -185,9 +237,17 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         destination={activeDest}
         skills={state.skills}
         onComplete={(apply) => { applyOutcome(apply); setActiveDest(null); }}
-        onExit={() => setActiveDest(null)}
+        onExit={() => isChief && setActiveDest(null)}
         onRequestApproval={session.mode === 'online'
-          ? (destId, taskTitle) => requestApproval(session.gameCode, session.groupId, { destId, taskTitle, shipName: setup.shipName }).catch(() => {})
+          ? (destId, taskTitle) => requestApproval(session.gameCode, myGroupId, { destId, taskTitle, shipName: setup.shipName }).catch(() => {})
+          : undefined}
+        isChief={isChief}
+        syncedEncounter={isOnline ? syncedGroup?.encounter ?? null : null}
+        onUpdateEncounter={isOnline && isChief
+          ? (partial) => {
+              const merged = { ...(syncedGroup?.encounter ?? { destId: activeDest.id, step: 'history' as const }), ...partial };
+              patchGroup(session.gameCode, myGroupId, { encounter: merged }).catch(() => {});
+            }
           : undefined}
       />
     );
@@ -232,7 +292,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         {/* Header */}
         <div className="mb-6 flex items-center gap-4 border-b-4 border-viking-gold pb-5">
           <VikingShip color={setup.shipColor} symbol={setup.shipSymbol} size={96} />
-          <div>
+          <div className="flex-1">
             <h1 className="font-cinzel text-3xl text-viking-gold">{setup.shipName}</h1>
             <p className="font-inter text-sm text-viking-gold-soft">{SYMBOL_LABEL[setup.shipSymbol]} · {state.visited.length}/{destinations.length} destinasjoner besøkt</p>
             <p className="mt-1.5">
@@ -251,6 +311,44 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           </div>
         </div>
 
+        {/* Mannskapet — kun online, med høvding-badge og «Gi roret»-knapper */}
+        {isOnline && memberIds.length > 0 && (
+          <div className="mb-6 rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-4" data-testid="crew-panel">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="font-cinzel text-sm text-viking-gold-soft">Mannskapet ombord</p>
+              <p className="font-mono text-xs text-viking-gold-soft" data-testid="crew-count">{memberIds.length} {memberIds.length === 1 ? 'medlem' : 'medlemmer'}</p>
+            </div>
+            <ul className="space-y-1">
+              {memberIds.map((mid) => {
+                const isThisChief = chiefId === mid;
+                const isMe = mid === myMemberId;
+                return (
+                  <li key={mid} className="flex items-center justify-between rounded border border-viking-gold/20 bg-viking-darkblue/30 px-2 py-1.5">
+                    <span className="font-inter text-sm text-viking-paper">
+                      {isMe ? 'Du' : `Medlem ${mid.slice(2, 6)}`}
+                      {isThisChief && <span className="ml-2 rounded bg-viking-gold/20 px-1.5 py-0.5 font-mono text-[10px] uppercase text-viking-gold" data-testid={`chief-badge-${mid}`}>⚓ Høvding</span>}
+                    </span>
+                    {isChief && !isThisChief && (
+                      <button
+                        onClick={() => transferChief(session.gameCode, myGroupId, mid).catch(() => {})}
+                        data-testid={`give-roret-${mid}`}
+                        className="rounded border border-viking-gold/40 px-2 py-0.5 font-cinzel text-xs text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold"
+                      >
+                        Gi roret
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+            {!isChief && (
+              <p className="mt-2 text-center font-cinzel text-xs text-viking-gold-soft" data-testid="spectator-banner">
+                ⚓ Høvdingen styrer skipet — dere ser med
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Poeng */}
         <div className="mb-6 grid grid-cols-3 gap-3">
           {stats.map((s) => (
@@ -262,17 +360,17 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         </div>
 
         {/* Ferdigheter — trykk en på nivå 1–2 for å ta verdighetsprøven (§3.2) */}
-        <p className="mb-2 font-inter text-xs text-viking-gold-soft/70">Ferdigheter — trykk en med ⚔ for å ta verdighetsprøven</p>
+        <p className="mb-2 font-inter text-xs text-viking-gold-soft/70">Ferdigheter{isChief ? ' — trykk en med ⚔ for å ta verdighetsprøven' : ''}</p>
         <div className="mb-6 flex flex-wrap gap-2">
           {SKILL_KEYS.map((key) => {
             const lvl = state.skills[key] ?? 0;
-            const eligible = lvl === 1 || lvl === 2;
+            const eligible = (lvl === 1 || lvl === 2) && isChief;
             return (
               <button
                 key={key}
                 disabled={!eligible}
                 onClick={() => setActiveSkill(key)}
-                title={eligible ? 'Ta verdighetsprøven' : lvl >= 3 ? 'Mester (maks nivå)' : 'Ikke låst opp ennå'}
+                title={eligible ? 'Ta verdighetsprøven' : lvl >= 3 ? 'Mester (maks nivå)' : !isChief ? 'Kun høvdingen kan starte prøven' : 'Ikke låst opp ennå'}
                 className={`flex items-center gap-2 rounded-full border-2 px-3 py-1 transition-all ${lvl > 0 ? 'border-viking-gold/60 bg-viking-gold/10' : 'border-viking-gold/20 opacity-60'} ${eligible ? 'cursor-pointer hover:border-viking-gold hover:bg-viking-gold/20' : 'cursor-default'}`}
               >
                 <span style={{ color: skillTreeData[key].color }}>{skillTreeData[key].icon}</span>
@@ -290,12 +388,15 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           {destinations.map((dest) => {
             const visited = state.visited.includes(dest.id);
             const locked = state.locked.includes(dest.id);
+            const clickable = isChief && !locked;
             return (
               <button
                 key={dest.id}
-                disabled={locked}
+                disabled={!clickable}
                 onClick={() => setActiveDest(dest)}
-                className={`flex items-center justify-between rounded-lg border-2 px-4 py-3 text-left transition-all ${locked ? 'cursor-not-allowed border-viking-crimson/30 opacity-50' : visited ? 'border-viking-moss/60 bg-viking-moss/10 hover:border-viking-moss' : 'border-viking-gold/40 bg-viking-surface hover:border-viking-gold hover:scale-[1.02]'}`}
+                title={!isChief ? '⚓ Kun høvdingen styrer skipet' : undefined}
+                data-testid={`dest-${dest.id}`}
+                className={`flex items-center justify-between rounded-lg border-2 px-4 py-3 text-left transition-all ${locked ? 'cursor-not-allowed border-viking-crimson/30 opacity-50' : !isChief ? 'cursor-not-allowed border-viking-gold/20 opacity-60' : visited ? 'border-viking-moss/60 bg-viking-moss/10 hover:border-viking-moss' : 'border-viking-gold/40 bg-viking-surface hover:border-viking-gold hover:scale-[1.02]'}`}
               >
                 <span className="flex items-center gap-2">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: DIFFICULTY_COLOR[dest.difficulty ?? 'middels'] }} />
@@ -320,7 +421,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         {/* §7.2 Sjøslag (kun online — krever andre grupper) */}
         {session.mode === 'online' && (
           <div className="mb-8">
-            <SeaBattle code={session.gameCode} myGroupId={session.groupId} myShipName={setup.shipName} mySkills={state.skills} onResult={addReward} />
+            <SeaBattle code={session.gameCode} myGroupId={myGroupId} myShipName={setup.shipName} mySkills={state.skills} onResult={addReward} />
           </div>
         )}
 
@@ -331,7 +432,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             <button onClick={resetProgress} className="rounded border-2 border-viking-gold bg-viking-teal px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-teal/80">Nullstill reise</button>
             <button onClick={() => setShowCeremony(true)} className="rounded border-2 border-viking-gold bg-viking-gold/80 px-4 py-2 text-sm font-bold text-viking-darkblue hover:bg-viking-gold">Sluttseremoni</button>
             <button onClick={onResetSetup} className="rounded border-2 border-viking-gold bg-viking-rust px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-rust/80">Start oppsett på nytt</button>
-            <button onClick={() => { if (session.mode === 'online') removeGroup(session.gameCode, session.groupId).catch(() => {}); onLeaveGame(); }} className="rounded border-2 border-viking-gold bg-viking-crimson px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-crimson/80">Forlat spill</button>
+            <button onClick={() => { if (session.mode === 'online' && session.groupId && isChief && memberIds.length <= 1) removeGroup(session.gameCode, session.groupId).catch(() => {}); onLeaveGame(); }} className="rounded border-2 border-viking-gold bg-viking-crimson px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-crimson/80">Forlat spill</button>
             <button onClick={onSwitchRole} className="rounded border-2 border-viking-gold bg-viking-plum px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-plum/80">Bytt rolle</button>
           </div>
         </div>

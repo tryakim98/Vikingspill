@@ -1,14 +1,21 @@
 /**
  * useGameState.ts
- * Fase 1-spilltilstand (poeng, ferdigheter, besøkte/låste destinasjoner) lagret i
- * localStorage. Seedet fra gruppens startferdighet. Flyttes til Firebase i fase 2.
+ * Gruppens spilltilstand. Den kanoniske kilden avhenger av modus:
+ *  - online:  /games/{code}/groups/{groupId} i Firebase — alle medlemmer leser samme
+ *             tilstand i sanntid. Endringer skrives til Firebase via patchGroup().
+ *             Optimistisk lokalt sett → re-render via Firebase-echo for konsistens.
+ *  - offline: localStorage er kilden (fase 1-oppførsel beholdt som fallback).
+ *
+ * Setterne skal idéelt sett gates av høvding-rollen før de kalles, men hooken selv
+ * applikerer endringen uansett — det er forenklere ChiefOnly-wrapperen i komponentene
+ * som hindrer ikke-høvding fra å trigge dem.
  */
 
 import { useState, useEffect } from 'react';
 import type { SkillKey } from '../types';
 import type { GroupSetup } from './useGroupSetup';
 import type { Session } from './useSession';
-import { writeGroup } from '../lib/gameSync';
+import { patchGroup, subscribeGroup, writeGroup } from '../lib/gameSync';
 import type { FateEffect } from '../data/fateCards';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
@@ -41,21 +48,38 @@ function seed(setup: GroupSetup): GameProgress {
 
 export function useGameState(setup: GroupSetup, session: Session | null) {
   const [state, setState] = useState<GameProgress | null>(null);
+  const isOnline = session?.mode === 'online' && !!session.groupId;
 
+  // Online: lytt på Firebase som kanonisk kilde.
   useEffect(() => {
+    if (!isOnline || session?.mode !== 'online' || !session.groupId) return;
+    const unsub = subscribeGroup(session.gameCode, session.groupId, (g) => {
+      if (!g) return;
+      setState({
+        scores: g.scores,
+        skills: g.skills,
+        visited: g.visited ?? [],
+        locked: g.locked ?? [],
+      });
+    });
+    return () => unsub();
+  }, [isOnline, session]);
+
+  // Offline: les fra localStorage, seed med startferdighet om første gang.
+  useEffect(() => {
+    if (isOnline) return;
     try {
       const raw = localStorage.getItem(KEY);
       setState(raw ? (JSON.parse(raw) as GameProgress) : seed(setup));
     } catch {
       setState(seed(setup));
     }
-    // Seedes kun ved første montering; setup er stabil fra localStorage.
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOnline]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Speil gruppens identitet + tilstand til Firebase når økten er online.
-  // localStorage er alltid kilden; dette er «best effort»-sync (feiler stille offline).
+  // Offline-fallback: speil lokal state til Firebase når noe endres (legacy single-device-stier).
   useEffect(() => {
-    if (!state || session?.mode !== 'online') return;
+    if (!state || session?.mode !== 'online' || !session.groupId) return;
+    if (isOnline) return; // online-modus skriver via persist; ikke dupliser her
     writeGroup(session.gameCode, session.groupId, {
       shipName: setup.shipName,
       shipSymbol: setup.shipSymbol,
@@ -66,12 +90,21 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       visited: state.visited,
       locked: state.locked,
       updatedAt: Date.now(),
-    }).catch(() => { /* offline-fallback: localStorage beholder tilstanden */ });
-  }, [state, session, setup]);
+    }).catch(() => {});
+  }, [state, session, setup, isOnline]);
 
   const persist = (next: GameProgress) => {
-    setState(next);
-    localStorage.setItem(KEY, JSON.stringify(next));
+    setState(next); // optimistisk
+    if (isOnline && session?.mode === 'online' && session.groupId) {
+      patchGroup(session.gameCode, session.groupId, {
+        scores: next.scores,
+        skills: next.skills,
+        visited: next.visited,
+        locked: next.locked,
+      }).catch(() => {});
+    } else {
+      localStorage.setItem(KEY, JSON.stringify(next));
+    }
   };
 
   const applyOutcome = (a: OutcomeApply) => {
@@ -94,13 +127,11 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     });
   };
 
-  // Oppgrader en ferdighet etter en bestått verdighetsprøve (§3.2).
   const setSkillLevel = (skill: SkillKey, level: number) => {
     const base = state ?? seed(setup);
     persist({ ...base, skills: { ...base.skills, [skill]: level } });
   };
 
-  // Legg til poeng uten å endre besøkt/låst/ferdigheter (f.eks. Gudenes prøve-belønning).
   const addReward = (deltas: { und: number; trade: number; rep: number }) => {
     const base = state ?? seed(setup);
     persist({
@@ -113,9 +144,6 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     });
   };
 
-  // Et skjebne-kort kan ramme både poeng OG en ferdighet samtidig. addReward og
-  // setSkillLevel leser begge fra samme `state`-snapshot, så å kalle dem etter hverandre
-  // ville fått den andre til å overskrive den første. Vi gjør begge i én persist.
   const applyFateEffect = (effect: FateEffect) => {
     const base = state ?? seed(setup);
     const skills = { ...base.skills };

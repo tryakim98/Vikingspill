@@ -31,7 +31,21 @@
             "skills":  { "$skill": { ".validate": "newData.isNumber()" } },
             "visited": { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
             "locked":  { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
-            "updatedAt": { ".validate": "newData.isNumber()" },
+            "updatedAt":     { ".validate": "newData.isNumber()" },
+            "chiefId":       { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "activeDestId":  { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "activeSkillKey":{ ".validate": "newData.isString() && newData.val().length <= 24" },
+            "showCeremony":  { ".validate": "newData.isBoolean()" },
+            "members": {
+              "$memberId": {
+                "joinedAt": { ".validate": "newData.isNumber()" },
+                "$other":   { ".validate": false }
+              }
+            },
+            "encounter": {
+              ".validate": "newData.hasChildren(['destId','step'])",
+              "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" }
+            },
             "$other": { ".validate": false }
           }
         },

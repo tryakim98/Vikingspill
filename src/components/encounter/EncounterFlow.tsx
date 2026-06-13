@@ -11,6 +11,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import type { Destination, Choice, RollOdds, SkillKey } from '../../types';
+import type { SyncedEncounter } from '../../lib/gameSync';
 import { skillTreeData } from '../../data';
 import {
   rollDice,
@@ -37,6 +38,11 @@ interface EncounterFlowProps {
   onExit: () => void;
   /** Sett kun når online — viser «Be om godkjenning» på oppgavesiden (§8.3). */
   onRequestApproval?: (destId: string, taskTitle: string) => void;
+  /** Multi-enhet: når satt, leses state fra Firebase i stedet for lokal useState,
+   *  og setterne skriver via onUpdateEncounter. Ikke-høvding ser banner i stedet for knapper. */
+  isChief?: boolean;
+  syncedEncounter?: SyncedEncounter | null;
+  onUpdateEncounter?: (partial: Partial<SyncedEncounter>) => void;
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -83,17 +89,51 @@ function OddsBar({ baseRoll }: { baseRoll: RollOdds }) {
   );
 }
 
-export default function EncounterFlow({ destination, skills, onComplete, onExit, onRequestApproval }: EncounterFlowProps) {
+export default function EncounterFlow({
+  destination, skills, onComplete, onExit, onRequestApproval,
+  isChief = true, syncedEncounter = null, onUpdateEncounter,
+}: EncounterFlowProps) {
   const d = destination;
-  const [step, setStep] = useState<Step>('history');
-  const [approvalSent, setApprovalSent] = useState(false);
-  const [kmAnswer, setKmAnswer] = useState<number | null>(null);
-  const [quizIdx, setQuizIdx] = useState(0);
-  const [quizCorrect, setQuizCorrect] = useState(0);
-  const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
-  const [quizBonus, setQuizBonus] = useState(0);
-  const [choice, setChoice] = useState<Choice | null>(null);
-  const [roll, setRoll] = useState<RollResult | null>(null);
+  const syncMode = !!syncedEncounter;
+
+  // Synket eller lokal state — én og samme variabel for resten av komponenten.
+  const [_step, _setStep] = useState<Step>('history');
+  const [_approvalSent, _setApprovalSent] = useState(false);
+  const [_kmAnswer, _setKmAnswer] = useState<number | null>(null);
+  const [_quizIdx, _setQuizIdx] = useState(0);
+  const [_quizCorrect, _setQuizCorrect] = useState(0);
+  const [_quizAnswer, _setQuizAnswer] = useState<number | null>(null);
+  const [_quizBonus, _setQuizBonus] = useState(0);
+  const [_choice, _setChoice] = useState<Choice | null>(null);
+  const [_roll, _setRoll] = useState<RollResult | null>(null);
+
+  const step = syncMode ? (syncedEncounter?.step ?? 'history') : _step;
+  const approvalSent = syncMode ? (syncedEncounter?.approvalSent ?? false) : _approvalSent;
+  const kmAnswer = syncMode ? (syncedEncounter?.kmAnswer ?? null) : _kmAnswer;
+  const quizIdx = syncMode ? (syncedEncounter?.quizIdx ?? 0) : _quizIdx;
+  const quizCorrect = syncMode ? (syncedEncounter?.quizCorrect ?? 0) : _quizCorrect;
+  const quizAnswer = syncMode ? (syncedEncounter?.quizAnswer ?? null) : _quizAnswer;
+  const quizBonus = syncMode ? (syncedEncounter?.quizBonus ?? 0) : _quizBonus;
+  const choiceId = syncMode ? (syncedEncounter?.choiceId ?? null) : (_choice?.id ?? null);
+  const choice = choiceId ? d.choices.find((c) => c.id === choiceId) ?? null : null;
+  const rollSync = syncMode ? syncedEncounter?.roll ?? null : null;
+  const roll: RollResult | null = syncMode
+    ? (rollSync ? { raw: rollSync.raw, effective: rollSync.effective, modifier: rollSync.modifier, tier: rollSync.tier as RollResult['tier'] } : null)
+    : _roll;
+
+  // Setter-wrappere: skriver til Firebase i synkmodus, ellers oppdaterer lokal state.
+  // Ikke-høvding må uansett ikke trigge skriv — vi gater på UI-nivå.
+  const setStep = (v: Step) => syncMode ? onUpdateEncounter?.({ step: v }) : _setStep(v);
+  const setApprovalSent = (v: boolean) => syncMode ? onUpdateEncounter?.({ approvalSent: v }) : _setApprovalSent(v);
+  const setKmAnswer = (v: number | null) => syncMode ? onUpdateEncounter?.({ kmAnswer: v }) : _setKmAnswer(v);
+  const setQuizIdx = (v: number) => syncMode ? onUpdateEncounter?.({ quizIdx: v }) : _setQuizIdx(v);
+  const setQuizCorrect = (v: number) => syncMode ? onUpdateEncounter?.({ quizCorrect: v }) : _setQuizCorrect(v);
+  const setQuizAnswer = (v: number | null) => syncMode ? onUpdateEncounter?.({ quizAnswer: v }) : _setQuizAnswer(v);
+  const setQuizBonus = (v: number) => syncMode ? onUpdateEncounter?.({ quizBonus: v }) : _setQuizBonus(v);
+  const setChoice = (c: Choice | null) => syncMode ? onUpdateEncounter?.({ choiceId: c?.id ?? null }) : _setChoice(c);
+  const setRoll = (r: RollResult | null) => syncMode
+    ? onUpdateEncounter?.({ roll: r ? { raw: r.raw, effective: r.effective, modifier: r.modifier, tier: r.tier } : null })
+    : _setRoll(r);
 
   // Kort bølgeeffekt idet vi seiler inn til destinasjonen (§10).
   useEffect(() => { playSound('waves'); }, []);
@@ -105,16 +145,24 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
     playMusic(reflective ? 'reflective' : 'adventure');
   }, [step]);
 
-  // Quiz-overgang: krigshorn + fakta forsegles, så vises quizen.
+  // Quiz-overgang: krigshorn + fakta forsegles, så vises quizen. Kun høvdingen
+  // utløser tids-overgangen til 'quiz' (alle får oppdateringen via Firebase-echo).
   useEffect(() => {
     if (step !== 'transition') return;
     playSound('horn');
+    if (!isChief) return;
     const t = setTimeout(() => setStep('quiz'), 1500);
     return () => clearTimeout(t);
-  }, [step]);
+  }, [step, isChief]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const modifier = choice ? quizBonus + skillBonusForChoice(choice, skills) : 0;
   const outcome = choice && roll ? choice.outcomes[roll.tier] : null;
+
+  const ChiefBanner = () => (
+    <p className="mt-8 text-center font-cinzel text-viking-gold-soft" data-testid="encounter-spectator-banner">
+      ⚓ Høvdingen styrer skipet — dere ser med
+    </p>
+  );
 
   // 1) HISTORIE
   if (step === 'history') {
@@ -126,7 +174,9 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
         </div>
         <h1 className="mb-4 font-cinzel text-3xl font-bold text-viking-gold">{d.name}</h1>
         <Html html={d.history ?? ''} className="block font-inter leading-relaxed text-viking-paper/90 [&_strong]:text-viking-gold-soft" />
-        <button onClick={() => setStep('kulturmote')} className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
+        {isChief ? (
+          <button onClick={() => setStep('kulturmote')} className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
+        ) : <ChiefBanner />}
       </Shell>
     );
   }
@@ -146,12 +196,12 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
             correct={km.kulturmøteSpørsmål.correct}
             feedback={km.kulturmøteSpørsmål.feedback}
             answer={kmAnswer}
-            onAnswer={setKmAnswer}
+            onAnswer={isChief ? setKmAnswer : () => {}}
           />
         </div>
-        {kmAnswer !== null && (
+        {kmAnswer !== null && (isChief ? (
           <button onClick={() => setStep('oppgave')} className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
-        )}
+        ) : <ChiefBanner />)}
       </Shell>
     );
   }
@@ -191,10 +241,12 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
             )}
           </div>
         </div>
-        <div className="mt-7 flex flex-wrap gap-3">
-          <button onClick={() => setStep('transition')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Start stedsquiz →</button>
-          <button onClick={() => { setQuizBonus(0); setStep('valg'); }} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Hopp til valgene</button>
-        </div>
+        {isChief ? (
+          <div className="mt-7 flex flex-wrap gap-3">
+            <button onClick={() => setStep('transition')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Start stedsquiz →</button>
+            <button onClick={() => { setQuizBonus(0); setStep('valg'); }} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Hopp til valgene</button>
+          </div>
+        ) : <ChiefBanner />}
       </Shell>
     );
   }
@@ -256,17 +308,17 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
             correct={q.correct}
             feedback={q.feedback}
             answer={quizAnswer}
-            onAnswer={(i) => { setQuizAnswer(i); if (i === q.correct) setQuizCorrect((c) => c + 1); }}
+            onAnswer={isChief ? ((i) => { setQuizAnswer(i); if (i === q.correct) setQuizCorrect(quizCorrect + 1); }) : () => {}}
           />
         </div>
-        {quizAnswer !== null && (
+        {quizAnswer !== null && (isChief ? (
           <button
             onClick={() => {
               if (last) {
                 setQuizBonus(Math.min(2, quizCorrect));
                 setStep('valg');
               } else {
-                setQuizIdx((n) => n + 1);
+                setQuizIdx(quizIdx + 1);
                 setQuizAnswer(null);
               }
             }}
@@ -274,7 +326,7 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
           >
             {last ? 'Til valgene →' : 'Neste spørsmål →'}
           </button>
-        )}
+        ) : <ChiefBanner />)}
       </Shell>
     );
   }
@@ -302,17 +354,20 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
                 <p className="mb-3 font-inter text-sm text-viking-paper/85">{c.desc}</p>
                 {reqText && <p className="mb-2 font-mono text-xs text-viking-crimson">{available ? '✓' : '🔒'} Krever {reqText}</p>}
                 <OddsBar baseRoll={c.baseRoll} />
-                <button
-                  disabled={!available}
-                  onClick={() => { setChoice(c); setRoll(null); setStep('roll'); }}
-                  className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Velg dette
-                </button>
+                {isChief ? (
+                  <button
+                    disabled={!available}
+                    onClick={() => { setChoice(c); setRoll(null); setStep('roll'); }}
+                    className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Velg dette
+                  </button>
+                ) : null}
               </div>
             );
           })}
         </div>
+        {!isChief && <ChiefBanner />}
       </Shell>
     );
   }
@@ -331,12 +386,14 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
             <p className="mt-1 text-viking-gold">Terningmodifikator: +{modifier}</p>
           </div>
         </div>
-        <button
-          onClick={() => { setRoll(rollDice(choice.baseRoll, modifier)); playSound('dice'); setStep('rolling'); }}
-          className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
-        >
-          ⚄ Kast terningen
-        </button>
+        {isChief ? (
+          <button
+            onClick={() => { setRoll(rollDice(choice.baseRoll, modifier)); playSound('dice'); setStep('rolling'); }}
+            className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+          >
+            ⚄ Kast terningen
+          </button>
+        ) : <ChiefBanner />}
       </Shell>
     );
   }
@@ -392,17 +449,19 @@ export default function EncounterFlow({ destination, skills, onComplete, onExit,
           <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">Lærdom</p>
           <p className="font-inter text-sm italic text-viking-paper/90">{choice.lesson}</p>
         </div>
-        <button
-          onClick={() => onComplete({
-            destId: d.id,
-            deltas: { und: outcome.und, trade: outcome.trade, rep: outcome.rep },
-            skillReward: choice.skillReward,
-            locks: choice.locks ?? [],
-          })}
-          className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
-        >
-          ⛵ Seil videre
-        </button>
+        {isChief ? (
+          <button
+            onClick={() => onComplete({
+              destId: d.id,
+              deltas: { und: outcome.und, trade: outcome.trade, rep: outcome.rep },
+              skillReward: choice.skillReward,
+              locks: choice.locks ?? [],
+            })}
+            className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+          >
+            ⛵ Seil videre
+          </button>
+        ) : <ChiefBanner />}
       </Shell>
     );
   }

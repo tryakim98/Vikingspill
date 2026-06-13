@@ -8,10 +8,29 @@
  * Alle skriv er «best effort» — feiler de (offline), beholder appen localStorage.
  */
 
-import { ref, set, get, remove, update, onValue, type Unsubscribe } from 'firebase/database';
+import { ref, set, get, remove, update, runTransaction, onValue, type Unsubscribe } from 'firebase/database';
 import { db } from './firebase';
 import type { SkillKey } from '../types';
 import type { FateEffect } from '../data/fateCards';
+
+export interface GroupMember {
+  joinedAt: number;
+}
+
+export type EncounterStep = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'valg' | 'roll' | 'rolling' | 'resultat';
+
+export interface SyncedEncounter {
+  destId: string;
+  step: EncounterStep;
+  approvalSent?: boolean;
+  kmAnswer?: number | null;
+  quizIdx?: number;
+  quizCorrect?: number;
+  quizAnswer?: number | null;
+  quizBonus?: number;
+  choiceId?: string | null;
+  roll?: { raw: number; effective: number; modifier: number; tier: string } | null;
+}
 
 export interface SyncedGroup {
   shipName: string;
@@ -23,6 +42,13 @@ export interface SyncedGroup {
   visited: string[];
   locked: string[];
   updatedAt: number;
+  // Multi-enhet-felt (§ multi-enhet med høvding-rolle):
+  chiefId?: string;                     // memberId til høvdingen
+  members?: Record<string, GroupMember>; // alle koblede enheter i gruppa
+  activeDestId?: string | null;          // hvilken destinasjon høvdingen er på
+  activeSkillKey?: SkillKey | null;      // verdighetsprøve aktiv?
+  showCeremony?: boolean;                // sluttseremoni vises?
+  encounter?: SyncedEncounter | null;    // encounter-state synket til alle medlemmer
 }
 
 /** Lærer: opprett et nytt spill. */
@@ -46,6 +72,55 @@ export function removeGroup(code: string, groupId: string): Promise<void> {
   return remove(ref(db, `games/${code}/groups/${groupId}`));
 }
 
+/** Patch et delsett av gruppens felter (scores/skills/visited/locked/UI-state). */
+export function patchGroup(code: string, groupId: string, patch: Partial<SyncedGroup>): Promise<void> {
+  return update(ref(db, `games/${code}/groups/${groupId}`), { ...patch, updatedAt: Date.now() });
+}
+
+/** Lytt på én gruppe — brukes av alle medlemmer for sanntidssync. */
+export function subscribeGroup(
+  code: string, groupId: string, callback: (group: SyncedGroup | null) => void,
+): Unsubscribe {
+  return onValue(ref(db, `games/${code}/groups/${groupId}`), (snap) => {
+    const g = snap.val() as SyncedGroup | null;
+    if (g) {
+      g.visited = g.visited ?? [];
+      g.locked = g.locked ?? [];
+    }
+    callback(g);
+  });
+}
+
+// === Medlemmer + høvding (multi-enhet med høvding-rolle) =========================
+
+/** Bli med i en eksisterende gruppe som nytt medlem. Hvis det ikke finnes en høvding
+ *  ennå (transaksjon mot chiefId), blir denne medlemmen høvding. */
+export async function joinGroupAsMember(code: string, groupId: string, memberId: string): Promise<void> {
+  await set(ref(db, `games/${code}/groups/${groupId}/members/${memberId}`), { joinedAt: Date.now() });
+  await runTransaction(ref(db, `games/${code}/groups/${groupId}/chiefId`), (current) => current ?? memberId);
+}
+
+/** Forlat gruppen — fjern medlem-noden. Hvis du er høvding, gi roret videre om mulig. */
+export async function leaveGroupAsMember(code: string, groupId: string, memberId: string): Promise<void> {
+  // Hvis jeg var høvdingen, gi roret til neste medlem (om noen finnes)
+  await runTransaction(ref(db, `games/${code}/groups/${groupId}`), (g) => {
+    if (!g) return g;
+    const members = { ...(g.members ?? {}) };
+    delete members[memberId];
+    if (g.chiefId === memberId) {
+      const next = Object.keys(members)[0];
+      g.chiefId = next ?? null;
+    }
+    g.members = members;
+    return g;
+  });
+}
+
+/** Høvdingen gir roret til et annet medlem. Frontend bør gate dette til chief. */
+export function transferChief(code: string, groupId: string, newChiefId: string): Promise<void> {
+  return set(ref(db, `games/${code}/groups/${groupId}/chiefId`), newChiefId);
+}
+
 /** Lærer: lytt på alle grupper i et spill. Returnerer en avmeldingsfunksjon. */
 export function subscribeGroups(
   code: string,
@@ -61,6 +136,12 @@ export function subscribeGroups(
     }
     callback(groups);
   });
+}
+
+/** Engangs-snapshot av alle grupper i spillet (brukes av GroupPicker). */
+export async function listGroups(code: string): Promise<Record<string, SyncedGroup>> {
+  const snap = await get(ref(db, `games/${code}/groups`));
+  return (snap.val() as Record<string, SyncedGroup> | null) ?? {};
 }
 
 // === Oppgavegodkjenning (§8.3) ====================================================
