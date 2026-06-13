@@ -126,7 +126,15 @@ export interface Destination {
   task: Task;              // v2-oppgave (erstatter gammel task, §14)
   episkeKulturmote: EpiskeKulturmote;
   stedsquiz: StedsQuizQuestion[];
+
+  // Handelsvarer som tildeles ved fullføring (1-2 per destinasjon, tematisk autentiske).
+  // IKKE inkludert: mennesker/treller/slaver — bare materielle varer (se data/tradeGoods.ts).
+  goodsReward: TradeGoodId[];
 }
+
+export type TradeGoodId =
+  | 'pelsverk' | 'solv' | 'jern' | 'rav'
+  | 'silke' | 'hvalrosstann' | 'krydder' | 'salt';
 
 // ========================
 // EPISK KULTURMØTE (v2)

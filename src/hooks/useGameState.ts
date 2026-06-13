@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import type { SkillKey } from '../types';
+import type { SkillKey, TradeGoodId } from '../types';
 import type { GroupSetup } from './useGroupSetup';
 import type { Session } from './useSession';
 import { patchGroup, subscribeGroup, writeGroup } from '../lib/gameSync';
@@ -26,6 +26,7 @@ export interface GameProgress {
   skills: Record<SkillKey, number>;
   visited: string[];
   locked: string[];
+  goods: Partial<Record<TradeGoodId, number>>;
 }
 
 export interface OutcomeApply {
@@ -33,6 +34,7 @@ export interface OutcomeApply {
   deltas: { und: number; trade: number; rep: number };
   skillReward: Partial<Record<SkillKey, number>> | null;
   locks: string[];
+  goodsReward?: TradeGoodId[];
 }
 
 function seed(setup: GroupSetup): GameProgress {
@@ -43,6 +45,7 @@ function seed(setup: GroupSetup): GameProgress {
     skills,
     visited: [],
     locked: [],
+    goods: {},
   };
 }
 
@@ -60,6 +63,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         skills: g.skills,
         visited: g.visited ?? [],
         locked: g.locked ?? [],
+        goods: g.goods ?? {},
       });
     });
     return () => unsub();
@@ -89,6 +93,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       skills: state.skills,
       visited: state.visited,
       locked: state.locked,
+      goods: state.goods,
       updatedAt: Date.now(),
     }).catch(() => {});
   }, [state, session, setup, isOnline]);
@@ -101,6 +106,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         skills: next.skills,
         visited: next.visited,
         locked: next.locked,
+        goods: next.goods,
       }).catch(() => {});
     } else {
       localStorage.setItem(KEY, JSON.stringify(next));
@@ -115,6 +121,12 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         skills[k] = (skills[k] ?? 0) + v;
       }
     }
+    const goods: Partial<Record<TradeGoodId, number>> = { ...(base.goods ?? {}) };
+    if (a.goodsReward) {
+      for (const g of a.goodsReward) {
+        goods[g] = (goods[g] ?? 0) + 1;
+      }
+    }
     persist({
       scores: {
         culturalUnderstanding: base.scores.culturalUnderstanding + a.deltas.und,
@@ -124,6 +136,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       skills,
       visited: base.visited.includes(a.destId) ? base.visited : [...base.visited, a.destId],
       locked: [...new Set([...base.locked, ...a.locks])],
+      goods,
     });
   };
 

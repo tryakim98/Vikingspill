@@ -10,7 +10,7 @@
 
 import { ref, set, get, remove, update, runTransaction, onValue, type Unsubscribe } from 'firebase/database';
 import { db } from './firebase';
-import type { SkillKey } from '../types';
+import type { SkillKey, TradeGoodId } from '../types';
 import type { FateEffect } from '../data/fateCards';
 
 export interface GroupMember {
@@ -41,6 +41,7 @@ export interface SyncedGroup {
   skills: Record<SkillKey, number>;
   visited: string[];
   locked: string[];
+  goods?: Partial<Record<TradeGoodId, number>>;
   updatedAt: number;
   // Multi-enhet-felt (§ multi-enhet med høvding-rolle):
   chiefId?: string;                     // memberId til høvdingen

@@ -126,14 +126,28 @@ export default function EncounterFlow({
   const setStep = (v: Step) => syncMode ? onUpdateEncounter?.({ step: v }) : _setStep(v);
   const setApprovalSent = (v: boolean) => syncMode ? onUpdateEncounter?.({ approvalSent: v }) : _setApprovalSent(v);
   const setKmAnswer = (v: number | null) => syncMode ? onUpdateEncounter?.({ kmAnswer: v }) : _setKmAnswer(v);
-  const setQuizIdx = (v: number) => syncMode ? onUpdateEncounter?.({ quizIdx: v }) : _setQuizIdx(v);
-  const setQuizCorrect = (v: number) => syncMode ? onUpdateEncounter?.({ quizCorrect: v }) : _setQuizCorrect(v);
-  const setQuizAnswer = (v: number | null) => syncMode ? onUpdateEncounter?.({ quizAnswer: v }) : _setQuizAnswer(v);
-  const setQuizBonus = (v: number) => syncMode ? onUpdateEncounter?.({ quizBonus: v }) : _setQuizBonus(v);
-  const setChoice = (c: Choice | null) => syncMode ? onUpdateEncounter?.({ choiceId: c?.id ?? null }) : _setChoice(c);
-  const setRoll = (r: RollResult | null) => syncMode
-    ? onUpdateEncounter?.({ roll: r ? { raw: r.raw, effective: r.effective, modifier: r.modifier, tier: r.tier } : null })
-    : _setRoll(r);
+
+  // Når flere felter skal endres i én og samme handler (f.eks. «Hopp til valgene»
+  // setter både quizBonus og step), MÅ vi gjøre ett samlet skriv — to separate
+  // patchGroup-kall raser mot hverandre (samme syncedGroup-snapshot i begge closures)
+  // og det siste skrivet overskriver det første.
+  const updateMany = (partial: Partial<SyncedEncounter>) => {
+    if (syncMode) { onUpdateEncounter?.(partial); return; }
+    if (partial.step !== undefined) _setStep(partial.step);
+    if (partial.approvalSent !== undefined) _setApprovalSent(partial.approvalSent);
+    if (partial.kmAnswer !== undefined) _setKmAnswer(partial.kmAnswer);
+    if (partial.quizIdx !== undefined) _setQuizIdx(partial.quizIdx);
+    if (partial.quizCorrect !== undefined) _setQuizCorrect(partial.quizCorrect);
+    if (partial.quizAnswer !== undefined) _setQuizAnswer(partial.quizAnswer);
+    if (partial.quizBonus !== undefined) _setQuizBonus(partial.quizBonus);
+    if (partial.choiceId !== undefined) {
+      const c = partial.choiceId ? d.choices.find((ch) => ch.id === partial.choiceId) ?? null : null;
+      _setChoice(c);
+    }
+    if (partial.roll !== undefined) {
+      _setRoll(partial.roll ? { raw: partial.roll.raw, effective: partial.roll.effective, modifier: partial.roll.modifier, tier: partial.roll.tier as RollResult['tier'] } : null);
+    }
+  };
 
   // Kort bølgeeffekt idet vi seiler inn til destinasjonen (§10).
   useEffect(() => { playSound('waves'); }, []);
@@ -244,7 +258,7 @@ export default function EncounterFlow({
         {isChief ? (
           <div className="mt-7 flex flex-wrap gap-3">
             <button onClick={() => setStep('transition')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Start stedsquiz →</button>
-            <button onClick={() => { setQuizBonus(0); setStep('valg'); }} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Hopp til valgene</button>
+            <button onClick={() => updateMany({ quizBonus: 0, step: 'valg' })} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Hopp til valgene</button>
           </div>
         ) : <ChiefBanner />}
       </Shell>
@@ -308,19 +322,14 @@ export default function EncounterFlow({
             correct={q.correct}
             feedback={q.feedback}
             answer={quizAnswer}
-            onAnswer={isChief ? ((i) => { setQuizAnswer(i); if (i === q.correct) setQuizCorrect(quizCorrect + 1); }) : () => {}}
+            onAnswer={isChief ? ((i) => updateMany({ quizAnswer: i, ...(i === q.correct ? { quizCorrect: quizCorrect + 1 } : {}) })) : () => {}}
           />
         </div>
         {quizAnswer !== null && (isChief ? (
           <button
             onClick={() => {
-              if (last) {
-                setQuizBonus(Math.min(2, quizCorrect));
-                setStep('valg');
-              } else {
-                setQuizIdx(quizIdx + 1);
-                setQuizAnswer(null);
-              }
+              if (last) updateMany({ quizBonus: Math.min(2, quizCorrect), step: 'valg' });
+              else updateMany({ quizIdx: quizIdx + 1, quizAnswer: null });
             }}
             className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
           >
@@ -357,7 +366,7 @@ export default function EncounterFlow({
                 {isChief ? (
                   <button
                     disabled={!available}
-                    onClick={() => { setChoice(c); setRoll(null); setStep('roll'); }}
+                    onClick={() => updateMany({ choiceId: c.id, roll: null, step: 'roll' })}
                     className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Velg dette
@@ -388,7 +397,11 @@ export default function EncounterFlow({
         </div>
         {isChief ? (
           <button
-            onClick={() => { setRoll(rollDice(choice.baseRoll, modifier)); playSound('dice'); setStep('rolling'); }}
+            onClick={() => {
+              const r = rollDice(choice.baseRoll, modifier);
+              playSound('dice');
+              updateMany({ roll: { raw: r.raw, effective: r.effective, modifier: r.modifier, tier: r.tier }, step: 'rolling' });
+            }}
             className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
           >
             ⚄ Kast terningen
@@ -456,6 +469,7 @@ export default function EncounterFlow({
               deltas: { und: outcome.und, trade: outcome.trade, rep: outcome.rep },
               skillReward: choice.skillReward,
               locks: choice.locks ?? [],
+              goodsReward: d.goodsReward,
             })}
             className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
           >

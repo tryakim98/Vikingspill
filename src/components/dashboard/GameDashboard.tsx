@@ -15,6 +15,7 @@ import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
 import SeaJourney, { SAILING_DURATION_S } from './SeaJourney';
+import TradeGoodsPanel from './TradeGoodsPanel';
 import type { Session } from '../../hooks/useSession';
 import { removeGroup, requestApproval, subscribeGroup, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent } from '../../lib/gameSync';
 import { chapters, chapterCompleted } from '../../data/chapters';
@@ -388,13 +389,18 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         )}
 
         {/* Poeng */}
-        <div className="mb-6 grid grid-cols-3 gap-3">
+        <div className="mb-4 grid grid-cols-3 gap-3">
           {stats.map((s) => (
             <div key={s.label} className="rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-3 text-center">
               <p className="font-mono text-xs text-viking-gold-soft">{s.label}</p>
               <p className="font-cinzel text-3xl font-bold text-viking-gold">{s.v}</p>
             </div>
           ))}
+        </div>
+
+        {/* Handelsvarer — lag oppå poengene */}
+        <div className="mb-6">
+          <TradeGoodsPanel goods={state.goods ?? {}} />
         </div>
 
         {/* Ferdigheter — trykk en på nivå 1–2 for å ta verdighetsprøven (§3.2) */}

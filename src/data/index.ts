@@ -10,3 +10,4 @@ export { destinations, getDestinationById, getAllDestinations, getRandomDestinat
 export { skillQuizBank, getQuizQuestionsForSkill, isQuizPassed } from './quizBank';
 export { gudenesProveChallenges, holmgangDueller, randomGudenesProve, randomHolmgangDuell } from './mekanikk';
 export { fateCards, fateEffectLines, type FateEffect, type FateCard } from './fateCards';
+export { TRADE_GOODS, GOODS_BY_DEST, type TradeGood, type TradeGoodInfo } from './tradeGoods';
