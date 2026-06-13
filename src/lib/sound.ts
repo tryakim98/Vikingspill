@@ -17,7 +17,9 @@ export type SoundKey =
   | 'thunder'  // torden ved katastrofe / skjebne-kort
   | 'trial'    // torden + varsel ved Gudenes prøve
   | 'fanfare'  // episk fanfare ved trumf
-  | 'bell';    // klokkeklang ved ny ferdighet
+  | 'bell'     // klokkeklang ved ny ferdighet
+  | 'wheel-tick'  // tikkende/knirkende lyd mens skjebnehjulet snurrer (loopes)
+  | 'wheel-klakk';// skarpt klakk når hjulet lander
 
 // NB: background-sea.mp3 (sjøsang) og background.mp3 (vikingfolk) er de lange
 // bakgrunnssporene — håndteres av lib/music.ts, ikke her.
@@ -25,14 +27,16 @@ export type SoundKey =
 interface SoundDef { file: string; volume: number; loop?: boolean }
 
 const SOUNDS: Record<SoundKey, SoundDef> = {
-  waves:   { file: 'waves.mp3',        volume: 0.5 },
-  horn:    { file: 'war-horn.mp3',     volume: 0.7 },
-  dice:    { file: 'dice-roll.mp3',    volume: 0.7 },
-  silver:  { file: 'silver-clink.mp3', volume: 0.7 },
-  thunder: { file: 'thunder.mp3',      volume: 0.8 },
-  trial:   { file: 'gods-trial.mp3',   volume: 0.85 },
-  fanfare: { file: 'fanfare.mp3',      volume: 0.8 },
-  bell:    { file: 'bell.mp3',         volume: 0.7 },
+  waves:         { file: 'waves.mp3',        volume: 0.5 },
+  horn:          { file: 'war-horn.mp3',     volume: 0.7 },
+  dice:          { file: 'dice-roll.mp3',    volume: 0.7 },
+  silver:        { file: 'silver-clink.mp3', volume: 0.7 },
+  thunder:       { file: 'thunder.mp3',      volume: 0.8 },
+  trial:         { file: 'gods-trial.mp3',   volume: 0.85 },
+  fanfare:       { file: 'fanfare.mp3',      volume: 0.8 },
+  bell:          { file: 'bell.mp3',         volume: 0.7 },
+  'wheel-tick':  { file: 'wheel-tick.mp3',   volume: 0.55, loop: true },
+  'wheel-klakk': { file: 'wheel-klakk.mp3',  volume: 0.85 },
 };
 
 const BASE = `${import.meta.env.BASE_URL}sounds/`;

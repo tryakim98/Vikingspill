@@ -25,6 +25,8 @@ under Gudenes prøve / skjebne-kort.
 | `gods-trial.mp3` | Gudenes prøve utløses | «dramatic thunder impact» |
 | `fanfare.mp3` | «Trumf» (beste utfall) | «epic fanfare» |
 | `bell.mp3` | Ferdighet låses opp | «bell ding / chime» |
+| `wheel-tick.mp3` | Mens Skjebnehjulet snurrer — looper, stopper ved landing (~1–2 sek) | «wheel ticking / clockwork loop» |
+| `wheel-klakk.mp3` | Skarpt klakk når Skjebnehjulet lander (~0,5 sek) | «wood thump / impact hit» |
 
 Volum per lyd justeres i `src/lib/sound.ts` / `src/lib/music.ts`.
 Lyd kan slås av/på med 🔊-knappen i hjørnet (lagres i localStorage).
