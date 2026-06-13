@@ -104,7 +104,6 @@ export default function TeacherPanel() {
       text: card.text,
       targetMode: card.targetMode,
       effect: card.effect,
-      effectLabel: card.effectLabel,
       at: Date.now(),
     };
     if (card.targetMode === 'group') {

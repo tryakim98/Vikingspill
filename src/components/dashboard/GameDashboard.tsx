@@ -40,7 +40,7 @@ interface Props {
 }
 
 export default function GameDashboard({ setup, session, onResetSetup, onLeaveGame, onSwitchRole }: Props) {
-  const { state, applyOutcome, setSkillLevel, addReward, resetProgress } = useGameState(setup, session);
+  const { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, resetProgress } = useGameState(setup, session);
   const [activeDest, setActiveDest] = useState<Destination | null>(null);
   const [activeSkill, setActiveSkill] = useState<SkillKey | null>(null);
   const [showCeremony, setShowCeremony] = useState(false);
@@ -144,13 +144,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         event={activeFate}
         affected={affected}
         onDone={() => {
-          if (affected) {
-            if (activeFate.effect.kind === 'score') {
-              addReward({ und: activeFate.effect.und ?? 0, trade: activeFate.effect.trade ?? 0, rep: activeFate.effect.rep ?? 0 });
-            } else {
-              setSkillLevel(activeFate.effect.skill, Math.max(0, (state.skills[activeFate.effect.skill] ?? 0) + activeFate.effect.delta));
-            }
-          }
+          if (affected) applyFateEffect(activeFate.effect);
           setActiveFate(null);
         }}
       />

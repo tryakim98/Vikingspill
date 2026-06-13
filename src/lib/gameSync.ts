@@ -11,6 +11,7 @@
 import { ref, set, get, remove, update, onValue, type Unsubscribe } from 'firebase/database';
 import { db } from './firebase';
 import type { SkillKey } from '../types';
+import type { FateEffect } from '../data/fateCards';
 
 export interface SyncedGroup {
   shipName: string;
@@ -198,8 +199,7 @@ export interface FateEvent {
   targetName?: string;
   condition?: { skill: SkillKey; below: number };
   conditionLabel?: string;
-  effect: { kind: 'score'; und?: number; trade?: number; rep?: number } | { kind: 'skill'; skill: SkillKey; delta: number };
-  effectLabel: string;
+  effect: FateEffect;
   at: number;
 }
 

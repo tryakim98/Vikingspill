@@ -9,6 +9,7 @@ import type { SkillKey } from '../types';
 import type { GroupSetup } from './useGroupSetup';
 import type { Session } from './useSession';
 import { writeGroup } from '../lib/gameSync';
+import type { FateEffect } from '../data/fateCards';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const KEY = 'vikingspill_state';
@@ -112,7 +113,28 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     });
   };
 
+  // Et skjebne-kort kan ramme både poeng OG en ferdighet samtidig. addReward og
+  // setSkillLevel leser begge fra samme `state`-snapshot, så å kalle dem etter hverandre
+  // ville fått den andre til å overskrive den første. Vi gjør begge i én persist.
+  const applyFateEffect = (effect: FateEffect) => {
+    const base = state ?? seed(setup);
+    const skills = { ...base.skills };
+    if (effect.skill) {
+      const cur = skills[effect.skill.key] ?? 0;
+      skills[effect.skill.key] = Math.max(0, Math.min(3, cur + effect.skill.delta));
+    }
+    persist({
+      ...base,
+      scores: {
+        culturalUnderstanding: base.scores.culturalUnderstanding + (effect.und ?? 0),
+        tradeGain: base.scores.tradeGain + (effect.trade ?? 0),
+        reputation: base.scores.reputation + (effect.rep ?? 0),
+      },
+      skills,
+    });
+  };
+
   const resetProgress = () => persist(seed(setup));
 
-  return { state, applyOutcome, setSkillLevel, addReward, resetProgress };
+  return { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, resetProgress };
 }
