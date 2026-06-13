@@ -17,8 +17,9 @@ import EndCeremony from '../ceremony/EndCeremony';
 import SeaJourney, { SAILING_DURATION_S } from './SeaJourney';
 import TradeGoodsPanel from './TradeGoodsPanel';
 import SvenneproveTrial from './SvenneproveTrial';
+import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeGroup, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent, type TradeOffer } from '../../lib/gameSync';
 import { chapters, chapterCompleted } from '../../data/chapters';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
 import SeaBattle from '../duel/SeaBattle';
@@ -50,6 +51,18 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   // og synket UI-tilstand (aktiv destinasjon m.m.).
   const isOnline = session.mode === 'online' && !!session.groupId;
   const myGroupId = session.groupId ?? '';
+
+  // Handelstorg — andre grupper + tilbud, synket fra Firebase.
+  const [showTradeMarket, setShowTradeMarket] = useState(false);
+  const [allGroups, setAllGroups] = useState<Record<string, SyncedGroup>>({});
+  const [trades, setTrades] = useState<Record<string, TradeOffer>>({});
+  useEffect(() => {
+    if (!isOnline) return;
+    const unsubG = subscribeGroups(session.gameCode, setAllGroups);
+    const unsubT = subscribeTrades(session.gameCode, setTrades);
+    return () => { unsubG(); unsubT(); };
+  }, [isOnline, session]);
+  const incomingPending = Object.values(trades).filter((t) => t.status === 'pending' && t.toGroupId === myGroupId).length;
   const [syncedGroup, setSyncedGroup] = useState<SyncedGroup | null>(null);
   useEffect(() => {
     if (!isOnline) return;
@@ -208,6 +221,35 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   useEffect(() => () => stopMusic(), []);
 
   if (!state) return <LoadingScreen text="Henter skipets logg …" />;
+
+  if (showTradeMarket && isOnline) {
+    return (
+      <TradeMarket
+        myGroupId={myGroupId}
+        myGoods={state.goods ?? {}}
+        groups={allGroups}
+        trades={trades}
+        isChief={isChief}
+        onSendOffer={async (toGroupId, toGroupName, giving, receiving) => {
+          const id = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+          const offer: TradeOffer = {
+            id, fromGroupId: myGroupId, fromGroupName: setup.shipName,
+            toGroupId, toGroupName, giving, receiving,
+            status: 'pending', createdAt: Date.now(),
+          };
+          await createTradeOffer(session.gameCode, offer);
+        }}
+        onAccept={async (offer) => {
+          const aGoods = allGroups[offer.fromGroupId]?.goods ?? {};
+          const bGoods = allGroups[offer.toGroupId]?.goods ?? {};
+          return await acceptTrade(session.gameCode, offer, aGoods, bGoods);
+        }}
+        onDecline={async (id) => { await declineTrade(session.gameCode, id); }}
+        onCancel={async (id) => { await cancelTrade(session.gameCode, id); }}
+        onClose={() => setShowTradeMarket(false)}
+      />
+    );
+  }
 
   if (svenneprove) {
     const dest = destinations.find((d) => d.id === svenneprove.destId);
@@ -441,6 +483,24 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             );
           })}
         </div>
+
+        {/* Handelstorg-knapp (kun online — krever andre grupper) */}
+        {isOnline && (
+          <div className="mb-4">
+            <button
+              onClick={() => setShowTradeMarket(true)}
+              data-testid="open-trade-market"
+              className="relative w-full rounded-lg border-2 border-viking-gold/60 bg-viking-darkblue/60 px-4 py-2.5 font-cinzel text-viking-gold hover:border-viking-gold hover:bg-viking-darkblue/80"
+            >
+              🏛 Handelstorg — bytt varer med andre skip
+              {incomingPending > 0 && (
+                <span data-testid="incoming-badge" className="ml-2 rounded-full bg-viking-crimson px-2 py-0.5 font-mono text-xs text-viking-paper">
+                  {incomingPending} nye tilbud
+                </span>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Interaktivt sjøkart erstatter destinasjonslisten */}
         <div className="mb-8">

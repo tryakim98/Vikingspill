@@ -236,6 +236,93 @@ export function subscribeTrialResult(code: string, callback: (result: TrialResul
   });
 }
 
+// === Handelstorg — varebytte mellom skip ==========================================
+// Et tilbud beskriver hva gruppe A gir bort til gruppe B og hva A vil ha tilbake.
+// Begge gruppene må fortsatt ha varene de skal gi når B aksepterer (vi sjekker idet
+// tilbudet godtas, ikke ved opprettelse) — ellers feiler skriving og B får beskjed.
+
+export interface TradeOffer {
+  id: string;
+  fromGroupId: string;
+  fromGroupName: string;
+  toGroupId: string;
+  toGroupName: string;
+  giving: Partial<Record<TradeGoodId, number>>;
+  receiving: Partial<Record<TradeGoodId, number>>;
+  status: 'pending' | 'accepted' | 'declined' | 'cancelled';
+  createdAt: number;
+  resolvedAt?: number;
+}
+
+export function createTradeOffer(code: string, offer: TradeOffer): Promise<void> {
+  return set(ref(db, `games/${code}/trades/${offer.id}`), offer);
+}
+
+export function subscribeTrades(
+  code: string,
+  callback: (trades: Record<string, TradeOffer>) => void,
+): Unsubscribe {
+  return onValue(ref(db, `games/${code}/trades`), (snap) => {
+    callback((snap.val() as Record<string, TradeOffer> | null) ?? {});
+  });
+}
+
+export type AcceptTradeResult =
+  | { ok: true }
+  | { ok: false; reason: string };
+
+/** Aksepter et tilbud: sjekker varebeholdning på begge sider, flytter varene
+ *  i én atomisk multi-path-skriving og markerer tilbudet som accepted. */
+export async function acceptTrade(
+  code: string,
+  offer: TradeOffer,
+  aGoods: Partial<Record<TradeGoodId, number>>,
+  bGoods: Partial<Record<TradeGoodId, number>>,
+): Promise<AcceptTradeResult> {
+  for (const [g, n] of Object.entries(offer.giving)) {
+    if ((aGoods[g as TradeGoodId] ?? 0) < (n ?? 0)) {
+      return { ok: false, reason: `${offer.fromGroupName} har ikke lenger ${n}× ${g}` };
+    }
+  }
+  for (const [g, n] of Object.entries(offer.receiving)) {
+    if ((bGoods[g as TradeGoodId] ?? 0) < (n ?? 0)) {
+      return { ok: false, reason: `Dere har ikke nok ${g} (${n} kreves)` };
+    }
+  }
+
+  const newA: Partial<Record<TradeGoodId, number>> = { ...aGoods };
+  const newB: Partial<Record<TradeGoodId, number>> = { ...bGoods };
+  for (const [g, n] of Object.entries(offer.giving)) {
+    const k = g as TradeGoodId;
+    newA[k] = (newA[k] ?? 0) - (n ?? 0);
+    newB[k] = (newB[k] ?? 0) + (n ?? 0);
+  }
+  for (const [g, n] of Object.entries(offer.receiving)) {
+    const k = g as TradeGoodId;
+    newB[k] = (newB[k] ?? 0) - (n ?? 0);
+    newA[k] = (newA[k] ?? 0) + (n ?? 0);
+  }
+  // Strip 0-verdier — Firebase vil ellers lagre tomme nøkler som kan rote til UI-tellingen
+  (Object.keys(newA) as TradeGoodId[]).forEach((k) => { if ((newA[k] ?? 0) === 0) delete newA[k]; });
+  (Object.keys(newB) as TradeGoodId[]).forEach((k) => { if ((newB[k] ?? 0) === 0) delete newB[k]; });
+
+  await update(ref(db), {
+    [`games/${code}/groups/${offer.fromGroupId}/goods`]: newA,
+    [`games/${code}/groups/${offer.toGroupId}/goods`]: newB,
+    [`games/${code}/trades/${offer.id}/status`]: 'accepted',
+    [`games/${code}/trades/${offer.id}/resolvedAt`]: Date.now(),
+  });
+  return { ok: true };
+}
+
+export function declineTrade(code: string, tradeId: string): Promise<void> {
+  return update(ref(db, `games/${code}/trades/${tradeId}`), { status: 'declined', resolvedAt: Date.now() });
+}
+
+export function cancelTrade(code: string, tradeId: string): Promise<void> {
+  return update(ref(db, `games/${code}/trades/${tradeId}`), { status: 'cancelled', resolvedAt: Date.now() });
+}
+
 // === Sjøslag — «Holmgang på bølgene» (§7.2) =======================================
 // To-sidig: A utfordrer B → B aksepterer → vinner rapporteres → begge får utfall.
 

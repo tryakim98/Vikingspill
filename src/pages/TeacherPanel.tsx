@@ -24,12 +24,14 @@ import {
   triggerFate,
   subscribeFate,
   triggerRagnarok,
+  subscribeTrades,
   type SyncedGroup,
   type ApprovalRequest,
   type ApprovalStatus,
   type Trial,
   type TrialResult,
   type FateEvent,
+  type TradeOffer,
 } from '../lib/gameSync';
 import { gudenesProveChallenges, fateCards } from '../data';
 import SeaMap from '../components/teacher/SeaMap';
@@ -64,15 +66,17 @@ export default function TeacherPanel() {
   const [trialWinner, setTrialWinner] = useState<string | null>(null);
   const [trialRunnerUp, setTrialRunnerUp] = useState<string | null>(null);
   const [fate, setFate] = useState<FateEvent | null>(null);
+  const [trades, setTrades] = useState<Record<string, TradeOffer>>({});
 
   useEffect(() => {
-    if (!code) { setGroups({}); setApprovals({}); setTrial(null); setTrialResult(null); setFate(null); return; }
+    if (!code) { setGroups({}); setApprovals({}); setTrial(null); setTrialResult(null); setFate(null); setTrades({}); return; }
     const unsubG = subscribeGroups(code, setGroups);
     const unsubA = subscribeApprovals(code, setApprovals);
     const unsubT = subscribeTrial(code, setTrial);
     const unsubR = subscribeTrialResult(code, setTrialResult);
     const unsubF = subscribeFate(code, setFate);
-    return () => { unsubG(); unsubA(); unsubT(); unsubR(); unsubF(); };
+    const unsubTr = subscribeTrades(code, setTrades);
+    return () => { unsubG(); unsubA(); unsubT(); unsubR(); unsubF(); unsubTr(); };
   }, [code]);
 
   // Nullstill kåringsvalg når en ny prøve utløses, så fjorårets valg ikke henger igjen.
@@ -331,6 +335,40 @@ export default function TeacherPanel() {
                 {trialResult.runnerUpName && <> · 🥈 2. plass: <strong>{trialResult.runnerUpName}</strong></>}
               </p>
             </div>
+          )}
+        </div>
+
+        {/* Handelstorg — kompakt aktivitetspanel */}
+        <div className="rounded-lg border-2 border-viking-teal/60 bg-viking-teal/15 p-4" data-testid="teacher-trade-panel">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="font-cinzel text-xl text-viking-gold">🏛 Handelstorg</h2>
+            <p className="font-mono text-xs text-viking-gold-soft">
+              {Object.values(trades).filter((t) => t.status === 'pending').length} ventende ·{' '}
+              {Object.values(trades).filter((t) => t.status === 'accepted').length} akseptert
+            </p>
+          </div>
+          {Object.keys(trades).length === 0 ? (
+            <p className="font-inter text-sm italic text-viking-paper/60">Ingen handler så langt.</p>
+          ) : (
+            <ul className="max-h-40 space-y-1 overflow-y-auto" data-testid="teacher-trade-list">
+              {Object.values(trades)
+                .sort((a, b) => (b.resolvedAt ?? b.createdAt) - (a.resolvedAt ?? a.createdAt))
+                .slice(0, 8)
+                .map((t) => {
+                  const sym = t.status === 'accepted' ? '✓' : t.status === 'declined' ? '✕' : t.status === 'cancelled' ? '↩' : '⏳';
+                  const summary = (g: TradeOffer['giving']) =>
+                    Object.entries(g).map(([k, n]) => `${n}× ${k}`).join(', ');
+                  return (
+                    <li key={t.id} className="font-inter text-xs text-viking-paper/90">
+                      <span className="mr-1 font-mono">{sym}</span>
+                      <strong>{t.fromGroupName}</strong> → <strong>{t.toGroupName}</strong>:{' '}
+                      <span className="text-viking-moss">{summary(t.giving)}</span>{' '}
+                      <span className="text-viking-gold-soft/70">↔</span>{' '}
+                      <span className="text-viking-gold-soft">{summary(t.receiving)}</span>
+                    </li>
+                  );
+                })}
+            </ul>
           )}
         </div>
 

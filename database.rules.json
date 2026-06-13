@@ -101,6 +101,13 @@
           }
         },
 
+        "trades": {
+          "$tradeId": {
+            ".validate": "newData.hasChildren(['id','fromGroupId','toGroupId','status'])",
+            "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" }
+          }
+        },
+
         "$other": { ".validate": false }
       }
     }
