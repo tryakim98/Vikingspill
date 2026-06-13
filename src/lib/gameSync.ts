@@ -67,6 +67,7 @@ export interface SyncedGroup {
   activeSkjebne?: ActiveSkjebne | null;  // pågående Skjebnemøte (sett av høvdingen)
   seenSkjebne?: string[];                // Skjebnemøte-ID-er gruppa har sett før
   lastSkjebneAtVisited?: number;         // visited.length da forrige ble utløst
+  forceSkjebneNextSail?: boolean;        // settes av Skjebnehjulet — tvinger Skjebnemøte ved neste seilas
 }
 
 /** Skjebnemøte i pågående tilstand. Høvdingen skriver choiceId; alle ser. */

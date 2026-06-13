@@ -38,7 +38,10 @@ import {
 } from '../lib/gameSync';
 import SagaReader from '../components/saga/SagaReader';
 import { gudenesProveChallenges, fateCards } from '../data';
+import { STORM_FATE_IDS, GAVE_FATE_IDS, VIND_FATE_ID, type WheelFieldId } from '../data/wheelFields';
+import { patchGroup } from '../lib/gameSync';
 import SeaMap from '../components/teacher/SeaMap';
+import SkjebneHjul from '../components/teacher/SkjebneHjul';
 import TideTimer from '../components/teacher/TideTimer';
 import ConnectionBanner from '../components/common/ConnectionBanner';
 import VikingShip from '../components/ship/VikingShip';
@@ -117,9 +120,13 @@ export default function TeacherPanel() {
     triggerTrialResult(code, result).catch(() => {});
   };
 
-  const triggerSkjebne = () => {
+  /** Trekk fra en pool av fate-kort. For 'vind' rammer eventet skipet som ligger bakerst (catch-up). */
+  const triggerFateFromPool = (pool: 'storm' | 'gave' | 'vind') => {
     if (!code) return;
-    const card = fateCards[Math.floor(Math.random() * fateCards.length)];
+    const ids = pool === 'storm' ? STORM_FATE_IDS : pool === 'gave' ? GAVE_FATE_IDS : [VIND_FATE_ID];
+    const candidates = fateCards.filter((c) => ids.includes(c.id));
+    if (candidates.length === 0) return;
+    const card = candidates[Math.floor(Math.random() * candidates.length)];
     const ev: FateEvent = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       icon: card.icon,
@@ -130,9 +137,15 @@ export default function TeacherPanel() {
       at: Date.now(),
     };
     if (card.targetMode === 'group') {
-      const ids = Object.keys(groups);
-      if (ids.length === 0) return; // ingen grupper å ramme ennå
-      const tid = ids[Math.floor(Math.random() * ids.length)];
+      let tid: string | null = null;
+      if (pool === 'vind') {
+        // catch-up: skipet med lavest sum får medvind
+        tid = ranked.length ? ranked[ranked.length - 1][0] : null;
+      } else {
+        const gids = Object.keys(groups);
+        if (gids.length) tid = gids[Math.floor(Math.random() * gids.length)];
+      }
+      if (!tid) return;
       ev.targetGroupId = tid;
       ev.targetName = groups[tid].shipName;
     } else if (card.condition) {
@@ -145,6 +158,26 @@ export default function TeacherPanel() {
   const triggerRagnarokNow = () => {
     if (!code) return;
     triggerRagnarok(code, { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, at: Date.now() }).catch(() => {});
+  };
+
+  /** Skjebnehjulet landet på 🌫️ — tving alle skip til en Skjebnemøte ved neste seilas. */
+  const broadcastSkjebne = () => {
+    if (!code) return;
+    Object.keys(groups).forEach((gid) => {
+      patchGroup(code, gid, { forceSkjebneNextSail: true }).catch(() => {});
+    });
+  };
+
+  /** Hjul-utfallet dispatcher til riktig handler. Bevarer eksisterende event-systemer. */
+  const handleWheelLanded = (field: WheelFieldId) => {
+    switch (field) {
+      case 'gudenes-prove': return triggerGudenesProve();
+      case 'storm':         return triggerFateFromPool('storm');
+      case 'gunstig-vind':  return triggerFateFromPool('vind');
+      case 'ragnarok':      return triggerRagnarokNow();
+      case 'gudenes-gave':  return triggerFateFromPool('gave');
+      case 'skjebnemote':   return broadcastSkjebne();
+    }
   };
 
   const [creating, setCreating] = useState(false);
@@ -274,17 +307,24 @@ export default function TeacherPanel() {
             {/* §6.5 Tidevannstimer — læreren styrer rammene pr. kapittel */}
             <TideTimer code={code} groups={groups} />
 
-        {/* §3.4/§8.5 Gudenes prøve — læreren bestemmer KUN når, og kårer vinner etter at klassen har gjort utfordringen fysisk */}
-        <div className="rounded-lg border-2 border-viking-plum/60 bg-viking-plum/15 p-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="font-cinzel text-xl text-viking-gold">⚡ Gudenes prøve</h2>
-              <p className="font-inter text-sm text-viking-paper/80">Du bestemmer kun <strong>når</strong>. Gudene trekker utfordring og ferdighet — likt for alle skip.</p>
-            </div>
-            <button onClick={triggerGudenesProve} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-3 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">
-              {trial ? '⚡ Utløs ny prøve' : '⚡ Utløs Gudenes prøve'}
-            </button>
+        {/* §3.4/§8.5 Skjebnehjulet — én dramatisk mekanikk som erstatter de spredte trigger-knappene.
+            Læreren bestemmer kun NÅR (spinner); hjulet avgjør HVA og HVEM. */}
+        <div className="rounded-lg border-2 border-viking-gold/60 bg-gradient-to-b from-viking-darkblue/70 to-viking-surface p-5" data-testid="wheel-panel">
+          <div className="mb-3 text-center">
+            <h2 className="font-cinzel text-2xl text-viking-gold">🎡 Skjebnehjulet</h2>
+            <p className="mx-auto mt-1 max-w-md font-inter text-sm italic text-viking-paper/80">
+              Du bestemmer kun <strong>når</strong> du spinner. Nornene avgjør hvilken kraft som rammer flåten — og hvem.
+            </p>
           </div>
+          <SkjebneHjul onLanded={handleWheelLanded} disabled={!code} />
+        </div>
+
+        {/* Etterspill: kåring av Gudenes prøve, sist event, ragnarok-status */}
+        <div className="rounded-lg border-2 border-viking-plum/60 bg-viking-plum/15 p-4">
+          <h3 className="font-cinzel text-lg text-viking-gold">⚡ Gudenes prøve — etterspill</h3>
+          {!trial && (
+            <p className="mt-1 font-inter text-sm italic text-viking-paper/65">Ingen aktiv prøve. Spinn skjebnehjulet for å utløse en.</p>
+          )}
 
           {trial && (
             <div className="mt-4 rounded-md border border-viking-gold/40 bg-viking-darkblue/40 p-4">
@@ -457,34 +497,20 @@ export default function TeacherPanel() {
           )}
         </div>
 
-        {/* §8.4 Skjebne-kort — læreren bestemmer KUN når */}
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-viking-rust/60 bg-viking-rust/15 p-4">
-          <div>
-            <h2 className="font-cinzel text-xl text-viking-gold">🎴 Tors inngripen</h2>
-            <p className="font-inter text-sm text-viking-paper/80">Du bestemmer kun <strong>når</strong> du griper inn. Nornene trekker hva som skjer og hvilket skip det rammer — tilfeldig.</p>
-            {fate && <p className="mt-1 font-mono text-xs text-viking-gold-soft">Sist gripe: {fate.title} → {fate.targetMode === 'group' ? fate.targetName : fate.conditionLabel}</p>}
+        {/* Sist trukne fate-kort (vises bare når et er trukket) */}
+        {fate && (
+          <div className="rounded-lg border-2 border-viking-rust/60 bg-viking-rust/15 p-4">
+            <h3 className="font-cinzel text-lg text-viking-gold">🎴 Sist gripe fra gudene</h3>
+            <p className="mt-1 font-mono text-xs text-viking-gold-soft">{fate.title} → {fate.targetMode === 'group' ? fate.targetName : fate.conditionLabel}</p>
           </div>
-          <button onClick={triggerSkjebne} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-3 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">🎴 Grip inn i flåtens skjebne</button>
-        </div>
+        )}
 
-        {/* §6.3 Ragnarok — catch-up når avstanden blir for stor (> 15 poeng) */}
-        <div className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 p-4 ${ragnarokReady ? 'border-viking-crimson bg-viking-crimson/15' : 'border-viking-gold/20 bg-viking-surface/40 opacity-70'}`}>
-          <div>
-            <h2 className="font-cinzel text-xl text-viking-gold">⚡ Ragnarok</h2>
-            <p className="font-inter text-sm text-viking-paper/80">
-              Når avstanden mellom 1. og siste skip passerer <strong>15 poeng</strong> kan du la Tors vrede ramme alle — halve handelspoeng forsvinner.
-            </p>
-            <p className="mt-1 font-mono text-xs text-viking-gold-soft">
-              Største avstand nå: {leadGap} poeng {ragnarokReady ? '— Tor er rasende!' : '(under 15 — flåten er jevn)'}
-            </p>
-          </div>
-          <button
-            onClick={triggerRagnarokNow}
-            disabled={!ragnarokReady}
-            className="rounded-md border-2 border-viking-gold bg-viking-crimson px-6 py-3 font-cinzel font-bold text-viking-paper hover:bg-viking-crimson/80 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            ⚡ Slipp Ragnarok løs
-          </button>
+        {/* §6.3 Ragnarok-status (informasjon — selve utløsningen skjer fra hjulet) */}
+        <div className={`rounded-lg border-2 p-4 ${ragnarokReady ? 'border-viking-crimson bg-viking-crimson/15' : 'border-viking-gold/20 bg-viking-surface/40 opacity-70'}`}>
+          <h3 className="font-cinzel text-lg text-viking-gold">⚰️ Ragnarok-status</h3>
+          <p className="mt-1 font-mono text-xs text-viking-gold-soft">
+            Største avstand: {leadGap} poeng {ragnarokReady ? '— Tor er rasende! Hjulets ⚰️-felt vil ramme hardt.' : '(flåten er jevn — Ragnarok merkes lite)'}
+          </p>
         </div>
 
             {/* §8.3 Godkjenning */}

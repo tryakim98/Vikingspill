@@ -151,18 +151,25 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     }
     window.setTimeout(() => {
       // Vurder Skjebnemøte før encounter åpnes. Bare høvdingen trekker; alle andre ser via sync.
+      // Skjebnehjulet kan ha tvunget frem en — flagget forceSkjebneNextSail overstyrer cooldown + rng.
       const visitedCount = (state?.visited ?? []).length;
-      const trigger = shouldTriggerSkjebneMote(visitedCount, lastSkjebneAtVisited);
+      const forced = isOnline ? !!syncedGroup?.forceSkjebneNextSail : false;
+      const trigger = forced || shouldTriggerSkjebneMote(visitedCount, lastSkjebneAtVisited);
       const quest = trigger ? pickSkjebneMote(seenSkjebne) : null;
       if (quest) {
         const skj = { id: quest.id, pendingDestId: destId };
         if (isOnline) {
-          patchGroup(session.gameCode, myGroupId, { sailingTo: null, activeSkjebne: skj }).catch(() => {});
+          patchGroup(session.gameCode, myGroupId, { sailingTo: null, activeSkjebne: skj, forceSkjebneNextSail: false }).catch(() => {});
         } else {
           setLocalSailingTo(null);
           setLocalActiveSkjebne(skj);
         }
         return;
+      }
+      // Selv om vi ikke fant en quest å vise, må vi kvittere det forsterkede flagget
+      // så det ikke utløses ved neste seilas.
+      if (forced && isOnline) {
+        patchGroup(session.gameCode, myGroupId, { forceSkjebneNextSail: false }).catch(() => {});
       }
       if (isOnline) {
         patchGroup(session.gameCode, myGroupId, {

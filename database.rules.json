@@ -60,7 +60,8 @@
             "showCeremony":   { ".validate": "newData.isBoolean()" },
             "previewDestId":  { ".validate": "newData.isString() && newData.val().length <= 40" },
             "sailingTo":      { ".validate": "newData.isString() && newData.val().length <= 40" },
-            "lastSkjebneAtVisited": { ".validate": "newData.isNumber()" },
+            "lastSkjebneAtVisited":  { ".validate": "newData.isNumber()" },
+            "forceSkjebneNextSail": { ".validate": "newData.isBoolean()" },
             "seenSkjebne":   { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
             "activeSkjebne": {
               ".validate": "newData.hasChildren(['id','pendingDestId'])",
