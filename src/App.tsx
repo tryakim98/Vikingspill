@@ -7,6 +7,7 @@ import './App.css';
 import RoleSelect from './pages/RoleSelect';
 import TeacherPanel from './pages/TeacherPanel';
 import StudentGame from './pages/StudentGame';
+import ForLarere from './pages/ForLarere';
 import ErrorFallback from './components/common/ErrorFallback';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
             <Route path="/" element={<RoleSelect />} />
             <Route path="/teacher" element={<TeacherPanel />} />
             <Route path="/student" element={<StudentGame />} />
+            <Route path="/for-larere" element={<ForLarere />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
