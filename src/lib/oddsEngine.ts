@@ -74,3 +74,20 @@ export function meetsRequirement(choice: Choice, skills: Record<SkillKey, number
   return (Object.entries(choice.skillReq) as [SkillKey, number][])
     .every(([skill, req]) => (skills[skill] ?? 0) >= req);
 }
+
+/** Sen-spill-straff (§3.3): når gruppa er sent i reisen (har besøkt minst 6 destinasjoner)
+ *  og tar et valg de mangler ferdighet til, blir valget tilgjengelig — men terningen
+ *  straffes med −2 («dere mangler ferdigheten og blir lurt»). Tidlig i spillet er valget
+ *  fortsatt utilgjengelig som før. Belønner balansert ferdighetsbygging. */
+export const LATE_GAME_THRESHOLD = 6;
+export const LATE_GAME_PENALTY = -2;
+
+export function lateGamePenalty(
+  choice: Choice,
+  skills: Record<SkillKey, number>,
+  isLateGame: boolean,
+): number {
+  if (!isLateGame) return 0;
+  if (meetsRequirement(choice, skills)) return 0;
+  return LATE_GAME_PENALTY;
+}

@@ -18,6 +18,7 @@ import {
   oddsPercent,
   skillBonusForChoice,
   meetsRequirement,
+  lateGamePenalty,
   TIER_LABEL,
   TIER_COLOR,
   TIER_ORDER,
@@ -43,6 +44,9 @@ interface EncounterFlowProps {
   isChief?: boolean;
   syncedEncounter?: SyncedEncounter | null;
   onUpdateEncounter?: (partial: Partial<SyncedEncounter>) => void;
+  /** Sent i spillet (§3.3): valg som krever en ferdighet gruppa mangler blir
+   *  tilgjengelige med −2 straff i stedet for å være låst. */
+  lateGame?: boolean;
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -92,6 +96,7 @@ function OddsBar({ baseRoll }: { baseRoll: RollOdds }) {
 export default function EncounterFlow({
   destination, skills, onComplete, onExit, onRequestApproval,
   isChief = true, syncedEncounter = null, onUpdateEncounter,
+  lateGame = false,
 }: EncounterFlowProps) {
   const d = destination;
   const syncMode = !!syncedEncounter;
@@ -169,7 +174,8 @@ export default function EncounterFlow({
     return () => clearTimeout(t);
   }, [step, isChief]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const modifier = choice ? quizBonus + skillBonusForChoice(choice, skills) : 0;
+  const choiceLatePenalty = choice ? lateGamePenalty(choice, skills, lateGame) : 0;
+  const modifier = choice ? quizBonus + skillBonusForChoice(choice, skills) + choiceLatePenalty : 0;
   const outcome = choice && roll ? choice.outcomes[roll.tier] : null;
 
   const ChiefBanner = () => (
@@ -350,23 +356,40 @@ export default function EncounterFlow({
         </p>
         <div className="space-y-4">
           {d.choices.map((c) => {
-            const available = meetsRequirement(c, skills);
+            const meets = meetsRequirement(c, skills);
+            const lateAvailable = lateGame && !meets;
+            const available = meets || lateAvailable;
             const reqText = c.skillReq
               ? (Object.entries(c.skillReq) as [SkillKey, number][]).map(([s, n]) => `${skillName(s)} ${n}`).join(', ')
               : null;
+            const cardCls =
+              !available ? 'border-viking-crimson/40 bg-viking-darkblue/40 opacity-70' :
+              lateAvailable ? 'border-viking-gold-soft/70 bg-viking-surface ring-2 ring-viking-gold-soft/20' :
+              'border-viking-gold/40 bg-viking-surface';
             return (
-              <div key={c.id} className={`rounded-lg border-2 p-4 ${available ? 'border-viking-gold/40 bg-viking-surface' : 'border-viking-crimson/40 bg-viking-darkblue/40 opacity-70'}`}>
+              <div key={c.id} className={`rounded-lg border-2 p-4 ${cardCls}`} data-testid={`valg-${c.id}`}>
                 <div className="mb-1 flex items-center gap-2">
                   <h3 className="font-cinzel text-lg text-viking-gold">{c.title}</h3>
                   <span className="rounded bg-viking-darkblue/70 px-2 py-0.5 font-mono text-[10px] uppercase text-viking-gold-soft/80">{c.tag}</span>
                 </div>
                 <p className="mb-3 font-inter text-sm text-viking-paper/85">{c.desc}</p>
-                {reqText && <p className="mb-2 font-mono text-xs text-viking-crimson">{available ? '✓' : '🔒'} Krever {reqText}</p>}
+                {reqText && (
+                  meets ? (
+                    <p className="mb-2 font-mono text-xs text-viking-moss">✓ Krever {reqText}</p>
+                  ) : lateAvailable ? (
+                    <p className="mb-2 font-mono text-xs text-viking-gold-soft" data-testid={`late-warning-${c.id}`}>
+                      ⚠ Krever {reqText} — dere mangler den, og det straffer seg sent i reisen (−2 på terningen).
+                    </p>
+                  ) : (
+                    <p className="mb-2 font-mono text-xs text-viking-crimson">🔒 Krever {reqText}</p>
+                  )
+                )}
                 <OddsBar baseRoll={c.baseRoll} />
                 {isChief ? (
                   <button
                     disabled={!available}
                     onClick={() => updateMany({ choiceId: c.id, roll: null, step: 'roll' })}
+                    data-testid={`pick-${c.id}`}
                     className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Velg dette
@@ -392,7 +415,12 @@ export default function EncounterFlow({
           <div className="mt-4 font-mono text-sm text-viking-paper/80">
             <p>Quizbonus: +{quizBonus}</p>
             <p>Ferdighet over krav: +{skillBonus}</p>
-            <p className="mt-1 text-viking-gold">Terningmodifikator: +{modifier}</p>
+            {choiceLatePenalty < 0 && (
+              <p className="text-viking-crimson" data-testid="late-penalty-line">
+                ⚠ Sen-spill-straff (mangler ferdighet): {choiceLatePenalty}
+              </p>
+            )}
+            <p className="mt-1 text-viking-gold">Terningmodifikator: {modifier >= 0 ? '+' : ''}{modifier}</p>
           </div>
         </div>
         {isChief ? (

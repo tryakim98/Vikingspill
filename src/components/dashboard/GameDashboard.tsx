@@ -339,6 +339,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           ? (destId, taskTitle) => requestApproval(session.gameCode, myGroupId, { destId, taskTitle, shipName: setup.shipName }).catch(() => {})
           : undefined}
         isChief={isChief}
+        lateGame={state.visited.length >= 6}
         syncedEncounter={isOnline ? syncedGroup?.encounter ?? null : null}
         onUpdateEncounter={isOnline && isChief
           ? (partial) => {
