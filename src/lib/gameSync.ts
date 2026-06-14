@@ -78,6 +78,24 @@ export interface SyncedGroup {
   lastSkjebneAtVisited?: number;         // visited.length da forrige ble utløst
   forceSkjebneNextSail?: boolean;        // settes av Skjebnehjulet — tvinger Skjebnemøte ved neste seilas
   seenHints?: string[];                  // førstegangs-forklaringer gruppa har sett (HintKey)
+  // Tinget — gruppa kan stemme fram en ny høvding (§Tinget):
+  ting?: TingSession | null;             // pågående/avsluttet ting (avstemning om høvding)
+  lastTingAt?: number;                   // tidspunkt forrige ting ble kalt inn (3-min cooldown)
+}
+
+/** Tinget: en avstemning der gruppa kan velge en ny høvding. Kalles inn av et hvilket
+ *  som helst medlem, som foreslår én kandidat. Alle medlemmer stemmer (kandidat vs.
+ *  sittende). Flertall for kandidaten overfører roret; uavgjort beholder sittende. */
+export interface TingSession {
+  id: string;
+  calledBy: string;        // memberId som kalte inn
+  candidateId: string;     // foreslått ny høvding
+  incumbentId: string;     // sittende høvding da tinget ble kalt
+  startedAt: number;
+  status: 'open' | 'resolved';
+  votes?: Record<string, string>; // memberId -> memberId det stemmes på (candidateId el. incumbentId)
+  resultChiefId?: string;  // hvem som holder roret etter avgjørelsen (for resultatvisning)
+  resolvedAt?: number;
 }
 
 /** Skjebnemøte i pågående tilstand. Høvdingen skriver choiceId; alle ser. */
@@ -180,6 +198,26 @@ export async function leaveGroupAsMember(code: string, groupId: string, memberId
 /** Høvdingen gir roret til et annet medlem. Frontend bør gate dette til chief. */
 export function transferChief(code: string, groupId: string, newChiefId: string): Promise<void> {
   return set(ref(db, `games/${code}/groups/${groupId}/chiefId`), newChiefId);
+}
+
+/** Tinget: kall inn en avstemning (hvem som helst). Skriver hele sesjonen + cooldown-stempel. */
+export function callTing(code: string, groupId: string, ting: TingSession): Promise<void> {
+  return update(ref(db, `games/${code}/groups/${groupId}`), { ting, lastTingAt: ting.startedAt });
+}
+
+/** Tinget: et medlem avgir sin stemme (egen leaf, race-trygt). */
+export function castTingVote(code: string, groupId: string, memberId: string, votedFor: string): Promise<void> {
+  return set(ref(db, `games/${code}/groups/${groupId}/ting/votes/${memberId}`), votedFor);
+}
+
+/** Tinget: avslutt avstemningen med resultat (skrives av sittende høvding). */
+export function resolveTing(code: string, groupId: string, resultChiefId: string, resolvedAt: number): Promise<void> {
+  return update(ref(db, `games/${code}/groups/${groupId}/ting`), { status: 'resolved', resultChiefId, resolvedAt });
+}
+
+/** Tinget: rydd bort sesjonen når resultatet er lest. */
+export function clearTing(code: string, groupId: string): Promise<void> {
+  return set(ref(db, `games/${code}/groups/${groupId}/ting`), null);
 }
 
 /** Rådslagning: et medlem (hvem som helst, ikke bare høvdingen) gir sitt råd før valget.

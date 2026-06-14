@@ -24,7 +24,8 @@ import { HINTS, type HintKey } from '../../data/firstTimeHints';
 import { isAccessible } from '../../lib/unlocks';
 import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, callTing, castTingVote, resolveTing, clearTing, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type TingSession, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
+import TingOverlay from '../ting/TingOverlay';
 import SagaReader from '../saga/SagaReader';
 import { chapters, chapterCompleted } from '../../data/chapters';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
@@ -109,6 +110,27 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const isChief = !isOnline || chiefId === myMemberId || !chiefId;
   const members = syncedGroup?.members ?? {};
   const memberIds = Object.keys(members);
+  const memberLabel = (mid: string) => mid === myMemberId ? 'Du' : `Medlem ${mid.slice(2, 6)}`;
+
+  // Tinget (§Tinget): avstemning om ny høvding. Sesjonen ligger på syncedGroup.ting.
+  const ting = isOnline ? (syncedGroup?.ting ?? null) : null;
+  const [proposingTing, setProposingTing] = useState(false);
+  const TING_COOLDOWN_MS = 180_000; // 3 min
+  const rollInProgress = syncedGroup?.encounter?.step === 'roll' || syncedGroup?.encounter?.step === 'rolling';
+  const tingCooldownLeft = Math.max(0, TING_COOLDOWN_MS - (Date.now() - (syncedGroup?.lastTingAt ?? 0)));
+  const startTing = (candidateId: string) => {
+    const now = Date.now();
+    const t: TingSession = {
+      id: `${now}-${myMemberId}`,
+      calledBy: myMemberId,
+      candidateId,
+      incumbentId: chiefId ?? myMemberId,
+      startedAt: now,
+      status: 'open',
+    };
+    callTing(session.gameCode, myGroupId, t).catch(() => {});
+    setProposingTing(false);
+  };
 
   // Aktiv destinasjon: synket i online, lokal ellers.
   const [localActiveDestId, setLocalActiveDestId] = useState<string | null>(null);
@@ -287,6 +309,29 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const [activeTrial, setActiveTrial] = useState<Trial | null>(null);
   const seenTrial = useRef<string | null>(null);
   const [trialResult, setTrialResult] = useState<TrialResult | null>(null);
+
+  // Tinget — kan ikke kalles inn midt i terningkast/Gudenes prøve, ikke når en ting alt
+  // pågår, ikke oftere enn hvert 3. min, og krever minst to medlemmer.
+  const canCallTing = isOnline && memberIds.length >= 2 && !ting && !activeTrial && !rollInProgress && tingCooldownLeft <= 0;
+
+  // Avgjør tinget når alle har stemt — KUN sittende høvding skriver resultatet (én resolver,
+  // race-trygt). Flertall for kandidaten overfører roret; uavgjort beholder sittende.
+  const resolvedTingRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isOnline || !ting || ting.status !== 'open') return;
+    if (myMemberId !== ting.incumbentId) return;
+    const votes = ting.votes ?? {};
+    if (memberIds.length === 0 || memberIds.filter((id) => votes[id]).length < memberIds.length) return;
+    if (resolvedTingRef.current === ting.id) return;
+    resolvedTingRef.current = ting.id;
+    const forCandidate = memberIds.filter((id) => votes[id] === ting.candidateId).length;
+    const forIncumbent = memberIds.filter((id) => votes[id] === ting.incumbentId).length;
+    const newChief = forCandidate > forIncumbent ? ting.candidateId : ting.incumbentId;
+    (async () => {
+      if (newChief !== ting.incumbentId) await transferChief(session.gameCode, myGroupId, newChief).catch(() => {});
+      await resolveTing(session.gameCode, myGroupId, newChief, Date.now()).catch(() => {});
+    })();
+  }, [ting, memberIds, isOnline, myMemberId, session.gameCode, myGroupId]);
   const [activeFate, setActiveFate] = useState<FateEvent | null>(null);
   const seenFate = useRef<string | null>(null);
   const [activeTideTurn, setActiveTideTurn] = useState<TideTurn | null>(null);
@@ -514,8 +559,58 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     }
   }
 
+  // Tinget — avstemning om ny høvding. Vises på ALLE enheter, uansett hvilken skjerm de er på.
+  if (ting) {
+    return (
+      <TingOverlay
+        ting={ting}
+        myMemberId={myMemberId}
+        memberIds={memberIds}
+        memberLabel={memberLabel}
+        onVote={(votedFor) => castTingVote(session.gameCode, myGroupId, myMemberId, votedFor).catch(() => {})}
+        onDismiss={() => clearTing(session.gameCode, myGroupId).catch(() => {})}
+      />
+    );
+  }
+
+  // Kandidatvelger når et medlem kaller inn Tinget (vises kun for den som kaller inn).
+  if (proposingTing) {
+    const candidates = memberIds.filter((mid) => mid !== chiefId);
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-viking-darkblue/95 px-4 text-center text-viking-paper" data-testid="ting-call-modal">
+        <p className="font-cinzel text-sm uppercase tracking-[0.3em] text-viking-gold-soft/70">Kall inn Tinget</p>
+        <div className="mt-2 text-6xl">⚖️</div>
+        <h1 className="mt-2 mb-1 font-cinzel text-2xl font-bold text-viking-gold">Hvem foreslår du som ny høvding?</h1>
+        <p className="mb-6 max-w-md font-inter text-sm italic text-viking-paper/80">Alle får stemme. Får kandidaten flertall, overtar hen roret.</p>
+        <div className="w-full max-w-sm space-y-2">
+          {candidates.map((mid) => (
+            <button key={mid} onClick={() => startTing(mid)} data-testid={`ting-candidate-${mid}`}
+              className="w-full rounded-lg border-2 border-viking-gold/40 px-5 py-3 font-cinzel text-viking-gold hover:border-viking-gold hover:bg-viking-gold/10">
+              {memberLabel(mid)}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setProposingTing(false)} className="mt-6 font-inter text-sm text-viking-gold-soft/70 hover:text-viking-gold-soft">Avbryt</button>
+      </div>
+    );
+  }
+
+  // Flytende «Kall inn Tinget»-knapp — også tilgjengelig midt i et kulturmøte (men ikke under terningkast).
+  const tingFab = isOnline && memberIds.length >= 2 ? (
+    <button
+      onClick={() => setProposingTing(true)}
+      disabled={!canCallTing}
+      data-testid="ting-call-fab"
+      title={canCallTing ? 'Kall inn Tinget' : (tingCooldownLeft > 0 ? `Tinget kan kalles inn igjen om ${Math.ceil(tingCooldownLeft / 60000)} min` : rollInProgress ? 'Ikke midt i et terningkast' : 'Ikke akkurat nå')}
+      className="fixed bottom-5 left-5 z-40 rounded-full border-2 border-viking-gold bg-viking-surface px-4 py-2 font-cinzel text-sm text-viking-gold shadow-lg hover:bg-viking-gold/15 disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      ⚖️ Tinget
+    </button>
+  ) : null;
+
   if (activeDest) {
     return (
+      <>
       <EncounterFlow
         destination={activeDest}
         skills={state.skills}
@@ -543,6 +638,8 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             }
           : undefined}
       />
+      {tingFab}
+      </>
     );
   }
 
@@ -645,6 +742,25 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
                 ⚓ Høvdingen styrer skipet — dere ser med
               </p>
             )}
+            {/* Tinget: hvilket som helst medlem kan kalle inn en avstemning om ny høvding */}
+            <div className="mt-3 border-t border-viking-gold/20 pt-3 text-center">
+              <button
+                onClick={() => setProposingTing(true)}
+                disabled={!canCallTing}
+                data-testid="ting-call-button"
+                className="rounded-md border-2 border-viking-gold/60 px-4 py-1.5 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Kall inn Tinget ⚖️
+              </button>
+              {!canCallTing && (
+                <p className="mt-1 font-inter text-[11px] italic text-viking-gold-soft/60">
+                  {tingCooldownLeft > 0 ? `Kan kalles inn igjen om ${Math.ceil(tingCooldownLeft / 60000)} min`
+                    : rollInProgress ? 'Ikke midt i et terningkast'
+                    : activeTrial ? 'Ikke under Gudenes prøve'
+                    : 'Krever minst to medlemmer'}
+                </p>
+              )}
+            </div>
           </div>
         )}
 

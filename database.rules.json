@@ -9,6 +9,7 @@
       ".read": false,
       ".write": false,
 
+      
       "$code": {
         ".read": "$code.matches(/^[A-HJ-NP-Z]{4}$/) || $code.matches(/^VIKING-[A-Z0-9]{3,12}$/)",
         ".write": "$code.matches(/^[A-HJ-NP-Z]{4}$/) || $code.matches(/^VIKING-[A-Z0-9]{3,12}$/)",
@@ -122,6 +123,24 @@
                   "note":     { ".validate": "newData.isString() && newData.val().length <= 120" },
                   "at":       { ".validate": "newData.isNumber()" },
                   "$other":   { ".validate": false }
+                }
+              },
+              "$other": { ".validate": false }
+            },
+            "lastTingAt": { ".validate": "newData.isNumber()" },
+            "ting": {
+              ".validate": "newData.hasChildren(['id','candidateId','incumbentId','status'])",
+              "id":          { ".validate": "newData.isString() && newData.val().length <= 60" },
+              "calledBy":    { ".validate": "newData.isString() && newData.val().matches(/^m-[a-z0-9]{1,16}$/)" },
+              "candidateId": { ".validate": "newData.isString() && newData.val().matches(/^m-[a-z0-9]{1,16}$/)" },
+              "incumbentId": { ".validate": "newData.isString() && newData.val().matches(/^m-[a-z0-9]{1,16}$/)" },
+              "startedAt":   { ".validate": "newData.isNumber()" },
+              "status":      { ".validate": "newData.isString() && newData.val().matches(/^(open|resolved)$/)" },
+              "resultChiefId": { ".validate": "newData.isString() && newData.val().matches(/^m-[a-z0-9]{1,16}$/)" },
+              "resolvedAt":  { ".validate": "newData.isNumber()" },
+              "votes": {
+                "$memberId": {
+                  ".validate": "$memberId.matches(/^m-[a-z0-9]{1,16}$/) && newData.isString() && newData.val().matches(/^m-[a-z0-9]{1,16}$/)"
                 }
               },
               "$other": { ".validate": false }
