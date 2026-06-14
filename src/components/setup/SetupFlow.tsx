@@ -39,12 +39,12 @@ function Waves() {
     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 overflow-hidden">
       <div className="animate-wave-slow absolute bottom-0 h-32" style={{ width: '200%' }}>
         <svg width="100%" height="100%" viewBox="0 0 2880 200" preserveAspectRatio="none">
-          <path d="M0,80 C360,140 720,20 1440,80 C2160,140 2520,20 2880,80 L2880,200 L0,200 Z" fill="#182846" opacity="0.75" />
+          <path d="M0,80 C360,140 720,20 1440,80 C2160,140 2520,20 2880,80 L2880,200 L0,200 Z" fill="#2B4A3F" opacity="0.75" />
         </svg>
       </div>
       <div className="animate-wave absolute bottom-0 h-24" style={{ width: '200%' }}>
         <svg width="100%" height="100%" viewBox="0 0 2880 200" preserveAspectRatio="none">
-          <path d="M0,110 C360,60 720,160 1440,110 C2160,60 2520,160 2880,110 L2880,200 L0,200 Z" fill="#0E1B33" />
+          <path d="M0,110 C360,60 720,160 1440,110 C2160,60 2520,160 2880,110 L2880,200 L0,200 Z" fill="#1A2E28" />
         </svg>
       </div>
     </div>
@@ -73,7 +73,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
   const [startSkill, setStartSkill] = useState<SkillKey | null>(null);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-viking-darkblue to-viking-surface text-viking-paper">
+    <div className="relative min-h-screen overflow-hidden viking-screen text-viking-paper">
       <Waves />
 
       <div className="relative z-10 mx-auto max-w-3xl px-4 py-10">

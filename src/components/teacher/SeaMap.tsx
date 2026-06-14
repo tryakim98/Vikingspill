@@ -46,7 +46,7 @@ export default function SeaMap({ groups }: { groups: Record<string, SyncedGroup>
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-lg border-4 border-viking-gold/70 bg-gradient-to-br from-viking-darkblue to-[#0e2436]"
+      className="relative w-full overflow-hidden rounded-lg border-4 border-viking-gold/70 bg-gradient-to-br from-viking-darkblue to-[#1c130b]"
       style={{ aspectRatio: '16 / 9', backgroundImage: 'repeating-linear-gradient(0deg, rgba(212,168,67,0.05) 0 1px, transparent 1px 40px), repeating-linear-gradient(90deg, rgba(212,168,67,0.05) 0 1px, transparent 1px 40px)' }}
     >
       {/* Dekorative landmasser (grovt, lav opasitet) */}

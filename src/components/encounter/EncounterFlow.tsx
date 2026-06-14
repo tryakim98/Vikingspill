@@ -78,7 +78,7 @@ const skillName = (s: SkillKey) => skillTreeData[s].name;
 
 function Shell({ name, onExit, children }: { name: string; onExit: () => void; children: ReactNode }) {
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-viking-darkblue to-viking-surface text-viking-paper">
+    <div className="relative min-h-screen viking-screen text-viking-paper">
       <div className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between border-b-2 border-viking-gold/40 pb-3">
           <h2 className="font-cinzel text-xl text-viking-gold">{name}</h2>

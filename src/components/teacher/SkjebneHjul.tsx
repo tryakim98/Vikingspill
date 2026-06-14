@@ -98,7 +98,7 @@ export default function SkjebneHjul({ onLanded, disabled }: Props) {
         >
           {/* Ytre treramme + indre gylden ring */}
           <circle cx={CENTER} cy={CENTER} r={RADIUS + 24} fill="#3a1f0d" stroke="#5a3318" strokeWidth="3" />
-          <circle cx={CENTER} cy={CENTER} r={RADIUS + 10} fill="#0B1426" stroke="#D4A843" strokeWidth="3" />
+          <circle cx={CENTER} cy={CENTER} r={RADIUS + 10} fill="#17100A" stroke="#D4A843" strokeWidth="3" />
 
           {/* Jernnagler langs rammen */}
           {Array.from({ length: 12 }).map((_, i) => {
@@ -152,7 +152,7 @@ export default function SkjebneHjul({ onLanded, disabled }: Props) {
           })}
 
           {/* Sentralmedaljong — Yggdrasil + Nornene */}
-          <circle cx={CENTER} cy={CENTER} r={70} fill="#0B1426" stroke="#D4A843" strokeWidth="4" />
+          <circle cx={CENTER} cy={CENTER} r={70} fill="#17100A" stroke="#D4A843" strokeWidth="4" />
           <circle cx={CENTER} cy={CENTER} r={62} fill="none" stroke="#D4A843" strokeWidth="1" />
           <text x={CENTER} y={CENTER - 10} textAnchor="middle" dominantBaseline="middle" fontSize="40" fill="#D4A843">ᛇ</text>
           <text

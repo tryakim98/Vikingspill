@@ -679,7 +679,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-viking-darkblue to-viking-surface text-viking-paper p-6">
+    <div className="min-h-screen viking-screen text-viking-paper p-6">
       <ConnectionBanner active={session.mode === 'online'} />
       <div className="mx-auto max-w-3xl">
         {/* §6.5 Tidevanns-nedtelling (kun online — læreren styrer timeren) */}

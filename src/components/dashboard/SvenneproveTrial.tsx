@@ -41,7 +41,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
   useEffect(() => { if (phase === 'passed') playSound('unlock'); }, [phase]);
 
   const Shell = ({ children }: { children: React.ReactNode }) => (
-    <div className="min-h-screen bg-gradient-to-b from-viking-darkblue to-viking-surface text-viking-paper">
+    <div className="min-h-screen viking-screen text-viking-paper">
       <div className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between border-b-2 border-viking-gold/40 pb-3">
           <h2 className="font-cinzel text-xl text-viking-gold">{branch.icon} Svenneprøve — {branch.name}</h2>

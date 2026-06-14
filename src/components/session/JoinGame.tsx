@@ -41,7 +41,7 @@ export default function JoinGame({ onJoin, onOffline, onSwitchRole }: Props) {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-viking-darkblue to-viking-surface px-4 py-8 text-viking-paper">
+    <div className="relative flex min-h-screen flex-col items-center justify-center viking-screen px-4 py-8 text-viking-paper">
       <div className="pointer-events-none absolute inset-x-0 top-0 flex h-24 justify-around text-4xl opacity-20">
         <span>ᚦ</span><span>ᚱ</span><span>ᚦ</span><span>ᚱ</span><span>ᚦ</span>
       </div>

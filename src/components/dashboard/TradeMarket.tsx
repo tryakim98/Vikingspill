@@ -109,7 +109,7 @@ export default function TradeMarket({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-viking-darkblue to-viking-surface text-viking-paper" data-testid="trade-market">
+    <div className="min-h-screen viking-screen text-viking-paper" data-testid="trade-market">
       <div className="mx-auto max-w-3xl px-4 py-6">
         <div className="mb-5 flex items-center justify-between border-b-2 border-viking-gold/40 pb-3">
           <div>

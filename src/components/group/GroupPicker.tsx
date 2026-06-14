@@ -29,7 +29,7 @@ export default function GroupPicker({ gameCode, myMemberId, onCreateNew, onJoinE
   const entries = Object.entries(groups);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-viking-darkblue to-viking-surface px-4 py-8 text-viking-paper">
+    <div className="flex min-h-screen flex-col items-center justify-center viking-screen px-4 py-8 text-viking-paper">
       <div className="w-full max-w-md space-y-5">
         <div className="text-center">
           <h1 className="font-saga text-3xl viking-engraved-large sm:text-5xl">Velg skip</h1>

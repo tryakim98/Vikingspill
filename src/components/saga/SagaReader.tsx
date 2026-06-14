@@ -23,7 +23,7 @@ interface Props {
 
 export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-viking-darkblue to-viking-surface px-4 py-6 text-viking-paper" data-testid="saga-reader">
+    <div className="min-h-screen viking-screen px-4 py-6 text-viking-paper" data-testid="saga-reader">
       <div className="mx-auto max-w-3xl">
         <div className="mb-5 flex items-center justify-between border-b-2 border-viking-gold/40 pb-3">
           <h1 className="font-cinzel text-3xl font-bold text-viking-gold">📜 {title}</h1>

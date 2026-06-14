@@ -71,7 +71,7 @@ export function ThorHammer({ size = 48, className = '', color = '#D4A843' }: Dec
 }
 
 // ─── Ravn — Hugin/Munin ─────────────────────────────────────────────────────
-export function Raven({ size = 56, className = '', color = '#0B1426', facing = 'right' }: DecorProps & { facing?: 'left' | 'right' }) {
+export function Raven({ size = 56, className = '', color = '#17100A', facing = 'right' }: DecorProps & { facing?: 'left' | 'right' }) {
   const flip = facing === 'left' ? 'scale(-1, 1) translate(-64, 0)' : '';
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" className={className} aria-hidden="true">
@@ -87,7 +87,7 @@ export function Raven({ size = 56, className = '', color = '#0B1426', facing = '
         {/* Øye */}
         <circle cx="50" cy="20" r="1.5" fill="#D4A843" />
         {/* Vinge */}
-        <path d="M 24 28 Q 30 22 38 26 Q 32 30 26 32 Z" fill="#08101C" />
+        <path d="M 24 28 Q 30 22 38 26 Q 32 30 26 32 Z" fill="#0E0A06" />
         {/* Bein */}
         <path d="M 22 42 L 22 50 M 30 42 L 30 50" stroke={color} strokeWidth="1.5" />
       </g>

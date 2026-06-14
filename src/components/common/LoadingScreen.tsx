@@ -8,7 +8,7 @@ import VikingShip from '../ship/VikingShip';
 
 export default function LoadingScreen({ text = 'Setter seil …' }: { text?: string }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-gradient-to-b from-viking-darkblue to-viking-surface text-viking-gold">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-5 viking-screen text-viking-gold">
       <VikingShip color="#D4A843" symbol="drage" size={110} bob />
       <p className="font-cinzel text-xl tracking-widest text-viking-gold-soft">{text}</p>
       <div className="flex gap-2 text-2xl text-viking-gold/70" aria-hidden>

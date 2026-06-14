@@ -95,7 +95,7 @@ export default function RulesScreen({ role, onDone }: Props) {
     : 'Slik fungerer kampanjen for dere';
 
   return (
-    <div className="relative min-h-screen overflow-y-auto bg-gradient-to-b from-viking-darkblue to-viking-surface px-4 py-8 text-viking-paper">
+    <div className="relative min-h-screen overflow-y-auto viking-screen px-4 py-8 text-viking-paper">
       {/* Runer øverst og nederst */}
       <div className="pointer-events-none absolute inset-x-0 top-0 flex h-20 justify-around text-3xl opacity-20">
         <span>ᚠ</span><span>ᚢ</span><span>ᚦ</span><span>ᚱ</span><span>ᚦ</span><span>ᚢ</span><span>ᚠ</span>

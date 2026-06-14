@@ -8,9 +8,11 @@ export default {
     extend: {
       colors: {
         viking: {
-          coal:     '#08101C', // kullsvart bakgrunn
-          darkblue: '#0B1426', // dyp nattblå
-          surface:  '#182846',
+          // Tidligere nattblå base — byttet til mørkt tre/skinn så uttrykket bæres av
+          // materiale, ikke en flat blåfarge. Navnene beholdes for å unngå masseendring.
+          coal:     '#0E0A06', // varm kullsvart
+          darkblue: '#17100A', // mørk valnøtt (dyp varm base)
+          surface:  '#241A10', // mørkt lær/tre (panelflate)
           gold:     '#D4A843', // gammelgull
           'gold-soft': '#E8C97A',
           'gold-deep': '#8B6914', // mørk patinert gull/bronse

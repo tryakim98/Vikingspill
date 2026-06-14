@@ -18,7 +18,7 @@ const FACE_CELLS: Record<number, number[]> = {
   6: [0, 2, 3, 5, 6, 8],
 };
 
-const WOOD = 'radial-gradient(circle at 50% 40%, #2a1c10 0%, #1a1208 60%, #0B1426 100%)';
+const WOOD = 'radial-gradient(circle at 50% 40%, #2a1c10 0%, #1a1208 60%, #0E0A06 100%)';
 
 export default function DiceRoll({ value, onDone }: { value: number; onDone: () => void }) {
   const [face, setFace] = useState(() => 1 + Math.floor(Math.random() * 6));

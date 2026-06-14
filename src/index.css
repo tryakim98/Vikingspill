@@ -21,8 +21,28 @@ html, body {
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #0B1426;
+  /* Mørkt forvitret tre som gjennomgående base — ikke en flat blåfarge. En mørk scrim
+     over fotoet holder kontrasten til lys tekst. background-color er fallback. */
+  background-color: #17100A;
+  background-image:
+    linear-gradient(180deg, rgba(20,13,7,0.82), rgba(8,5,3,0.90)),
+    url('/textures/tre-gammelt.jpg');
+  background-size: cover, cover;
+  background-position: center;
+  background-attachment: fixed;
   color: #FDFBF6;
+}
+
+/* Fullskjerm-bakgrunn for alle hovedvisninger — erstatter den blå
+   `bg-gradient-to-b from-viking-darkblue to-viking-surface`. Forvitret tre med en
+   mørk scrim på toppen (litt lysere øverst, mørkere nederst) så teksten er lesbar. */
+.viking-screen {
+  background-color: #17100A;
+  background-image:
+    linear-gradient(180deg, rgba(23,16,10,0.80) 0%, rgba(12,8,4,0.90) 100%),
+    url('/textures/tre-gammelt.jpg');
+  background-size: cover, cover;
+  background-position: center;
 }
 
 #root {
@@ -80,7 +100,7 @@ code {
 /* Subtil pergament/lærtekstur — påføres paneler og kort som skal se håndlaget ut.
    SVG-støy gir et organisk «fiberpreg» som ikke kan oppnås med rene gradienter. */
 .viking-card {
-  background-color: #182846;
+  background-color: #241A10;
   background-image:
     radial-gradient(ellipse at 50% 0%, rgba(212, 168, 67, 0.10) 0%, transparent 60%),
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.05  0 0 0 0 0.05  0 0 0 0 0.02  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
@@ -126,9 +146,9 @@ code {
 
 /* Gullmosaikk — bysantinsk prakt. Brukes på lærerens leaderboard-panel. */
 .viking-panel-mosaic {
-  background-color: #182846;
+  background-color: #241A10;
   background-image:
-    linear-gradient(180deg, rgba(11,20,38,0.82), rgba(24,40,70,0.88)),
+    linear-gradient(180deg, rgba(26,17,9,0.80), rgba(12,8,4,0.86)),
     url('/textures/mosaikk-gull.png');
   background-size: cover, cover;
   background-position: center;
@@ -138,9 +158,9 @@ code {
 
 /* Mose og stein — det rå, nordlige landskapet. Brukes som ramme rundt sjøkartet. */
 .viking-panel-stone {
-  background-color: #0F1A2E;
+  background-color: #14130E;
   background-image:
-    linear-gradient(180deg, rgba(11,20,38,0.80), rgba(11,20,38,0.88)),
+    linear-gradient(180deg, rgba(18,16,12,0.78), rgba(10,9,6,0.86)),
     url('/textures/mose-stein.jpg');
   background-size: cover, cover;
   background-position: center;

@@ -26,7 +26,7 @@ type Phase = 'quiz' | 'failed' | 'action' | 'passed';
 
 function TrialShell({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-viking-darkblue to-viking-surface text-viking-paper">
+    <div className="min-h-screen viking-screen text-viking-paper">
       <div className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between border-b-2 border-viking-gold/40 pb-3">
           <h2 className="font-cinzel text-xl text-viking-gold">{title}</h2>

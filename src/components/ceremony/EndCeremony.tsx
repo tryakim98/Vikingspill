@@ -56,7 +56,7 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
 
   if (step === 'intro') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-viking-darkblue to-viking-surface px-4 text-center text-viking-paper">
+      <div className="flex min-h-screen flex-col items-center justify-center viking-screen px-4 text-center text-viking-paper">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="mb-4 text-6xl">🏰</div>
           <h1 className="mb-3 font-cinzel text-3xl font-bold text-viking-gold md:text-4xl">Kongen kaller alle hjem til Avaldsnes</h1>
@@ -73,7 +73,7 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
 
   if (step === 'scores') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-viking-darkblue to-viking-surface px-4 text-center text-viking-paper">
+      <div className="flex min-h-screen flex-col items-center justify-center viking-screen px-4 text-center text-viking-paper">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-xl">
           <p className="mb-2 font-cinzel text-xs uppercase tracking-[0.3em] text-viking-gold-soft/70">Et øyeblikks regnskap</p>
           <h1 className="mb-6 font-cinzel text-3xl font-bold text-viking-gold">Hva dere samlet</h1>
