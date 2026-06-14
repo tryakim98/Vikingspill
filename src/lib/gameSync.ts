@@ -68,6 +68,7 @@ export interface SyncedGroup {
   seenSkjebne?: string[];                // Skjebnemøte-ID-er gruppa har sett før
   lastSkjebneAtVisited?: number;         // visited.length da forrige ble utløst
   forceSkjebneNextSail?: boolean;        // settes av Skjebnehjulet — tvinger Skjebnemøte ved neste seilas
+  seenHints?: string[];                  // førstegangs-forklaringer gruppa har sett (HintKey)
 }
 
 /** Skjebnemøte i pågående tilstand. Høvdingen skriver choiceId; alle ser. */
@@ -92,6 +93,7 @@ export interface GameSettings {
   requirePerspective?: boolean;
   requireBridge?: boolean;
   textLength?: TextLength; // 'full' = alle, 'short' = alle, 'group' = la hver gruppe velge
+  showHints?: boolean;     // førstegangs-forklaringer på/av (default på)
 }
 
 export function setGameSettings(code: string, settings: Partial<GameSettings>): Promise<void> {

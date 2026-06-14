@@ -21,6 +21,7 @@
           "requirePerspective": { ".validate": "newData.isBoolean()" },
           "requireBridge":      { ".validate": "newData.isBoolean()" },
           "textLength":         { ".validate": "newData.isString() && newData.val().matches(/^(full|short|group)$/)" },
+          "showHints":          { ".validate": "newData.isBoolean()" },
           "$other":             { ".validate": false }
         },
 
@@ -62,6 +63,7 @@
             "sailingTo":      { ".validate": "newData.isString() && newData.val().length <= 40" },
             "lastSkjebneAtVisited":  { ".validate": "newData.isNumber()" },
             "forceSkjebneNextSail": { ".validate": "newData.isBoolean()" },
+            "seenHints":     { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
             "seenSkjebne":   { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
             "activeSkjebne": {
               ".validate": "newData.hasChildren(['id','pendingDestId'])",

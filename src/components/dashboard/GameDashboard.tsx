@@ -18,6 +18,10 @@ import SeaJourney, { SAILING_DURATION_S } from './SeaJourney';
 import TradeGoodsPanel from './TradeGoodsPanel';
 import SvenneproveTrial from './SvenneproveTrial';
 import SvennepoverPanel from './SvennepoverPanel';
+import HintToast from './HintToast';
+import HvaKanViGjorePanel from './HvaKanViGjorePanel';
+import { HINTS, type HintKey } from '../../data/firstTimeHints';
+import { isAccessible } from '../../lib/unlocks';
 import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
 import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
@@ -128,6 +132,25 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
       patchGroup(session.gameCode, myGroupId, { previewDestId: id }).catch(() => {});
     } else {
       setLocalPreviewDestId(id);
+    }
+  };
+
+  // Førstegangs-forklaringer — engangs-bobler første gang gruppa møter et nytt konsept.
+  // Synket pr. gruppe (alle medlemmer ser samme historikk) eller lokal i offline.
+  const showHints = gameSettings.showHints !== false; // default på
+  const [localSeenHints, setLocalSeenHints] = useState<string[]>([]);
+  const seenHints = isOnline ? (syncedGroup?.seenHints ?? []) : localSeenHints;
+  const [activeHint, setActiveHint] = useState<HintKey | null>(null);
+  const triggerHint = (key: HintKey) => {
+    if (!showHints) return;
+    if (seenHints.includes(key)) return;
+    if (activeHint) return; // én av gangen
+    setActiveHint(key);
+    const nextSeen = Array.from(new Set([...seenHints, key]));
+    if (isOnline) {
+      patchGroup(session.gameCode, myGroupId, { seenHints: nextSeen }).catch(() => {});
+    } else {
+      setLocalSeenHints(nextSeen);
     }
   };
 
@@ -325,6 +348,32 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   useEffect(() => { if (!activeDest) playMusic('adventure'); }, [activeDest]);
   // Stopp musikken når dashboardet avmonteres (eleven forlater spillet / bytter rolle).
   useEffect(() => () => stopMusic(), []);
+
+  // Førstegangs-forklaringer: utløses når en ressurs blir > 0 første gang,
+  // eller når gruppa preview-er et låst sidested for første gang.
+  useEffect(() => {
+    if (!state) return;
+    if (state.scores.culturalUnderstanding > 0) triggerHint('reward-und');
+    if (state.scores.tradeGain > 0)             triggerHint('reward-trade');
+    if (state.scores.reputation > 0)            triggerHint('reward-rep');
+    const anySkill = Object.values(state.skills).some((lvl) => (lvl ?? 0) > 0);
+    if (anySkill) triggerHint('reward-skill');
+    const anyGoods = Object.values(state.goods ?? {}).some((n) => (n ?? 0) > 0);
+    if (anyGoods) triggerHint('reward-goods');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.scores.culturalUnderstanding, state?.scores.tradeGain, state?.scores.reputation, JSON.stringify(state?.skills), JSON.stringify(state?.goods)]);
+
+  // Locked-system hint: utløses første gang gruppa preview-er et sidested de IKKE
+  // har tilgang til ennå.
+  useEffect(() => {
+    if (!state || !previewDestId) return;
+    const dest = destinations.find((d) => d.id === previewDestId);
+    if (!dest) return;
+    if (dest.route === 'side' && !isAccessible(dest, { scores: state.scores, skills: state.skills, goods: state.goods ?? {}, locked: state.locked, unlockedSides: state.unlockedSides ?? [] })) {
+      triggerHint('locked-system');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewDestId]);
 
   if (!state) return <LoadingScreen text="Henter skipets logg …" />;
 
@@ -612,6 +661,17 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           onStartSvenneprove={(destId, skill) => setSvenneprove({ destId, skill })}
         />
 
+        {/* "Hva kan vi gjøre?"-panel — forklarer ressurser og viser muligheter */}
+        <HvaKanViGjorePanel
+          destinations={destinations}
+          scores={state.scores}
+          skills={state.skills}
+          goods={state.goods ?? {}}
+          visited={state.visited}
+          locked={state.locked}
+          unlockedSides={state.unlockedSides ?? []}
+        />
+
         {/* Ferdigheter — trykk en på nivå 1–2 for å ta verdighetsprøven (§3.2) */}
         <p className="mb-2 font-inter text-xs text-viking-gold-soft/70">Ferdigheter{isChief ? ' — trykk en med ⚔ for å ta verdighetsprøven' : ''}</p>
         <div className="mb-6 flex flex-wrap gap-2">
@@ -738,6 +798,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           </div>
         </div>
       </div>
+
+      {/* Engangs-forklaringer — bobler nederst når gruppa møter et nytt konsept */}
+      <HintToast hint={activeHint ? HINTS[activeHint] : null} onDismiss={() => setActiveHint(null)} />
     </div>
   );
 }

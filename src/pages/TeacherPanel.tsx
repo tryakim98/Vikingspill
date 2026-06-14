@@ -448,6 +448,16 @@ export default function TeacherPanel() {
               />
               <span className="font-cinzel text-sm text-viking-gold-soft">Bro til i dag: <strong>{settings.requireBridge ? 'PÅ' : 'AV'}</strong></span>
             </label>
+            <label className="inline-flex cursor-pointer items-center gap-2" title="Engangs-bobler som forklarer ressurser og låste steder første gang gruppa møter dem. Skru av i korte økter.">
+              <input
+                type="checkbox"
+                checked={settings.showHints !== false}
+                onChange={(e) => { if (code) setGameSettings(code, { showHints: e.target.checked }).catch(() => {}); }}
+                data-testid="show-hints-toggle"
+                className="h-4 w-4 accent-viking-gold"
+              />
+              <span className="font-cinzel text-sm text-viking-gold-soft">Forklaringer: <strong>{settings.showHints !== false ? 'PÅ' : 'AV'}</strong></span>
+            </label>
           </div>
 
           {/* Tekstlengde — differensiering for yrkesfag */}

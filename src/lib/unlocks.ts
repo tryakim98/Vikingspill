@@ -77,3 +77,27 @@ export function missingForRequirement(r: UnlockRequirement, s: GameStateLike): s
     }
   }
 }
+
+/** Det gruppa allerede har av kravet — formatert som «har X». Brukes ved siden av
+ *  missingForRequirement for å vise «har 3 pelsverk, mangler 2 sølv». Returnerer
+ *  null når informasjonen ikke er nyttig (f.eks. ren svenneprøve). */
+export function haveForRequirement(r: UnlockRequirement, s: GameStateLike): string | null {
+  switch (r.type) {
+    case 'svenneprove': return null;
+    case 'skill': {
+      const cur = s.skills[r.key] ?? 0;
+      return `nivå ${cur} i ${skillTreeData[r.key].name}`;
+    }
+    case 'score': {
+      const cur = s.scores[r.key];
+      return `${cur} ${SCORE_LABEL[r.key].toLowerCase()}`;
+    }
+    case 'goods': {
+      const have = Object.entries(r.goods).map(([g, n]) => {
+        const cur = s.goods[g as TradeGoodId] ?? 0;
+        return `${cur}/${n} ${TRADE_GOODS[g as TradeGoodId].name.toLowerCase()}`;
+      });
+      return have.join(' · ');
+    }
+  }
+}

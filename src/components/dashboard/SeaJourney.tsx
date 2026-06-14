@@ -13,7 +13,7 @@
 import { motion } from 'motion/react';
 import type { Destination, ShipSymbol, SkillKey, TradeGoodId } from '../../types';
 import VikingShip from '../ship/VikingShip';
-import { isAccessible, describeRequirement, missingForRequirement, meetsRequirement } from '../../lib/unlocks';
+import { isAccessible, describeRequirement, missingForRequirement, meetsRequirement, haveForRequirement } from '../../lib/unlocks';
 import { ACTIONS_BY_DEST, type SpecialAction, type ActionCategory } from '../../data/specialActions';
 import { evaluateAction, describeCost, describeEffect } from '../../lib/specialActions';
 import { skillTreeData } from '../../data/skillTree';
@@ -313,8 +313,9 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                                 Utfør →
                               </button>
                             ) : (
-                              <span className="block max-w-[14ch] text-right font-mono text-[10px] text-viking-crimson/90" title={av.missing.join(', ')}>
-                                Mangler {av.missing[0]}{av.missing.length > 1 ? ' …' : ''}
+                              <span className="block max-w-[16ch] text-right font-mono text-[10px] text-viking-crimson/90" title={av.missing.join(', ')}>
+                                <span className="block">Mangler:</span>
+                                <strong className="block">{av.missing.join(', ')}</strong>
                               </span>
                             )}
                           </div>
@@ -337,13 +338,17 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                       const satisfied = req.type !== 'svenneprove' && meetsRequirement(req, stateForLogic);
                       const description = describeRequirement(req);
                       const missing = missingForRequirement(req, stateForLogic);
+                      const have = haveForRequirement(req, stateForLogic);
                       return (
-                        <li key={i} className="flex items-center gap-2 font-inter text-xs">
-                          <span>{satisfied ? '✅' : req.type === 'svenneprove' ? '📜' : '◻️'}</span>
-                          <span className={satisfied ? 'text-viking-moss' : 'text-viking-paper/85'}>
+                        <li key={i} className="flex flex-wrap items-start gap-2 font-inter text-xs">
+                          <span className="shrink-0">{satisfied ? '✅' : req.type === 'svenneprove' ? '📜' : '◻️'}</span>
+                          <span className={`flex-1 ${satisfied ? 'text-viking-moss' : 'text-viking-paper/85'}`}>
                             <strong>{description}</strong>
+                            {!satisfied && req.type !== 'svenneprove' && have && (
+                              <span className="block text-[11px] text-viking-paper/65"><span className="text-viking-moss">Har:</span> {have}</span>
+                            )}
                             {!satisfied && req.type !== 'svenneprove' && missing && (
-                              <span className="text-viking-gold-soft/80"> — mangler {missing}</span>
+                              <span className="block text-[11px] text-viking-crimson/85"><span className="text-viking-crimson">Mangler:</span> {missing}</span>
                             )}
                           </span>
                         </li>
