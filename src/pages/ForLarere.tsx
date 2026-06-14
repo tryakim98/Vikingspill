@@ -42,7 +42,7 @@ export default function ForLarere() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-viking-coal text-viking-paper">
       {/* Bakgrunn — gradient + Yggdrasil */}
-      <div className="absolute inset-0 bg-gradient-to-b from-viking-coal via-viking-darkblue to-viking-surface" />
+      <div className="absolute inset-0 viking-screen" />
       <div className="pointer-events-none absolute left-1/2 top-32 -translate-x-1/2 opacity-[0.06]">
         <Yggdrasil size={620} />
       </div>

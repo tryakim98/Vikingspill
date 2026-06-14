@@ -8,26 +8,35 @@ export default {
     extend: {
       colors: {
         viking: {
-          // Tidligere nattblå base — byttet til mørkt tre/skinn så uttrykket bæres av
-          // materiale, ikke en flat blåfarge. Navnene beholdes for å unngå masseendring.
-          coal:     '#0E0A06', // varm kullsvart
-          darkblue: '#17100A', // mørk valnøtt (dyp varm base)
-          surface:  '#241A10', // mørkt lær/tre (panelflate)
-          gold:     '#D4A843', // gammelgull
-          'gold-soft': '#E8C97A',
-          'gold-deep': '#8B6914', // mørk patinert gull/bronse
-          paper:    '#FDFBF6',
-          parchment: '#E8DBB7', // patinert pergament
-          rust:     '#A0522D',
-          teal:     '#2B6B6B',
-          moss:     '#5B7553',
+          // Skitne jordfarger — myrbrun base, oksidert bronse, blodrust, beinhvit,
+          // mosegrønn. Bevisst dempet og «forvitret», vekk fra den rene blå/gull-looken.
+          coal:     '#0C0A06', // sotbrun
+          darkblue: '#17100A', // mørk valnøtt (base) — navnet beholdt
+          surface:  '#241A10', // myrbrun/lær (panelflate)
+          gold:     '#A8862F', // oksidert messing/bronse (dempet «gull»)
+          'gold-soft': '#C7AD6E', // støvet bronse
+          'gold-deep': '#7A5E18', // mørk patinert bronse
+          paper:    '#E8DEC8', // beinhvit (ikke ren hvit)
+          parchment: '#D6C49A', // skitnere pergament
+          rust:     '#8A3F22', // blodrust
+          teal:     '#3D5650', // mørk myr-grønnblå (dempet)
+          moss:     '#5A6B43', // mosegrønn
           bronze:   '#4A5A3C', // bronsegrønt
-          plum:     '#6B3FA0',
-          crimson:  '#8B2929', // blodrødt aksent
-          'crimson-deep': '#5C1818',
+          plum:     '#5C4466', // dempet plomme
+          crimson:  '#7A2A20', // blodrødt aksent (skittent)
+          'crimson-deep': '#4A1614',
           leather:  '#3A2615', // mørkt lær/tre
           'leather-soft': '#5C3E22',
         },
+      },
+      // KI-tell: avrundede hjørner. Alt firkantes (hugget-aktig) — sirkler beholdes (full).
+      borderRadius: {
+        none: '0', sm: '0', DEFAULT: '0', md: '0', lg: '0', xl: '0', '2xl': '0', '3xl': '0',
+        full: '9999px',
+      },
+      // KI-tell: myke drop-shadows. Fjernet — dybden bæres av harde kanter/border i stedet.
+      boxShadow: {
+        none: 'none', sm: 'none', DEFAULT: 'none', md: 'none', lg: 'none', xl: 'none', '2xl': 'none', inner: 'none',
       },
       fontFamily: {
         cinzel: ['Cinzel', 'serif'],

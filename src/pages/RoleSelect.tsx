@@ -24,117 +24,87 @@ export default function RoleSelect() {
   const handleStudent = () => { setRole('student'); navigate('/student'); };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-viking-coal text-viking-paper">
-      {/* Bakgrunn — dyp gradient + Yggdrasil sentralt */}
-      <div className="absolute inset-0 bg-gradient-to-b from-viking-coal via-viking-darkblue to-viking-surface" />
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.07]">
-        <Yggdrasil size={780} />
+    <div className="viking-screen relative min-h-screen overflow-hidden text-viking-paper">
+      {/* Yggdrasil forskjøvet mot høyre — bevisst usentrert (asymmetri) */}
+      <div className="pointer-events-none absolute -right-24 top-1/2 -translate-y-1/2 opacity-[0.06]">
+        <Yggdrasil size={760} />
+      </div>
+      {/* Ett runebånd langs venstre kant — vertikalt, ikke symmetrisk topp/bunn */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 hidden flex-col justify-center gap-6 pl-3 font-cinzel text-2xl text-viking-gold/20 sm:flex" style={{ letterSpacing: '0.3em' }}>
+        <span>ᚦ</span><span>ᚱ</span><span>ᚾ</span><span>ᛏ</span><span>ᛚ</span><span>ᛟ</span><span>ᚱ</span>
       </div>
 
-      {/* Stjernepunkter */}
-      <div className="pointer-events-none absolute inset-0">
-        {Array.from({ length: 60 }).map((_, i) => {
-          const x = (i * 137) % 100;
-          const y = (i * 91) % 100;
-          const s = (i % 3) + 1;
-          return <div key={i} className="absolute rounded-full bg-viking-gold-soft opacity-30" style={{ left: `${x}%`, top: `${y}%`, width: s, height: s }} />;
-        })}
-      </div>
-
-      {/* Runebånd øverst */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-around py-4 font-cinzel text-3xl text-viking-gold opacity-25" style={{ letterSpacing: '0.5em' }}>
-        <span>ᚦ</span><span>ᚱ</span><span>ᚾ</span><span>ᛏ</span><span>ᛚ</span><span>ᛟ</span><span>ᚱ</span><span>ᚦ</span>
-      </div>
-
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12">
-        {/* Tittel med ravner som flankerer */}
-        <div className="mb-3 flex items-center gap-6 sm:gap-10">
-          <Raven size={64} facing="right" color="#D4A843" className="-mt-4 hidden sm:block" />
-          <div className="text-center">
-            <h1 className="font-saga text-5xl font-black leading-tight viking-engraved-large md:text-7xl">
-              VIKINGENES<br/>KULTURMØTER
-            </h1>
-            <p className="mt-3 font-cinzel text-sm uppercase tracking-[0.4em] text-viking-gold-soft">
-              ᚦ ᚱ ᚾ ᛏ
-            </p>
-          </div>
-          <Raven size={64} facing="left" color="#D4A843" className="-mt-4 hidden sm:block" />
+      {/* Venstrestilt innhold, strammere luft */}
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-4xl flex-col justify-center px-6 py-10 sm:px-10">
+        {/* Tittel — venstrejustert, med én ravn (ikke flankerende par) */}
+        <div className="mb-1 flex items-end gap-4">
+          <Raven size={52} facing="right" color="#A8862F" className="mb-2 hidden sm:block" />
+          <h1 className="font-saga text-5xl font-black leading-[0.95] viking-engraved-large md:text-7xl">
+            VIKINGENES<br/>KULTURMØTER
+          </h1>
         </div>
-
-        <p className="mb-2 max-w-xl text-center font-inter italic text-viking-gold-soft md:text-lg">
+        <p className="mb-5 max-w-lg font-inter italic text-viking-gold-soft">
           Et klasseromsspill om handel, kultur og møter gjennom historien
         </p>
+        <RuneDivider className="mb-7 w-full max-w-md" />
 
-        <RuneDivider className="mb-8 mt-4 w-full max-w-2xl" />
+        {/* Rollevalg — asymmetrisk: Tor (storskjerm) er det tunge kortet, viking er smalere og forskjøvet ned */}
+        <div className="flex w-full flex-col gap-5 md:flex-row md:items-start">
 
-        {/* Rollevalg */}
-        <div className="grid w-full max-w-3xl grid-cols-1 gap-8 md:grid-cols-2">
-
-          {/* TOR — lærer */}
+          {/* TOR — lærer (dominant) */}
           <button
             onClick={handleTeacher}
-            className="viking-card-wood group relative overflow-hidden rounded-lg p-8 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-viking-gold/30"
+            className="viking-card-wood group relative overflow-hidden p-7 text-left transition-transform duration-150 hover:-translate-y-0.5 md:flex-[3]"
           >
-            {/* Gylne hjørner */}
             <CornerOrnaments />
             <div className="relative">
-              <div className="mb-4 flex items-center gap-4">
-                <ThorHammer size={56} color="#D4A843" />
+              <div className="mb-3 flex items-center gap-4">
+                <ThorHammer size={56} color="#A8862F" />
                 <h2 className="font-saga text-3xl font-bold text-viking-gold md:text-4xl viking-engraved">
                   Jeg er Tor ⚡
                 </h2>
               </div>
-              <p className="font-inter text-viking-paper/90">
+              <p className="max-w-md font-inter text-viking-paper/90">
                 Våk over flåten fra Åsgard. Følg med på de dødelige vikingenes ferd, gi din velsignelse, og slipp Skjebnehjulet løs når tiden er moden.
               </p>
-              <p className="mt-4 font-cinzel text-xs italic text-viking-gold-soft">
+              <p className="mt-3 font-cinzel text-xs italic text-viking-gold-soft">
                 ↳ Tors utsyn over Midgard — vises på storskjermen
               </p>
-              <KnotBorder width={240} height={20} className="mt-5 opacity-70" />
+              <KnotBorder width={240} height={20} className="mt-5 opacity-60" />
             </div>
           </button>
 
-          {/* VIKING — elev */}
+          {/* VIKING — elev (smalere, forskjøvet ned for asymmetri) */}
           <button
             onClick={handleStudent}
-            className="viking-card-leather group relative overflow-hidden rounded-lg p-8 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-viking-gold/30"
+            className="viking-card-leather group relative overflow-hidden p-7 text-left transition-transform duration-150 hover:-translate-y-0.5 md:mt-10 md:flex-[2]"
           >
             <CornerOrnaments />
             <div className="relative">
-              <div className="mb-4 flex items-center gap-4">
-                <DragonHead size={64} color="#D4A843" facing="right" />
-                <h2 className="font-saga text-3xl font-bold text-viking-gold md:text-4xl viking-engraved">
+              <div className="mb-3 flex items-center gap-3">
+                <DragonHead size={56} color="#A8862F" facing="right" />
+                <h2 className="font-saga text-2xl font-bold text-viking-gold md:text-3xl viking-engraved">
                   Jeg er viking
                 </h2>
               </div>
-              <p className="font-inter text-viking-paper/90">
+              <p className="font-inter text-sm text-viking-paper/90">
                 Bli én av Midgards dødelige sjøfarere. Velg skip, styr gjennom 12 land, og håp at Tor våker over dere.
               </p>
-              <p className="mt-4 font-cinzel text-xs italic text-viking-gold-soft">
-                ↳ Mobiltelefon/iPad: hver gruppe sin private skjerm
+              <p className="mt-3 font-cinzel text-xs italic text-viking-gold-soft">
+                ↳ Mobil/iPad: hver gruppe sin private skjerm
               </p>
-              <KnotBorder width={240} height={20} className="mt-5 opacity-70" />
             </div>
           </button>
         </div>
 
-        {/* Vegvisir-vannmerke nederst */}
-        <div className="mt-12 flex items-center gap-6 opacity-60">
-          <Vegvisir size={56} color="#D4A843" />
-          <p className="font-cinzel text-xs uppercase tracking-[0.3em] text-viking-gold-soft">
-            Velg din ferd
-          </p>
-          <Vegvisir size={56} color="#D4A843" />
+        {/* Bunnlinje — venstrestilt, ikke sentrert vannmerke */}
+        <div className="mt-8 flex items-center gap-3 opacity-60">
+          <Vegvisir size={44} color="#A8862F" />
+          <p className="font-cinzel text-xs uppercase tracking-[0.3em] text-viking-gold-soft">Velg din ferd</p>
         </div>
-
-        <p className="mt-4 font-mono text-[10px] text-viking-gold-soft/50">
+        <p className="mt-3 font-mono text-[10px] text-viking-gold-soft/50">
           Rolle lagres lokalt — klikk to ganger for å bytte
         </p>
-      </div>
-
-      {/* Runebånd nederst */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-around py-4 font-cinzel text-3xl text-viking-gold opacity-25" style={{ letterSpacing: '0.5em' }}>
-        <span>ᚷ</span><span>ᚹ</span><span>ᛟ</span><span>ᛚ</span><span>ᛏ</span><span>ᚾ</span><span>ᚱ</span><span>ᚦ</span>
       </div>
     </div>
   );

@@ -124,7 +124,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
       </p>
 
       <div
-        className="relative w-full overflow-hidden rounded-lg border-4 border-viking-gold/70 bg-gradient-to-br from-viking-darkblue to-[#1c130b]"
+        className="relative w-full overflow-hidden rounded-lg border-4 border-viking-gold/70 bg-[#14110b]"
         style={{ aspectRatio: '16 / 9', backgroundImage: 'repeating-linear-gradient(0deg, rgba(212,168,67,0.05) 0 1px, transparent 1px 40px), repeating-linear-gradient(90deg, rgba(212,168,67,0.05) 0 1px, transparent 1px 40px)' }}
         data-testid="sea-journey-map"
       >
