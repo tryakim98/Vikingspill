@@ -11,6 +11,7 @@
 import type { Destination, SkillKey } from '../../types';
 import { SIDE_UNLOCKS } from '../../data/routes';
 import { skillTreeData } from '../../data/skillTree';
+import Icon, { SKILL_ICON } from '../decor/Icon';
 
 interface Props {
   destinations: Destination[];
@@ -47,7 +48,7 @@ export default function SvennepoverPanel({ destinations, unlockedSides, isChief,
   return (
     <div className="mb-4 rounded-lg border-2 border-viking-gold/60 bg-viking-darkblue/40 p-3" data-testid="svenneprover-panel">
       <div className="mb-2 flex items-baseline justify-between">
-        <h3 className="font-cinzel text-sm text-viking-gold">📜 Svenneprøver</h3>
+        <h3 className="inline-flex items-center gap-2 font-cinzel text-sm text-viking-gold"><Icon name="scroll" size={15} /> Svenneprøver</h3>
         <p className="font-mono text-[10px] text-viking-gold-soft/80">{passedCount}/{rows.length} bestått</p>
       </div>
       <p className="mb-2 font-inter text-[11px] italic text-viking-gold-soft/75">
@@ -64,7 +65,7 @@ export default function SvennepoverPanel({ destinations, unlockedSides, isChief,
                 r.passed ? 'border-viking-moss/50 bg-viking-moss/10' : 'border-viking-gold/30 bg-viking-surface/40'
               }`}
             >
-              <span className="text-lg" style={{ color: branch.color }}>{branch.icon}</span>
+              <span style={{ color: branch.color }}><Icon name={SKILL_ICON[r.skill]} size={18} /></span>
               <div className="flex-1">
                 <p className="font-cinzel text-sm text-viking-paper">
                   Svenneprøve i <strong className="text-viking-gold">{branch.name}</strong>

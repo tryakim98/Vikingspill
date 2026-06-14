@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160" width="480" height="160" role="img" aria-label="Runesymboler til ikoner">
+  <defs>
+    <linearGradient id="rg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8c87a"/><stop offset="1" stop-color="#9a6a30"/></linearGradient>
+    <filter id="rr"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="5" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.3"/></filter>
+  </defs>
+  <g fill="none" stroke="url(#rg)" stroke-width="7" stroke-linecap="round" filter="url(#rr)">
+    <!-- Hver rune i en 80x80-celle. Bruk dem som ikoner: gi hver et id-utsnitt ved innkobling. -->
+    <!-- 1 Fehu (rikdom/handel) -->
+    <g transform="translate(20,40)"><path d="M0,0 V80 M0,8 L26,-6 M0,40 L26,26"/></g>
+    <!-- 2 Uruz (styrke/holmgang) -->
+    <g transform="translate(100,40)"><path d="M0,80 V6 L28,0 V80"/></g>
+    <!-- 3 Ansuz (Odin/visdom/Tor-rollen) -->
+    <g transform="translate(180,40)"><path d="M0,0 V80 M0,6 L26,20 M0,38 L26,52"/></g>
+    <!-- 4 Raidho (reise/seiling) -->
+    <g transform="translate(260,40)"><path d="M0,80 V0 H18 a16,16 0 0 1 0,32 H0 M16,32 L30,80"/></g>
+    <!-- 5 Sowilo (sol/seier) -->
+    <g transform="translate(340,40)"><path d="M22,0 L4,28 L24,46 L6,80"/></g>
+    <!-- 6 Tiwaz (Tyr/kamp/rettferd/Tinget) -->
+    <g transform="translate(420,40)"><path d="M14,80 V0 M14,10 L-2,28 M14,10 L30,28"/></g>
+  </g>
+</svg>

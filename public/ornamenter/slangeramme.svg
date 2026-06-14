@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" width="800" height="520" role="img" aria-label="Urnes-stil slangeramme">
+  <defs>
+    <linearGradient id="bronse" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b8893f"/>
+      <stop offset="0.5" stop-color="#e8c87a"/>
+      <stop offset="1" stop-color="#8a5a2b"/>
+    </linearGradient>
+    <filter id="ridse" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/>
+    </filter>
+  </defs>
+
+  <!-- Asymmetrisk Urnes-flettverk: to slanger som veksler tykk/tynn linje og løper i åtttall.
+       Bevisst IKKE symmetrisk - venstre og høyre side er ulike, slik ekte Urnes-kunst er. -->
+  <g fill="none" stroke="url(#bronse)" filter="url(#ridse)" stroke-linecap="round">
+    <!-- Hovedslange (tykk) -->
+    <path stroke-width="13" d="M150,40
+      C70,60 44,150 70,240 C92,318 60,400 150,470
+      C260,520 300,430 400,452 C520,478 560,470 650,452
+      C742,432 770,330 742,240 C720,168 760,90 660,52
+      C560,16 520,70 400,58 C300,48 250,20 150,40 Z"/>
+    <!-- Andre slange (tynnere), forskjøvet - skaper sammenfletting -->
+    <path stroke-width="6" opacity="0.9" d="M170,70
+      C110,92 92,160 110,235 C126,300 96,372 175,432
+      C268,478 300,402 400,420 C510,440 548,432 626,418
+      C706,400 726,318 704,244 C686,184 716,120 636,86
+      C556,54 516,104 400,92 C300,82 256,52 170,70 Z"/>
+    <!-- Slangehode øverst venstre (Urnes-stil: mandelformet øye, åpen kjeft) -->
+    <path stroke-width="9" d="M150,40 C120,28 96,40 92,66 C90,82 104,92 120,86"/>
+    <circle cx="118" cy="60" r="4" fill="url(#bronse)" stroke="none"/>
+    <!-- Slangehode nederst høyre, motsatt vei (asymmetri) -->
+    <path stroke-width="9" d="M650,452 C684,466 712,452 714,424 C715,408 700,398 684,406"/>
+    <circle cx="690" cy="430" r="4" fill="url(#bronse)" stroke="none"/>
+    <!-- Smårunelinjer langs kroppen (antydet, ikke faktiske runer) -->
+    <g stroke-width="2.5" opacity="0.65">
+      <path d="M210,452 l14,-20 M236,456 l14,-20 M262,452 l14,-20"/>
+      <path d="M560,64 l14,20 M586,60 l14,20 M612,64 l14,20"/>
+    </g>
+  </g>
+</svg>

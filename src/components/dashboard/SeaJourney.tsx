@@ -106,12 +106,12 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
   const isSideLocked = (d: Destination) => d.route === 'side' && !accessibleNow(d) && !locked.includes(d.id);
 
   const previewStatus = (d: Destination) =>
-    locked.includes(d.id) ? { label: '🔒 Stengt', color: 'text-viking-crimson' } :
+    locked.includes(d.id) ? { label: 'Stengt', color: 'text-viking-crimson' } :
     visited.includes(d.id) ? { label: '✓ Besøkt', color: 'text-viking-moss' } :
-    isSideLocked(d) ? { label: '🔒 Sidested — låst', color: 'text-viking-gold-soft' } :
-    d.route === 'side' && unlockedSides.includes(d.id) ? { label: '🔓 Låst opp!', color: 'text-viking-moss' } :
-    d.route === 'side' ? { label: '⛵ Sidested — åpent', color: 'text-viking-gold' } :
-    { label: '⛵ Hovedrute', color: 'text-viking-gold' };
+    isSideLocked(d) ? { label: 'Sidested — låst', color: 'text-viking-gold-soft' } :
+    d.route === 'side' && unlockedSides.includes(d.id) ? { label: 'Låst opp', color: 'text-viking-moss' } :
+    d.route === 'side' ? { label: 'Sidested — åpent', color: 'text-viking-gold' } :
+    { label: 'Hovedrute', color: 'text-viking-gold' };
 
   return (
     <div className="viking-panel-stone rounded-lg p-4">
@@ -187,7 +187,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                 className="relative flex h-3.5 w-3.5 items-center justify-center rounded-full"
                 style={{ backgroundColor: dotColor, boxShadow: dotShadow, opacity: dimmed && !isSelected ? 0.7 : 1 }}
               >
-                {(isLocked || sideLocked) && <span className="absolute -top-3 text-[10px]">🔒</span>}
+                {(isLocked || sideLocked) && <span className="absolute -top-3 font-mono text-[9px] text-viking-crimson">LÅST</span>}
                 {isVisited && <span className="absolute -top-3 text-[9px]">✓</span>}
               </motion.div>
               <span className={`absolute left-1/2 top-4 -translate-x-1/2 whitespace-nowrap font-inter text-[10px] ${isSelected ? 'text-viking-gold' : 'text-viking-gold-soft/80'}`}>
@@ -341,7 +341,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                       const have = haveForRequirement(req, stateForLogic);
                       return (
                         <li key={i} className="flex flex-wrap items-start gap-2 font-inter text-xs">
-                          <span className="shrink-0">{satisfied ? '✅' : req.type === 'svenneprove' ? '📜' : '◻️'}</span>
+                          <span className="shrink-0">{satisfied ? '✓' : '·'}</span>
                           <span className={`flex-1 ${satisfied ? 'text-viking-moss' : 'text-viking-paper/85'}`}>
                             <strong>{description}</strong>
                             {!satisfied && req.type !== 'svenneprove' && have && (
@@ -367,7 +367,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                   )}
                   {svenneReq && svenneReq.type === 'svenneprove' && !isChief && (
                     <p className="mt-3 rounded-md border border-viking-gold/30 bg-viking-darkblue/40 px-3 py-2 font-cinzel text-xs italic text-viking-gold-soft/80">
-                      📜 Høvdingen kan ta svenneprøven i {skillTreeData[svenneReq.skill].name}
+                      Høvdingen kan ta svenneprøven i {skillTreeData[svenneReq.skill].name}
                     </p>
                   )}
                 </div>
@@ -377,7 +377,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
             {/* "Låst opp!"-merke når sidestedet ER låst opp men ikke besøkt */}
             {dest.route === 'side' && unlockedSides.includes(dest.id) && !visited.includes(dest.id) && !locked.includes(dest.id) && (
               <div className="mt-3 rounded-md border-2 border-viking-moss/60 bg-viking-moss/15 p-3 text-center" data-testid="just-unlocked">
-                <p className="font-cinzel text-sm font-bold text-viking-moss">🔓 Låst opp!</p>
+                <p className="font-cinzel text-sm font-bold text-viking-moss">Låst opp!</p>
                 <p className="mt-0.5 font-inter text-xs text-viking-paper/85">Sidestedet er tilgjengelig — bekreft seilas under.</p>
               </div>
             )}

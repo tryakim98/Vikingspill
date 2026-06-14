@@ -30,6 +30,7 @@ import { playMusicForDestination } from '../../lib/music';
 import { playAmbienceForDestination, stopAmbience } from '../../lib/ambience';
 import QuestionCard from '../quiz/QuestionCard';
 import DiceRoll from '../dice/DiceRoll';
+import Icon from '../decor/Icon';
 
 type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'radslagning' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
 
@@ -124,7 +125,7 @@ function AdviceSummary({ advice, memberIds, choices }: {
   const notes = given.filter((a) => a.note).map((a) => a.note as string);
   return (
     <div className="mb-4 rounded-lg border-2 border-viking-teal/50 bg-viking-teal/10 p-4" data-testid="advice-summary">
-      <p className="mb-2 font-cinzel text-sm text-viking-gold-soft">⚖️ Gruppas råd ({given.length})</p>
+      <p className="mb-2 inline-flex items-center gap-2 font-cinzel text-sm text-viking-gold-soft"><Icon name="tiwaz" size={14} /> Gruppas råd ({given.length})</p>
       <div className="space-y-1">
         {tally.map((t) => (
           <div key={t.id} className="flex items-center gap-2 font-inter text-sm text-viking-paper/90">
@@ -136,7 +137,7 @@ function AdviceSummary({ advice, memberIds, choices }: {
       {notes.length > 0 && (
         <ul className="mt-2 space-y-1 border-t border-viking-teal/30 pt-2">
           {notes.map((nt, i) => (
-            <li key={i} className="font-inter text-xs italic text-viking-paper/80">💬 «{nt}»</li>
+            <li key={i} className="flex items-center gap-1.5 font-inter text-xs italic text-viking-paper/80"><Icon name="chat" size={12} /> «{nt}»</li>
           ))}
         </ul>
       )}
@@ -282,7 +283,7 @@ export default function EncounterFlow({
 
   const ChiefBanner = () => (
     <p className="mt-8 text-center font-cinzel text-viking-gold-soft" data-testid="encounter-spectator-banner">
-      ⚓ Høvdingen styrer skipet — dere ser med
+<Icon name="anchor" size={13} className="mr-1 inline" /> Høvdingen styrer skipet — dere ser med
     </p>
   );
 
@@ -310,22 +311,22 @@ export default function EncounterFlow({
       <Shell name={d.name} onExit={onExit}>
         <p className="mb-1 font-inter text-xs uppercase tracking-widest text-viking-gold-soft/70">Episk kulturmøte</p>
         <h1 className="mb-4 font-cinzel text-2xl font-bold text-viking-gold">{km.tittel}</h1>
-        {/* Kulturmøte-scenen rendres som en runekjevle — tre med innrissede runer */}
-        <div className="viking-runepinne mb-6 px-10 py-6 sm:px-14" data-testid="runepinne">
-          {/* Venstre rune-kolonne */}
-          <span className="viking-runepinne-runes pointer-events-none absolute left-4 top-1/2 hidden -translate-y-1/2 flex-col gap-3 font-cinzel text-base sm:flex" aria-hidden="true">
-            <span>ᚦ</span><span>ᚱ</span><span>ᚾ</span><span>ᛏ</span>
-          </span>
-          {/* Høyre rune-kolonne */}
-          <span className="viking-runepinne-runes pointer-events-none absolute right-4 top-1/2 hidden -translate-y-1/2 flex-col gap-3 font-cinzel text-base sm:flex" aria-hidden="true">
-            <span>ᛚ</span><span>ᛟ</span><span>ᛒ</span><span>ᛇ</span>
-          </span>
-          <p
-            className="whitespace-pre-line font-inter italic leading-relaxed"
-            data-testid={textLength === 'short' && d.kulturmoteSceneShort ? 'scene-short' : 'scene-full'}
-          >
-            {textLength === 'short' && d.kulturmoteSceneShort ? d.kulturmoteSceneShort : km.scene}
-          </p>
+        {/* Kulturmøte-scenen rammes inn av Urnes-slangerammen (public/ornamenter) */}
+        <div className="relative mb-6" data-testid="runepinne">
+          <img
+            src={`${import.meta.env.BASE_URL}ornamenter/slangeramme.svg`}
+            alt="" aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full"
+            style={{ objectFit: 'fill' }}
+          />
+          <div className="relative px-10 py-12 sm:px-16 sm:py-14">
+            <p
+              className="whitespace-pre-line font-inter italic leading-relaxed text-viking-parchment [text-shadow:0_1px_3px_rgba(0,0,0,0.85)]"
+              data-testid={textLength === 'short' && d.kulturmoteSceneShort ? 'scene-short' : 'scene-full'}
+            >
+              {textLength === 'short' && d.kulturmoteSceneShort ? d.kulturmoteSceneShort : km.scene}
+            </p>
+          </div>
         </div>
         <div className="rounded-lg border-2 border-viking-gold/40 bg-viking-darkblue/50 p-5">
           <QuestionCard
@@ -366,13 +367,13 @@ export default function EncounterFlow({
             {onRequestApproval && (
               <div className="mt-4 border-t border-viking-gold/20 pt-3">
                 {approvalSent ? (
-                  <p className="font-inter text-sm text-viking-moss">✋ Sendt til læreren — venter på godkjenning</p>
+                  <p className="inline-flex items-center gap-1.5 font-inter text-sm text-viking-moss"><Icon name="hand" size={14} /> Sendt til læreren — venter på godkjenning</p>
                 ) : (
                   <button
                     onClick={() => { onRequestApproval(d.id, d.task.title); setApprovalSent(true); }}
                     className="rounded-md border-2 border-viking-gold/60 px-4 py-1.5 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold"
                   >
-                    ✋ Be læreren om godkjenning
+                    <span className="inline-flex items-center gap-1.5"><Icon name="hand" size={14} /> Be læreren om godkjenning</span>
                   </button>
                 )}
               </div>
@@ -414,9 +415,9 @@ export default function EncounterFlow({
           initial={{ y: '-130%', rotate: -25, opacity: 0 }}
           animate={{ y: 0, rotate: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 90, damping: 11 }}
-          className="relative text-8xl drop-shadow-[0_0_28px_rgba(212,168,67,0.65)]"
+          className="relative text-viking-gold"
         >
-          🛡️
+          <Icon name="shield" size={96} strokeWidth={1.2} />
         </motion.div>
         <motion.p
           initial={{ opacity: 0, y: 12 }}
@@ -484,10 +485,10 @@ export default function EncounterFlow({
     return (
       <Shell name={d.name} onExit={onExit}>
         <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft/80">Perspektivskifte</p>
-        <h1 className="mb-2 font-cinzel text-2xl font-bold text-viking-gold">🪟 To sider av samme strand</h1>
+        <h1 className="mb-2 inline-flex items-center gap-2 font-cinzel text-2xl font-bold text-viking-gold"><Icon name="window" size={22} /> To sider av samme strand</h1>
         <p className="mb-4 font-inter text-sm italic text-viking-paper/75">Skriv kort — bare 1–2 setninger på hvert spørsmål.</p>
 
-        <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">⚔️ {p.vikingQuestion}</p>
+        <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold-soft"><Icon name="axe" size={13} /> {p.vikingQuestion}</p>
         <Pergament data-testid="viking-pergament">
           <textarea
             value={vikingPerspective}
@@ -501,7 +502,7 @@ export default function EncounterFlow({
           />
         </Pergament>
 
-        <p className="mb-1 mt-4 font-cinzel text-sm text-viking-gold-soft">👁️ {p.otherQuestion}</p>
+        <p className="mb-1 mt-4 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold-soft"><Icon name="eye" size={13} /> {p.otherQuestion}</p>
         <Pergament data-testid="other-pergament">
           <textarea
             value={otherPerspective}
@@ -539,7 +540,7 @@ export default function EncounterFlow({
     return (
       <Shell name={d.name} onExit={onExit}>
         <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft/80">Rådslagning</p>
-        <h1 className="mb-2 font-cinzel text-2xl font-bold text-viking-gold">🗣️ Hva mener mannskapet?</h1>
+        <h1 className="mb-2 inline-flex items-center gap-2 font-cinzel text-2xl font-bold text-viking-gold"><Icon name="ansuz" size={22} /> Hva mener mannskapet?</h1>
         <p className="mb-4 font-inter text-sm italic text-viking-paper/75">
           Hver i mannskapet gir sitt råd på egen enhet før høvdingen bestemmer — trykk på alternativet du helst vil, eller skriv én kort setning.
         </p>
@@ -602,7 +603,7 @@ export default function EncounterFlow({
                 Til den endelige avgjørelsen →
               </button>
             ) : (
-              <p className="text-center font-cinzel text-viking-gold-soft" data-testid="council-wait-chief">⚓ Alle har gitt råd — høvdingen tar den endelige avgjørelsen.</p>
+              <p className="text-center font-cinzel text-viking-gold-soft" data-testid="council-wait-chief"><Icon name="anchor" size={13} className="mr-1 inline" /> Alle har gitt råd — høvdingen tar den endelige avgjørelsen.</p>
             )}
           </div>
         ) : (
@@ -633,7 +634,7 @@ export default function EncounterFlow({
       return (
         <div key={c.id} className={`rounded-lg border-2 p-4 ${cardCls}`} data-testid={`valg-${c.id}`}>
           <div className="mb-1 flex items-center gap-2">
-            {isHidden && <span className="rounded bg-viking-gold px-2 py-0.5 font-mono text-[10px] uppercase text-viking-darkblue">📖 Skjult valg</span>}
+            {isHidden && <span className="inline-flex items-center gap-1 bg-viking-gold px-2 py-0.5 font-mono text-[10px] uppercase text-viking-darkblue"><Icon name="book" size={11} /> Skjult valg</span>}
             <h3 className="font-cinzel text-lg text-viking-gold">{c.title}</h3>
             <span className="rounded bg-viking-darkblue/70 px-2 py-0.5 font-mono text-[10px] uppercase text-viking-gold-soft/80">{c.tag}</span>
           </div>
@@ -643,10 +644,10 @@ export default function EncounterFlow({
               <p className="mb-2 font-mono text-xs text-viking-moss">✓ Krever {reqText}</p>
             ) : lateAvailable ? (
               <p className="mb-2 font-mono text-xs text-viking-gold-soft" data-testid={`late-warning-${c.id}`}>
-                ⚠ Krever {reqText} — dere mangler den, og det straffer seg sent i reisen (−2 på terningen).
+                Krever {reqText} — dere mangler den, og det straffer seg sent i reisen (−2 på terningen).
               </p>
             ) : (
-              <p className="mb-2 font-mono text-xs text-viking-crimson">🔒 Krever {reqText}</p>
+              <p className="mb-2 font-mono text-xs text-viking-crimson">Krever {reqText}</p>
             )
           )}
           <OddsBar baseRoll={c.baseRoll} />
@@ -679,7 +680,7 @@ export default function EncounterFlow({
         {/* Lesetest for skjult valg — kun hvis destinasjonen har et og ikke er forsøkt */}
         {hidden && test && !hiddenAnswered && (
           <div className="mb-5 rounded-lg border-2 border-viking-gold/60 bg-viking-darkblue/60 p-4" data-testid="reading-test">
-            <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">📖 Et skjult valg venter</p>
+            <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold-soft"><Icon name="book" size={13} /> Et skjult valg venter</p>
             <p className="mb-3 font-inter text-base text-viking-paper">{test.q}</p>
             <div className="grid gap-2">
               {test.opts.map((opt, i) => (
@@ -694,7 +695,7 @@ export default function EncounterFlow({
                 </button>
               ))}
             </div>
-            {!isChief && <p className="mt-2 text-center font-cinzel text-xs text-viking-gold-soft">⚓ Høvdingen svarer for gruppa.</p>}
+            {!isChief && <p className="mt-2 text-center font-cinzel text-xs text-viking-gold-soft"><Icon name="anchor" size={11} className="mr-1 inline" /> Høvdingen svarer for gruppa.</p>}
           </div>
         )}
 
@@ -705,7 +706,7 @@ export default function EncounterFlow({
             className="mb-5 rounded-md border-2 border-viking-gold bg-viking-gold/15 px-3 py-2"
             data-testid="reading-unlocked"
           >
-            <p className="font-cinzel text-sm text-viking-gold">📖 Fordi dere leste nøye, ser dere en vei de andre ikke ser.</p>
+            <p className="inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold"><Icon name="book" size={13} /> Fordi dere leste nøye, ser dere en vei de andre ikke ser.</p>
             {test?.feedback && <p className="mt-0.5 font-inter text-xs italic text-viking-paper/80">{test.feedback}</p>}
           </motion.div>
         )}
@@ -736,7 +737,7 @@ export default function EncounterFlow({
       <Shell name={d.name} onExit={onExit}>
         <div className="mb-4">
           <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft/80">Sagaen skrives</p>
-          <h1 className="font-cinzel text-2xl font-bold text-viking-gold">📜 Hvorfor valgte dere dette?</h1>
+          <h1 className="inline-flex items-center gap-2 font-cinzel text-2xl font-bold text-viking-gold"><Icon name="scroll" size={20} /> Hvorfor valgte dere dette?</h1>
         </div>
         <div className="mb-4 rounded-md border-2 border-viking-gold/40 bg-viking-darkblue/40 p-3">
           <p className="font-mono text-xs text-viking-gold-soft">Valget:</p>
@@ -786,7 +787,7 @@ export default function EncounterFlow({
             <p>Ferdighet over krav: +{skillBonus}</p>
             {choiceLatePenalty < 0 && (
               <p className="text-viking-crimson" data-testid="late-penalty-line">
-                ⚠ Sen-spill-straff (mangler ferdighet): {choiceLatePenalty}
+                Sen-spill-straff (mangler ferdighet): {choiceLatePenalty}
               </p>
             )}
             <p className="mt-1 text-viking-gold">Terningmodifikator: {modifier >= 0 ? '+' : ''}{modifier}</p>
@@ -801,7 +802,7 @@ export default function EncounterFlow({
             }}
             className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
           >
-            ⚄ Kast terningen
+<span className="inline-flex items-center gap-2"><Icon name="die" size={18} /> Kast terningen</span>
           </button>
         ) : <ChiefBanner />}
       </Shell>
@@ -860,7 +861,7 @@ export default function EncounterFlow({
             className="mb-5 rounded-md border-2 border-viking-gold bg-viking-gold/15 px-3 py-2"
             data-testid="historical-bonus"
           >
-            <p className="font-cinzel text-sm text-viking-gold">📜 Historisk klokt — dette ligner det vikingene faktisk gjorde.</p>
+            <p className="inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold"><Icon name="scroll" size={13} /> Historisk klokt — dette ligner det vikingene faktisk gjorde.</p>
             <p className="mt-0.5 font-inter text-xs italic text-viking-paper/85">+2 kulturforståelse i bonus.</p>
           </motion.div>
         )}
@@ -884,7 +885,7 @@ export default function EncounterFlow({
               data-testid="to-refleksjon"
               className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
             >
-              🌉 Til refleksjonen →
+<span className="inline-flex items-center gap-1.5"><Icon name="bridge" size={14} /> Til refleksjonen →</span>
             </button>
           ) : (
             <button
@@ -905,7 +906,7 @@ export default function EncounterFlow({
               })}
               className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
             >
-              ⛵ Seil videre
+              <span className="inline-flex items-center gap-2"><Icon name="sail" size={16} /> Seil videre</span>
             </button>
           )
         ) : <ChiefBanner />}
@@ -923,7 +924,7 @@ export default function EncounterFlow({
     return (
       <Shell name={d.name} onExit={onExit}>
         <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft/80">Bro til i dag</p>
-        <h1 className="mb-2 font-cinzel text-2xl font-bold text-viking-gold">🌉 {br.topic}</h1>
+        <h1 className="mb-2 inline-flex items-center gap-2 font-cinzel text-2xl font-bold text-viking-gold"><Icon name="bridge" size={22} /> {br.topic}</h1>
         <p className="mb-4 font-inter text-sm leading-relaxed text-viking-paper/90">{br.context}</p>
 
         <div className="mb-3 rounded-md border-2 border-viking-gold/40 bg-viking-darkblue/40 p-3">
@@ -988,7 +989,7 @@ export default function EncounterFlow({
             data-testid="bridge-continue"
             className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
-            ⛵ Seil videre
+            <span className="inline-flex items-center gap-2"><Icon name="sail" size={16} /> Seil videre</span>
           </button>
         ) : <ChiefBanner />}
       </Shell>

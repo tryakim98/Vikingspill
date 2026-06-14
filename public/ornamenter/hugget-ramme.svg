@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400" preserveAspectRatio="none" role="img" aria-label="Hugget kant-ramme">
+  <defs>
+    <linearGradient id="kant" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#caa253"/><stop offset="1" stop-color="#7a4f25"/></linearGradient>
+    <filter id="hugg"><feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="3" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="9"/></filter>
+  </defs>
+  <!-- Ujevn, hugget kant i stedet for avrundede hjørner. preserveAspectRatio=none gjør at den
+       kan strekkes til et hvilket som helst panel som border-image eller bakgrunn. -->
+  <g filter="url(#hugg)">
+    <rect x="10" y="10" width="580" height="380" fill="none" stroke="url(#kant)" stroke-width="6"/>
+    <rect x="22" y="22" width="556" height="356" fill="none" stroke="url(#kant)" stroke-width="2" opacity="0.6"/>
+    <!-- Naglemarkeringer i hjørnene (smidd-jern-følelse), bevisst litt ujevnt plassert -->
+    <g fill="url(#kant)" stroke="none">
+      <circle cx="30" cy="30" r="5"/><circle cx="571" cy="28" r="5"/>
+      <circle cx="28" cy="372" r="5"/><circle cx="573" cy="371" r="5"/>
+    </g>
+  </g>
+</svg>

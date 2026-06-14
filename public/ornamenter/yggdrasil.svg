@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520" width="400" height="520" role="img" aria-label="Yggdrasil verdenstre">
+  <defs>
+    <linearGradient id="tre" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d8b56a"/>
+      <stop offset="1" stop-color="#7a4f25"/>
+    </linearGradient>
+    <filter id="ridse2"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.4"/></filter>
+  </defs>
+  <g fill="none" stroke="url(#tre)" stroke-linecap="round" filter="url(#ridse2)">
+    <!-- Stamme -->
+    <path stroke-width="20" d="M200,510 C196,430 190,380 200,330 C208,290 196,250 200,210"/>
+    <!-- Røtter som flettes (Urnes-aktig) -->
+    <path stroke-width="9" d="M200,470 C150,484 120,500 78,496 M200,478 C250,492 286,500 326,494 M200,500 C176,510 150,512 120,512 M200,500 C228,510 256,512 286,512"/>
+    <!-- Greiner som vokser ut i flettede løkker -->
+    <path stroke-width="13" d="M200,250 C150,220 110,210 86,160 C70,128 96,96 132,112"/>
+    <path stroke-width="13" d="M200,250 C250,220 290,210 314,160 C330,128 304,96 268,112"/>
+    <path stroke-width="11" d="M200,210 C176,170 150,150 156,104 C160,72 196,64 206,100"/>
+    <path stroke-width="11" d="M200,210 C224,170 250,150 244,104 C240,72 204,64 206,100"/>
+    <!-- Krone-løkker -->
+    <path stroke-width="7" opacity="0.85" d="M132,112 C108,96 110,64 140,60 C168,56 178,84 160,100
+                                            M268,112 C292,96 290,64 260,60 C232,56 222,84 240,100"/>
+    <!-- To ravner (Hugin/Munin) som enkle silhuetter -->
+    <path stroke-width="4" d="M120,150 q10,-8 20,0 q-10,4 -20,0 M118,150 l-10,-4 M140,150 l10,-3"/>
+    <path stroke-width="4" d="M280,150 q-10,-8 -20,0 q10,4 20,0 M282,150 l10,-4 M260,150 l-10,-3"/>
+  </g>
+</svg>

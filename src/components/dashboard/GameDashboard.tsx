@@ -26,6 +26,7 @@ import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
 import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, callTing, castTingVote, resolveTing, clearTing, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type TingSession, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
 import TingOverlay from '../ting/TingOverlay';
+import Icon, { SKILL_ICON } from '../decor/Icon';
 import SagaReader from '../saga/SagaReader';
 import { chapters, chapterCompleted } from '../../data/chapters';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
@@ -42,7 +43,7 @@ import { SkjebneMoteModal } from '../skjebnemote/SkjebneMoteModal';
 import { shouldTriggerSkjebneMote, pickSkjebneMote, getSkjebneMoteById, rollSkjebne, type SkjebneMoteChoice, type SkjebneEffects, type RollResult } from '../../data/skjebnemoter';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
-const SYMBOL_LABEL: Record<string, string> = { drage: '🐉 Drage', ulv: '🐺 Ulv', ravn: '🐦‍⬛ Ravn' };
+const SYMBOL_LABEL: Record<string, string> = { drage: 'Drage', ulv: 'Ulv', ravn: 'Ravn' };
 
 interface Props {
   setup: GroupSetup;
@@ -579,7 +580,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-viking-darkblue/95 px-4 text-center text-viking-paper" data-testid="ting-call-modal">
         <p className="font-cinzel text-sm uppercase tracking-[0.3em] text-viking-gold-soft/70">Kall inn Tinget</p>
-        <div className="mt-2 text-6xl">⚖️</div>
+        <div className="mt-2 flex justify-center text-viking-gold"><Icon name="tiwaz" size={60} /></div>
         <h1 className="mt-2 mb-1 font-cinzel text-2xl font-bold text-viking-gold">Hvem foreslår du som ny høvding?</h1>
         <p className="mb-6 max-w-md font-inter text-sm italic text-viking-paper/80">Alle får stemme. Får kandidaten flertall, overtar hen roret.</p>
         <div className="w-full max-w-sm space-y-2">
@@ -604,7 +605,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
       title={canCallTing ? 'Kall inn Tinget' : (tingCooldownLeft > 0 ? `Tinget kan kalles inn igjen om ${Math.ceil(tingCooldownLeft / 60000)} min` : rollInProgress ? 'Ikke midt i et terningkast' : 'Ikke akkurat nå')}
       className="fixed bottom-5 left-5 z-40 rounded-full border-2 border-viking-gold bg-viking-surface px-4 py-2 font-cinzel text-sm text-viking-gold shadow-lg hover:bg-viking-gold/15 disabled:cursor-not-allowed disabled:opacity-40"
     >
-      ⚖️ Tinget
+      <span className="inline-flex items-center gap-1.5"><Icon name="tiwaz" size={14} /> Tinget</span>
     </button>
   ) : null;
 
@@ -722,7 +723,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
                   <li key={mid} className="flex items-center justify-between rounded border border-viking-gold/20 bg-viking-darkblue/30 px-2 py-1.5">
                     <span className="font-inter text-sm text-viking-paper">
                       {isMe ? 'Du' : `Medlem ${mid.slice(2, 6)}`}
-                      {isThisChief && <span className="ml-2 rounded bg-viking-gold/20 px-1.5 py-0.5 font-mono text-[10px] uppercase text-viking-gold" data-testid={`chief-badge-${mid}`}>⚓ Høvding</span>}
+                      {isThisChief && <span className="ml-2 inline-flex items-center gap-1 bg-viking-gold/20 px-1.5 py-0.5 font-mono text-[10px] uppercase text-viking-gold" data-testid={`chief-badge-${mid}`}><Icon name="anchor" size={10} /> Høvding</span>}
                     </span>
                     {isChief && !isThisChief && (
                       <button
@@ -739,7 +740,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             </ul>
             {!isChief && (
               <p className="mt-2 text-center font-cinzel text-xs text-viking-gold-soft" data-testid="spectator-banner">
-                ⚓ Høvdingen styrer skipet — dere ser med
+                <Icon name="anchor" size={12} className="mr-1 inline" /> Høvdingen styrer skipet — dere ser med
               </p>
             )}
             {/* Tinget: hvilket som helst medlem kan kalle inn en avstemning om ny høvding */}
@@ -750,7 +751,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
                 data-testid="ting-call-button"
                 className="rounded-md border-2 border-viking-gold/60 px-4 py-1.5 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Kall inn Tinget ⚖️
+                <span className="inline-flex items-center gap-1.5">Kall inn Tinget <Icon name="tiwaz" size={13} /></span>
               </button>
               {!canCallTing && (
                 <p className="mt-1 font-inter text-[11px] italic text-viking-gold-soft/60">
@@ -799,7 +800,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         />
 
         {/* Ferdigheter — trykk en på nivå 1–2 for å ta verdighetsprøven (§3.2) */}
-        <p className="mb-2 font-inter text-xs text-viking-gold-soft/70">Ferdigheter{isChief ? ' — trykk en med ⚔ for å ta verdighetsprøven' : ''}</p>
+        <p className="mb-2 font-inter text-xs text-viking-gold-soft/70">Ferdigheter{isChief ? ' — trykk en uthevet for å ta verdighetsprøven' : ''}</p>
         <div className="mb-6 flex flex-wrap gap-2">
           {SKILL_KEYS.map((key) => {
             const lvl = state.skills[key] ?? 0;
@@ -812,10 +813,10 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
                 title={eligible ? 'Ta verdighetsprøven' : lvl >= 3 ? 'Mester (maks nivå)' : !isChief ? 'Kun høvdingen kan starte prøven' : 'Ikke låst opp ennå'}
                 className={`flex items-center gap-2 rounded-full border-2 px-3 py-1 transition-all ${lvl > 0 ? 'border-viking-gold/60 bg-viking-gold/10' : 'border-viking-gold/20 opacity-60'} ${eligible ? 'cursor-pointer hover:border-viking-gold hover:bg-viking-gold/20' : 'cursor-default'}`}
               >
-                <span style={{ color: skillTreeData[key].color }}>{skillTreeData[key].icon}</span>
+                <span style={{ color: skillTreeData[key].color }}><Icon name={SKILL_ICON[key]} size={16} /></span>
                 <span className="font-inter text-xs text-viking-paper/90">{skillTreeData[key].name}</span>
                 <span className="font-mono text-xs text-viking-gold">{lvl}</span>
-                {eligible && <span className="text-xs">⚔</span>}
+                {eligible && <Icon name="axe" size={12} className="text-viking-gold" />}
               </button>
             );
           })}
@@ -824,7 +825,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         {/* Gruppe-styrt tekstlengde — vises bare når lærer har valgt "La gruppene velge" */}
         {isOnline && teacherTextLength === 'group' && (
           <div className="mb-3 flex items-center justify-between rounded-md border border-viking-gold/40 bg-viking-darkblue/40 px-3 py-2" data-testid="group-text-length">
-            <span className="font-cinzel text-xs text-viking-gold-soft">📖 Tekstlengde:</span>
+            <span className="inline-flex items-center gap-1.5 font-cinzel text-xs text-viking-gold-soft"><Icon name="book" size={13} /> Tekstlengde:</span>
             <div className="flex gap-1">
               <button
                 onClick={() => setGroupTextLength('full')}
@@ -848,9 +849,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             <button
               onClick={() => setShowOwnSaga(true)}
               data-testid="open-own-saga"
-              className="w-full rounded-lg border-2 border-viking-gold/60 bg-viking-darkblue/60 px-4 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold"
+              className="inline-flex w-full items-center justify-center gap-2 border-2 border-viking-gold/60 bg-viking-darkblue/60 px-4 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold"
             >
-              📜 Les vår saga ({state.saga.length} {state.saga.length === 1 ? 'kapittel' : 'kapitler'})
+              <Icon name="scroll" size={16} /> Les vår saga ({state.saga.length} {state.saga.length === 1 ? 'kapittel' : 'kapitler'})
             </button>
           </div>
         )}
@@ -861,9 +862,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             <button
               onClick={() => setShowTradeMarket(true)}
               data-testid="open-trade-market"
-              className="relative w-full rounded-lg border-2 border-viking-gold/60 bg-viking-darkblue/60 px-4 py-2.5 font-cinzel text-viking-gold hover:border-viking-gold hover:bg-viking-darkblue/80"
+              className="relative inline-flex w-full items-center justify-center gap-2 border-2 border-viking-gold/60 bg-viking-darkblue/60 px-4 py-2.5 font-cinzel text-viking-gold hover:border-viking-gold hover:bg-viking-darkblue/80"
             >
-              🏛 Handelstorg — bytt varer med andre skip
+              <Icon name="market" size={16} /> Handelstorg — bytt varer med andre skip
               {incomingPending > 0 && (
                 <span data-testid="incoming-badge" className="ml-2 rounded-full bg-viking-crimson px-2 py-0.5 font-mono text-xs text-viking-paper">
                   {incomingPending} nye tilbud
@@ -899,9 +900,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         {state.visited.length === destinations.length && (
           <button
             onClick={() => setShowCeremony(true)}
-            className="mb-8 w-full rounded-lg border-2 border-viking-gold bg-viking-gold px-6 py-4 font-cinzel text-xl font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft hover:scale-[1.01]"
+            className="mb-8 inline-flex w-full items-center justify-center gap-2 border-2 border-viking-gold bg-viking-gold px-6 py-4 font-cinzel text-xl font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft hover:scale-[1.01]"
           >
-            ⚓ Seil hjem til Avaldsnes
+            <Icon name="anchor" size={22} /> Seil hjem til Avaldsnes
           </button>
         )}
 
@@ -914,7 +915,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
 
         {/* Dev-modus */}
         <div className="rounded-lg border-2 border-viking-plum/60 bg-viking-plum/15 p-5">
-          <h3 className="mb-3 font-cinzel text-lg text-viking-plum">👨‍💻 Utvikler-modus</h3>
+          <h3 className="mb-3 font-cinzel text-lg text-viking-plum">Utvikler-modus</h3>
           <div className="flex flex-wrap gap-3">
             <button onClick={resetProgress} className="rounded border-2 border-viking-gold bg-viking-teal px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-teal/80">Nullstill reise</button>
             <button onClick={() => setShowCeremony(true)} className="rounded border-2 border-viking-gold bg-viking-gold/80 px-4 py-2 text-sm font-bold text-viking-darkblue hover:bg-viking-gold">Sluttseremoni</button>

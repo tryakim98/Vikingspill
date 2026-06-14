@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 200" width="240" height="200" role="img" aria-label="Dragehode i Borre-stil">
+  <defs>
+    <linearGradient id="jern" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c9a253"/><stop offset="1" stop-color="#6e4824"/>
+    </linearGradient>
+    <filter id="r3"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.5"/></filter>
+  </defs>
+  <g fill="none" stroke="url(#jern)" stroke-linecap="round" stroke-linejoin="round" filter="url(#r3)">
+    <!-- Dragehode i profil: bøyd nakke, åpen kjeft, krøllet leppe (Borre/Oseberg-trekk) -->
+    <path stroke-width="11" d="M30,170 C40,120 60,96 110,86 C150,78 170,60 168,34
+                               C166,16 140,14 130,30 C124,40 132,52 146,48"/>
+    <!-- Underkjeve -->
+    <path stroke-width="9" d="M110,86 C140,92 160,86 176,70 C184,62 182,48 170,46"/>
+    <!-- Krøllet leppe / tunge -->
+    <path stroke-width="6" d="M168,34 C182,30 192,40 186,52 C182,60 172,58 172,50"/>
+    <!-- Øye (mandelformet) -->
+    <path stroke-width="5" d="M120,52 q12,-8 22,0 q-11,7 -22,0 Z"/>
+    <circle cx="131" cy="51" r="3" fill="url(#jern)" stroke="none"/>
+    <!-- Flettverk i nakken (gripedyr-trekk) -->
+    <path stroke-width="5" opacity="0.8" d="M56,140 C76,132 78,112 64,104 M84,150 C104,142 106,122 92,114"/>
+  </g>
+</svg>
