@@ -17,7 +17,15 @@ export interface GroupMember {
   joinedAt: number;
 }
 
-export type EncounterStep = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
+export type EncounterStep = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'radslagning' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
+
+/** Ett medlems råd i rådslagningen før et valg: enten et foretrukket alternativ
+ *  (choiceId) ELLER en kort setning (note). Holdes lett — ikke en stil. */
+export interface CouncilAdvice {
+  choiceId?: string | null;
+  note?: string;
+  at: number;
+}
 
 export interface SyncedEncounter {
   destId: string;
@@ -37,6 +45,7 @@ export interface SyncedEncounter {
   vikingPerspective?: string;   // perspektivskifte: vikingenes side
   otherPerspective?: string;    // perspektivskifte: de andres side
   bridgeReflection?: string;    // bro til i dag: refleksjonstekst
+  advice?: Record<string, CouncilAdvice>; // rådslagning: ett råd per memberId (nullstilles per destinasjon)
 }
 
 export interface SyncedGroup {
@@ -93,6 +102,7 @@ export interface GameSettings {
   requirePerspective?: boolean;
   requireBridge?: boolean;
   requireQuiz?: boolean;   // stedsquizen må fullføres før valgene (default på)
+  requireCouncil?: boolean; // rådslagning: alle medlemmer må gi råd før høvdingen velger (default på)
   textLength?: TextLength; // 'full' = alle, 'short' = alle, 'group' = la hver gruppe velge
   showHints?: boolean;     // førstegangs-forklaringer på/av (default på)
 }
@@ -170,6 +180,20 @@ export async function leaveGroupAsMember(code: string, groupId: string, memberId
 /** Høvdingen gir roret til et annet medlem. Frontend bør gate dette til chief. */
 export function transferChief(code: string, groupId: string, newChiefId: string): Promise<void> {
   return set(ref(db, `games/${code}/groups/${groupId}/chiefId`), newChiefId);
+}
+
+/** Rådslagning: et medlem (hvem som helst, ikke bare høvdingen) gir sitt råd før valget.
+ *  Skriver kun sin egen leaf under encounter/advice/{memberId}, så det ikke raser mot
+ *  høvdingens encounter-skriv eller andre medlemmers råd. Tomme felt utelates (Firebase
+ *  tåler ikke undefined). */
+export function setEncounterAdvice(
+  code: string, groupId: string, memberId: string,
+  advice: { choiceId?: string | null; note?: string },
+): Promise<void> {
+  const clean: CouncilAdvice = { at: Date.now() };
+  if (advice.choiceId != null) clean.choiceId = advice.choiceId;
+  if (advice.note && advice.note.trim()) clean.note = advice.note.trim().slice(0, 120);
+  return set(ref(db, `games/${code}/groups/${groupId}/encounter/advice/${memberId}`), clean);
 }
 
 /** Lærer: lytt på alle grupper i et spill. Returnerer en avmeldingsfunksjon. */

@@ -460,6 +460,16 @@ export default function TeacherPanel() {
               />
               <span className="font-cinzel text-sm text-viking-gold-soft">Bro til i dag: <strong>{settings.requireBridge !== false ? 'PÅ' : 'AV'}</strong></span>
             </label>
+            <label className="inline-flex cursor-pointer items-center gap-2" title="Når på MÅ hvert medlem gi et råd (trykk på et alternativ eller én kort setning) før høvdingens valgknapper låses opp. Krever flere enheter i samme gruppe.">
+              <input
+                type="checkbox"
+                checked={settings.requireCouncil !== false}
+                onChange={(e) => { if (code) setGameSettings(code, { requireCouncil: e.target.checked }).catch(() => {}); }}
+                data-testid="require-council-toggle"
+                className="h-4 w-4 accent-viking-gold"
+              />
+              <span className="font-cinzel text-sm text-viking-gold-soft">Krev rådslagning: <strong>{settings.requireCouncil !== false ? 'PÅ' : 'AV'}</strong></span>
+            </label>
             <label className="inline-flex cursor-pointer items-center gap-2" title="Når på MÅ gruppa gjennom stedsquizen før de kan ta det endelige valget. Quizen gir fortsatt terningbonus.">
               <input
                 type="checkbox"

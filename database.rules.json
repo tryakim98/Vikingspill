@@ -23,6 +23,7 @@
           "requirePerspective": { ".validate": "newData.isBoolean()" },
           "requireBridge":      { ".validate": "newData.isBoolean()" },
           "requireQuiz":        { ".validate": "newData.isBoolean()" },
+          "requireCouncil":     { ".validate": "newData.isBoolean()" },
           "textLength":         { ".validate": "newData.isString() && newData.val().matches(/^(full|short|group)$/)" },
           "showHints":          { ".validate": "newData.isBoolean()" },
           "$other":             { ".validate": false }
@@ -92,7 +93,7 @@
             "encounter": {
               ".validate": "newData.hasChildren(['destId','step'])",
               "destId":       { ".validate": "newData.isString() && newData.val().length <= 40" },
-              "step":         { ".validate": "newData.isString() && newData.val().matches(/^(history|kulturmote|oppgave|transition|quiz|perspektiv|valg|saga|roll|rolling|resultat|refleksjon)$/)" },
+              "step":         { ".validate": "newData.isString() && newData.val().matches(/^(history|kulturmote|oppgave|transition|quiz|perspektiv|radslagning|valg|saga|roll|rolling|resultat|refleksjon)$/)" },
               "approvalSent": { ".validate": "newData.isBoolean()" },
               "kmAnswer":     { ".validate": "newData.isNumber()" },
               "quizIdx":      { ".validate": "newData.isNumber()" },
@@ -113,6 +114,15 @@
                 "modifier":  { ".validate": "newData.isNumber()" },
                 "tier":      { ".validate": "newData.isString() && newData.val().matches(/^(bad|mid|good|crit)$/)" },
                 "$other":    { ".validate": false }
+              },
+              "advice": {
+                "$memberId": {
+                  ".validate": "$memberId.matches(/^m-[a-z0-9]{1,16}$/)",
+                  "choiceId": { ".validate": "newData.isString() && newData.val().length <= 40" },
+                  "note":     { ".validate": "newData.isString() && newData.val().length <= 120" },
+                  "at":       { ".validate": "newData.isNumber()" },
+                  "$other":   { ".validate": false }
+                }
               },
               "$other": { ".validate": false }
             },

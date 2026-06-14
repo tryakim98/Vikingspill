@@ -24,7 +24,7 @@ import { HINTS, type HintKey } from '../../data/firstTimeHints';
 import { isAccessible } from '../../lib/unlocks';
 import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
 import SagaReader from '../saga/SagaReader';
 import { chapters, chapterCompleted } from '../../data/chapters';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
@@ -85,6 +85,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const requirePerspective = gameSettings.requirePerspective !== false;
   const requireBridge = gameSettings.requireBridge !== false;
   const requireQuiz = gameSettings.requireQuiz !== false; // default PÅ — stedsquizen er obligatorisk
+  const requireCouncil = gameSettings.requireCouncil !== false; // default PÅ — rådslagning før valg
   const [showOwnSaga, setShowOwnSaga] = useState(false);
 
   const [syncedGroup, setSyncedGroup] = useState<SyncedGroup | null>(null);
@@ -529,6 +530,10 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         requirePerspective={requirePerspective}
         requireBridge={requireBridge}
         requireQuiz={requireQuiz}
+        requireCouncil={requireCouncil}
+        myMemberId={myMemberId}
+        memberIds={memberIds}
+        onGiveAdvice={isOnline ? (advice) => setEncounterAdvice(session.gameCode, myGroupId, myMemberId, advice).catch(() => {}) : undefined}
         textLength={effectiveTextLength}
         syncedEncounter={isOnline ? syncedGroup?.encounter ?? null : null}
         onUpdateEncounter={isOnline && isChief

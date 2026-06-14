@@ -11,7 +11,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import type { Destination, Choice, RollOdds, SkillKey } from '../../types';
-import type { SyncedEncounter } from '../../lib/gameSync';
+import type { SyncedEncounter, CouncilAdvice } from '../../lib/gameSync';
 import { skillTreeData } from '../../data';
 import {
   rollDice,
@@ -31,7 +31,7 @@ import { playAmbienceForDestination, stopAmbience } from '../../lib/ambience';
 import QuestionCard from '../quiz/QuestionCard';
 import DiceRoll from '../dice/DiceRoll';
 
-type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
+type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'radslagning' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
 
 interface EncounterFlowProps {
   destination: Destination;
@@ -56,6 +56,14 @@ interface EncounterFlowProps {
   requireBridge?: boolean;
   /** Lærer-styrt: stedsquizen må fullføres før valgene — ingen «Hopp til valgene». */
   requireQuiz?: boolean;
+  /** Lærer-styrt: rådslagning — alle medlemmer må gi råd før høvdingens valgknapper låses opp. */
+  requireCouncil?: boolean;
+  /** Multi-enhet: denne enhetens medlem-id (for å skrive/lese eget råd). */
+  myMemberId?: string;
+  /** Multi-enhet: alle koblede medlemmer i gruppa (for å telle råd: «3 av 4»). */
+  memberIds?: string[];
+  /** Multi-enhet: skriv DENNE enhetens råd. Åpen for alle medlemmer, ikke bare høvdingen. */
+  onGiveAdvice?: (advice: { choiceId?: string | null; note?: string }) => void;
   /** Hvilken tekstlengde å rendre for historie + kulturmøte (differensiering). */
   textLength?: 'full' | 'short';
 }
@@ -104,10 +112,43 @@ function OddsBar({ baseRoll }: { baseRoll: RollOdds }) {
   );
 }
 
+/** Oppsummering av gruppas råd: hvor mange stemte på hvert alternativ + frie setninger.
+ *  Vises til høvdingen når alle har gitt råd, og over valgkortene. */
+function AdviceSummary({ advice, memberIds, choices }: {
+  advice: Record<string, CouncilAdvice>;
+  memberIds: string[];
+  choices: { id: string; title: string }[];
+}) {
+  const given = memberIds.map((id) => advice[id]).filter(Boolean) as CouncilAdvice[];
+  const tally = choices.map((c) => ({ ...c, n: given.filter((a) => a.choiceId === c.id).length }));
+  const notes = given.filter((a) => a.note).map((a) => a.note as string);
+  return (
+    <div className="mb-4 rounded-lg border-2 border-viking-teal/50 bg-viking-teal/10 p-4" data-testid="advice-summary">
+      <p className="mb-2 font-cinzel text-sm text-viking-gold-soft">⚖️ Gruppas råd ({given.length})</p>
+      <div className="space-y-1">
+        {tally.map((t) => (
+          <div key={t.id} className="flex items-center gap-2 font-inter text-sm text-viking-paper/90">
+            <span className="w-8 text-right font-mono text-viking-gold">{t.n}×</span>
+            <span>{t.title}</span>
+          </div>
+        ))}
+      </div>
+      {notes.length > 0 && (
+        <ul className="mt-2 space-y-1 border-t border-viking-teal/30 pt-2">
+          {notes.map((nt, i) => (
+            <li key={i} className="font-inter text-xs italic text-viking-paper/80">💬 «{nt}»</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function EncounterFlow({
   destination, skills, onComplete, onExit, onRequestApproval,
   isChief = true, syncedEncounter = null, onUpdateEncounter,
-  lateGame = false, requireSaga = false, requirePerspective = false, requireBridge = false, requireQuiz = false, textLength = 'full',
+  lateGame = false, requireSaga = false, requirePerspective = false, requireBridge = false, requireQuiz = false,
+  requireCouncil = false, myMemberId, memberIds = [], onGiveAdvice, textLength = 'full',
 }: EncounterFlowProps) {
   const d = destination;
   const syncMode = !!syncedEncounter;
@@ -129,6 +170,7 @@ export default function EncounterFlow({
   const [_vikingPerspective, _setVikingPerspective] = useState('');
   const [_otherPerspective, _setOtherPerspective] = useState('');
   const [_bridgeReflection, _setBridgeReflection] = useState('');
+  const [councilNote, setCouncilNote] = useState(''); // lokal input for ett kort råd (ikke synket)
 
   // Alle valg å slå opp i når et choice-id må mappes til Choice-objekt — inkluderer
   // det skjulte valget hvis destinasjonen har et og lesetesten ble svart riktig på.
@@ -159,8 +201,18 @@ export default function EncounterFlow({
   const bridgeReflection = syncMode ? (syncedEncounter?.bridgeReflection ?? '') : _bridgeReflection;
   const setBridgeReflection = (v: string) => syncMode ? onUpdateEncounter?.({ bridgeReflection: v }) : _setBridgeReflection(v);
 
+  // Rådslagning (§ multi-enhet): alle medlemmer gir råd FØR høvdingen velger. Bare
+  // meningsfull i synkmodus med minst to medlemmer (offline/solo hopper vi over).
+  const councilEnabled = requireCouncil && syncMode && memberIds.length >= 2;
+  const advice: Record<string, CouncilAdvice> = syncMode ? (syncedEncounter?.advice ?? {}) : {};
+  const adviceCount = memberIds.filter((id) => advice[id]).length;
+  const allAdvised = memberIds.length > 0 && adviceCount >= memberIds.length;
+  const myAdvice = myMemberId ? advice[myMemberId] : undefined;
+
   // Hvor skal vi gå når vi er ferdige med oppgave/quiz og inn mot valgene?
-  const preValgStep: Step = (requirePerspective && d.perspectivePrompt) ? 'perspektiv' : 'valg';
+  // Rådslagning skytes inn rett før valg-steget når den er på.
+  const valgEntryStep: Step = councilEnabled ? 'radslagning' : 'valg';
+  const preValgStep: Step = (requirePerspective && d.perspectivePrompt) ? 'perspektiv' : valgEntryStep;
 
   // Setter-wrappere: skriver til Firebase i synkmodus, ellers oppdaterer lokal state.
   // Ikke-høvding må uansett ikke trigge skriv — vi gater på UI-nivå.
@@ -465,7 +517,7 @@ export default function EncounterFlow({
 
         {isChief ? (
           <button
-            onClick={() => updateMany({ step: 'valg' })}
+            onClick={() => updateMany({ step: valgEntryStep })}
             disabled={!canContinue}
             data-testid="perspective-continue"
             className="mt-5 rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
@@ -474,6 +526,89 @@ export default function EncounterFlow({
           </button>
         ) : (
           <ChiefBanner />
+        )}
+      </Shell>
+    );
+  }
+
+  // 5a-iii) RÅDSLAGNING — alle medlemmer gir råd FØR høvdingen får velge.
+  // Dette er det ENE steget der ikke-høvdinger har en interaktiv kontroll.
+  if (step === 'radslagning') {
+    const giveChoice = (id: string) => onGiveAdvice?.({ choiceId: id });
+    const sendNote = () => { if (councilNote.trim()) { onGiveAdvice?.({ note: councilNote }); setCouncilNote(''); } };
+    return (
+      <Shell name={d.name} onExit={onExit}>
+        <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft/80">Rådslagning</p>
+        <h1 className="mb-2 font-cinzel text-2xl font-bold text-viking-gold">🗣️ Hva mener mannskapet?</h1>
+        <p className="mb-4 font-inter text-sm italic text-viking-paper/75">
+          Hver i mannskapet gir sitt råd på egen enhet før høvdingen bestemmer — trykk på alternativet du helst vil, eller skriv én kort setning.
+        </p>
+
+        {/* Teller */}
+        <div className="mb-4 flex items-center gap-3 rounded-md border-2 border-viking-gold/40 bg-viking-darkblue/50 px-4 py-2" data-testid="advice-counter">
+          <span className="font-cinzel text-lg text-viking-gold">{adviceCount} av {memberIds.length}</span>
+          <span className="font-inter text-sm text-viking-gold-soft">har gitt råd</span>
+        </div>
+
+        {/* Gi råd: trykk på et alternativ */}
+        <div className="space-y-2" data-testid="advice-options">
+          {d.choices.map((c) => {
+            const mine = myAdvice?.choiceId === c.id;
+            return (
+              <button
+                key={c.id}
+                onClick={() => giveChoice(c.id)}
+                data-testid={`advice-pick-${c.id}`}
+                className={`w-full rounded-md border-2 px-4 py-2.5 text-left font-inter text-sm transition-all ${mine ? 'border-viking-gold bg-viking-gold/20 text-viking-paper' : 'border-viking-gold/30 text-viking-paper/85 hover:border-viking-gold/70'}`}
+              >
+                <span className="font-cinzel text-viking-gold">{mine ? '✓ ' : ''}{c.title}</span>
+                <span className="ml-2 rounded bg-viking-darkblue/70 px-1.5 py-0.5 font-mono text-[10px] uppercase text-viking-gold-soft/80">{c.tag}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* … eller skriv én kort setning */}
+        <div className="mt-3 flex gap-2">
+          <input
+            type="text"
+            value={councilNote}
+            onChange={(e) => setCouncilNote(e.target.value.slice(0, 120))}
+            onKeyDown={(e) => { if (e.key === 'Enter') sendNote(); }}
+            placeholder="… eller skriv ett kort råd"
+            maxLength={120}
+            data-testid="advice-note-input"
+            className="flex-1 rounded-md border-2 border-viking-gold/40 bg-viking-darkblue/60 px-3 py-2 font-inter text-sm text-viking-paper placeholder:text-viking-paper/30 focus:border-viking-gold focus:outline-none"
+          />
+          <button onClick={sendNote} disabled={!councilNote.trim()} data-testid="advice-note-send" className="rounded-md border-2 border-viking-gold/60 px-4 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold disabled:opacity-40">Send råd</button>
+        </div>
+
+        {myAdvice && (
+          <p className="mt-2 font-inter text-xs text-viking-moss" data-testid="advice-mine">
+            ✓ Du har gitt ditt råd{myAdvice.note ? `: «${myAdvice.note}»` : ''} — du kan endre det til høvdingen velger.
+          </p>
+        )}
+
+        {/* Når alle har bidratt: oppsummering + høvdingen går videre */}
+        {allAdvised ? (
+          <div className="mt-6">
+            <AdviceSummary advice={advice} memberIds={memberIds} choices={d.choices} />
+            {isChief ? (
+              <button
+                onClick={() => updateMany({ step: 'valg' })}
+                data-testid="council-continue"
+                className="rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+              >
+                Til den endelige avgjørelsen →
+              </button>
+            ) : (
+              <p className="text-center font-cinzel text-viking-gold-soft" data-testid="council-wait-chief">⚓ Alle har gitt råd — høvdingen tar den endelige avgjørelsen.</p>
+            )}
+          </div>
+        ) : (
+          <p className="mt-6 text-center font-inter text-sm italic text-viking-gold-soft/70" data-testid="council-waiting">
+            Venter på resten av mannskapet …{isChief ? ' Du kan velge når alle har gitt råd.' : ''}
+          </p>
         )}
       </Shell>
     );
@@ -535,6 +670,11 @@ export default function EncounterFlow({
         <p className="mb-3 font-inter text-sm text-viking-gold-soft">
           Terningbonus fra quiz: <strong className="text-viking-gold">+{quizBonus}</strong>
         </p>
+
+        {/* Gruppas råd fra rådslagningen — så høvdingen ser mannskapets stemme mens hun velger */}
+        {councilEnabled && adviceCount > 0 && (
+          <AdviceSummary advice={advice} memberIds={memberIds} choices={d.choices} />
+        )}
 
         {/* Lesetest for skjult valg — kun hvis destinasjonen har et og ikke er forsøkt */}
         {hidden && test && !hiddenAnswered && (
