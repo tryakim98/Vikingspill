@@ -8,11 +8,12 @@
  * navnet «svenneprøve». Vi gjenbruker tier-2-spørsmålssettet.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import type { SkillKey } from '../../types';
 import { skillTreeData, getQuizQuestionsForSkill, isQuizPassed } from '../../data';
 import QuestionCard from '../quiz/QuestionCard';
+import { playSound } from '../../lib/sound';
 
 interface Props {
   skill: SkillKey;
@@ -35,6 +36,9 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
   const [correct, setCorrect] = useState(0);
   const [answer, setAnswer] = useState<number | null>(null);
   const [phase, setPhase] = useState<Phase>('quiz');
+
+  // Klang når sjøstedet faktisk låses opp (§3.2).
+  useEffect(() => { if (phase === 'passed') playSound('unlock'); }, [phase]);
 
   const Shell = ({ children }: { children: React.ReactNode }) => (
     <div className="min-h-screen bg-gradient-to-b from-viking-darkblue to-viking-surface text-viking-paper">

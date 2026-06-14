@@ -9,6 +9,7 @@
  */
 
 import { useMemo } from 'react';
+import { playSound } from '../../lib/sound';
 
 interface QuestionCardProps {
   q: string;
@@ -56,7 +57,7 @@ export default function QuestionCard({ q, opts, correct, feedback, answer, onAns
             <button
               key={i}
               disabled={answered}
-              onClick={() => onAnswer(perm[i])}
+              onClick={() => { playSound(perm[i] === correct ? 'correct' : 'wrong'); onAnswer(perm[i]); }}
               className={`rounded-md border-2 px-4 py-2.5 text-left font-inter transition-all ${cls}`}
             >
               {opt}

@@ -114,7 +114,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
     { label: '⛵ Hovedrute', color: 'text-viking-gold' };
 
   return (
-    <div>
+    <div className="viking-panel-stone rounded-lg p-4">
       <div className="flex items-baseline justify-between">
         <h2 className="font-cinzel text-xl text-viking-gold">Sjøkartet</h2>
         <p className="font-mono text-xs text-viking-gold-soft/80">{visited.length}/{destinations.length} besøkt</p>

@@ -18,8 +18,8 @@ interface Props {
 }
 
 export default function FateCardOverlay({ event, affected, onDone }: Props) {
-  // Torden idet skjebnen slår til (§10) — musikken dempes samtidig (styres i GameDashboard).
-  useEffect(() => { playSound('thunder'); }, []);
+  // Skjebnen avsløres (§8.4) — musikken dempes samtidig (styres i GameDashboard).
+  useEffect(() => { playSound('fate-reveal'); }, []);
 
   const whoLabel = event.targetMode === 'group' ? event.targetName : event.conditionLabel;
   const lines = fateEffectLines(event.effect);

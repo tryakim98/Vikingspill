@@ -7,9 +7,10 @@
  * Vises typisk på delt storskjerm.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRole } from '../hooks/useRole';
+import { playSound } from '../lib/sound';
 import { generateUniqueGameCode } from '../lib/gameCode';
 import {
   createGame,
@@ -92,6 +93,17 @@ export default function TeacherPanel() {
 
   // Nullstill kåringsvalg når en ny prøve utløses, så fjorårets valg ikke henger igjen.
   useEffect(() => { setTrialWinner(null); setTrialRunnerUp(null); }, [trial?.id]);
+
+  // §8.2 Konkurransesignal når en NY gruppe tar ledelsen (krever ≥2 grupper og at
+  // lederen faktisk har poeng). Ingen lyd ved første leder eller ved uendret ledelse.
+  const prevLeaderRef = useRef<string | null>(null);
+  useEffect(() => {
+    const r = Object.entries(groups).sort((a, b) => total(b[1]) - total(a[1]));
+    if (r.length < 2 || total(r[0][1]) <= 0) { prevLeaderRef.current = r[0]?.[0] ?? null; return; }
+    const leaderId = r[0][0];
+    if (prevLeaderRef.current !== null && prevLeaderRef.current !== leaderId) playSound('victory');
+    prevLeaderRef.current = leaderId;
+  }, [groups]);
 
   const triggerGudenesProve = () => {
     if (!code) return;
@@ -283,7 +295,7 @@ export default function TeacherPanel() {
             </div>
 
             {/* §8.2 Leaderboard */}
-            <div>
+            <div className="viking-panel-mosaic rounded-lg p-4">
               <div className="mb-3 flex items-baseline justify-between">
                 <h2 className="font-cinzel text-2xl text-viking-gold xl:text-3xl">Leaderboard</h2>
                 <span className="font-mono text-sm text-viking-gold-soft">{ranked.length} {ranked.length === 1 ? 'gruppe' : 'grupper'}</span>

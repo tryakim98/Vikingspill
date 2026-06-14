@@ -51,13 +51,7 @@ export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props)
               <ol className="space-y-3">
                 {g.entries.map((e, i) => (
                   <li key={`${e.destId}-${e.at}-${i}`}>
-                    <div
-                      className="rounded-lg border-4 border-viking-gold/50 p-4 shadow-[0_0_18px_rgba(212,168,67,0.15)]"
-                      style={{
-                        background: 'linear-gradient(135deg, #FDFBF6 0%, #F4EDDC 100%)',
-                        backgroundImage: 'repeating-linear-gradient(0deg, transparent 0 24px, rgba(160,82,45,0.06) 24px 25px)',
-                      }}
-                    >
+                    <div className="viking-parchment rounded-lg p-4">
                       <p className="font-cinzel text-xs uppercase tracking-widest text-viking-rust">Kapittel {i + 1} — {e.destName}</p>
                       <p className="mt-1 font-cinzel text-lg text-viking-darkblue">«{e.choiceTitle}»</p>
                       {e.reason && (

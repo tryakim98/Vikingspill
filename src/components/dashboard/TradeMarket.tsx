@@ -12,6 +12,7 @@ import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import type { TradeGoodId } from '../../types';
 import { TRADE_GOODS } from '../../data/tradeGoods';
+import { playSound } from '../../lib/sound';
 import type { SyncedGroup, TradeOffer } from '../../lib/gameSync';
 
 export const TRADE_GOOD_ORDER: TradeGoodId[] = ['pelsverk', 'solv', 'jern', 'rav', 'silke', 'hvalrosstann', 'krydder', 'salt'];
@@ -99,7 +100,9 @@ export default function TradeMarket({
 
   const handleAccept = async (offer: TradeOffer) => {
     const result = await onAccept(offer);
-    if (!result.ok) {
+    if (result.ok) {
+      playSound('coin'); // varene skifter hender — mynt og gods klirrer
+    } else {
       setError(result.reason ?? 'Aksept feilet.');
       window.setTimeout(() => setError(null), 4000);
     }

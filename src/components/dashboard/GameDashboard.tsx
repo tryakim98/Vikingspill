@@ -36,6 +36,7 @@ import RagnarokOverlay from '../ragnarok/RagnarokOverlay';
 import LoadingScreen from '../common/LoadingScreen';
 import ConnectionBanner from '../common/ConnectionBanner';
 import { playMusic, duckMusic, stopMusic } from '../../lib/music';
+import { playSound } from '../../lib/sound';
 import { SkjebneMoteModal } from '../skjebnemote/SkjebneMoteModal';
 import { shouldTriggerSkjebneMote, pickSkjebneMote, getSkjebneMoteById, rollSkjebne, type SkjebneMoteChoice, type SkjebneEffects, type RollResult } from '../../data/skjebnemoter';
 
@@ -167,6 +168,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const confirmSailingTo = (destId: string) => {
     const dest = destinations.find((d) => d.id === destId);
     if (!dest) return;
+    playSound('sail'); // skipet legger fra havn
     if (isOnline) {
       patchGroup(session.gameCode, myGroupId, { sailingTo: destId, previewDestId: null }).catch(() => {});
     } else {
@@ -344,8 +346,8 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
 
   // §10 Bakgrunnsmusikk: demp under Gudenes prøve / skjebne-kort (de har egne lyder).
   useEffect(() => { duckMusic(Boolean(activeTrial || activeFate)); }, [activeTrial, activeFate]);
-  // Dashboardet (og andre ikke-encounter-visninger) spiller «eventyr»-sporet; encounter-flyten styrer sitt eget.
-  useEffect(() => { if (!activeDest) playMusic('adventure'); }, [activeDest]);
+  // Mellom havnene (kart/dashboard) spiller seilas-sporet; encounter-flyten styrer sin egen stedsmusikk.
+  useEffect(() => { if (!activeDest) playMusic('sailing'); }, [activeDest]);
   // Stopp musikken når dashboardet avmonteres (eleven forlater spillet / bytter rolle).
   useEffect(() => () => stopMusic(), []);
 

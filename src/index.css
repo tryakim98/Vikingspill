@@ -82,22 +82,75 @@ code {
   border: 2px solid rgba(212, 168, 67, 0.45);
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4), 0 6px 18px rgba(0,0,0,0.45);
 }
+/* Ekte materialfoto ligger nederst, med en mørk gradient-scrim over så lys tekst
+   (gull/pergament) holder seg lesbar. background-color er fallback om bildet mangler. */
 .viking-card-wood {
   background-color: #3A2615;
   background-image:
-    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.25)),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='160'><filter id='w'><feTurbulence type='turbulence' baseFrequency='0.015 0.6' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.22  0 0 0 0 0.10  0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
-  background-size: auto, 300px 160px;
+    linear-gradient(180deg, rgba(40,22,9,0.55), rgba(0,0,0,0.62)),
+    url('/textures/tre-gammelt.jpg');
+  background-size: cover, cover;
+  background-position: center;
   border: 2px solid #5C3E22;
   box-shadow: inset 0 0 12px rgba(0,0,0,0.6);
 }
 .viking-card-leather {
   background-color: #2A1810;
   background-image:
-    radial-gradient(circle at 30% 20%, rgba(212,168,67,0.08), transparent 50%),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' seed='11'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.05  0 0 0 0 0.02  0 0 0 0.4 0'/></filter><rect width='100%' height='100%' filter='url(%23l)'/></svg>");
-  background-size: auto, 220px 220px;
+    linear-gradient(180deg, rgba(22,13,8,0.60), rgba(0,0,0,0.64)),
+    url('/textures/reinskinn.png');
+  background-size: cover, cover;
+  background-position: center;
   border: 2px solid #5C3E22;
+}
+
+/* Pergament — lyse «papir»-kort og tekstfelt. Lys scrim multipliseres over fotoet
+   så fiberpreget skinner gjennom, mens mørk brødtekst forblir lesbar. */
+.viking-parchment {
+  background-color: #F4EDDC;
+  background-image:
+    linear-gradient(135deg, rgba(253,251,246,0.86) 0%, rgba(244,237,220,0.90) 100%),
+    url('/textures/pergament.jpg');
+  background-size: cover, cover;
+  background-position: center;
+  background-blend-mode: multiply, normal;
+  border: 4px solid rgba(212, 168, 67, 0.6);
+  box-shadow: 0 0 18px rgba(212, 168, 67, 0.18);
+}
+
+/* Gullmosaikk — bysantinsk prakt. Brukes på lærerens leaderboard-panel. */
+.viking-panel-mosaic {
+  background-color: #182846;
+  background-image:
+    linear-gradient(180deg, rgba(11,20,38,0.82), rgba(24,40,70,0.88)),
+    url('/textures/mosaikk-gull.png');
+  background-size: cover, cover;
+  background-position: center;
+  border: 2px solid rgba(212, 168, 67, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.35), 0 6px 18px rgba(0,0,0,0.45);
+}
+
+/* Mose og stein — det rå, nordlige landskapet. Brukes som ramme rundt sjøkartet. */
+.viking-panel-stone {
+  background-color: #0F1A2E;
+  background-image:
+    linear-gradient(180deg, rgba(11,20,38,0.80), rgba(11,20,38,0.88)),
+    url('/textures/mose-stein.jpg');
+  background-size: cover, cover;
+  background-position: center;
+  border: 2px solid rgba(212, 168, 67, 0.40);
+}
+
+/* Smidd jern — kaldt metall. Brukes på terningutfall-boksen. */
+.viking-metal {
+  background-color: #1A1E24;
+  background-image:
+    linear-gradient(180deg, rgba(20,24,30,0.72), rgba(8,10,14,0.82)),
+    url('/textures/jern-smidd.png');
+  background-size: cover, cover;
+  background-position: center;
+  border: 2px solid rgba(212, 168, 67, 0.45);
+  box-shadow: inset 0 0 14px rgba(0,0,0,0.6);
 }
 
 /* Inngravert overskrift — gylden tekst med inset shadow + drop shadow, ser hugget
@@ -141,9 +194,12 @@ code {
     linear-gradient(180deg, rgba(255,210,160,0.05) 0%, rgba(255,210,160,0.10) 18%, transparent 50%, rgba(0,0,0,0.18) 80%, rgba(0,0,0,0.35) 100%),
     /* Ende-skygger på venstre og høyre side, så pinnen ser «rund» ut */
     linear-gradient(90deg, rgba(0,0,0,0.55) 0%, transparent 7%, transparent 93%, rgba(0,0,0,0.55) 100%),
-    /* Trefiber (langsgående tekstur) */
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='180'><filter id='wood'><feTurbulence type='turbulence' baseFrequency='0.012 0.85' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 0.38  0 0 0 0 0.22  0 0 0 0 0.09  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23wood)'/></svg>");
-  background-size: auto, auto, 420px 180px;
+    /* Mørk base-tint så den lyse runeteksten holder seg lesbar over fotoet */
+    linear-gradient(rgba(34,18,9,0.52), rgba(20,10,5,0.60)),
+    /* Ekte trefiber-foto */
+    url('/textures/tre-gammelt.jpg');
+  background-size: auto, auto, cover, cover;
+  background-position: center;
   border: 2px solid #5C3E22;
   border-radius: 10px;
   box-shadow:

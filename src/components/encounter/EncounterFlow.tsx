@@ -26,7 +26,8 @@ import {
 } from '../../lib/oddsEngine';
 import type { OutcomeApply } from '../../hooks/useGameState';
 import { playSound } from '../../lib/sound';
-import { playMusic } from '../../lib/music';
+import { playMusicForDestination } from '../../lib/music';
+import { playAmbienceForDestination, stopAmbience } from '../../lib/ambience';
 import QuestionCard from '../quiz/QuestionCard';
 import DiceRoll from '../dice/DiceRoll';
 
@@ -196,12 +197,20 @@ export default function EncounterFlow({
   // Kort bølgeeffekt idet vi seiler inn til destinasjonen (§10).
   useEffect(() => { playSound('waves'); }, []);
 
-  // Bakgrunnsmusikk per kontekst (§10): reflekterende under kulturmøte/oppgave/quiz,
-  // ellers det eventyrlige seilas-sporet. lib/music.ts crossfader mykt mellom dem.
+  // Stedsmusikk (§10): når gruppa ankommer en havn spiller kulturens eget spor
+  // gjennom hele møtet. lib/music.ts crossfader mykt fra forrige spor (seilas/forrige havn).
   useEffect(() => {
-    const reflective = step === 'kulturmote' || step === 'oppgave' || step === 'transition' || step === 'quiz';
-    playMusic(reflective ? 'reflective' : 'adventure');
-  }, [step]);
+    playMusicForDestination(d.id);
+  }, [d.id]);
+
+  // Miljølyd (§10): under det episke kulturmøtet legger stedets soundscape (kloster,
+  // marked, basar, hav, leir, vind) seg subtilt UNDER musikken. Toner ut når møtet er
+  // over (andre steg) og når flyten avmonteres.
+  useEffect(() => {
+    if (step === 'kulturmote') playAmbienceForDestination(d.id);
+    else stopAmbience();
+  }, [step, d.id]);
+  useEffect(() => () => stopAmbience(), []);
 
   // Quiz-overgang: krigshorn + fakta forsegles, så vises quizen. Kun høvdingen
   // utløser tids-overgangen til 'quiz' (alle får oppdateringen via Firebase-echo).
@@ -234,7 +243,7 @@ export default function EncounterFlow({
         <h1 className="mb-4 font-cinzel text-3xl font-bold text-viking-gold">{d.name}</h1>
         <Html html={(textLength === 'short' && d.historyShort ? d.historyShort : d.history) ?? ''} className="block font-inter leading-relaxed text-viking-paper/90 [&_strong]:text-viking-gold-soft" data-testid={textLength === 'short' && d.historyShort ? 'history-short' : 'history-full'} />
         {isChief ? (
-          <button onClick={() => setStep('kulturmote')} className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
+          <button onClick={() => { playSound('page'); setStep('kulturmote'); }} className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
         ) : <ChiefBanner />}
       </Shell>
     );
@@ -275,7 +284,7 @@ export default function EncounterFlow({
           />
         </div>
         {kmAnswer !== null && (isChief ? (
-          <button onClick={() => setStep('oppgave')} className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
+          <button onClick={() => { playSound('page'); setStep('oppgave'); }} className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
         ) : <ChiefBanner />)}
       </Shell>
     );
@@ -389,6 +398,7 @@ export default function EncounterFlow({
         {quizAnswer !== null && (isChief ? (
           <button
             onClick={() => {
+              playSound('page');
               if (last) updateMany({ quizBonus: Math.min(2, quizCorrect), step: preValgStep });
               else updateMany({ quizIdx: quizIdx + 1, quizAnswer: null });
             }}
@@ -406,14 +416,7 @@ export default function EncounterFlow({
     const p = d.perspectivePrompt;
     const canContinue = vikingPerspective.trim().length > 0 && otherPerspective.trim().length > 0;
     const Pergament = ({ children, ...rest }: React.PropsWithChildren<{ 'data-testid'?: string }>) => (
-      <div
-        className="rounded-lg border-4 border-viking-gold/60 p-3 shadow-[0_0_18px_rgba(212,168,67,0.18)]"
-        style={{
-          background: 'linear-gradient(135deg, #FDFBF6 0%, #F4EDDC 100%)',
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent 0 23px, rgba(160,82,45,0.07) 23px 24px)',
-        }}
-        {...rest}
-      >{children}</div>
+      <div className="viking-parchment rounded-lg p-3" {...rest}>{children}</div>
     );
     return (
       <Shell name={d.name} onExit={onExit}>
@@ -504,7 +507,7 @@ export default function EncounterFlow({
           {isChief ? (
             <button
               disabled={!available}
-              onClick={() => updateMany({ choiceId: c.id, roll: null, step: requireSaga ? 'saga' : 'roll', reason: '' })}
+              onClick={() => { playSound('click'); updateMany({ choiceId: c.id, roll: null, step: requireSaga ? 'saga' : 'roll', reason: '' }); }}
               data-testid={`pick-${c.id}`}
               className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -590,13 +593,7 @@ export default function EncounterFlow({
           <p className="font-inter text-sm italic text-viking-paper/85">{choice.desc}</p>
         </div>
         {/* Pergamentinspirert tekstområde */}
-        <div
-          className="mb-3 rounded-lg border-4 border-viking-gold/60 p-3 shadow-[0_0_18px_rgba(212,168,67,0.18)]"
-          style={{
-            background: 'linear-gradient(135deg, #FDFBF6 0%, #F4EDDC 100%)',
-            backgroundImage: 'repeating-linear-gradient(0deg, transparent 0 23px, rgba(160,82,45,0.07) 23px 24px)',
-          }}
-        >
+        <div className="viking-parchment mb-3 rounded-lg p-3">
           <textarea
             value={reason}
             onChange={(e) => isChief && setReason(e.target.value.slice(0, 600))}
@@ -692,8 +689,8 @@ export default function EncounterFlow({
             initial={{ scale: 0.3, rotate: -25, opacity: 0 }}
             animate={{ scale: 1, rotate: 0, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 260, damping: 14 }}
-            className="flex h-16 w-16 items-center justify-center rounded-lg border-4 font-cinzel text-3xl font-bold text-viking-gold"
-            style={{ borderColor: TIER_COLOR[roll.tier], backgroundColor: '#0B1426' }}
+            className="viking-metal flex h-16 w-16 items-center justify-center rounded-lg border-4 font-cinzel text-3xl font-bold text-viking-gold"
+            style={{ borderColor: TIER_COLOR[roll.tier] }}
           >
             {roll.effective}
           </motion.div>

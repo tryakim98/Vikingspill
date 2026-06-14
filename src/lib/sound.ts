@@ -19,7 +19,20 @@ export type SoundKey =
   | 'fanfare'  // episk fanfare ved trumf
   | 'bell'     // klokkeklang ved ny ferdighet
   | 'wheel-tick'  // tikkende/knirkende lyd mens skjebnehjulet snurrer (loopes)
-  | 'wheel-klakk';// skarpt klakk når hjulet lander
+  | 'wheel-klakk' // skarpt klakk når hjulet lander
+  | 'correct'     // riktig quiz-svar
+  | 'wrong'       // feil quiz-svar (dempet, ikke straffende)
+  | 'page'        // bla til neste side/steg i encounter-flyten
+  | 'click'       // treklikk når et skip/valg velges
+  | 'coin'        // mynt samles inn ved handel
+  | 'unlock'      // sted låses opp (svenneprøve bestått)
+  | 'sail'        // skipet legger fra havn (bekreftet seilas)
+  | 'duel'        // holmgang-duell starter
+  | 'storm'       // tidevannet snur — stormen kommer
+  | 'summon'      // kongen kaller flåten hjem (sluttseremoni)
+  | 'fate-reveal' // skjebne-kort avsløres
+  | 'archetype'   // arketypen avsløres i seremonien
+  | 'victory';    // konkurransesignal når en gruppe tar ledelsen
 
 // NB: background-sea.mp3 (sjøsang) og background.mp3 (vikingfolk) er de lange
 // bakgrunnssporene — håndteres av lib/music.ts, ikke her.
@@ -37,6 +50,19 @@ const SOUNDS: Record<SoundKey, SoundDef> = {
   bell:          { file: 'bell.mp3',         volume: 0.7 },
   'wheel-tick':  { file: 'wheel-tick.mp3',   volume: 0.55, loop: true },
   'wheel-klakk': { file: 'wheel-klakk.mp3',  volume: 0.85 },
+  correct:       { file: 'riktig-svar.mp3',     volume: 0.6 },
+  wrong:         { file: 'feil-dempet.mp3',     volume: 0.5 },
+  page:          { file: 'bla-side.mp3',        volume: 0.45 },
+  click:         { file: 'klikk-tre.mp3',       volume: 0.45 },
+  coin:          { file: 'mynt-samle.mp3',      volume: 0.6 },
+  unlock:        { file: 'laas-opp.mp3',        volume: 0.7 },
+  sail:          { file: 'seil-avgang.mp3',     volume: 0.6 },
+  duel:          { file: 'holmgang-start.mp3',  volume: 0.7 },
+  storm:         { file: 'storm.mp3',           volume: 0.7 },
+  summon:        { file: 'ting-kalt.mp3',       volume: 0.7 },
+  'fate-reveal': { file: 'skjebne-avslor.mp3',  volume: 0.8 },
+  archetype:     { file: 'arketype-avslor.mp3', volume: 0.85 },
+  victory:       { file: 'seier-fanfare.mp3',   volume: 0.8 },
 };
 
 const BASE = `${import.meta.env.BASE_URL}sounds/`;

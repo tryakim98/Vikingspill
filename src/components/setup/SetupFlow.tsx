@@ -11,6 +11,7 @@ import { useState } from 'react';
 import type { ShipSymbol, SkillKey } from '../../types';
 import { skillTreeData } from '../../data';
 import VikingShip from '../ship/VikingShip';
+import { playSound } from '../../lib/sound';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
 
 const SHIP_COLORS = [
@@ -87,7 +88,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
               {SHIP_COLORS.map((c, i) => (
                 <button
                   key={c.value}
-                  onClick={() => { setColor(c.value); setStep('info'); }}
+                  onClick={() => { playSound('click'); setColor(c.value); setStep('info'); }}
                   className="group rounded-lg p-2 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-viking-gold"
                   style={{ animationDelay: `${i * 0.4}s` }}
                   aria-label={`Velg ${c.label}-skipet`}

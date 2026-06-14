@@ -5,6 +5,9 @@
  * havn i tide.
  */
 
+import { useEffect } from 'react';
+import { playSound } from '../../lib/sound';
+
 interface Props {
   chapterNavn: string;
   affected: boolean;
@@ -13,6 +16,7 @@ interface Props {
 }
 
 export default function TideTurnOverlay({ chapterNavn, affected, penalty, onDone }: Props) {
+  useEffect(() => { playSound('storm'); }, []); // stormen reiser seg når tidevannet snur (§6.5)
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-viking-darkblue/95 px-4 text-center text-viking-paper">
       <p className="font-cinzel text-sm uppercase tracking-[0.3em] text-viking-gold-soft/70">Tidevannet snur</p>

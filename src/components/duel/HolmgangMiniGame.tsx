@@ -10,6 +10,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { DuelChampionResult } from '../../lib/gameSync';
+import { playSound } from '../../lib/sound';
 
 type Kind = 'tapping' | 'reaksjon' | 'regning';
 
@@ -19,6 +20,8 @@ interface Props {
 }
 
 export default function HolmgangMiniGame({ kind, onDone }: Props) {
+  // Forkjemperen går inn på holmen — duell-signal (§7.2).
+  useEffect(() => { playSound('duel'); }, []);
   if (kind === 'tapping') return <TappingGame onDone={onDone} />;
   if (kind === 'reaksjon') return <ReactionGame onDone={onDone} />;
   return <MathGame onDone={onDone} />;

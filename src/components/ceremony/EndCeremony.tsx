@@ -9,8 +9,9 @@
  *      flatterende), gruppens verdier, og eventuell heders-tittel.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { playSound } from '../../lib/sound';
 import type { SkillKey, SagaEntry, Destination } from '../../types';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
 import { determineArchetype, topSkillTitle } from '../../data/archetypes';
@@ -36,6 +37,13 @@ type Step = 'intro' | 'scores' | 'archetype';
 
 export default function EndCeremony({ setup, scores, skills, saga, destinations, acceptedTradesCount, onClose }: Props) {
   const [step, setStep] = useState<Step>('intro');
+
+  // Seremonilyd (§8.6): kongen kaller flåten hjem, og senere avsløres arketypen.
+  useEffect(() => {
+    if (step === 'intro') playSound('summon');
+    else if (step === 'archetype') playSound('archetype');
+  }, [step]);
+
   const total = scores.culturalUnderstanding + scores.tradeGain + scores.reputation;
   const archetype = determineArchetype({ saga, destinations, acceptedTradesCount, scores });
   const top = topSkillTitle(skills);
