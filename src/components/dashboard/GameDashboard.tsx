@@ -80,9 +80,10 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     const unsub = subscribeGameSettings(session.gameCode, setGameSettings);
     return () => unsub();
   }, [isOnline, session]);
-  const requireSaga = !!gameSettings.requireSaga;
-  const requirePerspective = !!gameSettings.requirePerspective;
-  const requireBridge = !!gameSettings.requireBridge;
+  // Kjernepedagogikken er PÅ som standard (default !== false) — læreren kan skru av for korte økter.
+  const requireSaga = gameSettings.requireSaga !== false;
+  const requirePerspective = gameSettings.requirePerspective !== false;
+  const requireBridge = gameSettings.requireBridge !== false;
   const requireQuiz = gameSettings.requireQuiz !== false; // default PÅ — stedsquizen er obligatorisk
   const [showOwnSaga, setShowOwnSaga] = useState(false);
 

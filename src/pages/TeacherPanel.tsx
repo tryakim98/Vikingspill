@@ -433,32 +433,32 @@ export default function TeacherPanel() {
             <label className="inline-flex cursor-pointer items-center gap-2">
               <input
                 type="checkbox"
-                checked={!!settings.requireSaga}
+                checked={settings.requireSaga !== false}
                 onChange={(e) => { if (code) setGameSettings(code, { requireSaga: e.target.checked }).catch(() => {}); }}
                 data-testid="require-saga-toggle"
                 className="h-4 w-4 accent-viking-gold"
               />
-              <span className="font-cinzel text-sm text-viking-gold-soft">Krev begrunnelse: <strong>{settings.requireSaga ? 'PÅ' : 'AV'}</strong></span>
+              <span className="font-cinzel text-sm text-viking-gold-soft">Krev begrunnelse: <strong>{settings.requireSaga !== false ? 'PÅ' : 'AV'}</strong></span>
             </label>
             <label className="inline-flex cursor-pointer items-center gap-2">
               <input
                 type="checkbox"
-                checked={!!settings.requirePerspective}
+                checked={settings.requirePerspective !== false}
                 onChange={(e) => { if (code) setGameSettings(code, { requirePerspective: e.target.checked }).catch(() => {}); }}
                 data-testid="require-perspective-toggle"
                 className="h-4 w-4 accent-viking-gold"
               />
-              <span className="font-cinzel text-sm text-viking-gold-soft">Krev perspektivskifte: <strong>{settings.requirePerspective ? 'PÅ' : 'AV'}</strong></span>
+              <span className="font-cinzel text-sm text-viking-gold-soft">Krev perspektivskifte: <strong>{settings.requirePerspective !== false ? 'PÅ' : 'AV'}</strong></span>
             </label>
             <label className="inline-flex cursor-pointer items-center gap-2">
               <input
                 type="checkbox"
-                checked={!!settings.requireBridge}
+                checked={settings.requireBridge !== false}
                 onChange={(e) => { if (code) setGameSettings(code, { requireBridge: e.target.checked }).catch(() => {}); }}
                 data-testid="require-bridge-toggle"
                 className="h-4 w-4 accent-viking-gold"
               />
-              <span className="font-cinzel text-sm text-viking-gold-soft">Bro til i dag: <strong>{settings.requireBridge ? 'PÅ' : 'AV'}</strong></span>
+              <span className="font-cinzel text-sm text-viking-gold-soft">Bro til i dag: <strong>{settings.requireBridge !== false ? 'PÅ' : 'AV'}</strong></span>
             </label>
             <label className="inline-flex cursor-pointer items-center gap-2" title="Når på MÅ gruppa gjennom stedsquizen før de kan ta det endelige valget. Quizen gir fortsatt terningbonus.">
               <input
