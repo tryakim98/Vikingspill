@@ -54,6 +54,8 @@ interface EncounterFlowProps {
   requirePerspective?: boolean;
   /** Lærer-styrt: bro til i dag — refleksjon etter utfallet på destinasjoner med modernBridge. */
   requireBridge?: boolean;
+  /** Lærer-styrt: stedsquizen må fullføres før valgene — ingen «Hopp til valgene». */
+  requireQuiz?: boolean;
   /** Hvilken tekstlengde å rendre for historie + kulturmøte (differensiering). */
   textLength?: 'full' | 'short';
 }
@@ -105,7 +107,7 @@ function OddsBar({ baseRoll }: { baseRoll: RollOdds }) {
 export default function EncounterFlow({
   destination, skills, onComplete, onExit, onRequestApproval,
   isChief = true, syncedEncounter = null, onUpdateEncounter,
-  lateGame = false, requireSaga = false, requirePerspective = false, requireBridge = false, textLength = 'full',
+  lateGame = false, requireSaga = false, requirePerspective = false, requireBridge = false, requireQuiz = false, textLength = 'full',
 }: EncounterFlowProps) {
   const d = destination;
   const syncMode = !!syncedEncounter;
@@ -326,10 +328,19 @@ export default function EncounterFlow({
           </div>
         </div>
         {isChief ? (
-          <div className="mt-7 flex flex-wrap gap-3">
-            <button onClick={() => setStep('transition')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Start stedsquiz →</button>
-            <button onClick={() => updateMany({ quizBonus: 0, step: preValgStep })} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Hopp til valgene</button>
-          </div>
+          <>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <button onClick={() => setStep('transition')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Start stedsquiz →</button>
+              {/* «Hopp til valgene» skjules når quizen er obligatorisk — men beholdes defensivt
+                  hvis destinasjonen mangler en stedsquiz, så flyten ikke låser seg. */}
+              {(!requireQuiz || (d.stedsquiz?.length ?? 0) === 0) && (
+                <button onClick={() => updateMany({ quizBonus: 0, step: preValgStep })} data-testid="skip-quiz" className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Hopp til valgene</button>
+              )}
+            </div>
+            {requireQuiz && (d.stedsquiz?.length ?? 0) > 0 && (
+              <p className="mt-2 font-inter text-xs italic text-viking-gold-soft/70" data-testid="quiz-mandatory-note">Stedsquizen er obligatorisk denne runden — den må fullføres før dere kan velge.</p>
+            )}
+          </>
         ) : <ChiefBanner />}
       </Shell>
     );

@@ -460,6 +460,16 @@ export default function TeacherPanel() {
               />
               <span className="font-cinzel text-sm text-viking-gold-soft">Bro til i dag: <strong>{settings.requireBridge ? 'PÅ' : 'AV'}</strong></span>
             </label>
+            <label className="inline-flex cursor-pointer items-center gap-2" title="Når på MÅ gruppa gjennom stedsquizen før de kan ta det endelige valget. Quizen gir fortsatt terningbonus.">
+              <input
+                type="checkbox"
+                checked={settings.requireQuiz !== false}
+                onChange={(e) => { if (code) setGameSettings(code, { requireQuiz: e.target.checked }).catch(() => {}); }}
+                data-testid="require-quiz-toggle"
+                className="h-4 w-4 accent-viking-gold"
+              />
+              <span className="font-cinzel text-sm text-viking-gold-soft">Obligatorisk quiz: <strong>{settings.requireQuiz !== false ? 'PÅ' : 'AV'}</strong></span>
+            </label>
             <label className="inline-flex cursor-pointer items-center gap-2" title="Engangs-bobler som forklarer ressurser og låste steder første gang gruppa møter dem. Skru av i korte økter.">
               <input
                 type="checkbox"

@@ -83,6 +83,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const requireSaga = !!gameSettings.requireSaga;
   const requirePerspective = !!gameSettings.requirePerspective;
   const requireBridge = !!gameSettings.requireBridge;
+  const requireQuiz = gameSettings.requireQuiz !== false; // default PÅ — stedsquizen er obligatorisk
   const [showOwnSaga, setShowOwnSaga] = useState(false);
 
   const [syncedGroup, setSyncedGroup] = useState<SyncedGroup | null>(null);
@@ -526,6 +527,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         requireSaga={requireSaga}
         requirePerspective={requirePerspective}
         requireBridge={requireBridge}
+        requireQuiz={requireQuiz}
         textLength={effectiveTextLength}
         syncedEncounter={isOnline ? syncedGroup?.encounter ?? null : null}
         onUpdateEncounter={isOnline && isChief

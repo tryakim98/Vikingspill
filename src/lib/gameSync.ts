@@ -92,6 +92,7 @@ export interface GameSettings {
   requireSaga?: boolean;
   requirePerspective?: boolean;
   requireBridge?: boolean;
+  requireQuiz?: boolean;   // stedsquizen må fullføres før valgene (default på)
   textLength?: TextLength; // 'full' = alle, 'short' = alle, 'group' = la hver gruppe velge
   showHints?: boolean;     // førstegangs-forklaringer på/av (default på)
 }
