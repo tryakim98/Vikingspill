@@ -2,10 +2,16 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Reset-en MÅ ligge i @layer base. Tailwind v4 legger alle utilities i et eget lag,
+   og ulagdelte regler vinner over lagdelte uansett spesifisitet — en ulagdelt
+   `* { margin:0; padding:0 }` ville derfor overstyre mx-auto, px-*, py-*, m-* osv.
+   i hele appen (innhold mister sentrering og luft). I base-laget vinner utilities. */
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 }
 
 html, body {
