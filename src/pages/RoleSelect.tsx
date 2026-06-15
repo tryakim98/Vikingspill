@@ -130,8 +130,8 @@ function Corner({ pos }: { pos: 'tl' | 'tr' | 'bl' | 'br' }) {
                    'bottom-2 right-2 scale-x-[-1] scale-y-[-1]';
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" className={`pointer-events-none absolute ${cls}`} aria-hidden="true">
-      <path d="M 2 2 L 26 2 L 26 6 L 6 6 L 6 26 L 2 26 Z" fill="#D4A843" />
-      <circle cx="2" cy="2" r="3" fill="#D4A843" />
+      <path d="M 2 2 L 26 2 L 26 6 L 6 6 L 6 26 L 2 26 Z" fill="#9C8138" />
+      <circle cx="2" cy="2" r="3" fill="#9C8138" />
       <circle cx="2" cy="2" r="1.5" fill="#3a1f0d" />
     </svg>
   );

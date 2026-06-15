@@ -385,9 +385,9 @@ export default function TeacherPanel() {
         <div className="viking-card relative rounded-lg p-5" data-testid="wheel-panel">
           <div className="mb-3 text-center">
             <div className="mb-1 flex items-center justify-center gap-3">
-              <Raven size={36} facing="right" color="#D4A843" />
+              <Raven size={36} facing="right" color="#9C8138" />
               <h2 className="font-saga text-3xl viking-engraved">Skjebnehjulet</h2>
-              <Raven size={36} facing="left" color="#D4A843" />
+              <Raven size={36} facing="left" color="#9C8138" />
             </div>
             <p className="mx-auto mt-1 max-w-md font-inter text-sm italic text-viking-paper/80">
               Du bestemmer kun <strong>når</strong> du spinner. Nornene avgjør hvilken kraft som rammer flåten — og hvem.

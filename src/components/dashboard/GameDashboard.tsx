@@ -714,7 +714,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             </p>
           </div>
         </div>
-        <BraidDivider className="mb-6" height={18} />
+        <BraidDivider className="mb-6" height={11} />
 
         {/* Mannskapet — kun online, med høvding-badge og «Gi roret»-knapper */}
         {isOnline && memberIds.length > 0 && (

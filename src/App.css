@@ -4,6 +4,6 @@
 /* Custom utilities for Viking theme */
 @layer components {
   .viking-border-pattern {
-    border-image: linear-gradient(45deg, #D4A843, #E8C97A, #D4A843) 1;
+    border-image: linear-gradient(45deg, #9C8138, #B9A467, #9C8138) 1;
   }
 }
