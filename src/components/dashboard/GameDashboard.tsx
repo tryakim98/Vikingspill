@@ -10,7 +10,7 @@ import type { Destination, SkillKey } from '../../types';
 import { destinations, skillTreeData } from '../../data';
 import { useGameState } from '../../hooks/useGameState';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
-import VikingShip from '../ship/VikingShip';
+import { EngravedShip, BraidDivider } from '../decor';
 import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
@@ -694,8 +694,8 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
       <ConnectionBanner active={session.mode === 'online'} />
       <div className="mx-auto max-w-3xl">
         {/* Header */}
-        <div className="mb-6 flex items-center gap-4 border-b-4 border-viking-gold pb-5">
-          <VikingShip color={setup.shipColor} symbol={setup.shipSymbol} size={96} />
+        <div className="flex items-center gap-4 pb-4">
+          <EngravedShip name="skip-avatar" size={120} />
           <div className="flex-1">
             <h1 className="font-cinzel text-3xl text-viking-gold">{setup.shipName}</h1>
             <p className="font-inter text-sm text-viking-gold-soft">{SYMBOL_LABEL[setup.shipSymbol]} · {state.visited.length}/{destinations.length} destinasjoner besøkt</p>
@@ -714,6 +714,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             </p>
           </div>
         </div>
+        <BraidDivider className="mb-6" height={18} />
 
         {/* Mannskapet — kun online, med høvding-badge og «Gi roret»-knapper */}
         {isOnline && memberIds.length > 0 && (

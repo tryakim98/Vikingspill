@@ -31,6 +31,7 @@ import { playAmbienceForDestination, stopAmbience } from '../../lib/ambience';
 import QuestionCard from '../quiz/QuestionCard';
 import DiceRoll from '../dice/DiceRoll';
 import Icon from '../decor/Icon';
+import { BraidDivider } from '../decor';
 
 type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'radslagning' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
 
@@ -83,10 +84,11 @@ function Shell({ name, onExit, children }: { name: string; onExit: () => void; c
   return (
     <div className="relative min-h-screen viking-screen text-viking-paper">
       <div className="mx-auto max-w-2xl px-4 py-8">
-        <div className="mb-6 flex items-center justify-between border-b-2 border-viking-gold/40 pb-3">
+        <div className="flex items-center justify-between pb-2">
           <h2 className="font-cinzel text-xl text-viking-gold">{name}</h2>
           <button onClick={onExit} className="font-inter text-xs text-viking-gold-soft/70 hover:text-viking-gold-soft">✕ Avbryt</button>
         </div>
+        <BraidDivider className="mb-6" />
         {children}
       </div>
     </div>

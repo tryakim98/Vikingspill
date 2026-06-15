@@ -12,7 +12,7 @@
 
 import { motion } from 'motion/react';
 import type { Destination, ShipSymbol, SkillKey, TradeGoodId } from '../../types';
-import VikingShip from '../ship/VikingShip';
+import { EngravedShip } from '../decor';
 import { isAccessible, describeRequirement, missingForRequirement, meetsRequirement, haveForRequirement } from '../../lib/unlocks';
 import { ACTIONS_BY_DEST, type SpecialAction, type ActionCategory } from '../../data/specialActions';
 import { evaluateAction, describeCost, describeEffect } from '../../lib/specialActions';
@@ -109,7 +109,7 @@ const CATEGORY_COLOR: Record<ActionCategory, string> = {
   diplomati: 'text-viking-teal',
 };
 
-export default function SeaJourney({ destinations, visited, locked, goods, skills, scores, unlockedSides, performedActions, ship, isChief, previewDestId, sailingTo, onSelect, onConfirm, onStartSvenneprove, onPerformAction }: Props) {
+export default function SeaJourney({ destinations, visited, locked, goods, skills, scores, unlockedSides, performedActions, isChief, previewDestId, sailingTo, onSelect, onConfirm, onStartSvenneprove, onPerformAction }: Props) {
   const previewDest = previewDestId ? destinations.find((d) => d.id === previewDestId) ?? null : null;
   const lastVisited = visited[visited.length - 1];
   const shipStart = (lastVisited && MAP_POS[lastVisited]) || HOME;
@@ -239,7 +239,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
             className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_2px_3px_rgba(0,0,0,0.6)]"
             style={{ left: `${stationaryShipPos.x}%`, top: `${stationaryShipPos.y}%` }}
           >
-            <VikingShip color={ship.color} symbol={ship.symbol} size={34} bob />
+            <EngravedShip name="skip-kart" size={48} bob />
           </div>
         )}
 
@@ -284,7 +284,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                 className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_2px_3px_rgba(0,0,0,0.6)]"
                 data-testid="sailing-ship"
               >
-                <VikingShip color={ship.color} symbol={ship.symbol} size={38} bob />
+                <EngravedShip name="skip-kart" size={52} bob />
               </motion.div>
 
               {/* Tekstboble — «Seiler mot X …» — synket via sailingTo */}

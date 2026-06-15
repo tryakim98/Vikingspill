@@ -142,6 +142,40 @@ export function RuneDivider({ className = '', color = '#D4A843', runes = ['ᚦ',
   );
 }
 
+// ─── BraidDivider — flettet bord (flettebord.png) som skillelinje ───────────
+// Erstatter de rette gull-strekene mellom seksjoner. Bildet brukes som CSS-maske
+// (svart bakgrunn allerede gjort transparent), fylt med gull så det matcher paletten.
+export function BraidDivider({ className = '', height = 16, color = '#D4A843' }: { className?: string; height?: number; color?: string }) {
+  const url = `${import.meta.env.BASE_URL}ornamenter/flettebord.png`;
+  return (
+    <div
+      aria-hidden="true"
+      className={className}
+      style={{
+        height, width: '100%', backgroundColor: color, opacity: 0.85,
+        WebkitMaskImage: `url("${url}")`, maskImage: `url("${url}")`,
+        WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat',
+        WebkitMaskPosition: 'center', maskPosition: 'center',
+        WebkitMaskSize: '100% 100%', maskSize: '100% 100%',
+      }}
+    />
+  );
+}
+
+// ─── EngravedShip — håndtegnet vikingskip (skip-kart/skip-avatar) ────────────
+// Erstatter det tegneserieaktige SVG-skipet. Detaljert gravering på transparent
+// bakgrunn; en varm tone løfter sølvet mot bronse så det matcher grensesnittet.
+export function EngravedShip({ name = 'skip-kart', size = 48, className = '', bob = false }: { name?: 'skip-kart' | 'skip-avatar'; size?: number; className?: string; bob?: boolean }) {
+  const url = `${import.meta.env.BASE_URL}ornamenter/${name}.png`;
+  return (
+    <img
+      src={url} alt="" aria-hidden="true"
+      className={`${bob ? 'animate-bob' : ''} ${className}`}
+      style={{ width: size, height: 'auto', filter: 'sepia(0.4) saturate(1.3) brightness(1.04)' }}
+    />
+  );
+}
+
 // ─── KnotBorder — flettet knutemønster ──────────────────────────────────────
 export function KnotBorder({ width = 240, height = 24, className = '', color = '#D4A843' }: { width?: number; height?: number; className?: string; color?: string }) {
   // Periodisk flettemønster — sammenflettede løkker
