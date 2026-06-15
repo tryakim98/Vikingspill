@@ -5,7 +5,7 @@
  * (§8.1) kommer senere. Rendres kun med en gyldig gruppe (gyldig hooks-bruk).
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type ReactNode } from 'react';
 import type { Destination, SkillKey } from '../../types';
 import { destinations, skillTreeData } from '../../data';
 import { useGameState } from '../../hooks/useGameState';
@@ -673,8 +673,8 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     );
   }
 
-  const stats = [
-    { label: 'Kulturforståelse', v: state.scores.culturalUnderstanding },
+  // Sekundærtallene står ved siden av kjernestatusen (Kulturforståelse) — bevisst hierarki.
+  const secondaryStats = [
     { label: 'Handelsutbytte', v: state.scores.tradeGain },
     { label: 'Rykte', v: state.scores.reputation },
   ];
@@ -765,18 +765,31 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           </div>
         )}
 
-        {/* Poeng */}
-        <div className="mb-4 grid grid-cols-3 gap-3">
-          {stats.map((s) => (
-            <div key={s.label} className="rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-3 text-center">
-              <p className="font-mono text-xs text-viking-gold-soft">{s.label}</p>
-              <p className="font-cinzel text-3xl font-bold text-viking-gold">{s.v}</p>
-            </div>
-          ))}
+        {/* Poeng — bevisst asymmetri: kjernestatusen (Kulturforståelse) dominerer,
+            sekundærtallene står mindre ved siden av. Ikke en jevn 3-kolonners grid. */}
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-stretch">
+          {/* Hero: Kulturforståelse — spillets pedagogiske kjerne, størst vekt, venstrejustert */}
+          <div className="relative flex-1 overflow-hidden rounded-lg border-2 border-viking-gold/70 bg-viking-surface p-5 sm:flex-[1.8]" data-testid="stat-hero">
+            <span aria-hidden className="pointer-events-none absolute -right-5 -top-4 text-viking-gold/10">
+              <Icon name="book" size={132} />
+            </span>
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-viking-gold-soft">Kulturforståelse</p>
+            <p className="mt-1 font-cinzel text-6xl font-bold leading-none text-viking-gold">{state.scores.culturalUnderstanding}</p>
+            <p className="mt-2 max-w-[22ch] font-inter text-[11px] italic leading-snug text-viking-paper/60">Respekt, læring og tilpasning — reisens egentlige mål.</p>
+          </div>
+          {/* Sekundærtall: handel + rykte — mindre celler, stablet ved siden av hero-kortet */}
+          <div className="flex gap-3 sm:flex-1 sm:flex-col">
+            {secondaryStats.map((s) => (
+              <div key={s.label} className="flex flex-1 items-baseline justify-between gap-2 rounded-lg border border-viking-gold/30 bg-viking-surface/70 px-3 py-2.5 sm:flex-col sm:items-start sm:justify-center" data-testid="stat-secondary">
+                <p className="font-mono text-[10px] uppercase tracking-wide text-viking-gold-soft/90">{s.label}</p>
+                <p className="font-cinzel text-3xl font-bold leading-none text-viking-gold">{s.v}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Handelsvarer — lag oppå poengene */}
-        <div className="mb-6">
+        {/* Handelsvarer — smalere lag-stripe oppå poengene, venstrestilt (ikke full bredde) */}
+        <div className="mb-6 sm:max-w-md">
           <TradeGoodsPanel goods={state.goods ?? {}} />
         </div>
 
@@ -874,8 +887,10 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           </div>
         )}
 
-        {/* Interaktivt sjøkart erstatter destinasjonslisten */}
-        <div className="mb-8">
+        {/* Sjøkartet er reisens midtpunkt — venstrestilt overskrift + kortet bryter
+            ut bredere enn de øvrige panelene, så tyngden ligger her (tilsiktet hierarki). */}
+        <SectionEyebrow>Sjøkartet — velg neste havn</SectionEyebrow>
+        <div className="mb-8 -mx-2 sm:-mx-6">
           <SeaJourney
             destinations={destinations}
             visited={state.visited}
@@ -928,6 +943,19 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
 
       {/* Engangs-forklaringer — bobler nederst når gruppa møter et nytt konsept */}
       <HintToast hint={activeHint ? HINTS[activeHint] : null} onDismiss={() => setActiveHint(null)} />
+    </div>
+  );
+}
+
+/**
+ * Venstrejustert seksjonsoverskrift med en vertikal gull-runesøyle. Bryter opp den
+ * sentrerte, jevne stablingen og gir tilsiktet hierarki uten å bli støyende.
+ */
+function SectionEyebrow({ children }: { children: ReactNode }) {
+  return (
+    <div className="mb-2 flex items-center gap-2.5">
+      <span aria-hidden className="h-5 w-1 rounded-full bg-viking-gold/70" />
+      <h2 className="font-cinzel text-sm uppercase tracking-[0.18em] text-viking-gold-soft">{children}</h2>
     </div>
   );
 }

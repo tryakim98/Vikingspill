@@ -87,14 +87,15 @@ export default function HvaKanViGjorePanel({ destinations, scores, skills, goods
         Ressursene gir konkrete muligheter. Slik bruker dere det dere har samlet.
       </p>
 
-      {/* Ressursnøkkel — hva er hver ressurs til for */}
-      <div className="mb-3 grid grid-cols-2 gap-1.5 text-[11px] sm:grid-cols-3" data-testid="resource-key">
-        <ResourceTip icon="book" label="Kulturforståelse" tip="Bedre valg, åpner sidesteder" />
-        <ResourceTip icon="fehu" label="Handel" tip="Kjøp varer, betal spesielle handlinger" />
-        <ResourceTip icon="sowilo" label="Rykte" tip="Diplomati-valg, fjerne havner" />
-        <ResourceTip icon="crate" label="Handelsvarer" tip="Lås opp sidesteder, bytt med andre" />
-        <ResourceTip icon="axe" label="Ferdigheter" tip="Bonus på terning, låser opp valg" />
-        <ResourceTip icon="scroll" label="Svenneprøver" tip="Lås opp sidesteder via quiz" />
+      {/* Ressursnøkkel — asymmetrisk «murverk» i stedet for jevn 2x3-grid: nøkkelressursen
+          Kulturforståelse spenner bredt øverst, resten faller inn under i ulik takt. */}
+      <div className="mb-3 flex flex-wrap gap-1.5 text-[11px]" data-testid="resource-key">
+        <ResourceTip icon="book" label="Kulturforståelse" tip="Bedre valg, åpner sidesteder" className="w-full" />
+        <ResourceTip icon="fehu" label="Handel" tip="Kjøp varer, betal spesielle handlinger" className="min-w-[8.5rem] flex-1" />
+        <ResourceTip icon="sowilo" label="Rykte" tip="Diplomati-valg, fjerne havner" className="min-w-[8.5rem] flex-[1.4]" />
+        <ResourceTip icon="crate" label="Handelsvarer" tip="Lås opp sidesteder, bytt med andre" className="min-w-[8.5rem] flex-[1.4]" />
+        <ResourceTip icon="axe" label="Ferdigheter" tip="Bonus på terning, låser opp valg" className="min-w-[8.5rem] flex-1" />
+        <ResourceTip icon="scroll" label="Svenneprøver" tip="Lås opp sidesteder via quiz" className="min-w-[8.5rem] flex-1" />
       </div>
 
       {/* Klare til å seile */}
@@ -146,9 +147,9 @@ export default function HvaKanViGjorePanel({ destinations, scores, skills, goods
   );
 }
 
-function ResourceTip({ icon, label, tip }: { icon: string; label: string; tip: string }) {
+function ResourceTip({ icon, label, tip, className = '' }: { icon: string; label: string; tip: string; className?: string }) {
   return (
-    <div className="flex items-start gap-1.5 border border-viking-gold/25 bg-viking-surface/40 px-2 py-1">
+    <div className={`flex items-start gap-1.5 border border-viking-gold/25 bg-viking-surface/40 px-2 py-1 ${className}`}>
       <span className="mt-0.5 shrink-0 text-viking-gold-soft"><Icon name={icon} size={14} /></span>
       <span className="leading-tight">
         <span className="block font-cinzel text-[10.5px] font-bold text-viking-gold-soft">{label}</span>
