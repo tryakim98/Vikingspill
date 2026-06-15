@@ -48,13 +48,13 @@ export default function RoleSelect() {
         </p>
         <RuneDivider className="mb-7 w-full max-w-md" />
 
-        {/* Rollevalg — asymmetrisk: Tor (storskjerm) er det tunge kortet, viking er smalere og forskjøvet ned */}
-        <div className="flex w-full flex-col gap-5 md:flex-row md:items-start">
+        {/* Rollevalg — likeverdige kort: samme bredde (flex-1) og høyde (items-stretch), side ved side */}
+        <div className="flex w-full flex-col gap-5 md:flex-row md:items-stretch">
 
-          {/* TOR — lærer (dominant) */}
+          {/* TOR — lærer */}
           <button
             onClick={handleTeacher}
-            className="viking-card-wood group relative overflow-hidden p-7 text-left transition-transform duration-150 hover:-translate-y-0.5 md:flex-[3]"
+            className="viking-card-wood group relative overflow-hidden p-7 text-left transition-transform duration-150 hover:-translate-y-0.5 md:flex-1"
           >
             <CornerOrnaments />
             <div className="relative">
@@ -74,25 +74,26 @@ export default function RoleSelect() {
             </div>
           </button>
 
-          {/* VIKING — elev (smalere, forskjøvet ned for asymmetri) */}
+          {/* VIKING — elev */}
           <button
             onClick={handleStudent}
-            className="viking-card-leather group relative overflow-hidden p-7 text-left transition-transform duration-150 hover:-translate-y-0.5 md:mt-10 md:flex-[2]"
+            className="viking-card-leather group relative overflow-hidden p-7 text-left transition-transform duration-150 hover:-translate-y-0.5 md:flex-1"
           >
             <CornerOrnaments />
             <div className="relative">
-              <div className="mb-3 flex items-center gap-3">
+              <div className="mb-3 flex items-center gap-4">
                 <DragonHead size={56} color="#A8862F" facing="right" />
-                <h2 className="font-saga text-2xl font-bold text-viking-gold md:text-3xl viking-engraved">
+                <h2 className="font-saga text-3xl font-bold text-viking-gold md:text-4xl viking-engraved">
                   Jeg er viking
                 </h2>
               </div>
-              <p className="font-inter text-sm text-viking-paper/90">
+              <p className="max-w-md font-inter text-viking-paper/90">
                 Bli én av Midgards dødelige sjøfarere. Velg skip, styr gjennom 12 land, og håp at Tor våker over dere.
               </p>
               <p className="mt-3 font-cinzel text-xs italic text-viking-gold-soft">
                 ↳ Mobil/iPad: hver gruppe sin private skjerm
               </p>
+              <KnotBorder width={240} height={20} className="mt-5 opacity-60" />
             </div>
           </button>
         </div>
