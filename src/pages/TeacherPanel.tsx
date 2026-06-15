@@ -447,7 +447,7 @@ export default function TeacherPanel() {
                       onClick={settleTrial}
                       disabled={!trialWinner}
                       data-testid="trial-settle-button"
-                      className="rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-2 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-2 font-saga text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Avgjør prøven
                     </button>
@@ -479,7 +479,7 @@ export default function TeacherPanel() {
             <button
               onClick={() => setShowSagas(true)}
               data-testid="open-sagas"
-              className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+              className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
             >
               📖 Les sagaer
             </button>

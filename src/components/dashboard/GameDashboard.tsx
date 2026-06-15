@@ -697,7 +697,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         <div className="flex items-center gap-4 pb-4">
           <EngravedShip name="skip-avatar" size={120} />
           <div className="flex-1">
-            <h1 className="font-cinzel text-3xl text-viking-gold">{setup.shipName}</h1>
+            <h1 className="font-saga text-4xl leading-tight text-viking-gold">{setup.shipName}</h1>
             <p className="font-inter text-sm text-viking-gold-soft">{SYMBOL_LABEL[setup.shipSymbol]} · {state.visited.length}/{destinations.length} destinasjoner besøkt</p>
             <p className="mt-1.5">
               {session.mode === 'online' ? (
@@ -781,7 +781,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             <span aria-hidden className="pointer-events-none absolute -right-5 -top-4 text-viking-gold/10">
               <NorseIcon name="ikon-kultur" size={132} />
             </span>
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-viking-gold-soft">Kulturforståelse</p>
+            <p className="font-saga text-base uppercase tracking-[0.18em] text-viking-gold-soft">Kulturforståelse</p>
             <p className="mt-1 font-cinzel text-6xl font-bold leading-none text-viking-gold">{state.scores.culturalUnderstanding}</p>
             <p className="mt-2 max-w-[22ch] font-inter text-[11px] italic leading-snug text-viking-paper/60">Respekt, læring og tilpasning — reisens egentlige mål.</p>
           </div>
@@ -789,7 +789,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           <div className="flex gap-3 sm:flex-1 sm:flex-col">
             {secondaryStats.map((s) => (
               <div key={s.label} className="flex flex-1 items-baseline justify-between gap-2 rounded-lg border border-viking-gold/30 bg-viking-surface/70 px-3 py-2.5 sm:flex-col sm:items-start sm:justify-center" data-testid="stat-secondary">
-                <p className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide text-viking-gold-soft/90">
+                <p className="inline-flex items-center gap-1.5 font-saga text-sm uppercase tracking-wide text-viking-gold-soft/90">
                   <NorseIcon name={s.icon} size={14} /> {s.label}
                 </p>
                 <p className="font-cinzel text-3xl font-bold leading-none text-viking-gold">{s.v}</p>
@@ -925,7 +925,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         {state.visited.length === destinations.length && (
           <button
             onClick={() => setShowCeremony(true)}
-            className="mb-8 inline-flex w-full items-center justify-center gap-2 border-2 border-viking-gold bg-viking-gold px-6 py-4 font-cinzel text-xl font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft hover:scale-[1.01]"
+            className="mb-8 inline-flex w-full items-center justify-center gap-2 border-2 border-viking-gold bg-viking-gold px-6 py-4 font-saga text-xl font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft hover:scale-[1.01]"
           >
             <Icon name="anchor" size={22} /> Seil hjem til Avaldsnes
           </button>

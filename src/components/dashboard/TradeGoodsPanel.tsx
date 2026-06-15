@@ -20,7 +20,7 @@ export default function TradeGoodsPanel({ goods }: Props) {
   return (
     <div className="viking-frame bg-viking-surface p-3" data-testid="trade-goods-panel">
       <div className="mb-2 flex items-baseline justify-between">
-        <p className="font-cinzel text-sm text-viking-gold-soft">Varer ombord</p>
+        <p className="font-saga text-lg text-viking-gold-soft">Varer ombord</p>
         <p className="font-mono text-xs text-viking-gold-soft/80">{total} {total === 1 ? 'enhet' : 'enheter'}</p>
       </div>
       {total === 0 ? (

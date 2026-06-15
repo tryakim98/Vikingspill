@@ -110,7 +110,7 @@ export default function TeacherLanding({ creating, createError, onCreateNew, onR
             onClick={onCreateNew}
             disabled={creating}
             data-testid="create-new-game"
-            className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-wait disabled:opacity-60"
+            className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-wait disabled:opacity-60"
           >
             {creating ? 'Reiser Åsgards porter …' : 'Åpne Åsgards porter ⚡'}
           </button>

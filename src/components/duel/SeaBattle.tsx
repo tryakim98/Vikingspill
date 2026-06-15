@@ -146,7 +146,7 @@ export default function SeaBattle({ code, myGroupId, myShipName, mySkills, onRes
           <p className="font-cinzel text-viking-gold">{d.challengerName} utfordrer dere til holmgang!</p>
           <p className="mb-3 font-inter text-sm text-viking-paper/85">{d.activity.navn} — {d.activity.desc}</p>
           <div className="flex gap-2">
-            <button onClick={() => updateDuel(code, id, { status: 'active' }).catch(() => {})} className="flex-1 rounded border-2 border-viking-gold bg-viking-gold px-2 py-1.5 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft">Aksepter</button>
+            <button onClick={() => updateDuel(code, id, { status: 'active' }).catch(() => {})} className="flex-1 rounded border-2 border-viking-gold bg-viking-gold px-2 py-1.5 font-saga text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft">Aksepter</button>
             <button onClick={() => updateDuel(code, id, { status: 'declined' }).catch(() => {})} className="flex-1 rounded border-2 border-viking-gold/40 px-2 py-1.5 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold">Avslå</button>
           </div>
         </div>

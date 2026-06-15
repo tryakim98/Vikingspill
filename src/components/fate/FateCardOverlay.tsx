@@ -56,7 +56,7 @@ export default function FateCardOverlay({ event, affected, onDone }: Props) {
       <button
         onClick={onDone}
         data-testid="fate-accept"
-        className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-3 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+        className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-3 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
       >
         Godta skjebnen
       </button>

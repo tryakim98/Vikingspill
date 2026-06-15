@@ -207,7 +207,7 @@ export default function TradeMarket({
                         onClick={sendOffer}
                         disabled={sending}
                         data-testid="send-offer"
-                        className="rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:opacity-50"
+                        className="rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:opacity-50"
                       >
                         {sending ? 'Sender …' : 'Send tilbud'}
                       </button>

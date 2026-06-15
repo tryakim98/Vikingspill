@@ -62,7 +62,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
           Svenneprøven krever {COUNT} spørsmål om steder dere har besøkt, men dere har bare {questions.length} tilgjengelig.
           Seil til flere destinasjoner og kom tilbake.
         </p>
-        <button onClick={onClose} className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Tilbake</button>
+        <button onClick={onClose} className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Tilbake</button>
       </Shell>
     );
   }
@@ -102,7 +102,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
         {answer !== null && (isChief ? (
           <button
             onClick={() => { if (last) finishQuiz(); else { setIdx(idx + 1); setAnswer(null); } }}
-            className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+            className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
           >
             {last ? 'Fullfør prøven' : 'Neste spørsmål →'}
           </button>
@@ -119,7 +119,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
         <p className="mb-3 font-cinzel text-2xl text-viking-crimson">Ikke bestått</p>
         <p className="mb-6 font-inter text-viking-paper/90">Dere fikk <strong>{correct} av {COUNT}</strong> riktige — trenger {PASS_NEEDED}. Sjøstedet forblir låst. Prøv igjen eller finn en annen vei.</p>
         <div className="flex gap-3">
-          {isChief && <button onClick={restart} data-testid="svenneprove-retry" className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Prøv igjen</button>}
+          {isChief && <button onClick={restart} data-testid="svenneprove-retry" className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Prøv igjen</button>}
           <button onClick={onClose} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Lukk</button>
         </div>
       </Shell>
@@ -141,7 +141,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
         Dere fikk {correct} av {COUNT} riktige. <strong className="text-viking-gold-soft">{destName}</strong> er nå åpent — seil dit når dere er klar.
       </p>
       {isChief && (
-        <button onClick={onPass} data-testid="svenneprove-claim" className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">
+        <button onClick={onPass} data-testid="svenneprove-claim" className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">
           Lås opp og fortsett
         </button>
       )}

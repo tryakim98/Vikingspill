@@ -65,7 +65,7 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
             <VikingShip color={setup.shipColor} symbol={setup.shipSymbol} size={180} bob />
           </div>
           <p className="mb-8 font-cinzel text-2xl text-viking-paper">{setup.shipName}</p>
-          <button onClick={() => setStep('scores')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">Stig i land →</button>
+          <button onClick={() => setStep('scores')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">Stig i land →</button>
         </motion.div>
       </div>
     );
@@ -93,7 +93,7 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
             Men poengsummen forteller bare HVA dere samlet — ikke HVORDAN.
             Det er HVORDAN som avgjør hvem dere ble.
           </p>
-          <button onClick={() => setStep('archetype')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">Avslør arketypen ✦</button>
+          <button onClick={() => setStep('archetype')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">Avslør arketypen ✦</button>
         </motion.div>
       </div>
     );
@@ -161,7 +161,7 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
         )}
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.9 }}>
-          <button onClick={onClose} className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Tilbake til dashbordet</button>
+          <button onClick={onClose} className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Tilbake til dashbordet</button>
           <p className="mt-4 font-inter text-xs italic text-viking-gold-soft/55">Mest poeng er ikke nødvendigvis det mest attraktive — arketypen er hovedbelønningen.</p>
         </motion.div>
       </div>

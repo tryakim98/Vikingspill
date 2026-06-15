@@ -430,7 +430,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                 <button
                   onClick={() => onConfirm(dest.id)}
                   data-testid="confirm-sailing"
-                  className="rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+                  className="rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
                 >
                   ⚓ Bekreft seilas →
                 </button>

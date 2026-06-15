@@ -18,7 +18,7 @@ export default function ErrorFallback({ error, resetErrorBoundary }: FallbackPro
       </p>
       <pre className="max-w-md overflow-auto rounded bg-viking-surface/70 p-3 text-left font-mono text-xs text-viking-crimson/90">{message}</pre>
       <div className="flex flex-wrap justify-center gap-3">
-        <button onClick={resetErrorBoundary} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-2.5 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Prøv igjen</button>
+        <button onClick={resetErrorBoundary} className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-2.5 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Prøv igjen</button>
         <button onClick={() => location.reload()} className="rounded-md border-2 border-viking-gold/50 px-6 py-2.5 font-cinzel text-viking-gold-soft hover:border-viking-gold">Last siden på nytt</button>
       </div>
     </div>

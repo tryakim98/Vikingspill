@@ -229,7 +229,7 @@ export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpi
           onClick={spin}
           disabled={spinning || disabled}
           data-testid="skjebnehjul-spin"
-          className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-4 font-cinzel text-xl font-bold text-viking-darkblue transition hover:bg-viking-gold-soft disabled:cursor-wait disabled:opacity-60"
+          className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-4 font-saga text-xl font-bold text-viking-darkblue transition hover:bg-viking-gold-soft disabled:cursor-wait disabled:opacity-60"
         >
           {spinning ? 'Hjulet snurrer …' : '🎲 Spinn Skjebnehjulet'}
         </button>

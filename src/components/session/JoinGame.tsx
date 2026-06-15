@@ -84,7 +84,7 @@ export default function JoinGame({ onJoin, onOffline, onSwitchRole }: Props) {
           <button
             onClick={() => void submit()}
             disabled={checking}
-            className="mt-4 w-full rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-3 font-cinzel text-lg font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft disabled:opacity-50"
+            className="mt-4 w-full rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-3 font-saga text-lg font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft disabled:opacity-50"
           >
             {checking ? 'Kobler til …' : 'Bli med i spillet'}
           </button>

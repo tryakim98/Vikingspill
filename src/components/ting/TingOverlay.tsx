@@ -39,7 +39,7 @@ export default function TingOverlay({ ting, myMemberId, memberIds, memberLabel, 
         </h1>
         <p className="mt-3 font-mono text-sm text-viking-gold-soft">{candidateName}: {forCandidate} · {incumbentName}: {forIncumbent}</p>
         {kept && <p className="mt-1 font-inter text-sm italic text-viking-paper/70">Uavgjort eller flertall mot — sittende høvding fortsetter.</p>}
-        <button onClick={onDismiss} data-testid="ting-dismiss" className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-3 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">
+        <button onClick={onDismiss} data-testid="ting-dismiss" className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-3 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">
           Seil videre →
         </button>
       </div>

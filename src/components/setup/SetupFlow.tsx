@@ -164,7 +164,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
               <button
                 onClick={() => setStep('skill')}
                 disabled={shipName.trim().length === 0}
-                className="rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Videre
               </button>
@@ -201,7 +201,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
               <button
                 onClick={() => setStep('summary')}
                 disabled={startSkill === null}
-                className="rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Videre
               </button>
@@ -225,7 +225,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
               <button onClick={() => setStep('skill')} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft transition-colors hover:border-viking-gold">Tilbake</button>
               <button
                 onClick={() => onComplete({ shipName: shipName.trim(), shipSymbol: symbol, shipColor: color, startSkill })}
-                className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2 font-cinzel font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft"
+                className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2 font-saga font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft"
               >
                 ⛵ Sett seil
               </button>

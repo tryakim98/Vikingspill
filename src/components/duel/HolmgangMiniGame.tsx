@@ -60,7 +60,7 @@ function TappingGame({ onDone }: { onDone: Props['onDone'] }) {
         <button
           onClick={() => setPhase('go')}
           data-testid="minigame-start"
-          className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+          className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
         >
           Start
         </button>
@@ -121,7 +121,7 @@ function ReactionGame({ onDone }: { onDone: Props['onDone'] }) {
         <button
           onClick={() => setPhase('wait')}
           data-testid="minigame-start"
-          className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+          className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
         >
           Start
         </button>
@@ -201,7 +201,7 @@ function MathGame({ onDone }: { onDone: Props['onDone'] }) {
         <button
           onClick={() => setPhase('go')}
           data-testid="minigame-start"
-          className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+          className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
         >
           Start
         </button>
@@ -228,7 +228,7 @@ function MathGame({ onDone }: { onDone: Props['onDone'] }) {
         onClick={submit}
         disabled={phase === 'done' || answer === ''}
         data-testid="math-submit"
-        className="ml-2 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:opacity-40"
+        className="ml-2 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:opacity-40"
       >
         Svar
       </button>

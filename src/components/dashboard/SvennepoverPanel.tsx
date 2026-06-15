@@ -48,7 +48,7 @@ export default function SvennepoverPanel({ destinations, unlockedSides, isChief,
   return (
     <div className="viking-frame mb-4 bg-viking-darkblue/40 p-3" data-testid="svenneprover-panel">
       <div className="mb-2 flex items-baseline justify-between">
-        <h3 className="inline-flex items-center gap-2 font-cinzel text-sm text-viking-gold"><NorseIcon name="ikon-svenneprove" size={16} /> Svenneprøver</h3>
+        <h3 className="inline-flex items-center gap-2 font-saga text-lg text-viking-gold"><NorseIcon name="ikon-svenneprove" size={16} /> Svenneprøver</h3>
         <p className="font-mono text-[10px] text-viking-gold-soft/80">{passedCount}/{rows.length} bestått</p>
       </div>
       <p className="mb-2 font-inter text-[11px] italic text-viking-gold-soft/75">

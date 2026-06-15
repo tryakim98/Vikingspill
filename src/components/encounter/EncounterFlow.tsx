@@ -85,7 +85,7 @@ function Shell({ name, onExit, children }: { name: string; onExit: () => void; c
     <div className="relative min-h-screen viking-screen text-viking-paper">
       <div className="mx-auto max-w-2xl px-4 py-8">
         <div className="flex items-center justify-between pb-2">
-          <h2 className="font-cinzel text-xl text-viking-gold">{name}</h2>
+          <h2 className="font-saga text-2xl text-viking-gold">{name}</h2>
           <button onClick={onExit} className="font-inter text-xs text-viking-gold-soft/70 hover:text-viking-gold-soft">✕ Avbryt</button>
         </div>
         <BraidDivider className="mb-6" />
@@ -313,11 +313,11 @@ export default function EncounterFlow({
           <span className="rounded-full px-3 py-0.5 font-mono text-xs text-viking-darkblue" style={{ backgroundColor: DIFFICULTY_COLOR[d.difficulty ?? 'middels'] }}>{d.difficulty}</span>
           <span className="font-inter text-sm text-viking-gold-soft">{d.region}</span>
         </div>
-        <h1 className="mb-4 font-cinzel text-3xl font-bold text-viking-gold">{d.name}</h1>
+        <h1 className="mb-4 font-saga text-5xl text-viking-gold">{d.name}</h1>
         <TextLenToggle />
         <Html html={(textLength === 'short' && d.historyShort ? d.historyShort : d.history) ?? ''} className="block font-inter leading-relaxed text-viking-paper/90 [&_strong]:text-viking-gold-soft" data-testid={textLength === 'short' && d.historyShort ? 'history-short' : 'history-full'} />
         {isChief ? (
-          <button onClick={() => { playSound('page'); setStep('kulturmote'); }} className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
+          <button onClick={() => { playSound('page'); setStep('kulturmote'); }} className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
         ) : <ChiefBanner />}
       </Shell>
     );
@@ -329,7 +329,7 @@ export default function EncounterFlow({
     return (
       <Shell name={d.name} onExit={onExit}>
         <p className="mb-1 font-inter text-xs uppercase tracking-widest text-viking-gold-soft/70">Episk kulturmøte</p>
-        <h1 className="mb-2 font-cinzel text-2xl font-bold text-viking-gold">{km.tittel}</h1>
+        <h1 className="mb-2 font-saga text-3xl text-viking-gold">{km.tittel}</h1>
         <TextLenToggle />
         {/* Kulturmøte-scenen rammes inn av den dekorerte flettverksrammen
             (public/ornamenter/ramme-kulturmote.png — bearbeidet til transparent midte).
@@ -376,7 +376,7 @@ export default function EncounterFlow({
           />
         </div>
         {kmAnswer !== null && (isChief ? (
-          <button onClick={() => { playSound('page'); setStep('oppgave'); }} className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
+          <button onClick={() => { playSound('page'); setStep('oppgave'); }} className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
         ) : <ChiefBanner />)}
       </Shell>
     );
@@ -386,7 +386,7 @@ export default function EncounterFlow({
   if (step === 'oppgave') {
     return (
       <Shell name={d.name} onExit={onExit}>
-        <h1 className="mb-5 font-cinzel text-2xl font-bold text-viking-gold">På stedet</h1>
+        <h1 className="mb-5 font-saga text-3xl text-viking-gold">På stedet</h1>
         <div className="space-y-4">
           <div className="rounded-lg border-2 border-viking-teal/50 bg-viking-teal/10 p-4">
             <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">Visste du?</p>
@@ -420,7 +420,7 @@ export default function EncounterFlow({
         {isChief ? (
           <>
             <div className="mt-7 flex flex-wrap gap-3">
-              <button onClick={() => setStep('transition')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Start stedsquiz →</button>
+              <button onClick={() => setStep('transition')} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Start stedsquiz →</button>
               {/* «Hopp til valgene» skjules når quizen er obligatorisk — men beholdes defensivt
                   hvis destinasjonen mangler en stedsquiz, så flyten ikke låser seg. */}
               {(!requireQuiz || (d.stedsquiz?.length ?? 0) === 0) && (
@@ -503,7 +503,7 @@ export default function EncounterFlow({
               if (last) updateMany({ quizBonus: Math.min(2, quizCorrect), step: preValgStep });
               else updateMany({ quizIdx: quizIdx + 1, quizAnswer: null });
             }}
-            className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+            className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
           >
             {last ? 'Til valgene →' : 'Neste spørsmål →'}
           </button>
@@ -558,7 +558,7 @@ export default function EncounterFlow({
             onClick={() => updateMany({ step: valgEntryStep })}
             disabled={!canContinue}
             data-testid="perspective-continue"
-            className="mt-5 rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-5 rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
             Til valgene →
           </button>
@@ -635,7 +635,7 @@ export default function EncounterFlow({
               <button
                 onClick={() => updateMany({ step: 'valg' })}
                 data-testid="council-continue"
-                className="rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+                className="rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
               >
                 Til den endelige avgjørelsen →
               </button>
@@ -693,7 +693,7 @@ export default function EncounterFlow({
               disabled={!available}
               onClick={() => { playSound('click'); updateMany({ choiceId: c.id, roll: null, step: requireSaga ? 'saga' : 'roll', reason: '' }); }}
               data-testid={`pick-${c.id}`}
-              className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-cinzel text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-saga text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
             >
               Velg dette
             </button>
@@ -800,7 +800,7 @@ export default function EncounterFlow({
             onClick={() => updateMany({ step: 'roll' })}
             disabled={!canContinue}
             data-testid="saga-continue"
-            className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
             Til terningkastet →
           </button>
@@ -837,7 +837,7 @@ export default function EncounterFlow({
               playSound('dice');
               updateMany({ roll: { raw: r.raw, effective: r.effective, modifier: r.modifier, tier: r.tier }, step: 'rolling' });
             }}
-            className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+            className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
           >
 <span className="inline-flex items-center gap-2"><Icon name="die" size={18} /> Kast terningen</span>
           </button>
@@ -920,7 +920,7 @@ export default function EncounterFlow({
             <button
               onClick={() => updateMany({ step: 'refleksjon' })}
               data-testid="to-refleksjon"
-              className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+              className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
             >
 <span className="inline-flex items-center gap-1.5"><Icon name="bridge" size={14} /> Til refleksjonen →</span>
             </button>
@@ -941,7 +941,7 @@ export default function EncounterFlow({
                   ...(d.perspectivePrompt ? { otherLabel: d.perspectivePrompt.otherLabel } : {}),
                 } : undefined,
               })}
-              className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+              className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
             >
               <span className="inline-flex items-center gap-2"><Icon name="sail" size={16} /> Seil videre</span>
             </button>
@@ -1024,7 +1024,7 @@ export default function EncounterFlow({
             })}
             disabled={!canContinue}
             data-testid="bridge-continue"
-            className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span className="inline-flex items-center gap-2"><Icon name="sail" size={16} /> Seil videre</span>
           </button>

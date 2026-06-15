@@ -75,7 +75,7 @@ export default function GroupPicker({ gameCode, myMemberId, onCreateNew, onJoinE
           <button
             onClick={onCreateNew}
             data-testid="create-new-group"
-            className="w-full rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-2.5 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+            className="w-full rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-2.5 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
           >
             ⛵ Rigg et nytt skip
           </button>

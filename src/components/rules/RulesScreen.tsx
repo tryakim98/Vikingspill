@@ -139,7 +139,7 @@ export default function RulesScreen({ role, onDone }: Props) {
           <button
             onClick={onDone}
             data-testid="rules-ready"
-            className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-cinzel text-lg font-bold text-viking-darkblue shadow-[0_0_24px_rgba(212,168,67,0.35)] hover:bg-viking-gold-soft"
+            className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-saga text-lg font-bold text-viking-darkblue shadow-[0_0_24px_rgba(212,168,67,0.35)] hover:bg-viking-gold-soft"
           >
             Jeg er klar ⚔️
           </button>
