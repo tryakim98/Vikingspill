@@ -172,7 +172,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
             <line
               x1={stationaryShipPos.x} y1={stationaryShipPos.y}
               x2={MAP_POS[previewDest.id].x} y2={MAP_POS[previewDest.id].y}
-              stroke="#B9A467" strokeWidth="0.5" strokeDasharray="1.4 1.2" strokeLinecap="round" opacity="0.95"
+              stroke="#A9A08D" strokeWidth="0.5" strokeDasharray="1.4 1.2" strokeLinecap="round" opacity="0.95"
             />
           </svg>
         )}
@@ -187,7 +187,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
           const isSelected = previewDestId === d.id;
           const dimmed = isLocked || sideLocked;
           const dotColor =
-            isSelected ? '#B9A467' :
+            isSelected ? '#A9A08D' :
             isVisited ? '#7FA06B' :
             isLocked ? '#5a727d' :
             sideLocked ? '#8a734d' :

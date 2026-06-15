@@ -74,7 +74,7 @@ interface EncounterFlowProps {
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   trygg: '#5B7553',
-  middels: '#9C8138',
+  middels: '#CDC3AD',
   farlig: '#8B2929',
 };
 

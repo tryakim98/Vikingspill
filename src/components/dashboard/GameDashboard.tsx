@@ -697,7 +697,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         <div className="flex items-center gap-4 pb-4">
           <EngravedShip name="skip-avatar" size={120} />
           <div className="flex-1">
-            <h1 className="font-saga text-4xl leading-tight text-viking-gold">{setup.shipName}</h1>
+            <h1 className="font-saga text-4xl leading-tight text-viking-brass">{setup.shipName}</h1>
             <p className="font-inter text-sm text-viking-gold-soft">{SYMBOL_LABEL[setup.shipSymbol]} · {state.visited.length}/{destinations.length} destinasjoner besøkt</p>
             <p className="mt-1.5">
               {session.mode === 'online' ? (
@@ -782,7 +782,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
               <NorseIcon name="ikon-kultur" size={132} />
             </span>
             <p className="font-saga text-base uppercase tracking-[0.18em] text-viking-gold-soft">Kulturforståelse</p>
-            <p className="mt-1 font-cinzel text-6xl font-bold leading-none text-viking-gold">{state.scores.culturalUnderstanding}</p>
+            <p className="mt-1 font-cinzel text-6xl font-bold leading-none text-viking-brass">{state.scores.culturalUnderstanding}</p>
             <p className="mt-2 max-w-[22ch] font-inter text-[11px] italic leading-snug text-viking-paper/60">Respekt, læring og tilpasning — reisens egentlige mål.</p>
           </div>
           {/* Sekundærtall: handel + rykte — mindre celler, stablet ved siden av hero-kortet */}

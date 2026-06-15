@@ -16,7 +16,7 @@ import { playSound } from '../../lib/sound';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
 
 const SHIP_COLORS = [
-  { label: 'Gull', value: '#9C8138' },
+  { label: 'Gull', value: '#CDC3AD' },
   { label: 'Rust', value: '#A0522D' },
   { label: 'Teal', value: '#2B6B6B' },
   { label: 'Mose', value: '#5B7553' },

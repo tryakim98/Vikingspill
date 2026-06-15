@@ -22,7 +22,7 @@ interface DecorProps {
 }
 
 // ─── Yggdrasil — verdenstreet ───────────────────────────────────────────────
-export function Yggdrasil({ size = 180, className = '', color = '#9C8138' }: DecorProps) {
+export function Yggdrasil({ size = 180, className = '', color = '#CDC3AD' }: DecorProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 200 240" className={className} aria-hidden="true">
       {/* Røtter */}
@@ -52,7 +52,7 @@ export function Yggdrasil({ size = 180, className = '', color = '#9C8138' }: Dec
 }
 
 // ─── Mjølner — Tors hammer ──────────────────────────────────────────────────
-export function ThorHammer({ size = 48, className = '', color = '#9C8138' }: DecorProps) {
+export function ThorHammer({ size = 48, className = '', color = '#CDC3AD' }: DecorProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" className={className} aria-hidden="true">
       <g fill={color} stroke="#3a1f0d" strokeWidth="1.5" strokeLinejoin="round">
@@ -75,7 +75,7 @@ export function Raven({ size = 56, className = '', color = '#17100A', facing = '
   const flip = facing === 'left' ? 'scale(-1, 1) translate(-64, 0)' : '';
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" className={className} aria-hidden="true">
-      <g transform={flip} fill={color} stroke="#9C8138" strokeWidth="1.2" strokeLinejoin="round">
+      <g transform={flip} fill={color} stroke="#CDC3AD" strokeWidth="1.2" strokeLinejoin="round">
         {/* Kropp */}
         <path d="M 14 38 Q 18 28 28 26 L 44 24 Q 52 24 54 30 Q 52 36 44 38 L 30 42 Q 20 44 14 38 Z" />
         {/* Hale */}
@@ -83,9 +83,9 @@ export function Raven({ size = 56, className = '', color = '#17100A', facing = '
         {/* Hode */}
         <circle cx="48" cy="22" r="6" />
         {/* Nebb */}
-        <path d="M 54 22 L 62 21 L 54 24 Z" fill="#9C8138" />
+        <path d="M 54 22 L 62 21 L 54 24 Z" fill="#CDC3AD" />
         {/* Øye */}
-        <circle cx="50" cy="20" r="1.5" fill="#9C8138" />
+        <circle cx="50" cy="20" r="1.5" fill="#CDC3AD" />
         {/* Vinge */}
         <path d="M 24 28 Q 30 22 38 26 Q 32 30 26 32 Z" fill="#0E0A06" />
         {/* Bein */}
@@ -96,7 +96,7 @@ export function Raven({ size = 56, className = '', color = '#17100A', facing = '
 }
 
 // ─── Vegvisir — norrøn kompassrose ──────────────────────────────────────────
-export function Vegvisir({ size = 80, className = '', color = '#9C8138' }: DecorProps) {
+export function Vegvisir({ size = 80, className = '', color = '#CDC3AD' }: DecorProps) {
   // Åtte armer som peker i alle kompassretninger, hver kronet av en gaffel
   const arms = Array.from({ length: 8 });
   return (
@@ -130,7 +130,7 @@ export function Vegvisir({ size = 80, className = '', color = '#9C8138' }: Decor
 }
 
 // ─── RuneDivider — futhark-rad mellom seksjoner ─────────────────────────────
-export function RuneDivider({ className = '', color = '#9C8138', runes = ['ᚦ', 'ᚱ', 'ᚾ', 'ᛏ', 'ᛚ', 'ᛟ'] }: { className?: string; color?: string; runes?: string[] }) {
+export function RuneDivider({ className = '', color = '#CDC3AD', runes = ['ᚦ', 'ᚱ', 'ᚾ', 'ᛏ', 'ᛚ', 'ᛟ'] }: { className?: string; color?: string; runes?: string[] }) {
   return (
     <div className={`flex items-center gap-3 ${className}`} aria-hidden="true">
       <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${color}80, ${color})` }} />
@@ -145,7 +145,7 @@ export function RuneDivider({ className = '', color = '#9C8138', runes = ['ᚦ',
 // ─── BraidDivider — flettet bord (flettebord.png) som skillelinje ───────────
 // Erstatter de rette gull-strekene mellom seksjoner. Bildet brukes som CSS-maske
 // (svart bakgrunn allerede gjort transparent), fylt med gull så det matcher paletten.
-export function BraidDivider({ className = '', height = 9, color = '#9C8138' }: { className?: string; height?: number; color?: string }) {
+export function BraidDivider({ className = '', height = 9, color = '#CDC3AD' }: { className?: string; height?: number; color?: string }) {
   const url = `${import.meta.env.BASE_URL}ornamenter/flettebord.png`;
   return (
     <div
@@ -171,13 +171,13 @@ export function EngravedShip({ name = 'skip-kart', size = 48, className = '', bo
     <img
       src={url} alt="" aria-hidden="true"
       className={`${bob ? 'animate-bob' : ''} ${className}`}
-      style={{ width: size, height: 'auto', filter: 'sepia(0.4) saturate(1.3) brightness(1.04)' }}
+      style={{ width: size, height: 'auto', filter: 'grayscale(1) brightness(1.08) contrast(1.02)' }}
     />
   );
 }
 
 // ─── KnotBorder — flettet knutemønster ──────────────────────────────────────
-export function KnotBorder({ width = 240, height = 24, className = '', color = '#9C8138' }: { width?: number; height?: number; className?: string; color?: string }) {
+export function KnotBorder({ width = 240, height = 24, className = '', color = '#CDC3AD' }: { width?: number; height?: number; className?: string; color?: string }) {
   // Periodisk flettemønster — sammenflettede løkker
   const loops = Math.floor(width / 32);
   return (
@@ -199,7 +199,7 @@ export function KnotBorder({ width = 240, height = 24, className = '', color = '
 }
 
 // ─── DragonHead — drakehode (stiliseret, prow-aktig) ────────────────────────
-export function DragonHead({ size = 72, className = '', color = '#9C8138', facing = 'right' }: DecorProps & { facing?: 'left' | 'right' }) {
+export function DragonHead({ size = 72, className = '', color = '#CDC3AD', facing = 'right' }: DecorProps & { facing?: 'left' | 'right' }) {
   const flip = facing === 'left' ? 'scale(-1, 1) translate(-100, 0)' : '';
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" className={className} aria-hidden="true">

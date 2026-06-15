@@ -38,7 +38,7 @@ export default function RoleSelect() {
       <div className="relative z-10 mx-auto flex min-h-screen max-w-4xl flex-col justify-center px-6 py-10 sm:px-10">
         {/* Tittel — venstrejustert, med én ravn (ikke flankerende par) */}
         <div className="mb-1 flex items-end gap-4">
-          <Raven size={52} facing="right" color="#A8862F" className="mb-2 hidden sm:block" />
+          <Raven size={52} facing="right" color="#CDC3AD" className="mb-2 hidden sm:block" />
           <h1 className="font-saga text-5xl font-black leading-[0.95] viking-engraved-large md:text-7xl">
             VIKINGENES<br/>KULTURMØTER
           </h1>
@@ -59,7 +59,7 @@ export default function RoleSelect() {
             <CornerOrnaments />
             <div className="relative">
               <div className="mb-3 flex items-center gap-4">
-                <ThorHammer size={56} color="#A8862F" />
+                <ThorHammer size={56} color="#CDC3AD" />
                 <h2 className="font-saga text-3xl font-bold text-viking-gold md:text-4xl viking-engraved">
                   Jeg er Tor ⚡
                 </h2>
@@ -82,7 +82,7 @@ export default function RoleSelect() {
             <CornerOrnaments />
             <div className="relative">
               <div className="mb-3 flex items-center gap-4">
-                <DragonHead size={56} color="#A8862F" facing="right" />
+                <DragonHead size={56} color="#CDC3AD" facing="right" />
                 <h2 className="font-saga text-3xl font-bold text-viking-gold md:text-4xl viking-engraved">
                   Jeg er viking
                 </h2>
@@ -100,7 +100,7 @@ export default function RoleSelect() {
 
         {/* Bunnlinje — venstrestilt, ikke sentrert vannmerke */}
         <div className="mt-8 flex items-center gap-3 opacity-60">
-          <Vegvisir size={44} color="#A8862F" />
+          <Vegvisir size={44} color="#CDC3AD" />
           <p className="font-cinzel text-xs uppercase tracking-[0.3em] text-viking-gold-soft">Velg din ferd</p>
         </div>
         <p className="mt-3 font-mono text-[10px] text-viking-gold-soft/50">
@@ -130,8 +130,8 @@ function Corner({ pos }: { pos: 'tl' | 'tr' | 'bl' | 'br' }) {
                    'bottom-2 right-2 scale-x-[-1] scale-y-[-1]';
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" className={`pointer-events-none absolute ${cls}`} aria-hidden="true">
-      <path d="M 2 2 L 26 2 L 26 6 L 6 6 L 6 26 L 2 26 Z" fill="#9C8138" />
-      <circle cx="2" cy="2" r="3" fill="#9C8138" />
+      <path d="M 2 2 L 26 2 L 26 6 L 6 6 L 6 26 L 2 26 Z" fill="#CDC3AD" />
+      <circle cx="2" cy="2" r="3" fill="#CDC3AD" />
       <circle cx="2" cy="2" r="1.5" fill="#3a1f0d" />
     </svg>
   );

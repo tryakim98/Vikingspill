@@ -13,7 +13,7 @@ const SYMBOL_EMOJI: Record<ShipSymbol, string> = {
   ravn: '🐦‍⬛',
 };
 
-const GOLD = '#9C8138';
+const GOLD = '#CDC3AD';
 const WOOD = '#6E4B2A';
 const WOOD_DARK = '#3A2817';
 const CREAM = '#FDFBF6';

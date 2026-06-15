@@ -95,9 +95,9 @@ export default function TeacherLanding({ creating, createError, onCreateNew, onR
     <div className="relative min-h-screen bg-viking-darkblue p-6 text-viking-paper">
       <div className="mx-auto max-w-4xl">
         <div className="mb-2 flex items-center justify-center gap-4">
-          <ThorHammer size={42} color="#9C8138" />
+          <ThorHammer size={42} color="#CDC3AD" />
           <h1 className="font-saga text-4xl viking-engraved-large md:text-5xl">Tors utsyn over Midgard</h1>
-          <ThorHammer size={42} color="#9C8138" />
+          <ThorHammer size={42} color="#CDC3AD" />
         </div>
         <RuneDivider className="mb-6 mx-auto max-w-md" />
         <p className="mb-8 text-center font-inter italic text-viking-gold-soft">Fra Åsgard ser tordenguden ut over flåten — storskjerm for hele klassen</p>

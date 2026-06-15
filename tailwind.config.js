@@ -13,9 +13,15 @@ export default {
           coal:     '#0C0A06', // sotbrun
           darkblue: '#17100A', // mørk valnøtt (base) — navnet beholdt
           surface:  '#241A10', // myrbrun/lær (panelflate)
-          gold:     '#A8862F', // oksidert messing/bronse (dempet «gull»)
-          'gold-soft': '#C7AD6E', // støvet bronse
-          'gold-deep': '#7A5E18', // mørk patinert bronse
+          // Fargestrategi: i hovedsak MONOKROMT (gravyr-stil). «gold»-tokenene er nå
+          // bein/sølv mot mørkt tre — gull er IKKE lenger gjennomgående farge.
+          gold:      '#CDC3AD', // beinhvit/lys sølv (tidl. gull — nå monokrom hovedtone)
+          'gold-soft': '#A9A08D', // dempet bein-grå (ledetekst/sekundær)
+          'gold-deep': '#6E685B', // mørk bein-grå
+          // Sjelden dempet gull-aksent — KUN på de få viktigste elementene (store
+          // nøkkeltall, hovedtittel/spillernavn). Matt oksidert gammelgull, ikke skinnende.
+          brass:      '#A07F32',
+          'brass-soft': '#B9A05A',
           paper:    '#E8DEC8', // beinhvit (ikke ren hvit)
           parchment: '#D6C49A', // skitnere pergament
           rust:     '#8A3F22', // blodrust

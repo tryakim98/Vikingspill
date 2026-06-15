@@ -107,8 +107,8 @@ export default function GudenesProveOverlay({ navn, desc, skill, skillLevel, res
     '🤝 Tapper innsats';
 
   const headlineColor =
-    isWinner ? '#B9A467' :
-    isRunnerUp ? '#9C8138' :
+    isWinner ? '#A9A08D' :
+    isRunnerUp ? '#CDC3AD' :
     '#A09A8E';
 
   const message =

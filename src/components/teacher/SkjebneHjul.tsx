@@ -122,7 +122,7 @@ export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpi
         >
           {/* Ytre treramme + indre gylden ring */}
           <circle cx={CENTER} cy={CENTER} r={RADIUS + 24} fill="#3a1f0d" stroke="#5a3318" strokeWidth="3" />
-          <circle cx={CENTER} cy={CENTER} r={RADIUS + 10} fill="#17100A" stroke="#9C8138" strokeWidth="3" />
+          <circle cx={CENTER} cy={CENTER} r={RADIUS + 10} fill="#17100A" stroke="#CDC3AD" strokeWidth="3" />
 
           {/* Jernnagler langs rammen */}
           {Array.from({ length: 12 }).map((_, i) => {
@@ -137,7 +137,7 @@ export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpi
 
           {/* Sektorer */}
           {WHEEL_FIELDS.map((f, i) => (
-            <path key={f.id} d={sectorPath(i)} fill={f.color} stroke="#9C8138" strokeWidth="3" />
+            <path key={f.id} d={sectorPath(i)} fill={f.color} stroke="#CDC3AD" strokeWidth="3" />
           ))}
 
           {/* Ikon + label inni hver sektor */}
@@ -167,7 +167,7 @@ export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpi
                 key={`rune-${i}`}
                 x={p.x} y={p.y}
                 textAnchor="middle" dominantBaseline="middle"
-                fontSize="34" fill="#9C8138"
+                fontSize="34" fill="#CDC3AD"
                 style={{ filter: 'drop-shadow(0 0 6px rgba(212,168,67,0.6))' }}
               >
                 {rune}
@@ -176,13 +176,13 @@ export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpi
           })}
 
           {/* Sentralmedaljong — Yggdrasil + Nornene */}
-          <circle cx={CENTER} cy={CENTER} r={70} fill="#17100A" stroke="#9C8138" strokeWidth="4" />
-          <circle cx={CENTER} cy={CENTER} r={62} fill="none" stroke="#9C8138" strokeWidth="1" />
-          <text x={CENTER} y={CENTER - 10} textAnchor="middle" dominantBaseline="middle" fontSize="40" fill="#9C8138">ᛇ</text>
+          <circle cx={CENTER} cy={CENTER} r={70} fill="#17100A" stroke="#CDC3AD" strokeWidth="4" />
+          <circle cx={CENTER} cy={CENTER} r={62} fill="none" stroke="#CDC3AD" strokeWidth="1" />
+          <text x={CENTER} y={CENTER - 10} textAnchor="middle" dominantBaseline="middle" fontSize="40" fill="#CDC3AD">ᛇ</text>
           <text
             x={CENTER} y={CENTER + 24}
             textAnchor="middle" dominantBaseline="middle"
-            fontSize="13" fill="#B9A467"
+            fontSize="13" fill="#A9A08D"
             fontFamily="Cinzel, serif" fontWeight="bold"
             letterSpacing="1.6"
           >
@@ -196,7 +196,7 @@ export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpi
           style={{ top: -6 }}
         >
           <svg width="56" height="64" viewBox="0 0 56 64">
-            <polygon points="28,62 6,4 50,4" fill="#9C8138" stroke="#3a1f0d" strokeWidth="3" />
+            <polygon points="28,62 6,4 50,4" fill="#CDC3AD" stroke="#3a1f0d" strokeWidth="3" />
             <circle cx="28" cy="16" r="5" fill="#3a1f0d" />
           </svg>
         </div>

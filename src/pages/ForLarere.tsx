@@ -56,9 +56,9 @@ export default function ForLarere() {
         {/* Tittel */}
         <div className="mb-6 text-center">
           <div className="mb-2 flex items-center justify-center gap-4">
-            <ThorHammer size={48} color="#9C8138" />
+            <ThorHammer size={48} color="#CDC3AD" />
             <h1 className="font-saga text-4xl viking-engraved-large sm:text-5xl">For lærere</h1>
-            <ThorHammer size={48} color="#9C8138" />
+            <ThorHammer size={48} color="#CDC3AD" />
           </div>
           <p className="mt-3 font-inter italic text-viking-gold-soft">
             Et klasseromsspill om vikingenes kulturmøter — gratis, ingen installasjon, fungerer i nettleseren.
@@ -86,7 +86,7 @@ export default function ForLarere() {
         {/* Sånn kommer dere i gang */}
         <section className="mb-10">
           <h2 className="mb-5 flex items-center gap-3 font-saga text-2xl text-viking-gold viking-engraved">
-            <Vegvisir size={32} color="#9C8138" /> Slik kommer dere i gang
+            <Vegvisir size={32} color="#CDC3AD" /> Slik kommer dere i gang
           </h2>
           <ol className="space-y-5">
             <Step
@@ -120,7 +120,7 @@ export default function ForLarere() {
         {/* Tips */}
         <section className="mb-10">
           <h2 className="mb-4 flex items-center gap-3 font-saga text-2xl text-viking-gold viking-engraved">
-            <Raven size={32} facing="right" color="#9C8138" /> Gode tips
+            <Raven size={32} facing="right" color="#CDC3AD" /> Gode tips
           </h2>
           <ul className="space-y-3">
             <Tip icon="🖥" text={<>La din egen skjerm vises på <strong>projektor eller storskjerm</strong>. Det er der hele klassen ser kartet, leaderboardet og hjulet.</>} />
