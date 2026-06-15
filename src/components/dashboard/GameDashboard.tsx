@@ -777,7 +777,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             sekundærtallene står mindre ved siden av. Ikke en jevn 3-kolonners grid. */}
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-stretch">
           {/* Hero: Kulturforståelse — spillets pedagogiske kjerne, størst vekt, venstrejustert */}
-          <div className="relative flex-1 overflow-hidden rounded-lg border-2 border-viking-gold/70 bg-viking-surface p-5 sm:flex-[1.8]" data-testid="stat-hero">
+          <div className="viking-frame relative flex-1 overflow-hidden bg-viking-surface p-5 sm:flex-[1.8]" data-testid="stat-hero">
             <span aria-hidden className="pointer-events-none absolute -right-5 -top-4 text-viking-gold/10">
               <NorseIcon name="ikon-kultur" size={132} />
             </span>

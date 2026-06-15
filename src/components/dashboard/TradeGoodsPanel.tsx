@@ -18,7 +18,7 @@ export default function TradeGoodsPanel({ goods }: Props) {
   const total = ORDER.reduce((sum, g) => sum + (goods[g] ?? 0), 0);
 
   return (
-    <div className="rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-3" data-testid="trade-goods-panel">
+    <div className="viking-frame bg-viking-surface p-3" data-testid="trade-goods-panel">
       <div className="mb-2 flex items-baseline justify-between">
         <p className="font-cinzel text-sm text-viking-gold-soft">Varer ombord</p>
         <p className="font-mono text-xs text-viking-gold-soft/80">{total} {total === 1 ? 'enhet' : 'enheter'}</p>

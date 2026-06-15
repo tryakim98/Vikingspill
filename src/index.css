@@ -95,6 +95,20 @@ code {
   .animate-bob, .animate-wave, .animate-wave-slow, .aurora, .animate-rise { animation: none; }
 }
 
+/* === Flettet panelramme (ramme-panel.png via border-image) =========================
+   Erstatter den tynne gull-kanten rundt viktige paneler med ekte flettverk + dragehjørner,
+   så den perfekte firkanten brytes. Senteret er transparent → panelets egen bakgrunn vises. */
+.viking-frame {
+  border-style: solid;
+  border-width: 30px 24px 28px 24px;
+  border-image-source: url('/ornamenter/ramme-panel.png');
+  border-image-slice: 87 70 80 72;
+  border-image-repeat: round;
+}
+@media (max-width: 640px) {
+  .viking-frame { border-width: 22px 18px 20px 18px; }
+}
+
 /* === Norrøn estetikk: teksturer og graveringer ===================================== */
 
 /* Subtil pergament/lærtekstur — påføres paneler og kort som skal se håndlaget ut.
