@@ -11,6 +11,7 @@ import { useState } from 'react';
 import type { ShipSymbol, SkillKey } from '../../types';
 import { skillTreeData } from '../../data';
 import VikingShip from '../ship/VikingShip';
+import NorseIcon, { SKILL_PNG } from '../decor/NorseIcon';
 import { playSound } from '../../lib/sound';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
 
@@ -218,7 +219,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
             <div className="mx-auto max-w-sm rounded-lg border-2 border-viking-gold/40 bg-viking-darkblue/50 p-6 text-left font-inter">
               <p className="mb-2"><span className="text-viking-gold-soft">Skip:</span> <span className="font-cinzel text-lg text-viking-paper">{shipName}</span></p>
               <p className="mb-2"><span className="text-viking-gold-soft">Symbol:</span> {SYMBOLS.find((s) => s.key === symbol)?.emoji} {SYMBOLS.find((s) => s.key === symbol)?.label}</p>
-              <p><span className="text-viking-gold-soft">Startferdighet:</span> {skillTreeData[startSkill].icon} {skillTreeData[startSkill].name}</p>
+              <p className="inline-flex items-center gap-1.5"><span className="text-viking-gold-soft">Startferdighet:</span> <NorseIcon name={SKILL_PNG[startSkill]} size={16} className="text-viking-gold-soft" /> {skillTreeData[startSkill].name}</p>
             </div>
             <div className="mt-8 flex justify-center gap-4">
               <button onClick={() => setStep('skill')} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft transition-colors hover:border-viking-gold">Tilbake</button>

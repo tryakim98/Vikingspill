@@ -13,6 +13,7 @@ import type { SkillKey } from '../../types';
 import { skillTreeData, getQuizQuestionsForSkill, isQuizPassed } from '../../data';
 import { playSound } from '../../lib/sound';
 import QuestionCard from '../quiz/QuestionCard';
+import NorseIcon, { SKILL_PNG } from '../decor/NorseIcon';
 
 const MASTER_ACTION: Record<SkillKey, string> = {
   språk: 'Lær en hel setning på et fremmedspråk (norrønt, arabisk eller gresk) og fremfør den for læreren.',
@@ -24,12 +25,14 @@ const MASTER_ACTION: Record<SkillKey, string> = {
 
 type Phase = 'quiz' | 'failed' | 'action' | 'passed';
 
-function TrialShell({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+function TrialShell({ title, iconName, onClose, children }: { title: string; iconName?: string; onClose: () => void; children: ReactNode }) {
   return (
     <div className="min-h-screen viking-screen text-viking-paper">
       <div className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between border-b-2 border-viking-gold/40 pb-3">
-          <h2 className="font-cinzel text-xl text-viking-gold">{title}</h2>
+          <h2 className="inline-flex items-center gap-2 font-cinzel text-xl text-viking-gold">
+            {iconName && <NorseIcon name={iconName} size={22} className="text-viking-gold-soft" />}{title}
+          </h2>
           <button onClick={onClose} className="font-inter text-xs text-viking-gold-soft/70 hover:text-viking-gold-soft">✕ Lukk</button>
         </div>
         {children}
@@ -53,7 +56,7 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
   const passNeeded = tier === 2 ? 2 : 3;
   const proveName = tier === 2 ? 'Lærlingeprøven' : 'Mesterprøven';
   const targetTierName = branch.tiers[tier - 1].name; // tiers[1] = nivå 2, tiers[2] = nivå 3
-  const title = `${branch.icon} ${branch.name} — ${proveName}`;
+  const title = `${branch.name} — ${proveName}`;
 
   const [questions, setQuestions] = useState(() => getQuizQuestionsForSkill(skill, tier, visited, count));
   const [idx, setIdx] = useState(0);
@@ -67,7 +70,7 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
   // Ikke nok spørsmål om besøkte steder (§6.4 filtreringsregel)
   if (questions.length < count) {
     return (
-      <TrialShell title={title} onClose={onClose}>
+      <TrialShell title={title} iconName={SKILL_PNG[skill]} onClose={onClose}>
         <p className="font-cinzel text-2xl text-viking-gold mb-4">Gudene venter ennå</p>
         <p className="font-inter text-viking-paper/90">
           Dere har ikke besøkt nok steder til at {proveName.toLowerCase()} kan holdes i <strong>{branch.name}</strong> ennå
@@ -99,7 +102,7 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
     const q = questions[idx];
     const last = idx === questions.length - 1;
     return (
-      <TrialShell title={title} onClose={onClose}>
+      <TrialShell title={title} iconName={SKILL_PNG[skill]} onClose={onClose}>
         <div className="mb-4 flex items-center justify-between">
           <p className="font-cinzel text-sm text-viking-gold-soft">Spørsmål {idx + 1}/{count} · trenger {passNeeded} rette</p>
           <p className="font-mono text-xs text-viking-gold-soft">Riktige: {correct}</p>
@@ -128,7 +131,7 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
 
   if (phase === 'failed') {
     return (
-      <TrialShell title={title} onClose={onClose}>
+      <TrialShell title={title} iconName={SKILL_PNG[skill]} onClose={onClose}>
         <p className="mb-3 font-cinzel text-2xl text-viking-crimson">Ikke bestått</p>
         <p className="mb-6 font-inter text-viking-paper/90">Dere fikk <strong>{correct} av {count}</strong> riktige — trenger {passNeeded}. Gudene gir dere en ny sjanse.</p>
         <div className="flex gap-3">
@@ -141,7 +144,7 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
 
   if (phase === 'passed') {
     return (
-      <TrialShell title={title} onClose={onClose}>
+      <TrialShell title={title} iconName={SKILL_PNG[skill]} onClose={onClose}>
         <motion.p
           initial={{ scale: 0.6, opacity: 0, textShadow: '0 0 0px rgba(212,168,67,0)' }}
           animate={{ scale: 1, opacity: 1, textShadow: ['0 0 0px rgba(212,168,67,0)', '0 0 26px rgba(212,168,67,0.9)', '0 0 10px rgba(212,168,67,0.5)'] }}
@@ -158,7 +161,7 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
 
   // phase === 'action' (mesterprøven, nivå 2→3)
   return (
-    <TrialShell title={title} onClose={onClose}>
+    <TrialShell title={title} iconName={SKILL_PNG[skill]} onClose={onClose}>
       <p className="mb-2 font-cinzel text-2xl text-viking-gold">Quiz bestått — siste prøve</p>
       <p className="mb-5 font-inter text-viking-paper/90">Dere fikk {correct} av {count} riktige. For å bli <strong className="text-viking-gold-soft">{targetTierName}</strong> (nivå 3) må dere fullføre mesterhandlingen:</p>
       <div className="rounded-lg border-2 border-viking-gold bg-viking-surface p-5">

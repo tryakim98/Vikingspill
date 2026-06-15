@@ -6,6 +6,7 @@
 
 import { TRADE_GOODS, type TradeGood } from '../../data';
 import Icon, { GOODS_ICON } from '../decor/Icon';
+import NorseIcon, { GOODS_PNG } from '../decor/NorseIcon';
 
 interface Props {
   goods: Partial<Record<TradeGood, number>>;
@@ -37,7 +38,11 @@ export default function TradeGoodsPanel({ goods }: Props) {
                 data-testid={`good-${g}`}
                 className="flex items-center gap-1.5 border border-viking-gold/40 bg-viking-darkblue/40 px-2 py-1"
               >
-                <span className="text-viking-gold-soft" aria-hidden><Icon name={GOODS_ICON[g]} size={16} /></span>
+                <span className="text-viking-gold-soft" aria-hidden>
+                  {GOODS_PNG[g]
+                    ? <NorseIcon name={GOODS_PNG[g]} size={16} />
+                    : <Icon name={GOODS_ICON[g]} size={16} />}
+                </span>
                 <span className="font-inter text-xs text-viking-paper/90">{info.name}</span>
                 <span className="font-cinzel text-xs font-bold text-viking-gold" data-testid={`good-count-${g}`}>× {n}</span>
               </div>

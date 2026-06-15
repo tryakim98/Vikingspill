@@ -26,7 +26,8 @@ import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
 import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, callTing, castTingVote, resolveTing, clearTing, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeWheelSpin, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type TingSession, type Trial, type TrialResult, type FateEvent, type WheelSpin, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
 import TingOverlay from '../ting/TingOverlay';
-import Icon, { SKILL_ICON } from '../decor/Icon';
+import Icon from '../decor/Icon';
+import NorseIcon, { SKILL_PNG, TRADE_PNG } from '../decor/NorseIcon';
 import SagaReader from '../saga/SagaReader';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
 import SeaBattle from '../duel/SeaBattle';
@@ -667,8 +668,8 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
 
   // Sekundærtallene står ved siden av kjernestatusen (Kulturforståelse) — bevisst hierarki.
   const secondaryStats = [
-    { label: 'Handelsutbytte', v: state.scores.tradeGain },
-    { label: 'Rykte', v: state.scores.reputation },
+    { label: 'Handelsutbytte', v: state.scores.tradeGain, icon: TRADE_PNG },
+    { label: 'Rykte', v: state.scores.reputation, icon: 'ikon-rykte' },
   ];
 
   return (
@@ -760,7 +761,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           {/* Hero: Kulturforståelse — spillets pedagogiske kjerne, størst vekt, venstrejustert */}
           <div className="relative flex-1 overflow-hidden rounded-lg border-2 border-viking-gold/70 bg-viking-surface p-5 sm:flex-[1.8]" data-testid="stat-hero">
             <span aria-hidden className="pointer-events-none absolute -right-5 -top-4 text-viking-gold/10">
-              <Icon name="book" size={132} />
+              <NorseIcon name="ikon-kultur" size={132} />
             </span>
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-viking-gold-soft">Kulturforståelse</p>
             <p className="mt-1 font-cinzel text-6xl font-bold leading-none text-viking-gold">{state.scores.culturalUnderstanding}</p>
@@ -770,7 +771,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           <div className="flex gap-3 sm:flex-1 sm:flex-col">
             {secondaryStats.map((s) => (
               <div key={s.label} className="flex flex-1 items-baseline justify-between gap-2 rounded-lg border border-viking-gold/30 bg-viking-surface/70 px-3 py-2.5 sm:flex-col sm:items-start sm:justify-center" data-testid="stat-secondary">
-                <p className="font-mono text-[10px] uppercase tracking-wide text-viking-gold-soft/90">{s.label}</p>
+                <p className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide text-viking-gold-soft/90">
+                  <NorseIcon name={s.icon} size={14} /> {s.label}
+                </p>
                 <p className="font-cinzel text-3xl font-bold leading-none text-viking-gold">{s.v}</p>
               </div>
             ))}
@@ -815,7 +818,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
                 title={eligible ? 'Ta verdighetsprøven' : lvl >= 3 ? 'Mester (maks nivå)' : !isChief ? 'Kun høvdingen kan starte prøven' : 'Ikke låst opp ennå'}
                 className={`flex items-center gap-2 rounded-full border-2 px-3 py-1 transition-all ${lvl > 0 ? 'border-viking-gold/60 bg-viking-gold/10' : 'border-viking-gold/20 opacity-60'} ${eligible ? 'cursor-pointer hover:border-viking-gold hover:bg-viking-gold/20' : 'cursor-default'}`}
               >
-                <span style={{ color: skillTreeData[key].color }}><Icon name={SKILL_ICON[key]} size={16} /></span>
+                <NorseIcon name={SKILL_PNG[key]} size={16} className="text-viking-gold-soft" />
                 <span className="font-inter text-xs text-viking-paper/90">{skillTreeData[key].name}</span>
                 <span className="font-mono text-xs text-viking-gold">{lvl}</span>
                 {eligible && <Icon name="axe" size={12} className="text-viking-gold" />}
