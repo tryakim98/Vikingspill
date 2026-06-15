@@ -330,8 +330,11 @@ export default function EncounterFlow({
             className="pointer-events-none absolute inset-0 h-full w-full"
             style={{ objectFit: 'fill' }}
           />
+          {/* km-scroll reserverer en fast kolonne for scrollbaren (scrollbar-gutter:
+              stable) og gjør den tynn + bronse. pr-3 gir teksten ekstra høyremarg
+              så siste bokstav i hver linje aldri kommer bak/under scrollefeltet. */}
           <div
-            className="absolute flex flex-col overflow-y-auto [justify-content:safe_center] [scrollbar-width:thin]"
+            className="km-scroll absolute flex flex-col overflow-y-auto pr-3 [justify-content:safe_center]"
             style={{ top: '22%', bottom: '24%', left: '18.5%', right: '18.5%' }}
           >
             <p

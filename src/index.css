@@ -272,6 +272,30 @@ code {
 .viking-runepinne::before { left: 8px; }
 .viking-runepinne::after  { right: 8px; }
 
+/* Scrollefelt for kulturmøte-scenen inne i den dekorerte rammen.
+   `scrollbar-gutter: stable` reserverer en fast kolonne for scrollbaren slik at
+   den ALDRI legger seg oppå teksten — kombinert med padding-right får hver
+   tekstlinje tydelig klaring til scrollefeltet. Scrollbaren selv gjøres tynn og
+   i en dempet bronse som passer stilen, i stedet for den brede standard-grå. */
+.km-scroll {
+  scrollbar-width: thin;                         /* Firefox: smal scrollbar */
+  scrollbar-color: #8B6914 transparent;          /* Firefox: bronse tommel, usynlig spor */
+  scrollbar-gutter: stable;                      /* fast kolonne reservert til scrollbaren */
+}
+.km-scroll::-webkit-scrollbar {
+  width: 6px;                                    /* WebKit/Blink: tynt scrollefelt */
+}
+.km-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.km-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #A8862F, #6E5410);
+  border-radius: 3px;
+}
+.km-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #CBB373, #8B6914);
+}
+
 /* Vertikale rune-kolonner i margene */
 .viking-runepinne-runes {
   color: #D4A843;

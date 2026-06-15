@@ -42,6 +42,5 @@ async function shoot(destId, label) {
   console.log(`  saved /tmp/km2-${label}-frame.png + -full.png`);
   await ctx.close();
 }
-await shoot('hedeby', 'kort');
-await shoot('miklagard', 'lang');
+await shoot('island', 'island');
 await b.close();
