@@ -67,6 +67,8 @@ interface EncounterFlowProps {
   onGiveAdvice?: (advice: { choiceId?: string | null; note?: string }) => void;
   /** Hvilken tekstlengde å rendre for historie + kulturmøte (differensiering). */
   textLength?: 'full' | 'short';
+  /** Individuell tekstlengde: bytter KUN denne enhetens visning (lagret per elev). */
+  onToggleTextLength?: () => void;
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -149,10 +151,24 @@ export default function EncounterFlow({
   destination, skills, onComplete, onExit, onRequestApproval,
   isChief = true, syncedEncounter = null, onUpdateEncounter,
   lateGame = false, requireSaga = false, requirePerspective = false, requireBridge = false, requireQuiz = false,
-  requireCouncil = false, myMemberId, memberIds = [], onGiveAdvice, textLength = 'full',
+  requireCouncil = false, myMemberId, memberIds = [], onGiveAdvice, textLength = 'full', onToggleTextLength,
 }: EncounterFlowProps) {
   const d = destination;
   const syncMode = !!syncedEncounter;
+
+  /** Diskret, personlig tekstlengde-bryter — endrer kun denne elevens visning. */
+  const TextLenToggle = () => onToggleTextLength ? (
+    <div className="mb-3 flex justify-end">
+      <button
+        onClick={onToggleTextLength}
+        data-testid="personal-textlen-toggle"
+        title="Endrer bare din egen skjerm"
+        className="inline-flex items-center gap-1.5 rounded-full border border-viking-gold/30 px-2.5 py-0.5 font-inter text-[11px] text-viking-gold-soft/80 transition-colors hover:border-viking-gold hover:text-viking-gold-soft"
+      >
+        <Icon name="book" size={12} /> {textLength === 'short' ? 'Vis full tekst' : 'Forkort teksten'}
+      </button>
+    </div>
+  ) : null;
 
   // Synket eller lokal state — én og samme variabel for resten av komponenten.
   const [_step, _setStep] = useState<Step>('history');
@@ -296,6 +312,7 @@ export default function EncounterFlow({
           <span className="font-inter text-sm text-viking-gold-soft">{d.region}</span>
         </div>
         <h1 className="mb-4 font-cinzel text-3xl font-bold text-viking-gold">{d.name}</h1>
+        <TextLenToggle />
         <Html html={(textLength === 'short' && d.historyShort ? d.historyShort : d.history) ?? ''} className="block font-inter leading-relaxed text-viking-paper/90 [&_strong]:text-viking-gold-soft" data-testid={textLength === 'short' && d.historyShort ? 'history-short' : 'history-full'} />
         {isChief ? (
           <button onClick={() => { playSound('page'); setStep('kulturmote'); }} className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-cinzel font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
@@ -310,7 +327,8 @@ export default function EncounterFlow({
     return (
       <Shell name={d.name} onExit={onExit}>
         <p className="mb-1 font-inter text-xs uppercase tracking-widest text-viking-gold-soft/70">Episk kulturmøte</p>
-        <h1 className="mb-4 font-cinzel text-2xl font-bold text-viking-gold">{km.tittel}</h1>
+        <h1 className="mb-2 font-cinzel text-2xl font-bold text-viking-gold">{km.tittel}</h1>
+        <TextLenToggle />
         {/* Kulturmøte-scenen rammes inn av den dekorerte flettverksrammen
             (public/ornamenter/ramme-kulturmote.png — bearbeidet til transparent midte).
             Rammen ligger som et bakgrunnslag BAK et eget tekstfelt — den legges aldri

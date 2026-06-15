@@ -109,6 +109,22 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   }, [isOnline, myGroupId, session]);
 
   const myMemberId = session.mode === 'online' ? session.memberId : session.memberId;
+
+  // Individuell tekstlengde — hver elev kan forkorte/forlenge teksten KUN på sin egen
+  // enhet (lagret lokalt per spill+elev). null = følg gruppas felles tekstlengde, så
+  // gruppa ser samme tekst som standard; en svakere leser kan velge kortere uten at det
+  // påvirker eller synes for de andre.
+  const personalTextKey = `vikingspill_textlen_${gameCode || 'offline'}_${myMemberId}`;
+  const [personalTextLength, setPersonalTextLength] = useState<'full' | 'short' | null>(() => {
+    try { const v = localStorage.getItem(personalTextKey); return v === 'full' || v === 'short' ? v : null; } catch { return null; }
+  });
+  const displayTextLength: 'full' | 'short' = personalTextLength ?? effectiveTextLength;
+  const togglePersonalTextLength = () => {
+    const next: 'full' | 'short' = displayTextLength === 'short' ? 'full' : 'short';
+    setPersonalTextLength(next);
+    try { localStorage.setItem(personalTextKey, next); } catch { /* ignore */ }
+  };
+
   const chiefId = syncedGroup?.chiefId;
   const isChief = !isOnline || chiefId === myMemberId || !chiefId;
   const members = syncedGroup?.members ?? {};
@@ -623,7 +639,8 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         myMemberId={myMemberId}
         memberIds={memberIds}
         onGiveAdvice={isOnline ? (advice) => setEncounterAdvice(session.gameCode, myGroupId, myMemberId, advice).catch(() => {}) : undefined}
-        textLength={effectiveTextLength}
+        textLength={displayTextLength}
+        onToggleTextLength={togglePersonalTextLength}
         syncedEncounter={isOnline ? syncedGroup?.encounter ?? null : null}
         onUpdateEncounter={isOnline && isChief
           ? (partial) => {
