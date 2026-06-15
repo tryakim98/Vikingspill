@@ -46,9 +46,10 @@ export default {
       },
       fontFamily: {
         cinzel: ['Cinzel', 'serif'],
-        // «Saga» = Grenze Gotisch — karakterfull gotisk overskriftsfont. Brukes på korte
-        // titler: hovedoverskrifter, panel-overskrifter, navn og hovedknapper. ALDRI brødtekst.
-        saga: ['"Grenze Gotisch"', 'Cinzel', 'serif'],
+        // «Saga» = Cinzel Decorative — romersk inskripsjonsfont med ornament, ser hugget/
+        // inngravert ut og matcher gravyr-uttrykket. Brukes på korte titler/navn. Cinzel
+        // (font-cinzel) brukes på øvrige overskrifter; brødtekst er Inter.
+        saga: ['"Cinzel Decorative"', 'Cinzel', 'serif'],
         inter: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
