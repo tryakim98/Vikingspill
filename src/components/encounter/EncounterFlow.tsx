@@ -311,28 +311,28 @@ export default function EncounterFlow({
       <Shell name={d.name} onExit={onExit}>
         <p className="mb-1 font-inter text-xs uppercase tracking-widest text-viking-gold-soft/70">Episk kulturmøte</p>
         <h1 className="mb-4 font-cinzel text-2xl font-bold text-viking-gold">{km.tittel}</h1>
-        {/* Kulturmøte-scenen rammes inn av Urnes-slangerammen (public/ornamenter).
+        {/* Kulturmøte-scenen rammes inn av den dekorerte flettverksrammen
+            (public/ornamenter/ramme-kulturmote.png — bearbeidet til transparent midte).
             Rammen ligger som et bakgrunnslag BAK et eget tekstfelt — den legges aldri
-            oppå teksten. Slangerammen har gjennomsiktig midte (fill="none"), så
-            treteksturen bak vises gjennom; ingen lys firkant legges over bakgrunnen.
-            Tekstfeltet er trygt innenfor flettverket med rikelig inset (16.5% sider,
-            20/25% topp/bunn) — ekstra klaring til hjørnene der slangehodene er tykkest.
-            Faste rammeproporsjoner: korte scener sentreres, svært lange scroller
-            innenfor rammen, så teksten aldri treffer eller går utenfor kanten. */}
+            oppå teksten. Den transparente midten slipper treteksturen gjennom; ingen
+            svart eller lys firkant. Tekstfeltet har rikelig inset (18.5% sider, 22/24%
+            topp/bunn) med ekstra klaring til de tykke hjørne-flettverkene. Faste
+            rammeproporsjoner: korte scener sentreres, svært lange scroller innenfor
+            rammen, så teksten aldri treffer eller går utenfor kanten. */}
         <div
           className="relative mx-auto mb-6 w-full max-w-2xl"
-          style={{ aspectRatio: '800 / 560' }}
+          style={{ aspectRatio: '1536 / 1180' }}
           data-testid="runepinne"
         >
           <img
-            src={`${import.meta.env.BASE_URL}ornamenter/slangeramme.svg`}
+            src={`${import.meta.env.BASE_URL}ornamenter/ramme-kulturmote.png`}
             alt="" aria-hidden="true"
             className="pointer-events-none absolute inset-0 h-full w-full"
             style={{ objectFit: 'fill' }}
           />
           <div
             className="absolute flex flex-col overflow-y-auto [justify-content:safe_center] [scrollbar-width:thin]"
-            style={{ top: '20%', bottom: '25%', left: '16.5%', right: '16.5%' }}
+            style={{ top: '22%', bottom: '24%', left: '18.5%', right: '18.5%' }}
           >
             <p
               className="whitespace-pre-line font-inter text-sm italic leading-relaxed text-viking-parchment [text-shadow:0_1px_3px_rgba(0,0,0,0.85)]"
