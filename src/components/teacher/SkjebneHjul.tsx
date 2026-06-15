@@ -39,11 +39,20 @@ function sectorPath(i: number) {
 }
 
 interface Props {
-  onLanded: (fieldId: WheelFieldId) => void;
+  /** Lærer: utløses når hjulet lander, dispatcher selve eventet. */
+  onLanded?: (fieldId: WheelFieldId) => void;
+  /** Lærer: utløses i det hjulet settes i gang, med valgt felt-indeks — brukes til å
+   *  kringkaste spinnet til elevene så det vises synkront. */
+  onSpinStart?: (resultIndex: number) => void;
   disabled?: boolean;
+  /** Elev (tilskuer): når denne endrer id, spinner hjulet til samme felt som læreren. */
+  remoteSpin?: { id: string; resultIndex: number } | null;
+  /** Elev (tilskuer): utløses når fjernstyrt spinn er ferdig (for å lukke overlayet). */
+  onRemoteDone?: () => void;
 }
 
-export default function SkjebneHjul({ onLanded, disabled }: Props) {
+export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpin, onRemoteDone }: Props) {
+  const isRemote = remoteSpin !== undefined; // tilskuer-modus (elev)
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const [resultIdx, setResultIdx] = useState<number | null>(null);
@@ -52,16 +61,16 @@ export default function SkjebneHjul({ onLanded, disabled }: Props) {
   // Sikkerhetsnett: hvis komponenten unmountes mens hjulet snurrer, drep tikkelyden.
   useEffect(() => () => { stopSound('wheel-tick'); }, []);
 
-  const spin = () => {
-    if (spinning || disabled) return;
+  // Selve snurringen — felles for lærer (lokalt valg) og elev (fjernstyrt felt).
+  const runSpin = (chosen: number) => {
     setResultIdx(null);
     setRevealing(false);
-    const chosen = Math.floor(Math.random() * WHEEL_FIELDS.length);
-    const desiredMod = (330 - chosen * SECTOR_DEG + 360) % 360;
-    const currentMod = ((rotation % 360) + 360) % 360;
-    const delta = (desiredMod - currentMod + 360) % 360;
-    const target = rotation + 5 * 360 + delta;
-    setRotation(target);
+    setRotation((prev) => {
+      const desiredMod = (330 - chosen * SECTOR_DEG + 360) % 360;
+      const currentMod = ((prev % 360) + 360) % 360;
+      const delta = (desiredMod - currentMod + 360) % 360;
+      return prev + 5 * 360 + delta;
+    });
     setSpinning(true);
 
     // Byggende tikkende lyd mens hjulet snurrer
@@ -79,10 +88,25 @@ export default function SkjebneHjul({ onLanded, disabled }: Props) {
       }, 250);
       window.setTimeout(() => {
         setRevealing(false);
-        onLanded(WHEEL_FIELDS[chosen].id);
+        onLanded?.(WHEEL_FIELDS[chosen].id);
+        onRemoteDone?.();
       }, 1800);
     }, 4200);
   };
+
+  const spin = () => {
+    if (spinning || disabled) return;
+    const chosen = Math.floor(Math.random() * WHEEL_FIELDS.length);
+    onSpinStart?.(chosen); // kringkast før animasjonen, så elevene spinner synkront
+    runSpin(chosen);
+  };
+
+  // Elev-tilskuer: spinn til lærerens felt hver gang et nytt spinn kringkastes.
+  useEffect(() => {
+    if (!remoteSpin) return;
+    runSpin(remoteSpin.resultIndex);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remoteSpin?.id]);
 
   const result = resultIdx !== null ? WHEEL_FIELDS[resultIdx] : null;
 
@@ -200,14 +224,16 @@ export default function SkjebneHjul({ onLanded, disabled }: Props) {
         </AnimatePresence>
       </div>
 
-      <button
-        onClick={spin}
-        disabled={spinning || disabled}
-        data-testid="skjebnehjul-spin"
-        className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-4 font-cinzel text-xl font-bold text-viking-darkblue transition hover:bg-viking-gold-soft disabled:cursor-wait disabled:opacity-60"
-      >
-        {spinning ? 'Hjulet snurrer …' : '🎲 Spinn Skjebnehjulet'}
-      </button>
+      {!isRemote && (
+        <button
+          onClick={spin}
+          disabled={spinning || disabled}
+          data-testid="skjebnehjul-spin"
+          className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-4 font-cinzel text-xl font-bold text-viking-darkblue transition hover:bg-viking-gold-soft disabled:cursor-wait disabled:opacity-60"
+        >
+          {spinning ? 'Hjulet snurrer …' : '🎲 Spinn Skjebnehjulet'}
+        </button>
+      )}
 
       {/* Vedvarende resultattekst (vises etter at avsløringen har lagt seg) */}
       {result && !revealing && (

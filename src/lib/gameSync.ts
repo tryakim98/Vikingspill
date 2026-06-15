@@ -549,6 +549,28 @@ export function subscribeFate(code: string, callback: (event: FateEvent | null) 
   });
 }
 
+// === Skjebnehjul-synk (§8.4/§8.5) =================================================
+// Selve hjul-snurringen kringkastes så den vises og spinner synkront på alle
+// elevskjermer når læreren spinner. Læreren skriver resultatfeltet (resultIndex) i det
+// hjulet settes i gang; alle klienter animerer til samme felt. De faktiske effektene
+// (storm/gave/ragnarok/prøve/skjebnemøte) sendes som før via egne noder når hjulet lander.
+
+export interface WheelSpin {
+  id: string;
+  resultIndex: number; // indeks i WHEEL_FIELDS som hjulet lander på
+  at: number;
+}
+
+export function triggerWheelSpin(code: string, spin: WheelSpin): Promise<void> {
+  return set(ref(db, `games/${code}/wheelSpin`), spin);
+}
+
+export function subscribeWheelSpin(code: string, callback: (spin: WheelSpin | null) => void): Unsubscribe {
+  return onValue(ref(db, `games/${code}/wheelSpin`), (snap) => {
+    callback((snap.val() as WheelSpin | null) ?? null);
+  });
+}
+
 // === Tidevannstimer (§6.5) ========================================================
 // Læreren styrer én timer pr. kapittel (start / pause / forleng / kort inn). Tilstanden
 // ligger på /games/{code}/tide og leses av alle. Når tidevannet snur, kringkastes en

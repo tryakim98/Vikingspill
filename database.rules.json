@@ -163,7 +163,8 @@
 
         "trial":       { ".validate": "newData.hasChildren(['id'])",                    "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
         "trialResult": { ".validate": "newData.hasChildren(['trialId','winnerId'])",    "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
-        "fate":     { ".validate": "newData.hasChildren(['id'])",          "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
+        "fate":      { ".validate": "newData.hasChildren(['id'])",          "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
+        "wheelSpin": { ".validate": "newData.hasChildren(['id'])",          "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
         "tide":     { ".validate": "newData.hasChildren(['chapterIndex'])","$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
         "tideTurn": { ".validate": "newData.hasChildren(['id'])",          "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },
         "ragnarok": { ".validate": "newData.hasChildren(['id'])",          "$f": { ".validate": "!newData.isString() || newData.val().length <= 1000" } },

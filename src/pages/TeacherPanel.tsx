@@ -29,6 +29,7 @@ import {
   triggerFate,
   subscribeFate,
   triggerRagnarok,
+  triggerWheelSpin,
   subscribeTrades,
   subscribeGameSettings,
   setGameSettings,
@@ -204,6 +205,17 @@ export default function TeacherPanel() {
     Object.keys(groups).forEach((gid) => {
       patchGroup(code, gid, { forceSkjebneNextSail: true }).catch(() => {});
     });
+  };
+
+  /** Kringkast selve spinnet i det hjulet settes i gang, så det vises og spinner
+   *  synkront på alle elevskjermer (lander på samme felt = resultIndex). */
+  const broadcastWheelSpin = (resultIndex: number) => {
+    if (!code) return;
+    triggerWheelSpin(code, {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      resultIndex,
+      at: Date.now(),
+    }).catch(() => {});
   };
 
   /** Hjul-utfallet dispatcher til riktig handler. Bevarer eksisterende event-systemer. */
@@ -384,7 +396,7 @@ export default function TeacherPanel() {
               Du bestemmer kun <strong>når</strong> du spinner. Nornene avgjør hvilken kraft som rammer flåten — og hvem.
             </p>
           </div>
-          <SkjebneHjul onLanded={handleWheelLanded} disabled={!code} />
+          <SkjebneHjul onLanded={handleWheelLanded} onSpinStart={broadcastWheelSpin} disabled={!code} />
         </div>
 
         {/* Etterspill: kåring av Gudenes prøve, sist event, ragnarok-status */}

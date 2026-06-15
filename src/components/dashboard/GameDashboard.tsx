@@ -24,7 +24,7 @@ import { HINTS, type HintKey } from '../../data/firstTimeHints';
 import { isAccessible } from '../../lib/unlocks';
 import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, callTing, castTingVote, resolveTing, clearTing, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type TingSession, type Trial, type TrialResult, type FateEvent, type TideTurn, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, callTing, castTingVote, resolveTing, clearTing, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeWheelSpin, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type TingSession, type Trial, type TrialResult, type FateEvent, type WheelSpin, type TideTurn, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
 import TingOverlay from '../ting/TingOverlay';
 import Icon, { SKILL_ICON } from '../decor/Icon';
 import SagaReader from '../saga/SagaReader';
@@ -32,6 +32,7 @@ import { chapters, chapterCompleted } from '../../data/chapters';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
 import SeaBattle from '../duel/SeaBattle';
 import FateCardOverlay from '../fate/FateCardOverlay';
+import WheelSpinOverlay from '../fate/WheelSpinOverlay';
 import TideBanner from '../tide/TideBanner';
 import TideTurnOverlay from '../tide/TideTurnOverlay';
 import RagnarokOverlay from '../ragnarok/RagnarokOverlay';
@@ -338,6 +339,8 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   }, [ting, memberIds, isOnline, myMemberId, gameCode, myGroupId]);
   const [activeFate, setActiveFate] = useState<FateEvent | null>(null);
   const seenFate = useRef<string | null>(null);
+  const [activeWheelSpin, setActiveWheelSpin] = useState<WheelSpin | null>(null);
+  const seenWheelSpin = useRef<string | null>(null);
   const [activeTideTurn, setActiveTideTurn] = useState<TideTurn | null>(null);
   const seenTideTurn = useRef<string | null>(null);
   const [activeRagnarok, setActiveRagnarok] = useState<RagnarokEvent | null>(null);
@@ -370,6 +373,17 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     const unsub = subscribeFate(session.gameCode, (fate) => {
       if (first) { first = false; seenFate.current = fate?.id ?? null; return; }
       if (fate && fate.id !== seenFate.current) { seenFate.current = fate.id; setActiveFate(fate); }
+    });
+    return () => unsub();
+  }, [session]);
+
+  // Skjebnehjulet (§8.4/§8.5): når læreren spinner, vises hjulet og spinner synkront her.
+  useEffect(() => {
+    if (session.mode !== 'online') return;
+    let first = true;
+    const unsub = subscribeWheelSpin(session.gameCode, (spin) => {
+      if (first) { first = false; seenWheelSpin.current = spin?.id ?? null; return; }
+      if (spin && spin.id !== seenWheelSpin.current) { seenWheelSpin.current = spin.id; setActiveWheelSpin(spin); }
     });
     return () => unsub();
   }, [session]);
@@ -482,6 +496,12 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         onClose={() => setSvenneprove(null)}
       />
     );
+  }
+
+  // Skjebnehjulet vises og spinner synkront når læreren spinner. Når det lander, kommer
+  // selve effekten (storm/gave/ragnarok/prøve) som egne overlays rett etterpå.
+  if (activeWheelSpin) {
+    return <WheelSpinOverlay spin={activeWheelSpin} onDone={() => setActiveWheelSpin(null)} />;
   }
 
   if (activeTrial) {
