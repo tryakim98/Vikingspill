@@ -15,6 +15,10 @@ import { generateUniqueGameCode, isValidGameCode } from '../lib/gameCode';
 import {
   createGame,
   gameExists,
+  touchGame,
+  exportGame,
+  importGame,
+  deleteGame,
   subscribeGroups,
   subscribeApprovals,
   setApprovalStatus,
@@ -43,7 +47,10 @@ import { STORM_FATE_IDS, GAVE_FATE_IDS, VIND_FATE_ID, type WheelFieldId } from '
 import { patchGroup } from '../lib/gameSync';
 import SeaMap from '../components/teacher/SeaMap';
 import SkjebneHjul from '../components/teacher/SkjebneHjul';
-import { ThorHammer, Raven, RuneDivider } from '../components/decor';
+import TeacherLanding from '../components/teacher/TeacherLanding';
+import { rememberTeacherGame, forgetTeacherGame } from '../lib/teacherGames';
+import { downloadBackup } from '../lib/gameBackup';
+import { Raven } from '../components/decor';
 import TideTimer from '../components/teacher/TideTimer';
 import ConnectionBanner from '../components/common/ConnectionBanner';
 import VikingShip from '../components/ship/VikingShip';
@@ -102,6 +109,15 @@ export default function TeacherPanel() {
 
   // Nullstill kåringsvalg når en ny prøve utløses, så fjorårets valg ikke henger igjen.
   useEffect(() => { setTrialWinner(null); setTrialRunnerUp(null); }, [trial?.id]);
+
+  // Når et spill er aktivt: marker det som nylig brukt — både i Firebase (lastActiveAt,
+  // så «tidligere spill» kan vise alder) og i lærerens lokale register (så koden er lett
+  // å finne igjen neste skoletime, også etter at fanen er lukket).
+  useEffect(() => {
+    if (!code) return;
+    rememberTeacherGame(code);
+    touchGame(code).catch(() => {});
+  }, [code]);
 
   // §8.2 Konkurransesignal når en NY gruppe tar ledelsen (krever ≥2 grupper og at
   // lederen faktisk har poeng). Ingen lyd ved første leder eller ved uendret ledelse.
@@ -225,7 +241,46 @@ export default function TeacherPanel() {
       setCreating(false);
     }
   };
-  const endGame = () => { localStorage.removeItem(CODE_KEY); setCode(null); };
+  /** Gjenoppta et eksisterende spill (fra kode-input eller «tidligere spill»-lista).
+   *  Spillet ligger allerede i Firebase under koden — vi kobler bare konsollen til det. */
+  const resumeGame = (c: string) => {
+    localStorage.setItem(CODE_KEY, c);
+    setCode(c);
+  };
+
+  /** Gjenopprett et helt spill fra en opplastet sikkerhetskopi, og koble til det. */
+  const restoreGame = async (c: string, data: unknown) => {
+    await importGame(c, data);
+    resumeGame(c);
+  };
+
+  /** «Pause»: koble konsollen fra spillet, men la alt ligge trygt i Firebase så det kan
+   *  gjenopptas senere. Koden blir igjen i lærerens «tidligere spill»-liste. */
+  const pauseGame = () => { localStorage.removeItem(CODE_KEY); setCode(null); };
+
+  /** Last ned en sikkerhetskopi av hele det aktive spillet som en JSON-fil. */
+  const [backupBusy, setBackupBusy] = useState(false);
+  const downloadGameBackup = async () => {
+    if (!code) return;
+    setBackupBusy(true);
+    try {
+      const data = await exportGame(code);
+      if (data) downloadBackup(code, data);
+    } catch { /* offline e.l. — knappen kan prøves igjen */ }
+    finally { setBackupBusy(false); }
+  };
+
+  /** «Avslutt for godt»: slett spillet fra Firebase og glem koden. Krever bekreftelse. */
+  const deleteGameForGood = async () => {
+    if (!code) return;
+    const c = code;
+    if (!window.confirm(`Slette spillet ${c} for godt? Alle gruppers fremgang forsvinner og kan ikke gjenopptas (med mindre du har lastet ned en sikkerhetskopi). Avbryt for å heller sette spillet på pause.`)) return;
+    await deleteGame(c).catch(() => {});
+    forgetTeacherGame(c);
+    localStorage.removeItem(CODE_KEY);
+    setCode(null);
+  };
+
   const switchRole = () => { clearRole(); navigate('/', { replace: true }); };
   const resolve = (groupId: string, status: ApprovalStatus) => {
     if (code) setApprovalStatus(code, groupId, status).catch(() => {});
@@ -248,34 +303,16 @@ export default function TeacherPanel() {
 
   if (!code) {
     return (
-      <div className="relative min-h-screen bg-viking-darkblue p-6 text-viking-paper">
-        <HelpButton onClick={() => setShowRules(true)} className="absolute right-4 top-4" />
-        <div className="mx-auto max-w-4xl">
-          <div className="mb-2 flex items-center justify-center gap-4">
-            <ThorHammer size={42} color="#D4A843" />
-            <h1 className="font-saga text-4xl viking-engraved-large md:text-5xl">Tors utsyn over Midgard</h1>
-            <ThorHammer size={42} color="#D4A843" />
-          </div>
-          <RuneDivider className="mb-6 mx-auto max-w-md" />
-          <p className="mb-8 font-inter italic text-viking-gold-soft">Fra Åsgard ser tordenguden ut over flåten — storskjerm for hele klassen</p>
-          <div className="rounded-lg border-2 border-viking-gold bg-viking-surface p-10 text-center">
-            <h2 className="mb-3 font-cinzel text-2xl text-viking-gold">Slipp en ny flåte på sjøen</h2>
-            <p className="mb-8 font-inter text-viking-paper/85">Du får et runeord vikingene taster inn for å bli sett av deg.</p>
-            <button
-              onClick={() => void createNew()}
-              disabled={creating}
-              className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-cinzel text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-wait disabled:opacity-60"
-            >
-              {creating ? 'Reiser Åsgards porter …' : 'Åpne Åsgards porter ⚡'}
-            </button>
-            {createError && (
-              <p className="mt-5 rounded-md border-2 border-viking-crimson bg-viking-crimson/15 p-3 font-inter text-sm text-viking-paper">
-                Bifrost svarer ikke — broen mellom Åsgard og Midgard er tåkete. Sjekk nettet og prøv igjen.
-              </p>
-            )}
-          </div>
-          <button onClick={switchRole} className="mt-6 rounded border-2 border-viking-gold/50 px-5 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Bytt rolle</button>
-        </div>
+      <div className="relative">
+        <HelpButton onClick={() => setShowRules(true)} className="absolute right-4 top-4 z-20" />
+        <TeacherLanding
+          creating={creating}
+          createError={createError}
+          onCreateNew={() => void createNew()}
+          onResume={resumeGame}
+          onRestore={restoreGame}
+          onSwitchRole={switchRole}
+        />
       </div>
     );
   }
@@ -601,9 +638,30 @@ export default function TeacherPanel() {
           </div>{/* HØYRE-kolonne slutt */}
         </div>{/* to-kolonners grid slutt */}
 
-        <div className="mt-8 flex flex-wrap gap-3">
-          <button onClick={endGame} className="rounded border-2 border-viking-gold bg-viking-rust px-5 py-2 font-bold text-viking-paper hover:bg-viking-rust/80">Avslutt spill</button>
-          <button onClick={switchRole} className="rounded border-2 border-viking-gold bg-viking-plum px-5 py-2 font-bold text-viking-paper hover:bg-viking-plum/80">Bytt rolle</button>
+        {/* Lagring / gjenopptaking — §lagre over flere økter */}
+        <div className="mt-8 rounded-lg border-2 border-viking-gold/40 bg-viking-surface/60 p-4">
+          <h3 className="mb-1 font-cinzel text-lg text-viking-gold">💾 Lagring & økter</h3>
+          <p className="mb-3 font-inter text-sm text-viking-paper/80">
+            Spillet lagres fortløpende under runeordet <strong className="font-mono text-viking-gold">{code}</strong>. Du kan trygt lukke
+            fanen og gjenoppta senere med samme kode. Last gjerne ned en sikkerhetskopi før en lang pause.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => void downloadGameBackup()}
+              disabled={backupBusy}
+              data-testid="download-backup"
+              className="rounded border-2 border-viking-gold bg-viking-gold/20 px-5 py-2 font-cinzel font-bold text-viking-gold hover:bg-viking-gold/40 disabled:opacity-50"
+            >
+              {backupBusy ? 'Lagrer …' : '⬇️ Last ned sikkerhetskopi'}
+            </button>
+            <button onClick={pauseGame} data-testid="pause-game" className="rounded border-2 border-viking-gold bg-viking-plum px-5 py-2 font-bold text-viking-paper hover:bg-viking-plum/80">
+              ⏸ Sett på pause (kan gjenopptas)
+            </button>
+            <button onClick={() => void deleteGameForGood()} data-testid="delete-game" className="rounded border-2 border-viking-crimson bg-viking-crimson/30 px-5 py-2 font-bold text-viking-paper hover:bg-viking-crimson/50">
+              🗑 Avslutt for godt
+            </button>
+            <button onClick={switchRole} className="rounded border-2 border-viking-gold/60 px-5 py-2 font-bold text-viking-gold-soft hover:border-viking-gold">Bytt rolle</button>
+          </div>
         </div>
       </div>
     </div>

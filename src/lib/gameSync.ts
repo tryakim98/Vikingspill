@@ -106,9 +106,48 @@ export interface ActiveSkjebne {
   rollResult?: { roll: number; bonus: number; total: number; won: boolean }; // for terningvalg
 }
 
+/** Spillets metadata. `createdAt` settes én gang; `lastActiveAt` bumpes hver gang
+ *  læreren åpner/gjenopptar spillet, så «tidligere spill»-oversikten kan vise alder. */
+export interface GameMeta {
+  createdAt: number;
+  lastActiveAt?: number;
+}
+
 /** Lærer: opprett et nytt spill. */
 export function createGame(code: string): Promise<void> {
-  return set(ref(db, `games/${code}/meta`), { createdAt: Date.now() });
+  const now = Date.now();
+  return set(ref(db, `games/${code}/meta`), { createdAt: now, lastActiveAt: now });
+}
+
+/** Lærer: marker spillet som nylig aktivt (kalles når konsollen åpnes/gjenopptas).
+ *  Best effort — feiler den (offline), er det ufarlig. */
+export function touchGame(code: string): Promise<void> {
+  return update(ref(db, `games/${code}/meta`), { lastActiveAt: Date.now() });
+}
+
+/** Les spillets metadata (om det finnes). */
+export async function getGameMeta(code: string): Promise<GameMeta | null> {
+  const snap = await get(ref(db, `games/${code}/meta`));
+  return (snap.val() as GameMeta | null) ?? null;
+}
+
+/** Hent et fullstendig øyeblikksbilde av HELE spillet — brukes til sikkerhetskopi
+ *  (læreren laster ned en JSON-fil) så et pågående spill aldri kan gå tapt mellom
+ *  to skoletimer, selv om Firebase-data skulle bli slettet eller utløpe. */
+export async function exportGame(code: string): Promise<unknown | null> {
+  const snap = await get(ref(db, `games/${code}`));
+  return snap.exists() ? snap.val() : null;
+}
+
+/** Gjenopprett et helt spill fra en sikkerhetskopi (skriver tilbake under samme kode).
+ *  Overskriver det som ligger der fra før. Brukes hvis Firebase-data er borte. */
+export function importGame(code: string, data: unknown): Promise<void> {
+  return set(ref(db, `games/${code}`), data);
+}
+
+/** Slett et spill for godt fra Firebase (lærerens «avslutt for godt»). */
+export function deleteGame(code: string): Promise<void> {
+  return remove(ref(db, `games/${code}`));
 }
 
 // === Spillinnstillinger (lærer-styrt) ============================================

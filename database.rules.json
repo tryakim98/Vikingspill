@@ -15,7 +15,8 @@
         ".write": "$code.matches(/^[A-HJ-NP-Z]{4}$/) || $code.matches(/^VIKING-[A-Z0-9]{3,12}$/)",
 
         "meta": {
-          "createdAt": { ".validate": "newData.isNumber()" },
+          "createdAt":    { ".validate": "newData.isNumber()" },
+          "lastActiveAt": { ".validate": "newData.isNumber()" },
           "$other": { ".validate": false }
         },
 
