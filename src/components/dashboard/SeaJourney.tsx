@@ -18,21 +18,38 @@ import { ACTIONS_BY_DEST, type SpecialAction, type ActionCategory } from '../../
 import { evaluateAction, describeCost, describeEffect } from '../../lib/specialActions';
 import { skillTreeData } from '../../data/skillTree';
 
+// Posisjoner i prosent (x = bredde, y = høyde) plassert omtrent geografisk riktig
+// oppå det ekte verdenskartet i public/textures/kart-bakgrunn.png.
 const MAP_POS: Record<string, { x: number; y: number }> = {
-  vinland: { x: 8, y: 40 },
-  island: { x: 21, y: 22 },
-  faroyene: { x: 31, y: 30 },
-  hebrides: { x: 37, y: 35 },
-  dublin: { x: 32, y: 43 },
-  lindisfarne: { x: 41, y: 41 },
-  hedeby: { x: 50, y: 37 },
-  sameland: { x: 55, y: 12 },
-  paris: { x: 44, y: 51 },
-  novgorod: { x: 66, y: 27 },
-  miklagard: { x: 66, y: 62 },
-  baghdad: { x: 78, y: 74 },
+  vinland: { x: 26, y: 31 },     // Newfoundland, øst i Nord-Amerika
+  island: { x: 39, y: 24 },      // Island
+  faroyene: { x: 43, y: 29 },    // Færøyene
+  hebrides: { x: 44.5, y: 31.5 },// Hebridene, N-Skottland
+  dublin: { x: 42, y: 35 },      // Irland
+  lindisfarne: { x: 46, y: 33 }, // NØ-England
+  hedeby: { x: 50, y: 32.5 },    // Danmark/Slesvig
+  sameland: { x: 54, y: 21 },    // Sápmi, N-Skandinavia
+  paris: { x: 47.5, y: 39 },     // Frankrike
+  novgorod: { x: 57.5, y: 27 },  // NV-Russland
+  miklagard: { x: 56.5, y: 45 }, // Konstantinopel
+  baghdad: { x: 63, y: 51 },     // Bagdad
 };
-const HOME = { x: 52, y: 22 }; // Avaldsnes
+const HOME = { x: 50.5, y: 28.5 }; // Avaldsnes, SV-Norge
+
+// Etikett-plassering for de tett pakkede stedene rundt Nordsjøen, så navnene ikke
+// stables oppå hverandre. above = navnet over punktet, dx = liten vannrett nudge (px).
+const LABEL: Record<string, { above?: boolean; dx?: number }> = {
+  island: { above: true, dx: -6 },
+  faroyene: { above: true, dx: 6 },
+  hebrides: { dx: -20 },
+  dublin: { dx: -10 },
+  lindisfarne: { dx: 18 },
+  hedeby: { dx: 16 },
+  sameland: { above: true },
+  novgorod: { dx: 20 },
+  miklagard: { dx: 18 },
+  vinland: { dx: 0 },
+};
 
 /** Varighet i sekunder for seilas-animasjonen. GameDashboard's setTimeout ligger
  *  litt over dette så vi rekker å se animasjonen ferdig før encounter åpner. */
@@ -124,33 +141,38 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
       </p>
 
       <div
-        className="relative w-full overflow-hidden rounded-lg border-4 border-viking-gold/70 bg-[#14110b]"
-        style={{ aspectRatio: '16 / 9', backgroundImage: 'repeating-linear-gradient(0deg, rgba(212,168,67,0.05) 0 1px, transparent 1px 40px), repeating-linear-gradient(90deg, rgba(212,168,67,0.05) 0 1px, transparent 1px 40px)' }}
+        className="relative w-full overflow-hidden rounded-lg border-4 border-viking-gold/70 bg-[#1a140d] shadow-inner"
+        style={{ aspectRatio: '16 / 9' }}
         data-testid="sea-journey-map"
       >
-        {/* Dekorative landmasser */}
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 56" preserveAspectRatio="none">
-          <g fill="#5B7553" opacity="0.18">
-            <path d="M2,28 Q6,18 12,24 Q16,30 10,40 Q4,44 2,36 Z" />
-            <path d="M30,8 Q44,2 60,10 Q72,16 70,30 Q60,26 50,30 Q40,26 34,30 Q26,22 30,8 Z" />
-            <path d="M58,40 Q72,34 86,48 Q92,56 78,56 L60,56 Q54,48 58,40 Z" />
-          </g>
-        </svg>
+        {/* Ekte gammelt verdenskart som bakgrunn */}
+        <img
+          src="/textures/kart-bakgrunn.png"
+          alt="Gammelt verdenskart"
+          className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover"
+          draggable={false}
+        />
+        {/* Lett vignett — demper kantene så punkter og ruter løfter seg fra det detaljrike kartet */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse at 50% 42%, rgba(11,20,38,0) 48%, rgba(11,20,38,0.45) 100%)' }}
+        />
 
-        {/* Tittel + kompass */}
-        <p className="absolute left-3 top-2 font-cinzel text-sm tracking-widest text-viking-gold-soft/80">VIKINGENES VERDEN</p>
-        <div className="absolute bottom-3 right-3 flex h-12 w-12 items-center justify-center rounded-full border-2 border-viking-gold/50 text-viking-gold-soft/70">
-          <span className="absolute top-0 text-[10px]">N</span>
-          <span className="text-lg">✦</span>
-        </div>
+        {/* Tittel-plakett — mørk bakgrunn for lesbarhet mot kartet */}
+        <p className="absolute left-3 top-2 z-10 rounded bg-viking-darkblue/75 px-2 py-0.5 font-cinzel text-xs tracking-widest text-viking-gold-soft shadow-md">VIKINGENES VERDEN</p>
 
-        {/* Linje mellom siste posisjon og forhåndsvist destinasjon */}
+        {/* Linje mellom siste posisjon og forhåndsvist destinasjon — mørk underlinje + gull for kontrast */}
         {previewDest && MAP_POS[previewDest.id] && !sailingTo && !locked.includes(previewDest.id) && (
-          <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 56" preserveAspectRatio="none">
+          <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <line
               x1={stationaryShipPos.x} y1={stationaryShipPos.y}
               x2={MAP_POS[previewDest.id].x} y2={MAP_POS[previewDest.id].y}
-              stroke="#D4A843" strokeWidth="0.3" strokeDasharray="1 1" opacity="0.6"
+              stroke="rgba(0,0,0,0.55)" strokeWidth="1.1" strokeLinecap="round"
+            />
+            <line
+              x1={stationaryShipPos.x} y1={stationaryShipPos.y}
+              x2={MAP_POS[previewDest.id].x} y2={MAP_POS[previewDest.id].y}
+              stroke="#E8C97A" strokeWidth="0.5" strokeDasharray="1.4 1.2" strokeLinecap="round" opacity="0.95"
             />
           </svg>
         )}
@@ -166,11 +188,11 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
           const dimmed = isLocked || sideLocked;
           const dotColor =
             isSelected ? '#E8C97A' :
-            isVisited ? '#5B7553' :
-            isLocked ? '#3a4d54' :
-            sideLocked ? '#594a35' :
-            '#D4A843';
-          const dotShadow = dimmed ? 'none' : (isSelected ? '0 0 14px 4px rgba(232,201,122,0.85)' : '0 0 8px 2px rgba(212,168,67,0.55)');
+            isVisited ? '#7FA06B' :
+            isLocked ? '#5a727d' :
+            sideLocked ? '#8a734d' :
+            '#F0BE4A';
+          const dotShadow = dimmed ? '0 0 0 1px rgba(0,0,0,0.5)' : (isSelected ? '0 0 16px 5px rgba(232,201,122,0.9)' : '0 0 10px 3px rgba(240,190,74,0.7)');
           return (
             <button
               key={d.id}
@@ -178,19 +200,33 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
               disabled={!isChief}
               aria-label={`${d.name} — ${isVisited ? 'besøkt' : isLocked ? 'låst' : 'tilgjengelig'}`}
               data-testid={`map-dest-${d.id}`}
-              className={`absolute -translate-x-1/2 -translate-y-1/2 ${isChief ? 'cursor-pointer' : 'cursor-default'}`}
+              className={`absolute z-10 -translate-x-1/2 -translate-y-1/2 ${isChief ? 'cursor-pointer' : 'cursor-default'}`}
               style={{ left: `${p.x}%`, top: `${p.y}%` }}
             >
               <motion.div
                 animate={dimmed ? { scale: 1 } : (isSelected ? { scale: [1, 1.25, 1.1] } : { scale: [1, 1.12, 1] })}
                 transition={dimmed ? { duration: 0 } : { duration: isSelected ? 0.6 : 2.2, repeat: Infinity, ease: 'easeInOut' }}
-                className="relative flex h-3.5 w-3.5 items-center justify-center rounded-full"
-                style={{ backgroundColor: dotColor, boxShadow: dotShadow, opacity: dimmed && !isSelected ? 0.7 : 1 }}
+                className="relative flex h-5 w-5 items-center justify-center rounded-full"
               >
-                {(isLocked || sideLocked) && <span className="absolute -top-3 font-mono text-[9px] text-viking-crimson">LÅST</span>}
-                {isVisited && <span className="absolute -top-3 text-[9px]">✓</span>}
+                {/* Mørk medaljong bak prikken — løfter den fra det detaljrike kartet */}
+                <span
+                  aria-hidden
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: 'rgba(11,20,38,0.6)', border: '1px solid rgba(212,168,67,0.55)' }}
+                />
+                {/* Selve prikken */}
+                <span
+                  aria-hidden
+                  className="relative h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: dotColor, boxShadow: dotShadow, border: '1px solid rgba(253,251,246,0.8)', opacity: dimmed && !isSelected ? 0.85 : 1 }}
+                />
+                {(isLocked || sideLocked) && <span className="absolute -left-1 -top-3.5 rounded bg-viking-darkblue/80 px-1 font-mono text-[8px] font-bold text-viking-crimson">LÅST</span>}
+                {isVisited && <span className="absolute -top-3.5 rounded-full bg-viking-darkblue/80 px-1 text-[9px] text-viking-moss">✓</span>}
               </motion.div>
-              <span className={`absolute left-1/2 top-4 -translate-x-1/2 whitespace-nowrap font-inter text-[10px] ${isSelected ? 'text-viking-gold' : 'text-viking-gold-soft/80'}`}>
+              <span
+                className={`pointer-events-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded px-1 py-px font-inter text-[10px] font-medium leading-tight shadow-md ${(LABEL[d.id]?.above) ? 'bottom-5' : 'top-5'} ${isSelected ? 'bg-viking-gold text-viking-darkblue' : 'bg-viking-darkblue/75 text-viking-gold-soft'}`}
+                style={{ marginLeft: LABEL[d.id]?.dx ?? 0 }}
+              >
                 {d.name}
               </span>
             </button>
@@ -200,10 +236,10 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
         {/* Stasjonært skip ved siste posisjon (skjult når seiling pågår) */}
         {!sailingTo && (
           <div
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2"
+            className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_2px_3px_rgba(0,0,0,0.6)]"
             style={{ left: `${stationaryShipPos.x}%`, top: `${stationaryShipPos.y}%` }}
           >
-            <VikingShip color={ship.color} symbol={ship.symbol} size={40} bob />
+            <VikingShip color={ship.color} symbol={ship.symbol} size={34} bob />
           </div>
         )}
 
@@ -213,17 +249,24 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
           const path = `M ${shipStart.x} ${shipStart.y} Q ${bz.cx} ${bz.cy} ${sailingPos.x} ${sailingPos.y}`;
           return (
             <>
-              {/* Animert kjølvann — SVG-bane som tegnes etterhvert som skipet seiler */}
-              <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 56" preserveAspectRatio="none">
+              {/* Animert kjølvann — SVG-bane som tegnes etterhvert som skipet seiler.
+                  Mørk underbane + lys overbane så sporet synes mot det detaljrike kartet. */}
+              <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <motion.path
+                  d={path} fill="none" stroke="rgba(0,0,0,0.45)" strokeWidth={1.1} strokeLinecap="round"
+                  initial={{ pathLength: 0, opacity: 0.7 }}
+                  animate={{ pathLength: 1, opacity: 0.45 }}
+                  transition={{ duration: SAILING_DURATION_S, ease: 'easeInOut' }}
+                />
                 <motion.path
                   d={path}
                   fill="none"
-                  stroke="rgba(255,255,255,0.55)"
-                  strokeWidth={0.35}
+                  stroke="rgba(255,255,255,0.7)"
+                  strokeWidth={0.5}
                   strokeDasharray="1.5 1"
                   strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 0.8 }}
-                  animate={{ pathLength: 1, opacity: 0.5 }}
+                  initial={{ pathLength: 0, opacity: 0.85 }}
+                  animate={{ pathLength: 1, opacity: 0.55 }}
                   transition={{ duration: SAILING_DURATION_S, ease: 'easeInOut' }}
                 />
               </svg>
@@ -238,10 +281,10 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                   rotate: [0, -4, 3, -3, 2, 0],
                 }}
                 transition={{ duration: SAILING_DURATION_S, ease: 'easeInOut' }}
-                className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2"
+                className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_2px_3px_rgba(0,0,0,0.6)]"
                 data-testid="sailing-ship"
               >
-                <VikingShip color={ship.color} symbol={ship.symbol} size={44} bob />
+                <VikingShip color={ship.color} symbol={ship.symbol} size={38} bob />
               </motion.div>
 
               {/* Tekstboble — «Seiler mot X …» — synket via sailingTo */}
