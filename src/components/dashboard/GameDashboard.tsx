@@ -62,6 +62,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   // og synket UI-tilstand (aktiv destinasjon m.m.).
   const isOnline = session.mode === 'online' && !!session.groupId;
   const myGroupId = session.groupId ?? '';
+  // Trygt avledet spillkode: gameCode finnes kun på online-økter. Brukes i Ting-
+  // håndtererne der TS ikke klarer å snevre inn union-typen i callbacks/dep-arrays.
+  const gameCode = session.mode === 'online' ? session.gameCode : '';
 
   // Handelstorg — andre grupper + tilbud, synket fra Firebase.
   const [showTradeMarket, setShowTradeMarket] = useState(false);
@@ -129,7 +132,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
       startedAt: now,
       status: 'open',
     };
-    callTing(session.gameCode, myGroupId, t).catch(() => {});
+    callTing(gameCode, myGroupId, t).catch(() => {});
     setProposingTing(false);
   };
 
@@ -330,9 +333,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     const newChief = forCandidate > forIncumbent ? ting.candidateId : ting.incumbentId;
     (async () => {
       if (newChief !== ting.incumbentId) await transferChief(session.gameCode, myGroupId, newChief).catch(() => {});
-      await resolveTing(session.gameCode, myGroupId, newChief, Date.now()).catch(() => {});
+      await resolveTing(gameCode, myGroupId, newChief, Date.now()).catch(() => {});
     })();
-  }, [ting, memberIds, isOnline, myMemberId, session.gameCode, myGroupId]);
+  }, [ting, memberIds, isOnline, myMemberId, gameCode, myGroupId]);
   const [activeFate, setActiveFate] = useState<FateEvent | null>(null);
   const seenFate = useRef<string | null>(null);
   const [activeTideTurn, setActiveTideTurn] = useState<TideTurn | null>(null);
@@ -568,8 +571,8 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         myMemberId={myMemberId}
         memberIds={memberIds}
         memberLabel={memberLabel}
-        onVote={(votedFor) => castTingVote(session.gameCode, myGroupId, myMemberId, votedFor).catch(() => {})}
-        onDismiss={() => clearTing(session.gameCode, myGroupId).catch(() => {})}
+        onVote={(votedFor) => castTingVote(gameCode, myGroupId, myMemberId, votedFor).catch(() => {})}
+        onDismiss={() => clearTing(gameCode, myGroupId).catch(() => {})}
       />
     );
   }
