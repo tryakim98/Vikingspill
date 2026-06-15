@@ -571,48 +571,6 @@ export function subscribeWheelSpin(code: string, callback: (spin: WheelSpin | nu
   });
 }
 
-// === Tidevannstimer (§6.5) ========================================================
-// Læreren styrer én timer pr. kapittel (start / pause / forleng / kort inn). Tilstanden
-// ligger på /games/{code}/tide og leses av alle. Når tidevannet snur, kringkastes en
-// /games/{code}/tideTurn slik at grupper som ikke har fullført kapitlet mister
-// handelspoeng «til stormen». Læreren bestemmer rammene; utfallet avgjøres av om hver
-// gruppe rakk fram — ikke av at læreren peker ut noen.
-
-export interface TideState {
-  chapterIndex: number;                              // hvilket kapittel timeren gjelder
-  status: 'idle' | 'running' | 'paused' | 'turned'; // idle = ikke startet, turned = snudd
-  endsAt: number | null;                             // epoch ms når tidevannet snur (kun running)
-  remainingMs: number;                               // gjeldende/frosset gjenstående tid
-  durationMs: number;                                // kapitlets varighet (for progresjonslinjen)
-}
-
-export function setTide(code: string, tide: TideState): Promise<void> {
-  return set(ref(db, `games/${code}/tide`), tide);
-}
-
-export function subscribeTide(code: string, callback: (tide: TideState | null) => void): Unsubscribe {
-  return onValue(ref(db, `games/${code}/tide`), (snap) => {
-    callback((snap.val() as TideState | null) ?? null);
-  });
-}
-
-export interface TideTurn {
-  id: string;
-  chapterIndex: number;
-  penaltyTrade: number; // handelspoeng tapt for grupper som ikke er ferdige
-  at: number;
-}
-
-export function triggerTideTurn(code: string, turn: TideTurn): Promise<void> {
-  return set(ref(db, `games/${code}/tideTurn`), turn);
-}
-
-export function subscribeTideTurn(code: string, callback: (turn: TideTurn | null) => void): Unsubscribe {
-  return onValue(ref(db, `games/${code}/tideTurn`), (snap) => {
-    callback((snap.val() as TideTurn | null) ?? null);
-  });
-}
-
 // === Ragnarok (§6.3) ==============================================================
 // Catch-up-mekanikk: når forskjellen mellom 1. og siste gruppe > 15 poeng kan læreren
 // slippe Ragnarok løs — ALLE mister halve handelspoeng («gudene straffer hybris»).

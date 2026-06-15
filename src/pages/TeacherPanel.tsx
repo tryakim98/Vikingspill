@@ -52,7 +52,6 @@ import TeacherLanding from '../components/teacher/TeacherLanding';
 import { rememberTeacherGame, forgetTeacherGame } from '../lib/teacherGames';
 import { downloadBackup } from '../lib/gameBackup';
 import { Raven } from '../components/decor';
-import TideTimer from '../components/teacher/TideTimer';
 import ConnectionBanner from '../components/common/ConnectionBanner';
 import VikingShip from '../components/ship/VikingShip';
 import RulesScreen from '../components/rules/RulesScreen';
@@ -380,8 +379,6 @@ export default function TeacherPanel() {
 
           {/* HØYRE — lærerens kontroller + godkjenning */}
           <div className="mt-6 space-y-6 xl:mt-0">
-            {/* §6.5 Tidevannstimer — læreren styrer rammene pr. kapittel */}
-            <TideTimer code={code} groups={groups} />
 
         {/* §3.4/§8.5 Skjebnehjulet — én dramatisk mekanikk som erstatter de spredte trigger-knappene.
             Læreren bestemmer kun NÅR (spinner); hjulet avgjør HVA og HVEM. */}

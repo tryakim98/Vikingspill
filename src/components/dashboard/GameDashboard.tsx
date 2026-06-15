@@ -24,17 +24,14 @@ import { HINTS, type HintKey } from '../../data/firstTimeHints';
 import { isAccessible } from '../../lib/unlocks';
 import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, callTing, castTingVote, resolveTing, clearTing, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeWheelSpin, subscribeTideTurn, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type TingSession, type Trial, type TrialResult, type FateEvent, type WheelSpin, type TideTurn, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, callTing, castTingVote, resolveTing, clearTing, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeWheelSpin, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type TingSession, type Trial, type TrialResult, type FateEvent, type WheelSpin, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
 import TingOverlay from '../ting/TingOverlay';
 import Icon, { SKILL_ICON } from '../decor/Icon';
 import SagaReader from '../saga/SagaReader';
-import { chapters, chapterCompleted } from '../../data/chapters';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
 import SeaBattle from '../duel/SeaBattle';
 import FateCardOverlay from '../fate/FateCardOverlay';
 import WheelSpinOverlay from '../fate/WheelSpinOverlay';
-import TideBanner from '../tide/TideBanner';
-import TideTurnOverlay from '../tide/TideTurnOverlay';
 import RagnarokOverlay from '../ragnarok/RagnarokOverlay';
 import LoadingScreen from '../common/LoadingScreen';
 import ConnectionBanner from '../common/ConnectionBanner';
@@ -341,8 +338,6 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const seenFate = useRef<string | null>(null);
   const [activeWheelSpin, setActiveWheelSpin] = useState<WheelSpin | null>(null);
   const seenWheelSpin = useRef<string | null>(null);
-  const [activeTideTurn, setActiveTideTurn] = useState<TideTurn | null>(null);
-  const seenTideTurn = useRef<string | null>(null);
   const [activeRagnarok, setActiveRagnarok] = useState<RagnarokEvent | null>(null);
   const seenRagnarok = useRef<string | null>(null);
 
@@ -384,17 +379,6 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     const unsub = subscribeWheelSpin(session.gameCode, (spin) => {
       if (first) { first = false; seenWheelSpin.current = spin?.id ?? null; return; }
       if (spin && spin.id !== seenWheelSpin.current) { seenWheelSpin.current = spin.id; setActiveWheelSpin(spin); }
-    });
-    return () => unsub();
-  }, [session]);
-
-  // Tidevannet snur (§6.5): grupper som ikke har fullført kapitlet mister handelspoeng.
-  useEffect(() => {
-    if (session.mode !== 'online') return;
-    let first = true;
-    const unsub = subscribeTideTurn(session.gameCode, (turn) => {
-      if (first) { first = false; seenTideTurn.current = turn?.id ?? null; return; }
-      if (turn && turn.id !== seenTideTurn.current) { seenTideTurn.current = turn.id; setActiveTideTurn(turn); }
     });
     return () => unsub();
   }, [session]);
@@ -534,21 +518,6 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         onDone={() => {
           if (affected) applyFateEffect(activeFate.effect);
           setActiveFate(null);
-        }}
-      />
-    );
-  }
-
-  if (activeTideTurn) {
-    const affected = !chapterCompleted(activeTideTurn.chapterIndex, state.visited);
-    return (
-      <TideTurnOverlay
-        chapterNavn={chapters[activeTideTurn.chapterIndex]?.navn ?? ''}
-        affected={affected}
-        penalty={activeTideTurn.penaltyTrade}
-        onDone={() => {
-          if (affected) addReward({ und: 0, trade: -activeTideTurn.penaltyTrade, rep: 0 });
-          setActiveTideTurn(null);
         }}
       />
     );
@@ -706,9 +675,6 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     <div className="min-h-screen viking-screen text-viking-paper p-6">
       <ConnectionBanner active={session.mode === 'online'} />
       <div className="mx-auto max-w-3xl">
-        {/* §6.5 Tidevanns-nedtelling (kun online — læreren styrer timeren) */}
-        {session.mode === 'online' && <TideBanner code={session.gameCode} />}
-
         {/* Header */}
         <div className="mb-6 flex items-center gap-4 border-b-4 border-viking-gold pb-5">
           <VikingShip color={setup.shipColor} symbol={setup.shipSymbol} size={96} />
