@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRole } from '../hooks/useRole';
 import { playSound } from '../lib/sound';
-import { generateUniqueGameCode } from '../lib/gameCode';
+import { generateUniqueGameCode, isValidGameCode } from '../lib/gameCode';
 import {
   createGame,
   gameExists,
@@ -59,7 +59,16 @@ const total = (g: SyncedGroup) => g.scores.culturalUnderstanding + g.scores.trad
 export default function TeacherPanel() {
   const navigate = useNavigate();
   const { clearRole } = useRole();
-  const [code, setCode] = useState<string | null>(() => localStorage.getItem(CODE_KEY));
+  // Les en eventuell tidligere spillkode fra localStorage — men bare hvis den er i
+  // gjeldende format (4 bokstaver, uten I/O). Et eldre cachet kode-format (f.eks. den
+  // gamle «VIKING-XXXX») forkastes, så læreren genererer en frisk 4-bokstavskode som
+  // elevenes inntastingsfelt faktisk godtar.
+  const [code, setCode] = useState<string | null>(() => {
+    const saved = localStorage.getItem(CODE_KEY);
+    if (saved && isValidGameCode(saved)) return saved;
+    if (saved) localStorage.removeItem(CODE_KEY); // ugyldig/utdatert kode — rydd vekk
+    return null;
+  });
   const [groups, setGroups] = useState<Record<string, SyncedGroup>>({});
   const [approvals, setApprovals] = useState<Record<string, ApprovalRequest>>({});
   const [showRules, setShowRules] = useState(() => {
