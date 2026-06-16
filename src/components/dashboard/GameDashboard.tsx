@@ -665,6 +665,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         onGiveAdvice={isOnline ? (advice) => setEncounterAdvice(session.gameCode, myGroupId, myMemberId, advice).catch(() => {}) : undefined}
         textLength={displayTextLength}
         onToggleTextLength={togglePersonalTextLength}
+        saga={state.saga ?? []}
         syncedEncounter={isOnline ? syncedGroup?.encounter ?? null : null}
         onUpdateEncounter={isOnline && isChief
           ? (partial) => {

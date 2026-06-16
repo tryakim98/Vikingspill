@@ -157,9 +157,7 @@
             }
           },
           "lesson": "Lindisfarne 793 var historisk lønnsomt på kort sikt. Men plyndringen startet 250 år med europeisk frykt — og stengte dører for vikinger som ville handle fredelig.",
-          "locks": [
-            "paris"
-          ]
+          "locks": []
         },
         {
           "id": "ransom",
@@ -451,9 +449,7 @@
             }
           },
           "lesson": "Vikingenes slavehandel var enorm. Tusenvis av irer, samer og slavere ble solgt. Selve ordet «slave» kommer fra «slaver», fordi så mange slaviske folk endte i fangenskap. Dette er et av historiens mørkeste kapitler.",
-          "locks": [
-            "miklagard"
-          ]
+          "locks": []
         },
         {
           "id": "marriage",

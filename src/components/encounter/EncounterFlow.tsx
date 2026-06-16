@@ -10,10 +10,11 @@
 
 import { useState, useEffect, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import type { Destination, Choice, RollOdds, SkillKey } from '../../types';
+import type { Destination, Choice, RollOdds, SkillKey, SagaEntry } from '../../types';
 import type { SyncedEncounter, CouncilAdvice, ApprovalRequest } from '../../lib/gameSync';
 import { taskBonusForApproval } from '../../lib/gameSync';
 import { skillTreeData } from '../../data';
+import { SCARRED_RECEPTION } from '../../data/consequences';
 import {
   rollDice,
   oddsPercent,
@@ -80,6 +81,8 @@ interface EncounterFlowProps {
   textLength?: 'full' | 'short';
   /** Individuell tekstlengde: bytter KUN denne enhetens visning (lagret per elev). */
   onToggleTextLength?: () => void;
+  /** Gruppens saga (tidligere valg) — brukes til «svidd mottakelse» (SCARRED_RECEPTION). */
+  saga?: SagaEntry[];
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -164,9 +167,16 @@ export default function EncounterFlow({
   isChief = true, syncedEncounter = null, onUpdateEncounter,
   lateGame = false, requireSaga = false, requirePerspective = false, requireBridge = false, requireQuiz = false,
   requireCouncil = false, myMemberId, memberIds = [], onGiveAdvice, textLength = 'full', onToggleTextLength,
+  saga = [],
 }: EncounterFlowProps) {
   const d = destination;
   const syncMode = !!syncedEncounter;
+
+  // «Svidd mottakelse» (§gating): et tidligere valg kan gi en kald mottakelse her —
+  // en myk terningstraff i stedet for å stenge havna. Hovedsporet er alltid åpent.
+  const scar = SCARRED_RECEPTION[d.id];
+  const scarred = !!scar && saga.some((e) => e.destId === scar.ifChoice.destId && e.choiceId === scar.ifChoice.choiceId);
+  const scarPenalty = scarred ? scar.dicePenalty : 0;
 
   /** Diskret, personlig tekstlengde-bryter — endrer kun denne elevens visning. */
   const TextLenToggle = () => onToggleTextLength ? (
@@ -307,7 +317,7 @@ export default function EncounterFlow({
   const taskBonus = taskBonusForApproval(approvalForHere?.status);
 
   const choiceLatePenalty = choice ? lateGamePenalty(choice, skills, lateGame) : 0;
-  const modifier = choice ? quizBonus + taskBonus + skillBonusForChoice(choice, skills) + choiceLatePenalty : 0;
+  const modifier = choice ? quizBonus + taskBonus + skillBonusForChoice(choice, skills) + choiceLatePenalty + scarPenalty : 0;
   const outcome = choice && roll ? choice.outcomes[roll.tier] : null;
 
   const ChiefBanner = () => (
@@ -735,6 +745,11 @@ export default function EncounterFlow({
     return (
       <Shell name={d.name} onExit={onExit}>
         <h1 className="mb-1 font-cinzel text-2xl font-bold text-viking-gold">Hva gjør dere?</h1>
+        {scarred && (
+          <p className="mb-3 flex items-start gap-2 rounded-md border-2 border-viking-crimson/50 bg-viking-crimson/10 px-3 py-2 font-inter text-sm text-viking-paper/90" data-testid="scarred-reception">
+            <Icon name="warn" size={15} className="mt-0.5 shrink-0 text-viking-crimson" /> {scar!.note}
+          </p>
+        )}
         <p className="mb-3 font-inter text-sm text-viking-gold-soft">
           Terningbonus fra quiz: <strong className="text-viking-gold">+{quizBonus}</strong>
         </p>
@@ -860,6 +875,11 @@ export default function EncounterFlow({
             {choiceLatePenalty < 0 && (
               <p className="text-viking-crimson" data-testid="late-penalty-line">
                 Sen-spill-straff (mangler ferdighet): {choiceLatePenalty}
+              </p>
+            )}
+            {scarPenalty < 0 && (
+              <p className="text-viking-crimson" data-testid="scar-penalty-line">
+                Svidd mottakelse: {scarPenalty}
               </p>
             )}
             <p className="mt-1 text-viking-gold">Terningmodifikator: {modifier >= 0 ? '+' : ''}{modifier}</p>
