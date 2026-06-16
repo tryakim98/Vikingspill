@@ -848,7 +848,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         />
 
         {/* Ferdigheter (jern) — trykk en på nivå 1–2 for å ta verdighetsprøven (§3.2) */}
-        <MaterialPanel material="jern" className="mb-6 p-3">
+        <MaterialPanel material="jern" framed className="mb-6 p-3">
         <p className="mb-2 font-inter text-xs text-viking-gold-soft">Ferdigheter{isChief ? ' — trykk en uthevet for å ta verdighetsprøven' : ''}</p>
         <div className="flex flex-wrap gap-2">
           {SKILL_KEYS.map((key) => {

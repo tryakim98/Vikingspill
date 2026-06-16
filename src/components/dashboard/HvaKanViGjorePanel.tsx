@@ -83,7 +83,7 @@ export default function HvaKanViGjorePanel({ destinations, scores, skills, goods
   const far = rows.filter((r) => r.status === 'far');
 
   return (
-    <MaterialPanel material="stein" className="mb-6 p-4" data-testid="hva-kan-vi-gjore">
+    <MaterialPanel material="stein" framed className="mb-6 p-4" data-testid="hva-kan-vi-gjore">
       <h3 className="mb-2 inline-flex items-center gap-2 font-saga text-xl text-viking-gold"><Icon name="compass" size={17} /> Hva kan vi gjøre?</h3>
       <p className="mb-3 font-inter text-[11px] italic text-viking-gold-soft/75">
         Ressursene gir konkrete muligheter. Slik bruker dere det dere har samlet.
