@@ -13,6 +13,7 @@ import type { SyncedGroup } from '../../lib/gameSync';
 import type { ShipSymbol } from '../../types';
 import { destinations } from '../../data';
 import VikingShip from '../ship/VikingShip';
+import { groupStatus } from '../../lib/groupStatus';
 
 const MAP_POS: Record<string, { x: number; y: number }> = {
   vinland: { x: 8, y: 40 },
@@ -33,15 +34,16 @@ const HOME = { x: 52, y: 22 }; // Avaldsnes — startpunkt før første seilas
 const NAME: Record<string, string> = Object.fromEntries(destinations.map((d) => [d.id, d.name]));
 
 export default function SeaMap({ groups }: { groups: Record<string, SyncedGroup> }) {
-  // Plasser skipene; spre dem som står på samme sted litt fra hverandre.
+  // Plasser skipene der gruppa ER NÅ (pågående seilas → aktiv destinasjon → siste
+  // besøkte), ikke bare ved siste besøkte sted. Spre skip som står på samme punkt.
   const counts: Record<string, number> = {};
   const ships = Object.entries(groups).map(([id, g]) => {
-    const last = g.visited[g.visited.length - 1];
-    const p = (last && MAP_POS[last]) || HOME;
+    const st = groupStatus(g);
+    const p = (st.locationId && MAP_POS[st.locationId]) || HOME;
     const key = `${p.x},${p.y}`;
     const n = counts[key] ?? 0;
     counts[key] = n + 1;
-    return { id, g, x: p.x + ((n % 3) - 1) * 3.5, y: p.y + Math.floor(n / 3) * 5 };
+    return { id, g, st, x: p.x + ((n % 3) - 1) * 3.5, y: p.y + Math.floor(n / 3) * 5 };
   });
 
   return (
@@ -73,7 +75,8 @@ export default function SeaMap({ groups }: { groups: Record<string, SyncedGroup>
         </div>
       ))}
 
-      {/* Skip (glir mykt mellom posisjoner langs rutene, §8.1/§10) */}
+      {/* Skip (glir mykt mellom posisjoner langs rutene, §8.1/§10). Et glødende ring
+          markerer skip som er midt i et kulturmøte; navnelappen viser hva de gjør nå. */}
       {ships.map((s) => (
         <motion.div
           key={s.id}
@@ -81,10 +84,17 @@ export default function SeaMap({ groups }: { groups: Record<string, SyncedGroup>
           initial={false}
           animate={{ left: `${s.x}%`, top: `${s.y}%` }}
           transition={{ type: 'spring', stiffness: 38, damping: 14 }}
-          title={s.g.shipName}
+          title={`${s.g.shipName} — ${s.st.text}`}
         >
+          {s.st.inEncounter && (
+            <span className="absolute left-1/2 top-1/2 -z-10 h-12 w-12 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-viking-gold/30" />
+          )}
           <VikingShip color={s.g.shipColor} symbol={s.g.shipSymbol as ShipSymbol} size={44} bob />
-          <span className="absolute left-1/2 top-full -translate-x-1/2 whitespace-nowrap rounded bg-viking-darkblue/80 px-1.5 font-cinzel text-[10px] text-viking-paper">{s.g.shipName}</span>
+          <span className="absolute left-1/2 top-full mt-0.5 -translate-x-1/2 whitespace-nowrap rounded bg-viking-darkblue/85 px-1.5 py-px text-center font-cinzel text-[10px] leading-tight text-viking-paper">
+            {s.g.shipName}
+            {s.st.noMembers && <span className="ml-1 text-viking-crimson" title="Ingen påkoblede enheter">⚠</span>}
+            <span className="block font-inter text-[8px] not-italic text-viking-gold-soft/80">{s.st.text}</span>
+          </span>
         </motion.div>
       ))}
 

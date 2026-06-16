@@ -19,6 +19,7 @@ import {
   exportGame,
   importGame,
   deleteGame,
+  removeGroup,
   subscribeGroups,
   subscribeApprovals,
   setApprovalStatus,
@@ -47,6 +48,8 @@ import { gudenesProveChallenges, fateCards } from '../data';
 import { STORM_FATE_IDS, GAVE_FATE_IDS, VIND_FATE_ID, type WheelFieldId } from '../data/wheelFields';
 import { patchGroup } from '../lib/gameSync';
 import SeaMap from '../components/teacher/SeaMap';
+import Leaderboard from '../components/teacher/Leaderboard';
+import LeadConfetti from '../components/teacher/LeadConfetti';
 import SkjebneHjul from '../components/teacher/SkjebneHjul';
 import TeacherLanding from '../components/teacher/TeacherLanding';
 import { rememberTeacherGame, forgetTeacherGame } from '../lib/teacherGames';
@@ -122,11 +125,15 @@ export default function TeacherPanel() {
   // §8.2 Konkurransesignal når en NY gruppe tar ledelsen (krever ≥2 grupper og at
   // lederen faktisk har poeng). Ingen lyd ved første leder eller ved uendret ledelse.
   const prevLeaderRef = useRef<string | null>(null);
+  const [confettiKey, setConfettiKey] = useState<number | null>(null);
   useEffect(() => {
     const r = Object.entries(groups).sort((a, b) => total(b[1]) - total(a[1]));
     if (r.length < 2 || total(r[0][1]) <= 0) { prevLeaderRef.current = r[0]?.[0] ?? null; return; }
     const leaderId = r[0][0];
-    if (prevLeaderRef.current !== null && prevLeaderRef.current !== leaderId) playSound('victory');
+    if (prevLeaderRef.current !== null && prevLeaderRef.current !== leaderId) {
+      playSound('victory');
+      setConfettiKey(Date.now()); // §8.2 konfetti ved nytt lederskifte
+    }
     prevLeaderRef.current = leaderId;
   }, [groups]);
 
@@ -296,6 +303,12 @@ export default function TeacherPanel() {
   const resolve = (groupId: string, status: ApprovalStatus) => {
     if (code) setApprovalStatus(code, groupId, status).catch(() => {});
   };
+  /** Rydd vekk en tom/forlatt/duplikat-gruppe fra spillet (krever bekreftelse). */
+  const removeGroupNow = (groupId: string, shipName: string) => {
+    if (!code) return;
+    if (!window.confirm(`Fjerne «${shipName}» fra spillet? Gruppas fremgang slettes. Dette kan ikke angres.`)) return;
+    removeGroup(code, groupId).catch(() => {});
+  };
 
   if (showRules) return <RulesScreen role="teacher" onDone={dismissRules} />;
 
@@ -331,6 +344,7 @@ export default function TeacherPanel() {
   return (
     <div className="relative min-h-screen bg-viking-darkblue p-4 text-viking-paper sm:p-6 xl:p-8">
       <ConnectionBanner active={!!code} />
+      {confettiKey && <LeadConfetti key={confettiKey} onDone={() => setConfettiKey(null)} />}
       <HelpButton onClick={() => setShowRules(true)} className="absolute right-4 top-4 z-20" />
       <div className="mx-auto w-full max-w-5xl xl:max-w-[1700px]">
         {/* Spillkode */}
@@ -351,34 +365,39 @@ export default function TeacherPanel() {
               <SeaMap groups={groups} />
             </div>
 
-            {/* §8.2 Leaderboard */}
-            <div className="viking-panel-mosaic rounded-lg p-4">
-              <div className="mb-3 flex items-baseline justify-between">
-                <h2 className="font-cinzel text-2xl text-viking-gold xl:text-3xl">Leaderboard</h2>
-                <span className="font-mono text-sm text-viking-gold-soft">{ranked.length} {ranked.length === 1 ? 'gruppe' : 'grupper'}</span>
-              </div>
-              {ranked.length === 0 ? (
-                <p className="rounded-lg border-2 border-dashed border-viking-gold/30 p-6 text-center font-inter italic text-viking-paper/60">Venter på grupper …</p>
-              ) : (
-                <div className="space-y-2">
-                  {ranked.map(([id, g], i) => (
-                    <div key={id} className="flex items-center gap-3 rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-2.5">
-                      <span className="w-5 text-center font-cinzel text-lg text-viking-gold">{i + 1}</span>
-                      <VikingShip color={g.shipColor} symbol={g.shipSymbol as ShipSymbol} size={44} />
-                      <div className="flex-1">
-                        <p className="font-cinzel text-viking-paper xl:text-lg">{g.shipName}</p>
-                        <p className="font-mono text-[10px] text-viking-gold-soft">{g.visited.length}/12 steder</p>
-                      </div>
-                      <p className="font-cinzel text-2xl font-bold text-viking-gold xl:text-3xl">{total(g)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* §8.2 Leaderboard — med per-gruppe-detalj og live status */}
+            <Leaderboard ranked={ranked} onRemoveGroup={removeGroupNow} />
           </div>
 
           {/* HØYRE — lærerens kontroller + godkjenning */}
           <div className="mt-6 space-y-6 xl:mt-0">
+
+        {/* §8.3 Godkjenning — ØVERST: dette er den mest tidskritiske live-handlingen.
+            Svaret gir nå reell terningbonus til gruppa (§6.2): Velsign +2 · Delvis +1 · Forkast −1. */}
+        <div className={`rounded-lg border-2 p-4 ${pending.length > 0 ? 'border-viking-crimson bg-viking-crimson/10' : 'border-viking-gold/40 bg-viking-surface'}`} data-testid="approvals-panel">
+          <div className="mb-1 flex items-baseline justify-between">
+            <h2 className="font-cinzel text-2xl text-viking-gold xl:text-3xl">⚡ Tors velsignelse</h2>
+            {pending.length > 0 && <span className="animate-pulse rounded-full bg-viking-crimson px-2.5 py-0.5 font-mono text-xs text-viking-paper">{pending.length} venter</span>}
+          </div>
+          <p className="mb-3 font-inter text-xs text-viking-paper/70">Godkjenn oppgaver gruppene gjør. Svaret gir terningbonus: <strong className="text-viking-moss">Velsign +2</strong> · <strong className="text-viking-gold">Delvis +1</strong> · <strong className="text-viking-crimson">Forkast −1</strong>.</p>
+          {pending.length === 0 ? (
+            <p className="rounded-lg border-2 border-dashed border-viking-gold/30 p-4 text-center font-inter italic text-viking-paper/60">Ingen skip ber om velsignelse akkurat nå</p>
+          ) : (
+            <div className="space-y-2">
+              {pending.map(([groupId, a]) => (
+                <div key={groupId} className="rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-3" data-testid={`approval-${groupId}`}>
+                  <p className="font-cinzel text-viking-gold">{a.shipName}</p>
+                  <p className="mb-3 font-inter text-sm text-viking-paper/85">{a.taskTitle}</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => resolve(groupId, 'approved')} className="flex-1 rounded border-2 border-viking-moss bg-viking-moss/30 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-moss/50">Velsign ⚡ (+2)</button>
+                    <button onClick={() => resolve(groupId, 'partial')} className="flex-1 rounded border-2 border-viking-gold bg-viking-gold/20 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-gold/40">Delvis (+1)</button>
+                    <button onClick={() => resolve(groupId, 'rejected')} className="flex-1 rounded border-2 border-viking-crimson bg-viking-crimson/30 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-crimson/50">Forkast (−1)</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* §3.4/§8.5 Skjebnehjulet — én dramatisk mekanikk som erstatter de spredte trigger-knappene.
             Læreren bestemmer kun NÅR (spinner); hjulet avgjør HVA og HVEM. */}
@@ -484,7 +503,9 @@ export default function TeacherPanel() {
               📖 Les sagaer
             </button>
           </div>
-          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+          <div className="mt-4 border-t border-viking-rust/30 pt-3">
+            <p className="mb-2 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold-soft">⚙ Spillregler <span className="font-inter text-xs italic text-viking-paper/55">— settes vanligvis før timen</span></p>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
             <label className="inline-flex cursor-pointer items-center gap-2">
               <input
                 type="checkbox"
@@ -568,6 +589,7 @@ export default function TeacherPanel() {
               })}
             </div>
           </div>
+          </div>{/* ⚙ Spillregler-seksjon slutt */}
         </div>
 
         {/* Handelstorg — kompakt aktivitetspanel */}
@@ -620,30 +642,6 @@ export default function TeacherPanel() {
           </p>
         </div>
 
-            {/* §8.3 Godkjenning */}
-            <div>
-              <div className="mb-3 flex items-baseline justify-between">
-                <h2 className="font-cinzel text-2xl text-viking-gold xl:text-3xl">Tors velsignelse</h2>
-              {pending.length > 0 && <span className="rounded-full bg-viking-crimson px-2 py-0.5 font-mono text-xs text-viking-paper">{pending.length} venter</span>}
-            </div>
-            {pending.length === 0 ? (
-              <p className="rounded-lg border-2 border-dashed border-viking-gold/30 p-6 text-center font-inter italic text-viking-paper/60">Ingen skip ber om velsignelse</p>
-            ) : (
-              <div className="space-y-2">
-                {pending.map(([groupId, a]) => (
-                  <div key={groupId} className="rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-3">
-                    <p className="font-cinzel text-viking-gold">{a.shipName}</p>
-                    <p className="mb-3 font-inter text-sm text-viking-paper/85">{a.taskTitle}</p>
-                    <div className="flex gap-2">
-                      <button onClick={() => resolve(groupId, 'approved')} className="flex-1 rounded border-2 border-viking-moss bg-viking-moss/30 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-moss/50">Velsign ⚡</button>
-                      <button onClick={() => resolve(groupId, 'partial')} className="flex-1 rounded border-2 border-viking-gold bg-viking-gold/20 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-gold/40">Delvis nåde</button>
-                      <button onClick={() => resolve(groupId, 'rejected')} className="flex-1 rounded border-2 border-viking-crimson bg-viking-crimson/30 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-crimson/50">Forkast</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            </div>
           </div>{/* HØYRE-kolonne slutt */}
         </div>{/* to-kolonners grid slutt */}
 
