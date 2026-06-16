@@ -38,6 +38,11 @@ og gjør terningbaserte valg med konsekvenser. Én React-app, to roller (lærer/
   valgbare — ferdigheter forbedrer/straffer odds, men låser dem aldri.
 - **`textLength` per elev:** hver elev kan veksle `full`/`short` på historie- og
   kulturmøte-tekst; lærer setter standard (`full`/`short`/`group`).
+- **Tilgang & konsekvenser:** Hovedsporet (7 havner, `MAIN_ROUTE`) er alltid åpent.
+  Sidesteder (5, `SIDE_UNLOCKS`) er gated, men hver har ≥1 vei som ikke krever en
+  bestemt ferdighet (varer eller ferdsbrev). Valg-konsekvenser *forgrener* — en
+  «svidd mottakelse» ved en senere havn (`data/consequences.ts`, myk −2 + banner) —
+  de **amputerer aldri** en havn.
 - **Solo-prinsippet (samme valg, to spor):** online = bindende individuell stemme
   (høvding bryter likhet); solo (offline) = mannskapet som NPC-arketyp-stemmer,
   spilleren velger + begrunner. Felles konsekvens og saga-logg.
