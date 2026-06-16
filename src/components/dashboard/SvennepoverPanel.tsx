@@ -1,7 +1,7 @@
 /**
  * SvennepoverPanel.tsx
- * Fast «Prøver»-panel som alltid er synlig i dashbordet. Lister alle
- * tilgjengelige svenneprøver, hva hver av dem låser opp, og status. Slik
+ * Fast «Ferdsbrev»-panel som alltid er synlig i dashbordet. Lister alle
+ * tilgjengelige ferdsbrev, hva hver av dem låser opp, og status. Slik
  * blir funksjonen ikke glemt — gruppene kan starte en prøve direkte herfra.
  *
  * Bygger på samme høvding-system: bare høvdingen kan trykke; medlemmene ser
@@ -49,11 +49,11 @@ export default function SvennepoverPanel({ destinations, unlockedSides, isChief,
   return (
     <MaterialPanel material="jern" framed className="mb-4 p-3" data-testid="svenneprover-panel">
       <div className="mb-2 flex items-baseline justify-between">
-        <h3 className="inline-flex items-center gap-2 font-saga text-lg text-viking-gold"><NorseIcon name="ikon-svenneprove" size={16} /> Svenneprøver</h3>
+        <h3 className="inline-flex items-center gap-2 font-saga text-lg text-viking-gold"><NorseIcon name="ikon-svenneprove" size={16} /> Ferdsbrev</h3>
         <p className="font-mono text-[10px] text-viking-gold-soft/80">{passedCount}/{rows.length} bestått</p>
       </div>
       <p className="mb-2 font-inter text-[11px] italic text-viking-gold-soft/75">
-        Hver svenneprøve låser opp et sidested. Du trenger ikke ta dem — bare hvis dere vil dit.
+        Hvert ferdsbrev låser opp et sidested. Du trenger ikke ta dem — bare hvis dere vil dit.
       </p>
       <ul className="space-y-1.5">
         {rows.map((r) => {
@@ -69,7 +69,7 @@ export default function SvennepoverPanel({ destinations, unlockedSides, isChief,
               <NorseIcon name={SKILL_PNG[r.skill]} size={18} className="text-viking-gold-soft" />
               <div className="flex-1">
                 <p className="font-cinzel text-sm text-viking-paper">
-                  Svenneprøve i <strong className="text-viking-gold">{branch.name}</strong>
+                  Ferdsbrev i <strong className="text-viking-gold">{branch.name}</strong>
                 </p>
                 <p className="font-inter text-[10.5px] text-viking-gold-soft/80">
                   Låser opp: <strong>{r.destName}</strong>

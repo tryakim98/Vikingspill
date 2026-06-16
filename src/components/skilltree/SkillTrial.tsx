@@ -1,6 +1,6 @@
 /**
  * SkillTrial.tsx
- * Verdighetsprøven (§3.2) for å heve ferdighetsnivå — TODELT (begge deler kreves):
+ * Svenneprøven (§3.2) for å heve ferdighetsnivå — TODELT (begge deler kreves):
  *   DEL 1 (teori): ferdighetstre-quiz om besøkte steder (Lærling 1→2: 3 spm/2 rette,
  *                  Mester 2→3: 4 spm/3 rette). Uendret quiz-mekanikk.
  *   DEL 2 (praksis): en ferdighetsspesifikk, aktiv oppgave (SkillPractice) som må

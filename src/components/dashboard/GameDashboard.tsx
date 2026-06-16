@@ -316,7 +316,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     }
   };
 
-  // Aktiv verdighetsprøve og sluttseremoni: synket i online, lokal ellers.
+  // Aktiv svenneprøve og sluttseremoni: synket i online, lokal ellers.
   const [localActiveSkill, setLocalActiveSkill] = useState<SkillKey | null>(null);
   const activeSkill = isOnline ? (syncedGroup?.activeSkillKey ?? null) : localActiveSkill;
   const setActiveSkill = (s: SkillKey | null) => {
@@ -848,9 +848,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           unlockedSides={state.unlockedSides ?? []}
         />
 
-        {/* Ferdigheter (jern) — trykk en på nivå 1–2 for å ta verdighetsprøven (§3.2) */}
+        {/* Ferdigheter (jern) — trykk en på nivå 1–2 for å ta svenneprøven (§3.2) */}
         <MaterialPanel material="jern" framed className="mb-6 p-3">
-        <p className="mb-2 font-inter text-xs text-viking-gold-soft">Ferdigheter{isChief ? ' — trykk en uthevet for å ta verdighetsprøven' : ''}</p>
+        <p className="mb-2 font-inter text-xs text-viking-gold-soft">Ferdigheter{isChief ? ' — trykk en uthevet for å ta svenneprøven' : ''}</p>
         <div className="flex flex-wrap gap-2">
           {SKILL_KEYS.map((key) => {
             const lvl = state.skills[key] ?? 0;
@@ -860,7 +860,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
                 key={key}
                 disabled={!eligible}
                 onClick={() => setActiveSkill(key)}
-                title={eligible ? 'Ta verdighetsprøven' : lvl >= 3 ? 'Mester (maks nivå)' : !isChief ? 'Kun høvdingen kan starte prøven' : 'Ikke låst opp ennå'}
+                title={eligible ? 'Ta svenneprøven' : lvl >= 3 ? 'Mester (maks nivå)' : !isChief ? 'Kun høvdingen kan starte prøven' : 'Ikke låst opp ennå'}
                 className={`flex items-center gap-2 rounded-full border-2 px-3 py-1 transition-all ${lvl > 0 ? 'border-viking-gold/60 bg-viking-gold/10' : 'border-viking-gold/20 opacity-60'} ${eligible ? 'cursor-pointer hover:border-viking-gold hover:bg-viking-gold/20' : 'cursor-default'}`}
               >
                 <NorseIcon name={SKILL_PNG[key]} size={16} className="text-viking-gold-soft" />

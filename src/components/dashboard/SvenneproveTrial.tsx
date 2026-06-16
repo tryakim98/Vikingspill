@@ -1,11 +1,11 @@
 /**
  * SvenneproveTrial.tsx
- * Svenneprøve for å låse opp et sidested. 3 spørsmål fra ferdighetstre-quizen
- * for valgt ferdighet, filtrert til besøkte destinasjoner. 2/3 rette = bestått
- * og sidestedet låses opp permanent.
+ * «Ferdsbrev» — en ADGANG som låser opp et sidested (ikke en ferdighets-prøve).
+ * 3 spørsmål fra ferdighetstre-quizen for valgt ferdighet, filtrert til besøkte
+ * destinasjoner. 2/3 rette = bestått og sidestedet låses opp permanent.
  *
- * Trinn over Lærlingeprøven (§3.2) i innsats men UNDER Mesterprøven, derav
- * navnet «svenneprøve». Vi gjenbruker tier-2-spørsmålssettet.
+ * NB: filnavn, props og data-testid-er beholder «svenneprove» (intern logikk);
+ * kun synlig UI-tekst sier «ferdsbrev». Vi gjenbruker tier-2-spørsmålssettet.
  */
 
 import { useEffect, useState } from 'react';
@@ -46,7 +46,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
     <div className="min-h-screen viking-screen text-viking-paper">
       <div className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between border-b-2 border-viking-gold/40 pb-3">
-          <h2 className="inline-flex items-center gap-2 font-cinzel text-xl text-viking-gold"><AutoIcon name={branch.icon} size={20} /> Svenneprøve — {branch.name}</h2>
+          <h2 className="inline-flex items-center gap-2 font-cinzel text-xl text-viking-gold"><AutoIcon name={branch.icon} size={20} /> Ferdsbrev — {branch.name}</h2>
           <button onClick={onClose} className="font-inter text-xs text-viking-gold-soft/70 hover:text-viking-gold-soft">✕ Avbryt</button>
         </div>
         <p className="mb-4 font-inter italic text-viking-gold-soft">For å låse opp <strong>{destName}</strong></p>
@@ -61,7 +61,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
       <Shell>
         <p className="font-cinzel text-2xl text-viking-gold mb-4">Du har ikke sett nok av verden</p>
         <p className="font-inter text-viking-paper/90">
-          Svenneprøven krever {COUNT} spørsmål om steder dere har besøkt, men dere har bare {questions.length} tilgjengelig.
+          Ferdsbrevet krever {COUNT} spørsmål om steder dere har besøkt, men dere har bare {questions.length} tilgjengelig.
           Seil til flere destinasjoner og kom tilbake.
         </p>
         <button onClick={onClose} className="mt-8 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Tilbake</button>

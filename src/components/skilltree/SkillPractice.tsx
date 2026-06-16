@@ -1,6 +1,6 @@
 /**
  * SkillPractice.tsx
- * DEL 2 av verdighetsprøven (§3.2): en ferdighetsspesifikk, AKTIV oppgave som må
+ * DEL 2 av svenneprøven (§3.2): en ferdighetsspesifikk, AKTIV oppgave som må
  * fullføres for å heve ferdigheten — i tillegg til quizen (DEL 1).
  *
  * Modulært: hver ferdighet har én oppføring i SKILL_PRACTICE. To typer i dag, lett

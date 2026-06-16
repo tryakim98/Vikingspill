@@ -64,7 +64,7 @@ export default function HvaKanViGjorePanel({ destinations, scores, skills, goods
       if (sp && sp.type === 'svenneprove') {
         return [{
           destId, destName: dest.name, status: 'far',
-          bestPath: `Trenger svenneprøve i ${skillTreeData[sp.skill].name}`,
+          bestPath: `Trenger ferdsbrev i ${skillTreeData[sp.skill].name}`,
         }];
       }
       return [];
@@ -97,7 +97,7 @@ export default function HvaKanViGjorePanel({ destinations, scores, skills, goods
         <ResourceTip icon="ikon-rykte" label="Rykte" tip="Diplomati-valg, fjerne havner" className="min-w-[8.5rem] flex-[1.4]" />
         <ResourceTip icon="ikon-hvalrosstann" label="Handelsvarer" tip="Lås opp sidesteder, bytt med andre" className="min-w-[8.5rem] flex-[1.4]" />
         <ResourceTip icon="ikon-krigskunst" label="Ferdigheter" tip="Bonus på terning, låser opp valg" className="min-w-[8.5rem] flex-1" />
-        <ResourceTip icon="ikon-svenneprove" label="Svenneprøver" tip="Lås opp sidesteder via quiz" className="min-w-[8.5rem] flex-1" />
+        <ResourceTip icon="ikon-svenneprove" label="Ferdsbrev" tip="Lås opp sidesteder via quiz" className="min-w-[8.5rem] flex-1" />
       </div>
 
       {/* Klare til å seile */}

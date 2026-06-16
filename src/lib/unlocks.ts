@@ -1,7 +1,7 @@
 /**
  * unlocks.ts
  * Evaluerer opplåsingskrav for sidesteder, og lager de menneskelige tekstene
- * som vises på infokortet («Dere mangler: 1 sølv» / «Krever svenneprøve i …»).
+ * som vises på infokortet («Dere mangler: 1 sølv» / «Krever ferdsbrev i …»).
  */
 
 import type { Destination, SkillKey, ScoreKey, TradeGoodId, UnlockRequirement } from '../types';
@@ -46,7 +46,7 @@ export function isAccessible(d: Destination, s: GameStateLike): boolean {
 /** Menneskelig beskrivelse av et krav («Sjømannskap nivå 2», «3 sølv», …). */
 export function describeRequirement(r: UnlockRequirement): string {
   switch (r.type) {
-    case 'svenneprove': return `Svenneprøve i ${skillTreeData[r.skill].name}`;
+    case 'svenneprove': return `Ferdsbrev i ${skillTreeData[r.skill].name}`;
     case 'skill':       return `${skillTreeData[r.key].name} nivå ${r.min}`;
     case 'score':       return `${SCORE_LABEL[r.key]} ≥ ${r.min}`;
     case 'goods':
@@ -60,7 +60,7 @@ export function describeRequirement(r: UnlockRequirement): string {
  *  Returnerer null hvis kravet allerede er oppfylt. */
 export function missingForRequirement(r: UnlockRequirement, s: GameStateLike): string | null {
   switch (r.type) {
-    case 'svenneprove': return `Svenneprøve i ${skillTreeData[r.skill].name}`;
+    case 'svenneprove': return `Ferdsbrev i ${skillTreeData[r.skill].name}`;
     case 'skill': {
       const cur = s.skills[r.key] ?? 0;
       return cur >= r.min ? null : `${r.min - cur} nivå i ${skillTreeData[r.key].name}`;

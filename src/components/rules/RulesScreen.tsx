@@ -78,7 +78,7 @@ const STUDENT_SECTIONS: Section[] = [
   {
     icon: 'tree',
     title: 'Ferdigheter bygges underveis',
-    body: 'Språk, Sjømannskap, Krigskunst, Diplomati, Tro & visdom. Når en ferdighet er på nivå 1 eller 2, kan dere ta verdighetsprøven og låse opp neste nivå.',
+    body: 'Språk, Sjømannskap, Krigskunst, Diplomati, Tro & visdom. Når en ferdighet er på nivå 1 eller 2, kan dere ta svenneprøven og låse opp neste nivå.',
   },
   {
     icon: 'axe',

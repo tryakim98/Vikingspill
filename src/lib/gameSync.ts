@@ -67,7 +67,7 @@ export interface SyncedGroup {
   chiefId?: string;                     // memberId til høvdingen
   members?: Record<string, GroupMember>; // alle koblede enheter i gruppa
   activeDestId?: string | null;          // hvilken destinasjon høvdingen er på
-  activeSkillKey?: SkillKey | null;      // verdighetsprøve aktiv?
+  activeSkillKey?: SkillKey | null;      // svenneprøve aktiv?
   showCeremony?: boolean;                // sluttseremoni vises?
   encounter?: SyncedEncounter | null;    // encounter-state synket til alle medlemmer
   previewDestId?: string | null;         // destinasjonen høvdingen har valgt på kartet

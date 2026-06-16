@@ -2,7 +2,7 @@
  * QUIZ-DATA — Ferdighetstre-quizen (67 spørsmål)
  *
  * Importeres fra vikingspill_quiz.json. Dette er den OPPSUMMERENDE quizen om alle
- * 12 land som brukes til å låse opp ferdighetsnivå 2 og 3 (verdighetsprøven, §3.2 /
+ * 12 land som brukes til å låse opp ferdighetsnivå 2 og 3 (svenneprøven, §3.2 /
  * §6.4) — IKKE stedsquizen (som ligger på hver destinasjon i innhold_v2).
  *
  * Spørsmålene filtreres på besøkte steder via `source`, slik at gruppen kun får

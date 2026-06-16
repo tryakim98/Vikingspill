@@ -62,7 +62,7 @@ export function groupStatus(g: SyncedGroup): GroupStatus {
     text = `${capitalize(STEP_LABEL[step])} — ${NAME[activeDestId] ?? activeDestId}`;
   } else if (g.activeSkillKey) {
     locationId = lastVisited;
-    text = 'Tar verdighetsprøve';
+    text = 'Tar svenneprøve';
   } else if (g.showCeremony) {
     locationId = lastVisited;
     text = 'I sluttseremonien';
