@@ -38,6 +38,26 @@ const HISTORICAL_CHOICES: Record<string, string> = {
   miklagard:   'guard',       // Væringgarden i Bysants — vikinger som keiserens livvakt
 };
 
+/** Hvilke 3 av de 6 stedsquiz-spørsmålene (indeks i innhold_v2.json) hver havn bruker.
+ *  Sammen med kulturmøte-spørsmålet (alltid først) gir det NØYAKTIG 4 spørsmål per havn.
+ *  Utvalget tester med vilje de faktaene gruppa straks bruker i diskusjonen og
+ *  avstemningen over valgene (testing-effekt) — ikke rene navn/årstall. De øvrige
+ *  spørsmålene beholdes i datafila og kan enkelt byttes inn her senere. */
+const STEDSQUIZ_PICK: Record<string, number[]> = {
+  lindisfarne: [4, 5, 1], // ubeskyttet rikdom · ubevoktet skattkammer · 793
+  hedeby:      [4, 2, 3], // handelsby · folketall · bevis på fjernhandel
+  dublin:      [1, 5, 3], // Aud frigjorde slaver · assimilert etter 200 år · norrønt DNA
+  paris:       [0, 3, 4], // Rollo fikk land · etterkommere ble normannere · Vilhelm 1066
+  hebrides:    [0, 4, 3], // Gall-Gàidheal · Somerled · stedsnavn-blanding
+  sameland:    [0, 3, 4], // Ottar/bytte · finnskatt · Harald giftet seg samisk
+  faroyene:    [0, 2, 3], // munkene først · første bosetter · springbrett mot Island
+  island:      [0, 1, 3], // Alltinget · Þorgeirrs kompromiss · hvorfor vi kjenner mytene
+  vinland:     [1, 0, 4], // hva utløste volden · skrælinger · hvor lenge bosetningen varte
+  novgorod:    [1, 2, 3], // kom til makten via invitasjon · Rurik · Olga
+  baghdad:     [0, 2, 3], // to reaksjoner · morgenvask-sjokk · sølvmynt-funn
+  miklagard:   [1, 3, 5], // Væringgarden · Harald Hardråde · formet Norge
+};
+
 /** Basisdata pr. destinasjon (prototypens `task` ignoreres — v2-oppgaven vinner, §14). */
 interface BaseDestination {
   id: string;
@@ -75,9 +95,12 @@ export const destinations: Destination[] = baseDestinations.map((base): Destinat
     task: v2.task,               // v2-oppgave erstatter prototypens gamle oppgave (§14)
     episkeKulturmote: v2.episkeKulturmote,
     // Stedsquizen er NØYAKTIG 4 spørsmål: kulturmøte-spørsmålet (som før lå som et eget
-    // steg etter scenen) er nå første spørsmål, etterfulgt av tre stedsquiz-spørsmål.
-    // (Selve utvalget av de tre er midlertidig — riktig innhold per havn kommer i del 3.)
-    stedsquiz: [v2.episkeKulturmote.kulturmøteSpørsmål, ...v2.stedsquiz].slice(0, 4),
+    // steg etter scenen) er spm 1, etterfulgt av de tre utvalgte stedsquiz-spørsmålene
+    // (STEDSQUIZ_PICK) — valgt for å teste fakta gruppa straks bruker i avstemningen.
+    stedsquiz: [
+      v2.episkeKulturmote.kulturmøteSpørsmål,
+      ...(STEDSQUIZ_PICK[base.id]?.map((i) => v2.stedsquiz[i]).filter(Boolean) ?? v2.stedsquiz.slice(0, 3)),
+    ].slice(0, 4),
     goodsReward: GOODS_BY_DEST[base.id] ?? [],
     route: MAIN_ROUTE.has(base.id) ? 'main' : 'side',
     unlocks: SIDE_UNLOCKS[base.id],
