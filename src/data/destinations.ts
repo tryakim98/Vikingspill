@@ -38,24 +38,26 @@ const HISTORICAL_CHOICES: Record<string, string> = {
   miklagard:   'guard',       // Væringgarden i Bysants — vikinger som keiserens livvakt
 };
 
-/** Hvilke 3 av de 6 stedsquiz-spørsmålene (indeks i innhold_v2.json) hver havn bruker.
- *  Sammen med kulturmøte-spørsmålet (alltid først) gir det NØYAKTIG 4 spørsmål per havn.
- *  Utvalget tester med vilje de faktaene gruppa straks bruker i diskusjonen og
- *  avstemningen over valgene (testing-effekt) — ikke rene navn/årstall. De øvrige
- *  spørsmålene beholdes i datafila og kan enkelt byttes inn her senere. */
+/** Hvilke 3 stedsquiz-spørsmål (indeks i innhold_v2.json sin stedsquiz-liste) hver havn
+ *  bruker. Sammen med kulturmøte-spørsmålet (alltid først) gir det NØYAKTIG 4 spørsmål.
+ *  Hvert spørsmål er valgt for å LADE et av kjernevalgene ved havnen — fakta gruppa
+ *  straks bruker i diskusjonen og avstemningen (testing-effekt), ikke rene navn/årstall.
+ *  Kommentaren etter hver linje viser hvilket valg de tre lader. Noen havner har fått et
+ *  ekstra spørsmål (indeks 6) lagt til i datafila nettopp for å dekke et valg som manglet.
+ *  De øvrige spørsmålene beholdes i datafila og kan enkelt byttes inn her senere. */
 const STEDSQUIZ_PICK: Record<string, number[]> = {
-  lindisfarne: [4, 5, 1], // ubeskyttet rikdom · ubevoktet skattkammer · 793
-  hedeby:      [4, 2, 3], // handelsby · folketall · bevis på fjernhandel
-  dublin:      [1, 5, 3], // Aud frigjorde slaver · assimilert etter 200 år · norrønt DNA
-  paris:       [0, 3, 4], // Rollo fikk land · etterkommere ble normannere · Vilhelm 1066
-  hebrides:    [0, 4, 3], // Gall-Gàidheal · Somerled · stedsnavn-blanding
-  sameland:    [0, 3, 4], // Ottar/bytte · finnskatt · Harald giftet seg samisk
-  faroyene:    [0, 2, 3], // munkene først · første bosetter · springbrett mot Island
-  island:      [0, 1, 3], // Alltinget · Þorgeirrs kompromiss · hvorfor vi kjenner mytene
-  vinland:     [1, 0, 4], // hva utløste volden · skrælinger · hvor lenge bosetningen varte
-  novgorod:    [1, 2, 3], // kom til makten via invitasjon · Rurik · Olga
-  baghdad:     [0, 2, 3], // to reaksjoner · morgenvask-sjokk · sølvmynt-funn
-  miklagard:   [1, 3, 5], // Væringgarden · Harald Hardråde · formet Norge
+  lindisfarne: [4, 5, 2], // ubeskyttet→spare/plunder · «gudegave»→plunder · munk drept→spare
+  hedeby:      [4, 3, 6], // handelsby→merchant · fjernhandel/glassperler→merchant+glass · Danevirke→spy
+  dublin:      [1, 3, 2], // Aud frigjorde slaver→slave · norrønt DNA→marriage · grunnla 841→kingdom
+  paris:       [0, 2, 5], // Rollo fikk land→normandy · Danegeld→tribute · murer/forhandling→siege
+  hebrides:    [0, 4, 6], // Gall-Gàidheal→hybrid · Somerled→hybrid/pirates · Iona→iona
+  sameland:    [0, 3, 4], // Ottar/bytte→reciprocity · finnskatt→finnskatt · Snøfrid→marriage
+  faroyene:    [0, 2, 3], // munker først→monks · Grim Kamban→settle · springbrett→springboard
+  island:      [0, 3, 6], // Alltinget→lawspeaker · Snorre→saga · blodhevn→feud
+  vinland:     [1, 5, 4], // melk→vold→force/patient · manglende forståelse→patient · varte få år→flee
+  novgorod:    [1, 3, 6], // invitert→rule · Olga→olga · Volgaruten→trade
+  baghdad:     [0, 3, 4], // to reaksjoner→adapt/rigid · 500k sølvmynter→slave_trade · astrolabet→adapt
+  miklagard:   [0, 3, 6], // utlendinger→guard · Harald Hardråde→guard · bysantinsk silke→silk
 };
 
 /** Basisdata pr. destinasjon (prototypens `task` ignoreres — v2-oppgaven vinner, §14). */

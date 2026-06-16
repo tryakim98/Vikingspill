@@ -150,6 +150,12 @@
           "opts": ["At alle fremmede er fiender", "At det 'rare' alltid avhenger av hvem som ser", "At vikingene var underlegne araberne", "At handel er umulig mellom kulturer"],
           "correct": 1,
           "feedback": "Ibrahim syntes vikingene var rare; vikingene syntes nok han var rar. Perspektiv avgjør hva som regnes som normalt."
+        },
+        {
+          "q": "Hva voktet Hedeby og Danmark mot frankerne og sakserne i sør?",
+          "opts": ["En flåte som patruljerte elvene", "Danevirke — en mektig forsvarsvoll av jord og tre", "En ring av vakttårn langs kysten", "En steinmur bygget av romerne"],
+          "correct": 1,
+          "feedback": "Danevirke stengte landeveien sørfra. Hedeby lå rett innenfor, midt i spenningsfeltet mot saksere og frankere — den som vil vite hva fienden pønsker på, lytter her."
         }
       ]
     },
@@ -342,6 +348,12 @@
           "opts": ["At den ene kulturen vinner", "At ingen av de opprinnelige kulturene overlever uendret — begge blir til noe nytt", "At kulturene holdes adskilt", "At den er kortvarig"],
           "correct": 1,
           "feedback": "Begge kulturene transformeres. Det er ikke at den ene erobrer den andre — de skaper noe tredje sammen."
+        },
+        {
+          "q": "Hva var Iona-klosteret kjent for?",
+          "opts": ["En festning som aldri falt", "Et av Europas rikeste og helligste klostre — plyndret gang på gang", "Vikingenes egen handelsstasjon", "Et samisk offersted"],
+          "correct": 1,
+          "feedback": "Iona var et åndelig sentrum med uvurderlige bøker og skatter — et fristende mål, men også noe mange mente var verdt å verne."
         }
       ]
     },
@@ -534,6 +546,12 @@
           "opts": ["At den sterkeste vinner", "At kulturmøter kan løses med kompromiss i stedet for at én part knuser den andre", "At demokrati ikke fungerer", "At religion må forbys"],
           "correct": 1,
           "feedback": "Þorgeirr viste at ulike kulturer og verdensbilder kan finne plass sammen — uten vinner og taper."
+        },
+        {
+          "q": "Hva preget det islandske ætte-samfunnet i sagatiden?",
+          "opts": ["En sterk konge som dømte alle saker", "Blodhevn — æren krevde gjengjeld når noen ble drept", "Et stående yrkesmilitære", "Forbud mot å bære våpen"],
+          "correct": 1,
+          "feedback": "Uten konge eller politi hvilte rettferd på ætten selv. Æren krevde hevn — og feider kunne vare i generasjoner, slik sagaene forteller."
         }
       ]
     },
@@ -662,6 +680,12 @@
           "opts": ["De forble rene skandinaver", "De ble fullstendig slaviske på tre generasjoner", "De dro tilbake til Sverige", "De ble utvist"],
           "correct": 1,
           "feedback": "De tok språk, navn og religion fra dem de styrte. Erobreren ble assimilert — makt er ikke det samme som kulturell dominans."
+        },
+        {
+          "q": "Hva var Volgaruten?",
+          "opts": ["En pilegrimsvei til Konstantinopel", "Handelsveien sørover — pels og slaver mot arabisk sølv", "Vikingenes vei hjem til Norge", "En forsvarslinje mot mongolene"],
+          "correct": 1,
+          "feedback": "Langs Volga fraktet Rus-vikingene pels, voks og treller sørover og kom hjem med arabiske dirhamer — derfor de enorme sølvfunnene i Skandinavia."
         }
       ]
     },
@@ -790,6 +814,12 @@
           "opts": ["Bare gull", "Kunnskap om kirkebygging, lovverk, militær taktikk og skriftkultur", "Greske slaver", "Ingenting"],
           "correct": 1,
           "feedback": "Det fjerneste kulturmøtet formet hjemlandet mest. Norges middelalder ble bygget på bysantinsk gull og kunnskap."
+        },
+        {
+          "q": "Hva var Miklagards mest ettertraktede handelsvare for vikingene?",
+          "opts": ["Jern fra Svartehavet", "Bysantinsk silke fra Silkeveien", "Rav fra Østersjøen", "Hvalrosstann fra nord"],
+          "correct": 1,
+          "feedback": "Bysantinsk silke var luksus uten like — vevd av tråd som hadde reist hele Silkeveien fra Kina. Få varer ga større ære hjemme."
         }
       ]
     }
