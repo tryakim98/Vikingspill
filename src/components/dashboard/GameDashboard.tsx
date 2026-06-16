@@ -25,7 +25,7 @@ import { HINTS, type HintKey } from '../../data/firstTimeHints';
 import { isAccessible } from '../../lib/unlocks';
 import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, callTing, castTingVote, resolveTing, clearTing, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeWheelSpin, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type TingSession, type Trial, type TrialResult, type FateEvent, type WheelSpin, type RagnarokEvent, type TradeOffer, type GameSettings } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, callTing, castTingVote, resolveTing, clearTing, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeWheelSpin, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type TingSession, type Trial, type TrialResult, type FateEvent, type WheelSpin, type RagnarokEvent, type TradeOffer, type GameSettings, type ApprovalRequest } from '../../lib/gameSync';
 import TingOverlay from '../ting/TingOverlay';
 import Icon from '../decor/Icon';
 import NorseIcon, { SKILL_PNG, TRADE_PNG } from '../decor/NorseIcon';
@@ -94,6 +94,15 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const [showOwnSaga, setShowOwnSaga] = useState(false);
 
   const [syncedGroup, setSyncedGroup] = useState<SyncedGroup | null>(null);
+
+  // Egen gruppes godkjenningsstatus (§8.3) — så eleven ser lærerens svar og får
+  // oppgavebonusen (§6.2) inn i terningkastet. Kun online.
+  const [myApproval, setMyApproval] = useState<ApprovalRequest | null>(null);
+  useEffect(() => {
+    if (!isOnline) { setMyApproval(null); return; }
+    const unsub = subscribeApproval(session.gameCode, myGroupId, setMyApproval);
+    return () => unsub();
+  }, [isOnline, myGroupId, session]);
 
   // Tekstlengde — lærer styrer (full/short), eller velger 'group' så hver gruppe velger
   const teacherTextLength = gameSettings.textLength ?? 'full';
@@ -630,6 +639,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         onRequestApproval={session.mode === 'online'
           ? (destId, taskTitle) => requestApproval(session.gameCode, myGroupId, { destId, taskTitle, shipName: setup.shipName }).catch(() => {})
           : undefined}
+        approval={isOnline ? myApproval : null}
         isChief={isChief}
         lateGame={state.visited.length >= 6}
         requireSaga={requireSaga}

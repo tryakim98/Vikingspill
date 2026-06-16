@@ -337,6 +337,29 @@ export function subscribeApprovals(
   });
 }
 
+/** Elev: lytt på egen gruppes godkjenningsstatus, så eleven ser lærerens svar (og får
+ *  terningbonusen for oppgaven, §6.2) uten å måtte spørre på nytt. */
+export function subscribeApproval(
+  code: string,
+  groupId: string,
+  callback: (approval: ApprovalRequest | null) => void,
+): Unsubscribe {
+  return onValue(ref(db, `games/${code}/approvals/${groupId}`), (snap) => {
+    callback((snap.val() as ApprovalRequest | null) ?? null);
+  });
+}
+
+/** Terningbonus fra oppgavegodkjenning (§6.2): godkjent +2 · delvis +1 · forkastet −1 ·
+ *  uavklart/ikke bedt om 0. Brukes både i elevflyten og i odds-visningen. */
+export function taskBonusForApproval(status: ApprovalStatus | undefined | null): number {
+  switch (status) {
+    case 'approved': return 2;
+    case 'partial': return 1;
+    case 'rejected': return -1;
+    default: return 0;
+  }
+}
+
 // === Gudenes prøve (§3.4 / §8.5) ==================================================
 // Lærer trykker én knapp; spillet trekker utfordring + ferdighet og kringkaster den
 // likt til alle grupper via /games/{code}/trial (overskrives ved hver utløsning).

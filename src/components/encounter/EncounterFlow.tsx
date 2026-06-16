@@ -11,7 +11,8 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import type { Destination, Choice, RollOdds, SkillKey } from '../../types';
-import type { SyncedEncounter, CouncilAdvice } from '../../lib/gameSync';
+import type { SyncedEncounter, CouncilAdvice, ApprovalRequest } from '../../lib/gameSync';
+import { taskBonusForApproval } from '../../lib/gameSync';
 import { skillTreeData } from '../../data';
 import {
   rollDice,
@@ -43,6 +44,9 @@ interface EncounterFlowProps {
   onExit: () => void;
   /** Sett kun når online — viser «Be om godkjenning» på oppgavesiden (§8.3). */
   onRequestApproval?: (destId: string, taskTitle: string) => void;
+  /** Online: egen gruppes godkjenningsstatus. Når den gjelder DENNE destinasjonen gir
+   *  den en terningbonus (§6.2: godkjent +2 · delvis +1 · forkastet −1). */
+  approval?: ApprovalRequest | null;
   /** Multi-enhet: når satt, leses state fra Firebase i stedet for lokal useState,
    *  og setterne skriver via onUpdateEncounter. Ikke-høvding ser banner i stedet for knapper. */
   isChief?: boolean;
@@ -151,7 +155,7 @@ function AdviceSummary({ advice, memberIds, choices }: {
 }
 
 export default function EncounterFlow({
-  destination, skills, onComplete, onExit, onRequestApproval,
+  destination, skills, onComplete, onExit, onRequestApproval, approval = null,
   isChief = true, syncedEncounter = null, onUpdateEncounter,
   lateGame = false, requireSaga = false, requirePerspective = false, requireBridge = false, requireQuiz = false,
   requireCouncil = false, myMemberId, memberIds = [], onGiveAdvice, textLength = 'full', onToggleTextLength,
@@ -296,8 +300,13 @@ export default function EncounterFlow({
     return () => clearTimeout(t);
   }, [step, isChief]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Oppgavebonus (§6.2): bare når lærerens svar gjelder DENNE destinasjonen, så en
+  // gammel godkjenning fra et tidligere sted ikke smitter over.
+  const approvalForHere = approval && approval.destId === d.id ? approval : null;
+  const taskBonus = taskBonusForApproval(approvalForHere?.status);
+
   const choiceLatePenalty = choice ? lateGamePenalty(choice, skills, lateGame) : 0;
-  const modifier = choice ? quizBonus + skillBonusForChoice(choice, skills) + choiceLatePenalty : 0;
+  const modifier = choice ? quizBonus + taskBonus + skillBonusForChoice(choice, skills) + choiceLatePenalty : 0;
   const outcome = choice && roll ? choice.outcomes[roll.tier] : null;
 
   const ChiefBanner = () => (
@@ -420,15 +429,21 @@ export default function EncounterFlow({
             <p className="mb-3 font-inter text-sm text-viking-darkblue">{d.task.desc}</p>
             <p className="font-inter text-xs italic text-viking-darkblue/65">{d.task.rationale}</p>
             {onRequestApproval && (
-              <div className="mt-4 border-t border-viking-rust/25 pt-3">
-                {approvalSent ? (
-                  <p className="inline-flex items-center gap-1.5 font-inter text-sm text-viking-moss"><Icon name="hand" size={14} /> Sendt til læreren — venter på godkjenning</p>
+              <div className="mt-4 border-t border-viking-rust/25 pt-3" data-testid="approval-box">
+                {approvalForHere?.status === 'approved' ? (
+                  <p className="inline-flex items-center gap-1.5 font-cinzel text-sm font-bold text-viking-moss" data-testid="approval-result"><Icon name="hand" size={14} /> Læreren velsignet oppgaven — <strong>+2</strong> på terningen!</p>
+                ) : approvalForHere?.status === 'partial' ? (
+                  <p className="inline-flex items-center gap-1.5 font-cinzel text-sm font-bold text-viking-gold" data-testid="approval-result"><Icon name="hand" size={14} /> Delvis nåde fra læreren — <strong>+1</strong> på terningen.</p>
+                ) : approvalForHere?.status === 'rejected' ? (
+                  <p className="inline-flex items-center gap-1.5 font-cinzel text-sm font-bold text-viking-crimson" data-testid="approval-result"><Icon name="hand" size={14} /> Læreren forkastet oppgaven — <strong>−1</strong> på terningen.</p>
+                ) : approvalSent || approvalForHere?.status === 'pending' ? (
+                  <p className="inline-flex items-center gap-1.5 font-inter text-sm text-viking-rust"><Icon name="hand" size={14} /> Sendt til læreren — venter på dom. Bonusen legges til terningen når læreren svarer.</p>
                 ) : (
                   <button
                     onClick={() => { onRequestApproval(d.id, d.task.title); setApprovalSent(true); }}
                     className="rounded-md border-2 border-viking-rust/50 px-4 py-1.5 font-cinzel text-sm text-viking-rust hover:border-viking-rust hover:bg-viking-rust/10"
                   >
-                    <span className="inline-flex items-center gap-1.5"><Icon name="hand" size={14} /> Be læreren om godkjenning</span>
+                    <span className="inline-flex items-center gap-1.5"><Icon name="hand" size={14} /> Be læreren om å vurdere oppgaven (gir terningbonus)</span>
                   </button>
                 )}
               </div>
@@ -840,6 +855,11 @@ export default function EncounterFlow({
           <OddsBar baseRoll={choice.baseRoll} />
           <div className="mt-4 font-mono text-sm text-viking-paper/90">
             <p>Quizbonus: +{quizBonus}</p>
+            {taskBonus !== 0 && (
+              <p className={taskBonus > 0 ? 'text-viking-moss' : 'text-viking-crimson'} data-testid="task-bonus-line">
+                Oppgave (lærer): {taskBonus > 0 ? '+' : ''}{taskBonus}
+              </p>
+            )}
             <p>Ferdighet over krav: +{skillBonus}</p>
             {choiceLatePenalty < 0 && (
               <p className="text-viking-crimson" data-testid="late-penalty-line">
