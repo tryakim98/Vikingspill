@@ -17,6 +17,7 @@ import { skillTreeData, holmgangDueller } from '../../data';
 import { subscribeGroups, subscribeDuels, createDuel, updateDuel, submitChampionResult, type SyncedGroup, type Duel, type DuelChampionResult } from '../../lib/gameSync';
 import HolmgangMiniGame from './HolmgangMiniGame';
 import MaterialPanel from '../decor/MaterialPanel';
+import Icon from '../decor/Icon';
 
 const APPLIED_KEY = 'vikingspill_applied_duels';
 
@@ -102,7 +103,7 @@ export default function SeaBattle({ code, myGroupId, myShipName, mySkills, onRes
 
   return (
     <MaterialPanel material="jern" className="border-2 border-viking-crimson/50 p-5">
-      <h2 className="mb-1 font-cinzel text-2xl text-viking-gold">⚔️ Sjøslag — Holmgang på bølgene</h2>
+      <h2 className="mb-1 inline-flex items-center gap-2 font-cinzel text-2xl text-viking-gold"><Icon name="axe" size={22} /> Sjøslag — Holmgang på bølgene</h2>
       <p className="mb-4 font-inter text-sm text-viking-paper/75">Utfordre et annet skip. Hver gruppe utnevner en holmgangsmann. Vinner: +3 handel · taper: −2 · begge: −1 rykte.</p>
 
       {active.map(([id, d]) => {
@@ -134,7 +135,7 @@ export default function SeaBattle({ code, myGroupId, myShipName, mySkills, onRes
                 onDone={(r) => submitChampionResult(code, id, myGroupId, { ...r, finishedAt: Date.now() }).catch(() => {})}
               />
             ) : !otherResult ? (
-              <p className="text-center font-cinzel text-viking-gold-soft" data-testid="waiting-opponent">⏳ Venter på {other} …</p>
+              <p className="inline-flex w-full items-center justify-center gap-1.5 text-center font-cinzel text-viking-gold-soft" data-testid="waiting-opponent"><Icon name="hourglass" size={15} /> Venter på {other} …</p>
             ) : (
               <p className="text-center font-cinzel text-viking-gold-soft">Beregner utfall …</p>
             )}

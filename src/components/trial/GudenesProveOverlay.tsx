@@ -13,6 +13,7 @@ import { motion } from 'motion/react';
 import type { SkillKey } from '../../types';
 import { skillTreeData } from '../../data';
 import { AutoIcon } from '../decor/NorseIcon';
+import Icon from '../decor/Icon';
 import { playSound } from '../../lib/sound';
 import type { TrialResult } from '../../lib/gameSync';
 
@@ -56,9 +57,9 @@ export default function GudenesProveOverlay({ navn, desc, skill, skillLevel, res
           initial={{ scale: 0.4, opacity: 0 }}
           animate={{ scale: 1, opacity: 1, x: [0, -10, 9, -7, 6, 0] }}
           transition={{ duration: 0.7 }}
-          className="relative text-7xl"
+          className="relative text-viking-gold"
         >
-          👁️
+          <Icon name="eye" size={72} />
         </motion.div>
         <motion.h1
           initial={{ scale: 0.7, opacity: 0 }}
@@ -66,7 +67,7 @@ export default function GudenesProveOverlay({ navn, desc, skill, skillLevel, res
           transition={{ delay: 0.25, type: 'spring', stiffness: 200, damping: 12 }}
           className="relative mt-4 font-cinzel text-4xl font-bold tracking-widest text-viking-gold drop-shadow-lg md:text-5xl"
         >
-          ⚡ GUDENES PRØVE ⚡
+          <span className="inline-flex items-center gap-3"><Icon name="bolt" size={36} /> GUDENES PRØVE <Icon name="bolt" size={36} /></span>
         </motion.h1>
         <p className="relative mt-2 font-inter italic text-viking-gold-soft">Gudene avbryter reisen — alle skip prøves samtidig!</p>
 
@@ -90,7 +91,7 @@ export default function GudenesProveOverlay({ navn, desc, skill, skillLevel, res
           transition={{ duration: 1.8, repeat: Infinity }}
           className="relative mt-3 font-inter text-sm italic text-viking-gold-soft/70"
         >
-          ⏳ Venter på Odins dom …
+          <span className="inline-flex items-center gap-1.5"><Icon name="hourglass" size={14} /> Venter på Odins dom …</span>
         </motion.p>
       </motion.div>
     );
@@ -102,10 +103,8 @@ export default function GudenesProveOverlay({ navn, desc, skill, skillLevel, res
   const placement = isWinner ? 'winner' : isRunnerUp ? 'runnerUp' : 'consolation';
   const repReward = TRIAL_REWARD[placement];
 
-  const headline =
-    isWinner ? '🏆 Seier!' :
-    isRunnerUp ? '🥈 Andreplass' :
-    '🤝 Tapper innsats';
+  const headlineIcon = isWinner ? 'trophy' : isRunnerUp ? 'medal' : 'hand';
+  const headlineText = isWinner ? 'Seier!' : isRunnerUp ? 'Andreplass' : 'Tapper innsats';
 
   const headlineColor =
     isWinner ? '#A9A08D' :
@@ -128,10 +127,10 @@ export default function GudenesProveOverlay({ navn, desc, skill, skillLevel, res
         initial={{ scale: 0.7, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 12 }}
-        className="font-cinzel text-5xl font-bold drop-shadow-lg md:text-6xl"
+        className="inline-flex items-center gap-3 font-cinzel text-5xl font-bold drop-shadow-lg md:text-6xl"
         style={{ color: headlineColor }}
       >
-        {headline}
+        <Icon name={headlineIcon} size={48} /> {headlineText}
       </motion.h1>
 
       <div className="mt-8 max-w-md rounded-lg border-2 border-viking-gold bg-viking-surface p-6">

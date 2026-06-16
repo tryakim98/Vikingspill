@@ -24,10 +24,10 @@ const SHIP_COLORS = [
   { label: 'Karmosin', value: '#8B2929' },
 ];
 
-const SYMBOLS: { key: ShipSymbol; emoji: string; label: string }[] = [
-  { key: 'drage', emoji: '🐉', label: 'Drage' },
-  { key: 'ulv', emoji: '🐺', label: 'Ulv' },
-  { key: 'ravn', emoji: '🐦‍⬛', label: 'Ravn' },
+const SYMBOLS: { key: ShipSymbol; icon: string; label: string }[] = [
+  { key: 'drage', icon: 'dragonhead', label: 'Drage' },
+  { key: 'ulv', icon: 'wolf', label: 'Ulv' },
+  { key: 'ravn', icon: 'raven', label: 'Ravn' },
 ];
 
 const SKILL_KEYS = Object.keys(skillTreeData) as SkillKey[];
@@ -135,7 +135,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
                       onClick={() => setSymbol(s.key)}
                       className={`flex flex-col items-center gap-1 rounded-lg border-2 py-3 transition-all ${symbol === s.key ? 'border-viking-gold bg-viking-gold/15' : 'border-viking-gold/30 hover:border-viking-gold/70'}`}
                     >
-                      <span className="text-3xl">{s.emoji}</span>
+                      <AutoIcon name={s.icon} size={30} className="text-viking-gold" />
                       <span className="font-inter text-sm">{s.label}</span>
                     </button>
                   ))}
@@ -218,7 +218,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
             </div>
             <div className="mx-auto max-w-sm rounded-lg border-2 border-viking-gold/40 bg-viking-darkblue/50 p-6 text-left font-inter">
               <p className="mb-2"><span className="text-viking-gold-soft">Skip:</span> <span className="font-cinzel text-lg text-viking-paper">{shipName}</span></p>
-              <p className="mb-2"><span className="text-viking-gold-soft">Symbol:</span> {SYMBOLS.find((s) => s.key === symbol)?.emoji} {SYMBOLS.find((s) => s.key === symbol)?.label}</p>
+              <p className="mb-2 inline-flex items-center gap-1.5"><span className="text-viking-gold-soft">Symbol:</span> <AutoIcon name={SYMBOLS.find((s) => s.key === symbol)?.icon ?? 'dragonhead'} size={16} className="text-viking-gold-soft" /> {SYMBOLS.find((s) => s.key === symbol)?.label}</p>
               <p className="inline-flex items-center gap-1.5"><span className="text-viking-gold-soft">Startferdighet:</span> <NorseIcon name={SKILL_PNG[startSkill]} size={16} className="text-viking-gold-soft" /> {skillTreeData[startSkill].name}</p>
             </div>
             <div className="mt-8 flex justify-center gap-4">
@@ -227,7 +227,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
                 onClick={() => onComplete({ shipName: shipName.trim(), shipSymbol: symbol, shipColor: color, startSkill })}
                 className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2 font-saga font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft"
               >
-                ⛵ Sett seil
+                <span className="inline-flex items-center gap-2"><AutoIcon name="sail" size={16} /> Sett seil</span>
               </button>
             </div>
           </div>

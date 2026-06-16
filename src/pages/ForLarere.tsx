@@ -8,6 +8,7 @@
 
 import { Link } from 'react-router-dom';
 import { ThorHammer, Raven, Yggdrasil, Vegvisir, RuneDivider, KnotBorder } from '../components/decor';
+import Icon from '../components/decor/Icon';
 
 interface StepProps {
   num: string;
@@ -32,7 +33,7 @@ function Step({ num, title, body }: StepProps) {
 function Tip({ icon, text }: { icon: string; text: React.ReactNode }) {
   return (
     <li className="flex items-start gap-3">
-      <span className="font-cinzel text-xl text-viking-gold">{icon}</span>
+      <span className="mt-0.5 shrink-0 text-viking-gold"><Icon name={icon} size={20} /></span>
       <span className="font-inter text-viking-paper/90">{text}</span>
     </li>
   );
@@ -92,7 +93,7 @@ export default function ForLarere() {
             <Step
               num="1"
               title="Åpne lenken på din maskin (gjerne projektor)"
-              body={<>Trykk <strong className="text-viking-gold">«Jeg er Tor ⚡»</strong>. Du blir spillets game master.</>}
+              body={<>Trykk <strong className="inline-flex items-center gap-1 text-viking-gold">«Jeg er Tor <Icon name="bolt" size={14} />»</strong>. Du blir spillets game master.</>}
             />
             <Step
               num="2"
@@ -123,12 +124,12 @@ export default function ForLarere() {
             <Raven size={32} facing="right" color="#CDC3AD" /> Gode tips
           </h2>
           <ul className="space-y-3">
-            <Tip icon="🖥" text={<>La din egen skjerm vises på <strong>projektor eller storskjerm</strong>. Det er der hele klassen ser kartet, leaderboardet og hjulet.</>} />
-            <Tip icon="👥" text={<>Lag grupper på <strong>3–5 elever</strong>. Mindre grupper får dårlig diskusjon, større blir kaotiske.</>} />
-            <Tip icon="⛵" text={<>Hver gruppe trenger <strong>én høvding</strong> som har rett til å trykke valgene. De andre er med på skjermen og hjelper å diskutere.</>} />
-            <Tip icon="⏱" text={<>Tidsbruk: en kort time (~75 min) for 6–7 steder, en dobbeltime (~120 min) for full reise gjennom alle 12.</>} />
-            <Tip icon="📜" text={<>Skru på «Krev begrunnelse» hvis du vil ha saga-loggen tilgjengelig for etterarbeid og vurdering. Innstillingene ligger oppe i panelet ditt.</>} />
-            <Tip icon="📖" text={<>For yrkesfag eller klasser med varierende leseferdighet: bruk innstillingen <strong>Kortversjon</strong> for kortere tekster som beholder handlingen.</>} />
+            <Tip icon="monitor" text={<>La din egen skjerm vises på <strong>projektor eller storskjerm</strong>. Det er der hele klassen ser kartet, leaderboardet og hjulet.</>} />
+            <Tip icon="people" text={<>Lag grupper på <strong>3–5 elever</strong>. Mindre grupper får dårlig diskusjon, større blir kaotiske.</>} />
+            <Tip icon="sail" text={<>Hver gruppe trenger <strong>én høvding</strong> som har rett til å trykke valgene. De andre er med på skjermen og hjelper å diskutere.</>} />
+            <Tip icon="hourglass" text={<>Tidsbruk: en kort time (~75 min) for 6–7 steder, en dobbeltime (~120 min) for full reise gjennom alle 12.</>} />
+            <Tip icon="scroll" text={<>Skru på «Krev begrunnelse» hvis du vil ha saga-loggen tilgjengelig for etterarbeid og vurdering. Innstillingene ligger oppe i panelet ditt.</>} />
+            <Tip icon="book" text={<>For yrkesfag eller klasser med varierende leseferdighet: bruk innstillingen <strong>Kortversjon</strong> for kortere tekster som beholder handlingen.</>} />
           </ul>
         </section>
 

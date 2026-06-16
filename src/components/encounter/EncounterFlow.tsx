@@ -37,6 +37,11 @@ import MaterialPanel from '../decor/MaterialPanel';
 
 type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'radslagning' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
 
+// Oppgavetype → strek-glyf (erstatter den fargerike emojien i task.icon).
+const TASK_TYPE_ICON: Record<string, string> = {
+  foto: 'camera', innspilling: 'mic', geoguesser: 'compass',
+};
+
 interface EncounterFlowProps {
   destination: Destination;
   skills: Record<SkillKey, number>;
@@ -424,7 +429,7 @@ export default function EncounterFlow({
             <Html html={d.famousPerson ?? ''} className="font-inter text-sm text-viking-darkblue [&_strong]:text-viking-rust" />
           </MaterialPanel>
           <MaterialPanel material="pergament" framed className="p-5">
-            <p className="mb-1 font-mono text-xs text-viking-rust">{d.task.icon} {d.task.typeLabel}</p>
+            <p className="mb-1 inline-flex items-center gap-1.5 font-mono text-xs text-viking-rust"><Icon name={TASK_TYPE_ICON[d.task.type] ?? 'scroll'} size={13} /> {d.task.typeLabel}</p>
             <h3 className="mb-2 font-cinzel text-xl text-[#5C3E22]">{d.task.title}</h3>
             <p className="mb-3 font-inter text-sm text-viking-darkblue">{d.task.desc}</p>
             <p className="font-inter text-xs italic text-viking-darkblue/65">{d.task.rationale}</p>

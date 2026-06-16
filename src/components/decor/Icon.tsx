@@ -93,6 +93,10 @@ const GLYPHS: Record<string, string> = {
   gear:      'M12 9a3 3 0 100 6 3 3 0 000-6Z M12 3v3 M12 18v3 M3 12h3 M18 12h3 M5.6 5.6l2.1 2.1 M16.3 16.3l2.1 2.1 M18.4 5.6l-2.1 2.1 M5.6 18.4l2.1-2.1',
   pause:     'M9 5v14 M15 5v14',
   hourglass: 'M6 3h12 M6 21h12 M6 3c0 5 6 6 6 9 0-3 6-4 6-9 M6 21c0-5 6-6 6-9 0 3 6 4 6 9',
+  'horn-muted':'M20 7c-5-2-11 0-14 5-1 2 0 4 2 4 5 0 9-3 12-7 M20 7c1 1 1 2 0 3 M4 21L21 4',
+  warn:        'M12 3L2 20h20Z M12 9v5 M12 17h.01',
+  camera:      'M4 8h3l1.5-2h7L17 8h3v11H4Z M12 11a3 3 0 100 6 3 3 0 000-6Z',
+  mic:         'M12 4a3 3 0 013 3v5a3 3 0 01-6 0V7a3 3 0 013-3Z M7 11a5 5 0 0010 0 M12 16v4 M9 20h6',
 };
 
 const isRune = (n: string): n is RuneName => n in RUNES;

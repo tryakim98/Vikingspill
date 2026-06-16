@@ -12,6 +12,7 @@
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useRole } from '../hooks/useRole';
 import { Yggdrasil, Raven, ThorHammer, DragonHead, RuneDivider, KnotBorder, Vegvisir } from '../components/decor';
+import Icon from '../components/decor/Icon';
 
 export default function RoleSelect() {
   const navigate = useNavigate();
@@ -60,8 +61,8 @@ export default function RoleSelect() {
             <div className="relative">
               <div className="mb-3 flex items-center gap-4">
                 <ThorHammer size={56} color="#CDC3AD" />
-                <h2 className="font-saga text-3xl font-bold text-viking-gold md:text-4xl viking-engraved">
-                  Jeg er Tor ⚡
+                <h2 className="inline-flex items-center gap-2 font-saga text-3xl font-bold text-viking-gold md:text-4xl viking-engraved">
+                  Jeg er Tor <Icon name="bolt" size={28} />
                 </h2>
               </div>
               <p className="max-w-md font-inter text-viking-paper/90">

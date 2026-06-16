@@ -6,12 +6,13 @@
  */
 
 import type { FallbackProps } from 'react-error-boundary';
+import Icon from '../decor/Icon';
 
 export default function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   const message = error instanceof Error ? error.message : String(error);
   return (
     <div role="alert" className="flex min-h-screen flex-col items-center justify-center gap-4 bg-viking-darkblue px-6 text-center text-viking-paper">
-      <div className="text-6xl">⚓</div>
+      <Icon name="anchor" size={60} className="text-viking-gold" />
       <h1 className="font-cinzel text-3xl font-bold text-viking-gold">Skipet gikk på grunn</h1>
       <p className="max-w-md font-inter text-viking-paper/85">
         Noe uventet skjedde. Prøv igjen, eller last siden på nytt — fremgangen deres er lagret.

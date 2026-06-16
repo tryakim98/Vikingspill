@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { DuelChampionResult } from '../../lib/gameSync';
 import { playSound } from '../../lib/sound';
+import Icon from '../decor/Icon';
 
 type Kind = 'tapping' | 'reaksjon' | 'regning';
 
@@ -77,7 +78,7 @@ function TappingGame({ onDone }: { onDone: Props['onDone'] }) {
         data-testid="tap-button"
         className="my-3 h-32 w-full select-none touch-manipulation rounded-lg border-2 border-viking-gold bg-viking-gold/20 font-cinzel text-2xl text-viking-gold transition-transform active:scale-95 disabled:opacity-50"
       >
-        ⚔ TRYKK!
+        <span className="inline-flex items-center gap-2"><Icon name="axe" size={22} /> TRYKK!</span>
       </button>
       <p className="font-cinzel text-4xl font-bold text-viking-gold" data-testid="tap-count">{score}</p>
       {phase === 'done' && <p className="mt-2 font-inter text-sm text-viking-gold-soft">Sender resultat …</p>}

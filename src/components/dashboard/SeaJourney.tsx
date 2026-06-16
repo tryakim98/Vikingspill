@@ -4,7 +4,7 @@
  * Bygger på samme håndplasserte koordinater som lærerens SeaMap.
  *
  *  - Klikk på en destinasjon → infokort med navn, region, teaser og status.
- *  - Tilgjengelige steder glør i gull; besøkte er grønne ✓; låste er nedtonet med 🔒.
+ *  - Tilgjengelige steder glør i gull; besøkte er grønne ✓; låste er nedtonet og merket med en lås-glyf.
  *  - Høvdingen klikker «Bekreft seilas» — skipet glir fra siste posisjon mot målet
  *    (motion-animasjon på alle medlemmers skjermer) før encounter-flyten åpner.
  *  - Preview-valg + sailing-state er synket via Firebase, så alle ser samme bilde.

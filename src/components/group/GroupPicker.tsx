@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import { subscribeGroups, type SyncedGroup } from '../../lib/gameSync';
 import VikingShip from '../ship/VikingShip';
+import Icon from '../decor/Icon';
 import type { ShipSymbol } from '../../types';
 
 interface Props {
@@ -77,7 +78,7 @@ export default function GroupPicker({ gameCode, myMemberId, onCreateNew, onJoinE
             data-testid="create-new-group"
             className="w-full rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-2.5 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
           >
-            ⛵ Rigg et nytt skip
+            <span className="inline-flex items-center gap-2"><Icon name="sail" size={16} /> Rigg et nytt skip</span>
           </button>
         </section>
 

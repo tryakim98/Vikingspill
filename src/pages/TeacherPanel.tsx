@@ -208,7 +208,7 @@ export default function TeacherPanel() {
     triggerRagnarok(code, { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, at: Date.now() }).catch(() => {});
   };
 
-  /** Skjebnehjulet landet på 🌫️ — tving alle skip til en Skjebnemøte ved neste seilas. */
+  /** Skjebnehjulet landet på skjebnemøte-feltet — tving alle skip til en Skjebnemøte ved neste seilas. */
   const broadcastSkjebne = () => {
     if (!code) return;
     Object.keys(groups).forEach((gid) => {
@@ -600,7 +600,7 @@ export default function TeacherPanel() {
               })}
             </div>
           </div>
-          </div>{/* ⚙ Spillregler-seksjon slutt */}
+          </div>{/* Spillregler-seksjon slutt */}
         </div>
 
         {/* Handelstorg — kompakt aktivitetspanel */}

@@ -55,7 +55,7 @@ export default function JoinGame({ onJoin, onOffline, onSwitchRole }: Props) {
         {/* PRIMÆR: Bli med i lærerens spill */}
         <section className="rounded-lg border-2 border-viking-gold bg-viking-surface p-5 shadow-[0_0_18px_rgba(205,195,173,0.15)]">
           <div className="mb-2 flex items-center gap-2">
-            <span className="text-2xl" aria-hidden>🟢</span>
+            <span className="inline-block h-3.5 w-3.5 shrink-0 rounded-full bg-viking-moss" aria-hidden />
             <h2 className="font-cinzel text-xl font-bold text-viking-gold">Bli med i lærerens spill</h2>
           </div>
           <p className="mb-4 font-inter text-sm text-viking-paper/85">
@@ -93,7 +93,7 @@ export default function JoinGame({ onJoin, onOffline, onSwitchRole }: Props) {
         {/* SEKUNDÆR: Øv alene (offline) — bevisst, eget kort, ikke en bortgjemt lenke */}
         <section className="rounded-lg border-2 border-viking-gold/30 bg-viking-darkblue/50 p-5">
           <div className="mb-2 flex items-center gap-2">
-            <span className="text-2xl" aria-hidden>⚪</span>
+            <span className="inline-block h-3.5 w-3.5 shrink-0 rounded-full border-2 border-viking-gold-soft" aria-hidden />
             <h2 className="font-cinzel text-xl font-bold text-viking-gold-soft">Øv alene (offline)</h2>
           </div>
           <p className="mb-4 font-inter text-sm text-viking-paper/75">

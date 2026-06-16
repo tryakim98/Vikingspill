@@ -13,6 +13,7 @@ import type { SyncedGroup } from '../../lib/gameSync';
 import type { ShipSymbol } from '../../types';
 import { destinations } from '../../data';
 import VikingShip from '../ship/VikingShip';
+import Icon from '../decor/Icon';
 import { groupStatus } from '../../lib/groupStatus';
 
 const MAP_POS: Record<string, { x: number; y: number }> = {
@@ -92,7 +93,7 @@ export default function SeaMap({ groups }: { groups: Record<string, SyncedGroup>
           <VikingShip color={s.g.shipColor} symbol={s.g.shipSymbol as ShipSymbol} size={44} bob />
           <span className="absolute left-1/2 top-full mt-0.5 -translate-x-1/2 whitespace-nowrap rounded bg-viking-darkblue/85 px-1.5 py-px text-center font-cinzel text-[10px] leading-tight text-viking-paper">
             {s.g.shipName}
-            {s.st.noMembers && <span className="ml-1 text-viking-crimson" title="Ingen påkoblede enheter">⚠</span>}
+            {s.st.noMembers && <Icon name="warn" size={12} className="ml-1 inline-block align-[-1px] text-viking-crimson" title="Ingen påkoblede enheter" />}
             <span className="block font-inter text-[8px] not-italic text-viking-gold-soft/80">{s.st.text}</span>
           </span>
         </motion.div>

@@ -60,7 +60,7 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
     return (
       <div className="flex min-h-screen flex-col items-center justify-center viking-screen px-4 text-center text-viking-paper">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="mb-4 text-6xl">🏰</div>
+          <AutoIcon name="longhouse" size={60} className="mb-4 text-viking-gold" />
           <h1 className="mb-3 font-cinzel text-3xl font-bold text-viking-gold md:text-4xl">Kongen kaller alle hjem til Avaldsnes</h1>
           <p className="mb-8 font-inter italic text-viking-gold-soft">Reisen er over. Stig i land og hør hvordan det gikk.</p>
           <div className="mb-8 flex justify-center">

@@ -16,7 +16,7 @@ import type { ShipSymbol, SkillKey, TradeGoodId } from '../../types';
 import { skillTreeData, TRADE_GOODS } from '../../data';
 import { groupStatus } from '../../lib/groupStatus';
 import VikingShip from '../ship/VikingShip';
-import NorseIcon, { SKILL_PNG } from '../decor/NorseIcon';
+import NorseIcon, { SKILL_PNG, AutoIcon } from '../decor/NorseIcon';
 
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const total = (g: SyncedGroup) => g.scores.culturalUnderstanding + g.scores.tradeGain + g.scores.reputation;
@@ -62,7 +62,7 @@ export default function Leaderboard({ ranked, onRemoveGroup, onSummon, onClearSu
                       <p className="flex flex-wrap items-center gap-x-2 font-inter text-[11px] text-viking-gold-soft">
                         <span className="font-mono">{g.visited.length}/12 steder</span>
                         {st.noMembers
-                          ? <span className="text-viking-crimson" title="Ingen påkoblede enheter">⚠ ingen pålogget</span>
+                          ? <span className="inline-flex items-center gap-1 text-viking-crimson" title="Ingen påkoblede enheter"><AutoIcon name="warn" size={12} /> ingen pålogget</span>
                           : <span className="text-viking-gold-soft/70">· {st.memberCount} {st.memberCount === 1 ? 'enhet' : 'enheter'}</span>}
                         <span className="text-viking-gold-soft/90">· {st.text}</span>
                       </p>
@@ -87,7 +87,7 @@ export default function Leaderboard({ ranked, onRemoveGroup, onSummon, onClearSu
                       title="Varsel sendt — venter på kvittering. Trykk for å avbryte."
                       className="shrink-0 animate-pulse rounded border border-viking-gold/60 bg-viking-gold/15 px-2 py-1 font-cinzel text-[11px] text-viking-gold-soft"
                     >
-                      📣 kalt …
+                      <span className="inline-flex items-center gap-1"><AutoIcon name="horn" size={13} /> kalt …</span>
                     </button>
                   ) : (
                     <button
@@ -96,7 +96,7 @@ export default function Leaderboard({ ranked, onRemoveGroup, onSummon, onClearSu
                       title="Kall gruppa til læreren"
                       className="shrink-0 rounded border border-viking-gold/40 px-2 py-1 font-cinzel text-[11px] text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold"
                     >
-                      📣 Kall hit
+                      <span className="inline-flex items-center gap-1"><AutoIcon name="horn" size={13} /> Kall hit</span>
                     </button>
                   )}
                 </div>

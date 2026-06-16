@@ -12,6 +12,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import type { SkjebneMote, SkjebneMoteChoice, SkjebneEffects } from '../../data/skjebnemoter';
 import { DEFAULT_ROLL_THRESHOLD } from '../../data/skjebnemoter';
+import Icon from '../decor/Icon';
 
 interface Props {
   quest: SkjebneMote;
@@ -83,9 +84,9 @@ export function SkjebneMoteModal({ quest, isChief, selectedChoiceId, rollResult,
               {quest.choices.map((c) => {
                 const t = c.roll?.threshold ?? DEFAULT_ROLL_THRESHOLD;
                 const hint = c.roll
-                  ? c.roll.skill
-                    ? `🎲 Terning + ${SKILL_LABEL[c.roll.skill] ?? c.roll.skill} (≥ ${t})`
-                    : `🎲 Terning (≥ ${t})`
+                  ? <><Icon name="die" size={13} className="mr-1 inline-block align-[-1px]" />{c.roll.skill
+                      ? `Terning + ${SKILL_LABEL[c.roll.skill] ?? c.roll.skill} (≥ ${t})`
+                      : `Terning (≥ ${t})`}</>
                   : null;
                 return (
                   <button
@@ -117,7 +118,7 @@ export function SkjebneMoteModal({ quest, isChief, selectedChoiceId, rollResult,
                   data-testid="skjebnemote-roll"
                 >
                   <span className="font-cinzel text-sm text-viking-gold-soft">
-                    🎲 {rollResult.roll}{rollResult.bonus ? ` + ${rollResult.bonus}` : ''} = <strong className="text-viking-gold">{rollResult.total}</strong>
+                    <Icon name="die" size={14} className="mr-1 inline-block align-[-2px]" />{rollResult.roll}{rollResult.bonus ? ` + ${rollResult.bonus}` : ''} = <strong className="text-viking-gold">{rollResult.total}</strong>
                   </span>
                   <span className={`font-cinzel text-sm ${rollResult.won ? 'text-viking-gold' : 'text-viking-crimson'}`}>
                     {rollResult.won ? 'Seier' : 'Tap'}

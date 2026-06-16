@@ -5,6 +5,8 @@
  * mister mest og feltet jevnes ut.
  */
 
+import Icon from '../decor/Icon';
+
 interface Props {
   lost: number;
   onDone: () => void;
@@ -16,7 +18,7 @@ export default function RagnarokOverlay({ lost, onDone }: Props) {
       <div className="absolute inset-0 bg-viking-darkblue/85" />
       <div className="relative flex flex-col items-center">
         <p className="font-cinzel text-sm uppercase tracking-[0.3em] text-viking-crimson">Gudene straffer hybris</p>
-        <div className="mt-3 animate-pulse text-7xl">⚡🐺⚡</div>
+        <div className="mt-3 flex animate-pulse items-center gap-3 text-viking-gold"><Icon name="bolt" size={56} /><Icon name="wolf" size={64} /><Icon name="bolt" size={56} /></div>
         <h1 className="mt-3 font-cinzel text-5xl font-bold tracking-widest text-viking-gold drop-shadow-lg md:text-6xl">RAGNAROK</h1>
         <p className="mt-2 max-w-md font-inter italic text-viking-paper/90">
           Avstanden mellom skipene ble for stor. Gudene jevner feltet — alle mister halve handelspoeng.

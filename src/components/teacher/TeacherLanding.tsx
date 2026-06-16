@@ -15,6 +15,7 @@ import { normalizeGameCode, isValidGameCode, CODE_LENGTH } from '../../lib/gameC
 import { listTeacherGames, forgetTeacherGame, type TeacherGame } from '../../lib/teacherGames';
 import { parseBackup } from '../../lib/gameBackup';
 import { ThorHammer, RuneDivider } from '../decor';
+import Icon from '../decor/Icon';
 
 interface Props {
   creating: boolean;
@@ -112,7 +113,7 @@ export default function TeacherLanding({ creating, createError, onCreateNew, onR
             data-testid="create-new-game"
             className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-wait disabled:opacity-60"
           >
-            {creating ? 'Reiser Åsgards porter …' : 'Åpne Åsgards porter ⚡'}
+            {creating ? 'Reiser Åsgards porter …' : <span className="inline-flex items-center gap-2">Åpne Åsgards porter <Icon name="bolt" size={18} /></span>}
           </button>
           {createError && (
             <p className="mt-5 rounded-md border-2 border-viking-crimson bg-viking-crimson/15 p-3 font-inter text-sm text-viking-paper">
@@ -150,7 +151,7 @@ export default function TeacherLanding({ creating, createError, onCreateNew, onR
               data-testid="resume-code-button"
               className="rounded-md border-2 border-viking-gold bg-viking-gold/20 px-6 py-2.5 font-cinzel font-bold text-viking-gold hover:bg-viking-gold/40 disabled:opacity-50"
             >
-              {resumeChecking ? 'Søker …' : 'Gjenoppta ⚓'}
+              {resumeChecking ? 'Søker …' : <span className="inline-flex items-center gap-2">Gjenoppta <Icon name="anchor" size={15} /></span>}
             </button>
           </div>
           {resumeError && (
@@ -204,7 +205,7 @@ export default function TeacherLanding({ creating, createError, onCreateNew, onR
             data-testid="restore-file-button"
             className="rounded-md border-2 border-viking-rust bg-viking-rust/30 px-6 py-2.5 font-cinzel font-bold text-viking-paper hover:bg-viking-rust/50 disabled:opacity-50"
           >
-            {restoreBusy ? 'Gjenoppliver …' : '📂 Velg sikkerhetskopi-fil'}
+            {restoreBusy ? 'Gjenoppliver …' : <span className="inline-flex items-center gap-2"><Icon name="folder" size={16} /> Velg sikkerhetskopi-fil</span>}
           </button>
           {restoreError && (
             <p className="mt-3 rounded-md border-2 border-viking-crimson/60 bg-viking-crimson/15 p-2.5 font-inter text-sm text-viking-paper" role="alert">

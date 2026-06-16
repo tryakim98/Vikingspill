@@ -6,11 +6,12 @@
  */
 
 import type { ShipSymbol } from '../../types';
+import Icon from '../decor/Icon';
 
-const SYMBOL_EMOJI: Record<ShipSymbol, string> = {
-  drage: '🐉',
-  ulv: '🐺',
-  ravn: '🐦‍⬛',
+const SYMBOL_GLYPH: Record<ShipSymbol, string> = {
+  drage: 'dragonhead',
+  ulv: 'wolf',
+  ravn: 'raven',
 };
 
 const GOLD = '#CDC3AD';
@@ -98,11 +99,11 @@ export default function VikingShip({
             left: '50%',
             top: '37%',
             transform: 'translate(-50%, -50%)',
-            fontSize: size * 0.17,
-            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))',
+            color: WOOD_DARK,
+            filter: 'drop-shadow(0 1px 1px rgba(253,251,246,0.4))',
           }}
         >
-          {SYMBOL_EMOJI[symbol]}
+          <Icon name={SYMBOL_GLYPH[symbol]} size={size * 0.24} strokeWidth={1.4} />
         </span>
       )}
     </div>
