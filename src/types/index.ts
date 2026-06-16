@@ -117,6 +117,7 @@ export interface Destination {
   region: string;
   color: string;           // Hex-farge for visuell identitet
   difficulty: Difficulty;
+  image: string;           // Stemningsbilde av ankomsten (public/steder/sted-<id>.jpg), vist øverst i historie-steget
   history: string;         // Førsteperson-fortelling av ankomsten
   funFact: string;
   famousPerson: string;

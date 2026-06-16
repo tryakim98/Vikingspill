@@ -67,6 +67,7 @@ export const destinations: Destination[] = baseDestinations.map((base): Destinat
     region: base.region,
     color: base.color,
     difficulty: base.difficulty,
+    image: `${import.meta.env.BASE_URL}steder/sted-${base.id}.jpg`,
     history: base.history,
     funFact: base.funFact,
     famousPerson: base.famousPerson,

@@ -309,6 +309,22 @@ export default function EncounterFlow({
   if (step === 'history') {
     return (
       <Shell name={d.name} onExit={onExit}>
+        {/* Stemningsbilde av ankomsten (public/steder/sted-<id>.jpg). Beskåret til et
+            bredt banner; en mørk gradient nederst lar tittelen hvile mot bildet. Skjuler
+            seg selv om filen mangler, så historie-steget aldri viser et brukket bilde. */}
+        <div
+          className="relative mb-5 overflow-hidden rounded-lg border-2 border-viking-gold/40 shadow-[0_4px_20px_rgba(0,0,0,0.45)]"
+          style={{ aspectRatio: '16 / 9' }}
+        >
+          <img
+            src={d.image}
+            alt={`Ankomst til ${d.name}`}
+            loading="lazy"
+            onError={(e) => { (e.currentTarget.closest('div') as HTMLElement).style.display = 'none'; }}
+            className="h-full w-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-viking-darkblue/80 via-transparent to-transparent" />
+        </div>
         <div className="mb-2 flex items-center gap-3">
           <span className="rounded-full px-3 py-0.5 font-mono text-xs text-viking-darkblue" style={{ backgroundColor: DIFFICULTY_COLOR[d.difficulty ?? 'middels'] }}>{d.difficulty}</span>
           <span className="font-inter text-sm text-viking-gold-soft">{d.region}</span>

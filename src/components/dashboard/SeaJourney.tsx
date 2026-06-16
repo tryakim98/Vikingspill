@@ -19,7 +19,7 @@ import { evaluateAction, describeCost, describeEffect } from '../../lib/specialA
 import { skillTreeData } from '../../data/skillTree';
 
 // Posisjoner i prosent (x = bredde, y = høyde) plassert omtrent geografisk riktig
-// oppå det ekte verdenskartet i public/textures/kart-bakgrunn.png.
+// oppå det ekte verdenskartet i public/textures/kart-bakgrunn.jpg.
 const MAP_POS: Record<string, { x: number; y: number }> = {
   vinland: { x: 26, y: 31 },     // Newfoundland, øst i Nord-Amerika
   island: { x: 39, y: 24 },      // Island
@@ -147,7 +147,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
       >
         {/* Ekte gammelt verdenskart som bakgrunn */}
         <img
-          src="/textures/kart-bakgrunn.png"
+          src="/textures/kart-bakgrunn.jpg"
           alt="Gammelt verdenskart"
           className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover"
           draggable={false}
