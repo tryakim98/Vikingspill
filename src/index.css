@@ -26,7 +26,7 @@ body {
   background-color: #17100A;
   background-image:
     linear-gradient(180deg, rgba(20,13,7,0.82), rgba(8,5,3,0.90)),
-    url('/textures/tre-gammelt.jpg');
+    url('/textures/natt-hav.png');
   background-size: cover, cover;
   background-position: center;
   background-attachment: fixed;
@@ -40,7 +40,7 @@ body {
   background-color: #17100A;
   background-image:
     linear-gradient(180deg, rgba(23,16,10,0.80) 0%, rgba(12,8,4,0.90) 100%),
-    url('/textures/tre-gammelt.jpg');
+    url('/textures/natt-hav.png');
   background-size: cover, cover;
   background-position: center;
 }
@@ -128,7 +128,7 @@ code {
   background-color: #3A2615;
   background-image:
     linear-gradient(180deg, rgba(40,22,9,0.55), rgba(0,0,0,0.62)),
-    url('/textures/tre-gammelt.jpg');
+    url('/textures/tre.png');
   background-size: cover, cover;
   background-position: center;
   border: 2px solid #5C3E22;
@@ -138,7 +138,7 @@ code {
   background-color: #2A1810;
   background-image:
     linear-gradient(180deg, rgba(22,13,8,0.60), rgba(0,0,0,0.64)),
-    url('/textures/reinskinn.png');
+    url('/textures/skinn.png');
   background-size: cover, cover;
   background-position: center;
   border: 2px solid #5C3E22;
@@ -150,7 +150,7 @@ code {
   background-color: #F4EDDC;
   background-image:
     linear-gradient(135deg, rgba(253,251,246,0.86) 0%, rgba(244,237,220,0.90) 100%),
-    url('/textures/pergament.jpg');
+    url('/textures/pergament.png');
   background-size: cover, cover;
   background-position: center;
   background-blend-mode: multiply, normal;
@@ -163,7 +163,7 @@ code {
   background-color: #241A10;
   background-image:
     linear-gradient(180deg, rgba(26,17,9,0.80), rgba(12,8,4,0.86)),
-    url('/textures/mosaikk-gull.png');
+    url('/textures/mosaikk.png');
   background-size: cover, cover;
   background-position: center;
   border: 2px solid rgba(205, 196, 176, 0.55);
@@ -175,7 +175,7 @@ code {
   background-color: #14130E;
   background-image:
     linear-gradient(180deg, rgba(18,16,12,0.78), rgba(10,9,6,0.86)),
-    url('/textures/mose-stein.jpg');
+    url('/textures/stein.png');
   background-size: cover, cover;
   background-position: center;
   border: 2px solid rgba(205, 196, 176, 0.40);
@@ -253,7 +253,7 @@ code {
     /* Mørk base-tint så den lyse runeteksten holder seg lesbar over fotoet */
     linear-gradient(rgba(34,18,9,0.52), rgba(20,10,5,0.60)),
     /* Ekte trefiber-foto */
-    url('/textures/tre-gammelt.jpg');
+    url('/textures/tre.png');
   background-size: auto, auto, cover, cover;
   background-position: center;
   border: 2px solid #5C3E22;
@@ -349,12 +349,12 @@ code {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.78);
 }
 .mat-tre {
-  background-image: url('/textures/tre-gammelt.jpg');
+  background-image: url('/textures/tre.png');
   background-color: #3A2615;
   box-shadow: inset 0 0 0 1.5px rgba(150, 110, 60, 0.55), 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 .mat-skinn {
-  background-image: url('/textures/reinskinn.png');
+  background-image: url('/textures/skinn.png');
   background-color: #2A1810;
   box-shadow: inset 0 0 0 1.5px rgba(150, 110, 60, 0.50), 0 6px 18px rgba(0, 0, 0, 0.45);
 }
@@ -364,7 +364,7 @@ code {
   box-shadow: inset 0 0 0 1.5px rgba(150, 162, 178, 0.45), 0 6px 18px rgba(0, 0, 0, 0.5);
 }
 .mat-stein {
-  background-image: url('/textures/mose-stein.jpg');
+  background-image: url('/textures/stein.png');
   background-color: #14130E;
   box-shadow: inset 0 0 0 1.5px rgba(140, 138, 120, 0.42), 0 6px 18px rgba(0, 0, 0, 0.5);
 }
@@ -379,7 +379,7 @@ code {
 /* Pergament: lys flate med mørk blekk-tekst. En myk lys scrim jevner ut fiberen
    så mørk tekst aldri kolliderer med en mørk flekk, men fiberpreget skinner gjennom. */
 .mat-pergament {
-  background-image: url('/textures/pergament.jpg');
+  background-image: url('/textures/pergament.png');
   background-color: #E9DEC4;
   color: #2A1C0E;
   box-shadow: inset 0 0 0 1.5px rgba(120, 96, 56, 0.45), 0 6px 16px rgba(0, 0, 0, 0.4);
