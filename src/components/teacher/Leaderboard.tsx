@@ -137,7 +137,7 @@ export default function Leaderboard({ ranked, onRemoveGroup, onSummon, onClearSu
                         <p className="font-inter text-xs italic text-viking-paper/55">Lasterommet er tomt.</p>
                       ) : (
                         <p className="font-inter text-xs text-viking-paper/90">
-                          {goodsList(g.goods).map(([k, n]) => `${TRADE_GOODS[k]?.icon ?? ''} ${TRADE_GOODS[k]?.name ?? k} ×${n}`).join('  ·  ')}
+                          {goodsList(g.goods).map(([k, n]) => `${TRADE_GOODS[k]?.name ?? k} ×${n}`).join('  ·  ')}
                         </p>
                       )}
                     </div>

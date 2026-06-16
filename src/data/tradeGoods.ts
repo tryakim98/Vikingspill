@@ -18,19 +18,19 @@ export type TradeGood =
 export interface TradeGoodInfo {
   id: TradeGood;
   name: string;
-  icon: string;       // emoji
+  icon: string;       // ikon-navn (AutoIcon: 'ikon-*' = PNG, ellers SVG-glyf)
   origin: string;     // kort historisk note (tooltip)
 }
 
 export const TRADE_GOODS: Record<TradeGood, TradeGoodInfo> = {
-  pelsverk:     { id: 'pelsverk',     name: 'Pelsverk',     icon: '🦊', origin: 'Fra nord — Sameland, Novgorod, Bjarmaland. Bjørn, rev, mår.' },
-  solv:         { id: 'solv',         name: 'Sølv',         icon: '🪙', origin: 'Frankiske mynter, arabiske dirhamer fra Bagdad, klosterskatter.' },
-  jern:         { id: 'jern',         name: 'Jern',         icon: '⚒',  origin: 'Skandinavia og Vinland — sverd, økser, nagler.' },
-  rav:          { id: 'rav',          name: 'Rav',          icon: '🟡', origin: 'Østersjøen — fossilisert harpiks, hovedvare i Hedeby.' },
-  silke:        { id: 'silke',        name: 'Silke',        icon: '🧶', origin: 'Miklagard — bysantinske vevninger fra Silkeveien.' },
-  hvalrosstann: { id: 'hvalrosstann', name: 'Hvalrosstann', icon: '🦷', origin: 'Atlantiske kolonier — Færøyene, Island, Grønland.' },
-  krydder:      { id: 'krydder',      name: 'Krydder',      icon: '🌶', origin: 'Bagdad og videre øst — kanel, pepper, safran.' },
-  salt:         { id: 'salt',         name: 'Salt',         icon: '🧂', origin: 'Handelsbyer langs kysten — uunnværlig for vinterlagring.' },
+  pelsverk:     { id: 'pelsverk',     name: 'Pelsverk',     icon: 'ikon-pelsverk', origin: 'Fra nord — Sameland, Novgorod, Bjarmaland. Bjørn, rev, mår.' },
+  solv:         { id: 'solv',         name: 'Sølv',         icon: 'coin', origin: 'Frankiske mynter, arabiske dirhamer fra Bagdad, klosterskatter.' },
+  jern:         { id: 'jern',         name: 'Jern',         icon: 'anvil',  origin: 'Skandinavia og Vinland — sverd, økser, nagler.' },
+  rav:          { id: 'rav',          name: 'Rav',          icon: 'amber', origin: 'Østersjøen — fossilisert harpiks, hovedvare i Hedeby.' },
+  silke:        { id: 'silke',        name: 'Silke',        icon: 'thread', origin: 'Miklagard — bysantinske vevninger fra Silkeveien.' },
+  hvalrosstann: { id: 'hvalrosstann', name: 'Hvalrosstann', icon: 'ikon-hvalrosstann', origin: 'Atlantiske kolonier — Færøyene, Island, Grønland.' },
+  krydder:      { id: 'krydder',      name: 'Krydder',      icon: 'spice', origin: 'Bagdad og videre øst — kanel, pepper, safran.' },
+  salt:         { id: 'salt',         name: 'Salt',         icon: 'salt', origin: 'Handelsbyer langs kysten — uunnværlig for vinterlagring.' },
 };
 
 /** Hva hver destinasjon gir av handelsvarer ved fullføring. Tematisk historisk. */

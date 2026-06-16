@@ -27,7 +27,7 @@ export interface WheelField {
 export const WHEEL_FIELDS: WheelField[] = [
   {
     id: 'gudenes-prove',
-    icon: '⚡',
+    icon: 'bolt',
     label: 'Gudenes prøve',
     shortLabel: 'Prøve',
     color: '#6B3FA0', // plum
@@ -35,7 +35,7 @@ export const WHEEL_FIELDS: WheelField[] = [
   },
   {
     id: 'storm',
-    icon: '🌊',
+    icon: 'wave',
     label: 'Storm',
     shortLabel: 'Storm',
     color: '#2B6B6B', // teal
@@ -43,7 +43,7 @@ export const WHEEL_FIELDS: WheelField[] = [
   },
   {
     id: 'gunstig-vind',
-    icon: '🍃',
+    icon: 'leaf',
     label: 'Gunstig vind',
     shortLabel: 'Vind',
     color: '#5B7553', // moss
@@ -51,7 +51,7 @@ export const WHEEL_FIELDS: WheelField[] = [
   },
   {
     id: 'ragnarok',
-    icon: '⚰️',
+    icon: 'urn',
     label: 'Ragnarok',
     shortLabel: 'Ragnarok',
     color: '#8B2929', // crimson
@@ -59,7 +59,7 @@ export const WHEEL_FIELDS: WheelField[] = [
   },
   {
     id: 'gudenes-gave',
-    icon: '🎁',
+    icon: 'gift',
     label: 'Gudenes gave',
     shortLabel: 'Gave',
     color: '#A07F32', // dempet brass (gudegave — sjelden gull-aksent)
@@ -67,7 +67,7 @@ export const WHEEL_FIELDS: WheelField[] = [
   },
   {
     id: 'skjebnemote',
-    icon: '🌫️',
+    icon: 'mist',
     label: 'Skjebnemøte',
     shortLabel: 'Skjebne',
     color: '#A0522D', // rust

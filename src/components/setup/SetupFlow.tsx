@@ -11,7 +11,7 @@ import { useState } from 'react';
 import type { ShipSymbol, SkillKey } from '../../types';
 import { skillTreeData } from '../../data';
 import VikingShip from '../ship/VikingShip';
-import NorseIcon, { SKILL_PNG } from '../decor/NorseIcon';
+import NorseIcon, { SKILL_PNG, AutoIcon } from '../decor/NorseIcon';
 import { playSound } from '../../lib/sound';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
 
@@ -187,7 +187,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
                     onClick={() => setStartSkill(key)}
                     className={`flex items-start gap-3 rounded-lg border-2 p-4 text-left transition-all ${selected ? 'border-viking-gold bg-viking-gold/15' : 'border-viking-gold/30 hover:border-viking-gold/70'}`}
                   >
-                    <span className="text-3xl leading-none" style={{ color: branch.color }}>{branch.icon}</span>
+                    <span className="leading-none" style={{ color: branch.color }}><AutoIcon name={branch.icon} size={30} /></span>
                     <span>
                       <span className="block font-cinzel text-lg text-viking-gold">{branch.name}</span>
                       <span className="block font-inter text-xs text-viking-paper/80">{branch.tiers[0].desc}</span>

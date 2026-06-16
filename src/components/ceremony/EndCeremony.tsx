@@ -17,6 +17,7 @@ import type { GroupSetup } from '../../hooks/useGroupSetup';
 import { determineArchetype, topSkillTitle } from '../../data/archetypes';
 import VikingShip from '../ship/VikingShip';
 import MaterialPanel, { type Material } from '../decor/MaterialPanel';
+import { AutoIcon } from '../decor/NorseIcon';
 
 interface Scores {
   culturalUnderstanding: number;
@@ -117,9 +118,9 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
           initial={{ scale: 0.4, opacity: 0, filter: 'blur(8px)' }}
           animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
           transition={{ type: 'spring', stiffness: 180, damping: 14, delay: 0.4 }}
-          className="mb-5 text-[100px] drop-shadow-[0_0_28px_rgba(205,195,173,0.55)]"
+          className="mb-5 flex justify-center text-viking-brass drop-shadow-[0_0_28px_rgba(205,195,173,0.55)]"
         >
-          {archetype.icon}
+          <AutoIcon name={archetype.icon} size={100} />
         </motion.div>
 
         <motion.h1
@@ -150,7 +151,7 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
             className="mx-auto mb-6 max-w-md rounded-lg border-2 border-viking-gold bg-viking-gold/15 px-4 py-3"
             data-testid="archetype-honor"
           >
-            <p className="font-cinzel text-sm text-viking-gold">{archetype.honor.label}</p>
+            <p className="inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold"><AutoIcon name={archetype.honor.icon} size={16} /> {archetype.honor.label}</p>
             <p className="mt-1 font-inter text-xs italic text-viking-paper/85">{archetype.honor.blurb}</p>
           </motion.div>
         )}
@@ -158,9 +159,9 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
         {top && (
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.7 }}
-            className="mb-8 font-cinzel text-viking-gold-soft"
+            className="mb-8 inline-flex items-center justify-center gap-1.5 font-cinzel text-viking-gold-soft"
           >
-            {top.icon} Sterkest i {top.name} {top.level >= 3 ? '— Mester' : `(nivå ${top.level})`}
+            <AutoIcon name={top.icon} size={16} /> Sterkest i {top.name} {top.level >= 3 ? '— Mester' : `(nivå ${top.level})`}
           </motion.p>
         )}
 

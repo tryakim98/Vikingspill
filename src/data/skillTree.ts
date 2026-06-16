@@ -9,7 +9,7 @@ import type { SkillTree } from '../types';
 export const skillTreeData: SkillTree = {
   språk: {
     name: 'Språk',
-    icon: '🗣️',
+    icon: 'ikon-sprak',
     color: '#2B6B6B',
     tiers: [
       { name: 'Grunnleggende språkforståelse', desc: 'Dere kan si hilsener og takk på flere språk. +1 i fredelige handelssituasjoner.' },
@@ -19,7 +19,7 @@ export const skillTreeData: SkillTree = {
   },
   sjømannskap: {
     name: 'Sjømannskap',
-    icon: '⛵',
+    icon: 'ikon-sjomannskap',
     color: '#1A4F7A',
     tiers: [
       { name: 'Kystnavigasjon', desc: 'Dere kan seile langs kjente kyster. +1 mot uvær.' },
@@ -29,7 +29,7 @@ export const skillTreeData: SkillTree = {
   },
   krigskunst: {
     name: 'Krigskunst',
-    icon: '⚔️',
+    icon: 'ikon-krigskunst',
     color: '#8B2929',
     tiers: [
       { name: 'Skjoldborg', desc: 'Dere kan slåss i formasjon. +1 i kamp.' },
@@ -39,7 +39,7 @@ export const skillTreeData: SkillTree = {
   },
   diplomati: {
     name: 'Diplomati',
-    icon: '🤝',
+    icon: 'ikon-diplomati',
     color: '#5B7553',
     tiers: [
       { name: 'Gavekultur', desc: 'Dere forstår norrøn gaveseremoni. +1 ved første møte med fremmede.' },
@@ -49,7 +49,7 @@ export const skillTreeData: SkillTree = {
   },
   tro: {
     name: 'Tro & visdom',
-    icon: '🌳',
+    icon: 'ikon-tro',
     color: '#6B3FA0',
     tiers: [
       { name: 'Runelesning', desc: 'Dere kan tolke runer og varsler. +1 i åndelige situasjoner.' },

@@ -7,6 +7,7 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { Hint } from '../../data/firstTimeHints';
+import { AutoIcon } from '../decor/NorseIcon';
 
 interface Props {
   hint: Hint | null;
@@ -33,7 +34,7 @@ export default function HintToast({ hint, onDismiss }: Props) {
         >
           <div className="rounded-lg border-2 border-viking-gold bg-viking-darkblue/95 p-4 shadow-2xl" style={{ boxShadow: '0 0 32px rgba(205,195,173,0.35)' }}>
             <div className="flex items-start gap-3">
-              <span className="text-3xl">{hint.icon}</span>
+              <AutoIcon name={hint.icon} size={30} className="mt-0.5 shrink-0 text-viking-gold" />
               <div className="flex-1">
                 <p className="font-cinzel text-sm font-bold text-viking-gold">{hint.title}</p>
                 <p className="mt-1 font-inter text-xs leading-relaxed text-viking-paper/90">{hint.body}</p>

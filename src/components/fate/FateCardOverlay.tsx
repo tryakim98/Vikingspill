@@ -9,6 +9,7 @@
 import { useEffect } from 'react';
 import type { FateEvent } from '../../lib/gameSync';
 import { fateEffectLines } from '../../data';
+import { AutoIcon } from '../decor/NorseIcon';
 import { playSound } from '../../lib/sound';
 
 interface Props {
@@ -28,7 +29,7 @@ export default function FateCardOverlay({ event, affected, onDone }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-viking-darkblue/95 px-4 text-center text-viking-paper" data-testid="fate-overlay">
       <p className="font-cinzel text-sm uppercase tracking-[0.3em] text-viking-gold-soft/70">Skjebnen har talt</p>
-      <div className="mt-3 text-7xl">{event.icon}</div>
+      <AutoIcon name={event.icon} size={72} className="mt-3 text-viking-gold" />
       <h1 className="mt-3 font-cinzel text-4xl font-bold text-viking-gold drop-shadow-lg md:text-5xl">{event.title}</h1>
       <p className="mt-2 max-w-md font-inter italic text-viking-paper/90">{event.text}</p>
       <p className="mt-4 font-inter text-sm text-viking-gold-soft">Rammer: {whoLabel}</p>

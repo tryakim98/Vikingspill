@@ -15,6 +15,7 @@ import { skillTreeData, getQuizQuestionsForSkill, isQuizPassed } from '../../dat
 import QuestionCard from '../quiz/QuestionCard';
 import { playSound } from '../../lib/sound';
 import MaterialPanel from '../decor/MaterialPanel';
+import { AutoIcon } from '../decor/NorseIcon';
 
 interface Props {
   skill: SkillKey;
@@ -45,7 +46,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
     <div className="min-h-screen viking-screen text-viking-paper">
       <div className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between border-b-2 border-viking-gold/40 pb-3">
-          <h2 className="font-cinzel text-xl text-viking-gold">{branch.icon} Svenneprøve — {branch.name}</h2>
+          <h2 className="inline-flex items-center gap-2 font-cinzel text-xl text-viking-gold"><AutoIcon name={branch.icon} size={20} /> Svenneprøve — {branch.name}</h2>
           <button onClick={onClose} className="font-inter text-xs text-viking-gold-soft/70 hover:text-viking-gold-soft">✕ Avbryt</button>
         </div>
         <p className="mb-4 font-inter italic text-viking-gold-soft">For å låse opp <strong>{destName}</strong></p>

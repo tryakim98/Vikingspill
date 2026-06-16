@@ -15,6 +15,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WHEEL_FIELDS, type WheelFieldId } from '../../data/wheelFields';
+import Icon from '../decor/Icon';
 import { playSound, stopSound } from '../../lib/sound';
 
 const RUNES = ['ᚦ', 'ᚱ', 'ᚾ', 'ᛏ', 'ᛚ', 'ᛟ'];
@@ -146,7 +147,9 @@ export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpi
             const p = polar(angle, RADIUS * 0.62);
             return (
               <g key={`label-${f.id}`} transform={`translate(${p.x} ${p.y}) rotate(${angle})`}>
-                <text textAnchor="middle" dominantBaseline="middle" fontSize="52" y="-22">{f.icon}</text>
+                <g transform="translate(-26 -48)" className="text-[#FDFBF6]">
+                  <Icon name={f.icon} size={52} strokeWidth={1.4} />
+                </g>
                 <text
                   textAnchor="middle" dominantBaseline="middle"
                   fontSize="22" y="26" fill="#FDFBF6"
@@ -215,8 +218,8 @@ export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpi
             >
               <div className="rounded-lg border-4 border-viking-gold bg-viking-darkblue/95 px-8 py-6 text-center shadow-2xl" style={{ boxShadow: '0 0 60px rgba(205,195,173,0.6)' }}>
                 <p className="font-cinzel text-xs uppercase tracking-[0.35em] text-viking-gold-soft">Skjebnen har talt</p>
-                <p className="mt-2 font-cinzel text-4xl font-bold text-viking-gold drop-shadow-lg">
-                  {result.icon} {result.label}!
+                <p className="mt-2 inline-flex items-center gap-2 font-cinzel text-4xl font-bold text-viking-gold drop-shadow-lg">
+                  <Icon name={result.icon} size={36} /> {result.label}!
                 </p>
               </div>
             </motion.div>
@@ -242,7 +245,7 @@ export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpi
           className="mt-4 max-w-md rounded-md border-2 border-viking-gold/60 bg-viking-darkblue/70 p-4 text-center"
         >
           <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft">Skjebnen har talt</p>
-          <p className="mt-1 font-cinzel text-2xl text-viking-gold">{result.icon} {result.label}</p>
+          <p className="mt-1 inline-flex items-center gap-2 font-cinzel text-2xl text-viking-gold"><Icon name={result.icon} size={22} /> {result.label}</p>
           <p className="mt-1 font-inter text-sm italic text-viking-paper/85">{result.description}</p>
         </div>
       )}

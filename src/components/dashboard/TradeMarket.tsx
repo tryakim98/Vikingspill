@@ -12,6 +12,7 @@ import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import type { TradeGoodId } from '../../types';
 import { TRADE_GOODS } from '../../data/tradeGoods';
+import { AutoIcon } from '../decor/NorseIcon';
 import { playSound } from '../../lib/sound';
 import type { SyncedGroup, TradeOffer } from '../../lib/gameSync';
 import MaterialPanel from '../decor/MaterialPanel';
@@ -35,7 +36,7 @@ type GoodsMap = Partial<Record<TradeGoodId, number>>;
 const isEmpty = (g: GoodsMap) => Object.values(g).every((n) => !n);
 const goodsSummary = (g: GoodsMap) => TRADE_GOOD_ORDER
   .filter((id) => g[id])
-  .map((id) => `${g[id]}× ${TRADE_GOODS[id].icon} ${TRADE_GOODS[id].name}`)
+  .map((id) => `${g[id]}× ${TRADE_GOODS[id].name}`)
   .join(', ');
 
 export default function TradeMarket({
@@ -182,7 +183,7 @@ export default function TradeMarket({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-cinzel text-viking-paper">{g.shipName}</p>
-                    <p className="font-mono text-[10px] text-viking-gold-soft/80">{TRADE_GOOD_ORDER.filter((k) => opponentGoods[k]).map((k) => `${opponentGoods[k]}× ${TRADE_GOODS[k].icon}`).join(' ') || '(tom)'}</p>
+                    <p className="font-mono text-[10px] text-viking-gold-soft/80">{TRADE_GOOD_ORDER.filter((k) => opponentGoods[k]).map((k) => `${opponentGoods[k]}× ${TRADE_GOODS[k].name}`).join('  ') || '(tom)'}</p>
                   </div>
                   {isChief && !isComposing && (
                     <button onClick={() => startCompose(id)} data-testid={`compose-${id}`} className="rounded border-2 border-viking-gold bg-viking-gold/15 px-3 py-1 font-cinzel text-sm text-viking-gold hover:bg-viking-gold/30">Send tilbud →</button>
@@ -260,7 +261,7 @@ function GoodsPicker({
         const disableInc = side === 'giving' ? n >= available : false;
         return (
           <div key={g} className="flex items-center gap-1.5 rounded border border-viking-gold/30 bg-viking-darkblue/40 px-2 py-1">
-            <span aria-hidden>{TRADE_GOODS[g].icon}</span>
+            <AutoIcon name={TRADE_GOODS[g].icon} size={15} className="text-viking-gold-soft" />
             <span className="flex-1 truncate font-inter text-[11px] text-viking-paper/85">{TRADE_GOODS[g].name}</span>
             <button
               type="button"

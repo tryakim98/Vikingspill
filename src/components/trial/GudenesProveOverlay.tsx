@@ -12,6 +12,7 @@ import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import type { SkillKey } from '../../types';
 import { skillTreeData } from '../../data';
+import { AutoIcon } from '../decor/NorseIcon';
 import { playSound } from '../../lib/sound';
 import type { TrialResult } from '../../lib/gameSync';
 
@@ -73,7 +74,7 @@ export default function GudenesProveOverlay({ navn, desc, skill, skillLevel, res
           <h2 className="mb-2 font-cinzel text-2xl text-viking-gold">{navn}</h2>
           <p className="mb-4 font-inter text-viking-paper/90">{desc}</p>
           <p className="font-inter text-sm text-viking-paper/80">
-            Ferdigheten som teller: <span className="font-cinzel" style={{ color: branch.color }}>{branch.icon} {branch.name}</span>
+            Ferdigheten som teller: <span className="inline-flex items-center gap-1 font-cinzel" style={{ color: branch.color }}><AutoIcon name={branch.icon} size={16} /> {branch.name}</span>
           </p>
           <p className="mt-1 font-cinzel text-lg text-viking-gold">
             Deres bonus: +{skillLevel}{skillLevel === 0 ? ' — dere er svake her!' : ''}

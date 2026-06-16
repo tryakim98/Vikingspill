@@ -9,6 +9,8 @@
  * Bruk: <NorseIcon name="ikon-sprak" size={16} className="text-viking-gold-soft" />
  */
 
+import Icon from './Icon';
+
 interface Props {
   name: string;          // filnavn uten .png, f.eks. 'ikon-sprak'
   size?: number;
@@ -37,6 +39,19 @@ export default function NorseIcon({ name, size = 18, className = '', title }: Pr
       }}
     />
   );
+}
+
+/**
+ * AutoIcon — velger riktig ikon-familie fra et navn lagret i data: navn som
+ * starter med 'ikon-' rendres som PNG-glyf (NorseIcon), alt annet som SVG-strek-
+ * glyf (Icon). Begge arver tekstfargen via currentColor. Brukes der datafelt
+ * (skillTree/archetypes/fateCards/tradeGoods/wheelFields/firstTimeHints) før
+ * holdt en emoji-streng.
+ */
+export function AutoIcon({ name, size = 18, className = '', title }: Props) {
+  return name.startsWith('ikon-')
+    ? <NorseIcon name={name} size={size} className={className} title={title} />
+    : <Icon name={name} size={size} className={className} title={title} />;
 }
 
 /** Ferdighet → norrønt ikon (PNG). */

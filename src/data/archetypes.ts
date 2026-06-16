@@ -16,6 +16,7 @@ import type { SkillKey, SagaEntry, Destination, Choice } from '../types';
 import { skillTreeData } from './skillTree';
 
 export interface Honor {
+  icon: string;
   label: string;
   blurb: string;
 }
@@ -39,42 +40,43 @@ const ARCHETYPES = {
   brobygger: {
     id: 'brobygger',
     title: 'Brobyggeren',
-    icon: '🕊️',
+    icon: 'dove',
     blurb: 'Dere så mennesker, ikke fiender. På hver kyst lyttet dere før dere svingte sverdet — og verden ble større for det. Skaldene skriver lite om sånne reiser. Etterkommerne lever av dem.',
     values: 'Verdier dere viste: nysgjerrighet, respekt for det fremmede, viljen til å lære av andre kulturer.',
   },
   plyndrer: {
     id: 'plyndrer',
     title: 'Plyndreren',
-    icon: '⚔️',
+    icon: 'axe',
     blurb: 'Halve Europa lærte å frykte navnet deres. Dere tok det dere ville ha, og lot ingen være i tvil om hvem som hersket. Det ga rikdom — og kostet venner. Ingen kunne snu ryggen til dere uten å se seg over skulderen.',
     values: 'Verdier dere viste: styrke, øyeblikkelig vinning, ære gjennom kamp. Også: lite tålmodighet med dem som var annerledes.',
   },
   hovding: {
     id: 'hovding',
     title: 'Høvdingen',
-    icon: '👑',
+    icon: 'crown',
     blurb: 'Diplomati, allianse og rettferdig handel ble deres signatur. Dere bygde nettverk som varte etter at skipet la til kai for siste gang — sølv som rant, ja, men også ord som holdt.',
     values: 'Verdier dere viste: ære i avtaler, langsiktig tenking, evnen til å se mellommennesker, ikke bare bytte.',
   },
   klok: {
     id: 'klok',
     title: 'Den Kloke',
-    icon: '🌳',
+    icon: 'tree',
     blurb: 'Verken sverd, sølv eller bønn alene. Dere leste hver situasjon for seg — sjelden helhjertet, ofte rett. Andre vil aldri helt forstå dere, og det er greit.',
     values: 'Verdier dere viste: tilpasningsevne, situasjonsforståelse, ydmykhet overfor det dere ikke vet.',
   },
   vagehals: {
     id: 'vagehals',
     title: 'Vågehalsen',
-    icon: '🔥',
+    icon: 'flame',
     blurb: 'Dere lukket øynene og kastet terningen — for når seier kommer slik, blir den stor. Andre kalte dere uvettige. Skaldene kaller dere modige. Sannheten ligger et sted imellom.',
     values: 'Verdier dere viste: dristighet, viljen til å tape stort for sjansen til å vinne stort, ringe respekt for trygge veier.',
   },
 } as const;
 
 const HONOR_BRIDGE_KEEPER: Honor = {
-  label: '🤝 Handelsbroens vokter',
+  icon: 'hand',
+  label: 'Handelsbroens vokter',
   blurb: 'Andre skip seilte trygt fordi dere holdt handelsveiene åpne. Uten dere ville flere strandet alene med varer ingen ville kjøpe.',
 };
 
