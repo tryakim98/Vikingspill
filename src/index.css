@@ -25,7 +25,7 @@ body {
      over fotoet holder kontrasten til lys tekst. background-color er fallback. */
   background-color: #17100A;
   background-image:
-    linear-gradient(180deg, rgba(20,13,7,0.82), rgba(8,5,3,0.90)),
+    linear-gradient(180deg, rgba(16,18,26,0.32), rgba(6,8,14,0.56)),
     url('/textures/natt-hav.png');
   background-size: cover, cover;
   background-position: center;
@@ -39,7 +39,7 @@ body {
 .viking-screen {
   background-color: #17100A;
   background-image:
-    linear-gradient(180deg, rgba(23,16,10,0.80) 0%, rgba(12,8,4,0.90) 100%),
+    linear-gradient(180deg, rgba(16,18,26,0.34) 0%, rgba(6,8,14,0.58) 100%),
     url('/textures/natt-hav.png');
   background-size: cover, cover;
   background-position: center;
@@ -127,7 +127,7 @@ code {
 .viking-card-wood {
   background-color: #3A2615;
   background-image:
-    linear-gradient(180deg, rgba(40,22,9,0.55), rgba(0,0,0,0.62)),
+    linear-gradient(180deg, rgba(40,22,9,0.30), rgba(0,0,0,0.46)),
     url('/textures/tre.png');
   background-size: cover, cover;
   background-position: center;
@@ -137,7 +137,7 @@ code {
 .viking-card-leather {
   background-color: #2A1810;
   background-image:
-    linear-gradient(180deg, rgba(22,13,8,0.60), rgba(0,0,0,0.64)),
+    linear-gradient(180deg, rgba(22,13,8,0.32), rgba(0,0,0,0.48)),
     url('/textures/skinn.png');
   background-size: cover, cover;
   background-position: center;
@@ -162,7 +162,7 @@ code {
 .viking-panel-mosaic {
   background-color: #241A10;
   background-image:
-    linear-gradient(180deg, rgba(26,17,9,0.80), rgba(12,8,4,0.86)),
+    linear-gradient(180deg, rgba(26,17,9,0.42), rgba(12,8,4,0.56)),
     url('/textures/mosaikk.png');
   background-size: cover, cover;
   background-position: center;
@@ -174,7 +174,7 @@ code {
 .viking-panel-stone {
   background-color: #14130E;
   background-image:
-    linear-gradient(180deg, rgba(18,16,12,0.78), rgba(10,9,6,0.86)),
+    linear-gradient(180deg, rgba(18,16,12,0.30), rgba(10,9,6,0.50)),
     url('/textures/stein.png');
   background-size: cover, cover;
   background-position: center;
@@ -251,7 +251,7 @@ code {
     /* Ende-skygger på venstre og høyre side, så pinnen ser «rund» ut */
     linear-gradient(90deg, rgba(0,0,0,0.55) 0%, transparent 7%, transparent 93%, rgba(0,0,0,0.55) 100%),
     /* Mørk base-tint så den lyse runeteksten holder seg lesbar over fotoet */
-    linear-gradient(rgba(34,18,9,0.52), rgba(20,10,5,0.60)),
+    linear-gradient(rgba(34,18,9,0.34), rgba(20,10,5,0.44)),
     /* Ekte trefiber-foto */
     url('/textures/tre.png');
   background-size: auto, auto, cover, cover;
@@ -368,9 +368,16 @@ code {
   background-color: #14130E;
   box-shadow: inset 0 0 0 1.5px rgba(140, 138, 120, 0.42), 0 6px 18px rgba(0, 0, 0, 0.5);
 }
-/* Varm scrim for tre/skinn/stein, kjølig for jern — lett øverst, litt tettere nederst. */
-.mat-tre::before, .mat-skinn::before, .mat-stein::before {
-  background: linear-gradient(180deg, rgba(16, 10, 4, 0.32) 0%, rgba(10, 7, 3, 0.52) 100%);
+/* Varm scrim for tre/skinn, kjølig for jern — lett øverst, litt tettere nederst.
+   Verdiene er senket fordi de nye teksturene er mørkere enn de gamle (de ville
+   ellers bli kvalt til en nesten-svart flate). */
+.mat-tre::before, .mat-skinn::before {
+  background: linear-gradient(180deg, rgba(16, 10, 4, 0.16) 0%, rgba(10, 7, 3, 0.34) 100%);
+}
+/* Stein er den mørkeste teksturen (snitt ~14) → enda lettere veil, så steinflaten
+   faktisk synes. Lys tekst holdes lesbar av text-shadow på .mat-stein. */
+.mat-stein::before {
+  background: linear-gradient(180deg, rgba(14, 13, 9, 0.10) 0%, rgba(8, 8, 5, 0.28) 100%);
 }
 .mat-jern::before {
   background: linear-gradient(180deg, rgba(10, 13, 18, 0.34) 0%, rgba(6, 8, 12, 0.54) 100%);
