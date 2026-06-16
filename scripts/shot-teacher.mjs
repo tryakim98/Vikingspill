@@ -19,6 +19,8 @@ const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 1500, height: 1400 }, deviceScaleFactor: 1 });
 const p = await ctx.newPage();
 p.on('pageerror', e => console.log('PAGE ERROR:', e.message));
+// Lærerens «kom til meg» bruker window.prompt — auto-aksepter med en beskjed.
+p.on('dialog', (d) => d.accept('Kom til kateteret nå').catch(() => {}));
 
 // Gå rett inn som lærer
 await p.goto(BASE);
@@ -101,6 +103,36 @@ if (await spin.count()) {
   await p.screenshot({ path: '/tmp/teacher-6-wheel-reveal.png', fullPage: true });
   console.log('saved teacher-6-wheel-reveal');
 }
+
+// 6b) «KOM TIL MEG»-VARSEL: lærer kaller g-ulv hit → elev ser overlay → kvitterer
+const summonBtn = p.locator('[data-testid="summon-g-ulv"]');
+if (await summonBtn.count()) {
+  await summonBtn.click();
+  await p.waitForTimeout(1000);
+  await p.screenshot({ path: '/tmp/teacher-8-summon-sent.png', fullPage: true });
+  console.log('saved teacher-8-summon-sent (lærer: g-ulv «kalt …»)');
+}
+{
+  const stud2 = await b.newContext({ viewport: { width: 900, height: 1300 }, deviceScaleFactor: 1.5 });
+  const sp2 = await stud2.newPage();
+  await sp2.goto(BASE);
+  await sp2.evaluate((c) => {
+    localStorage.setItem('vikingspill_role', 'student');
+    localStorage.setItem('vikingspill_rules_seen_student', '1');
+    localStorage.setItem('vikingspill_member_id', 'm-0');
+    localStorage.setItem('vikingspill_session', JSON.stringify({ mode: 'online', gameCode: c, memberId: 'm-0', groupId: 'g-ulv' }));
+  }, code);
+  await sp2.reload();
+  await sp2.waitForTimeout(2500);
+  console.log('elev ser varsel-overlay:', (await sp2.locator('[data-testid="summon-overlay"]').count()) ? 'JA' : 'NEI');
+  await sp2.screenshot({ path: '/tmp/teacher-9-summon-overlay.png', fullPage: true });
+  console.log('saved teacher-9-summon-overlay');
+  await sp2.locator('[data-testid="summon-ack"]').click().catch(() => {});
+  await sp2.waitForTimeout(1500);
+  await stud2.close();
+}
+await p.waitForTimeout(1300);
+console.log('lærer ser kvittering:', (await p.locator('[data-testid="summon-acked-g-ulv"]').count()) ? 'JA («på vei»)' : 'NEI');
 
 // 7) ELEV-SIDEN: godkjenning gir synlig utfall + terningbonus (§6.2)
 // Sett g-orm sin godkjenning til 'approved' for island, og plasser gruppa på oppgavesteget.

@@ -24,9 +24,13 @@ const total = (g: SyncedGroup) => g.scores.culturalUnderstanding + g.scores.trad
 interface Props {
   ranked: [string, SyncedGroup][];
   onRemoveGroup: (groupId: string, shipName: string) => void;
+  /** Kall en gruppe til læreren (§8 klasseromsstyring). */
+  onSummon: (groupId: string, shipName: string) => void;
+  /** Fjern et aktivt varsel (etter at gruppa har kommet). */
+  onClearSummon: (groupId: string) => void;
 }
 
-export default function Leaderboard({ ranked, onRemoveGroup }: Props) {
+export default function Leaderboard({ ranked, onRemoveGroup, onSummon, onClearSummon }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   return (
@@ -44,27 +48,58 @@ export default function Leaderboard({ ranked, onRemoveGroup }: Props) {
             const isOpen = expanded === id;
             return (
               <div key={id} className="overflow-hidden rounded-lg border-2 border-viking-gold/40 bg-viking-surface">
-                {/* Sammenfellbar rad — alltid synlig status + medlemstall */}
-                <button
-                  onClick={() => setExpanded(isOpen ? null : id)}
-                  data-testid={`leaderboard-row-${id}`}
-                  className="flex w-full items-center gap-3 p-2.5 text-left hover:bg-viking-gold/5"
-                >
-                  <span className="w-5 text-center font-cinzel text-lg text-viking-gold">{i + 1}</span>
-                  <VikingShip color={g.shipColor} symbol={g.shipSymbol as ShipSymbol} size={44} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-cinzel text-viking-paper xl:text-lg">{g.shipName}</p>
-                    <p className="flex flex-wrap items-center gap-x-2 font-inter text-[11px] text-viking-gold-soft">
-                      <span className="font-mono">{g.visited.length}/12 steder</span>
-                      {st.noMembers
-                        ? <span className="text-viking-crimson" title="Ingen påkoblede enheter">⚠ ingen pålogget</span>
-                        : <span className="text-viking-gold-soft/70">· {st.memberCount} {st.memberCount === 1 ? 'enhet' : 'enheter'}</span>}
-                      <span className="text-viking-gold-soft/90">· {st.text}</span>
-                    </p>
-                  </div>
-                  <p className="font-cinzel text-2xl font-bold text-viking-gold xl:text-3xl">{total(g)}</p>
-                  <span className="ml-1 font-mono text-xs text-viking-gold-soft/60">{isOpen ? '▲' : '▼'}</span>
-                </button>
+                {/* Sammenfellbar rad — alltid synlig status + medlemstall + «kall hit» */}
+                <div className="flex w-full items-center gap-1.5 p-2.5">
+                  <button
+                    onClick={() => setExpanded(isOpen ? null : id)}
+                    data-testid={`leaderboard-row-${id}`}
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                  >
+                    <span className="w-5 text-center font-cinzel text-lg text-viking-gold">{i + 1}</span>
+                    <VikingShip color={g.shipColor} symbol={g.shipSymbol as ShipSymbol} size={44} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-cinzel text-viking-paper xl:text-lg">{g.shipName}</p>
+                      <p className="flex flex-wrap items-center gap-x-2 font-inter text-[11px] text-viking-gold-soft">
+                        <span className="font-mono">{g.visited.length}/12 steder</span>
+                        {st.noMembers
+                          ? <span className="text-viking-crimson" title="Ingen påkoblede enheter">⚠ ingen pålogget</span>
+                          : <span className="text-viking-gold-soft/70">· {st.memberCount} {st.memberCount === 1 ? 'enhet' : 'enheter'}</span>}
+                        <span className="text-viking-gold-soft/90">· {st.text}</span>
+                      </p>
+                    </div>
+                    <p className="font-cinzel text-2xl font-bold text-viking-gold xl:text-3xl">{total(g)}</p>
+                    <span className="ml-1 font-mono text-xs text-viking-gold-soft/60">{isOpen ? '▲' : '▼'}</span>
+                  </button>
+                  {/* «Kom til meg»-varsel */}
+                  {g.summon && g.summon.acked ? (
+                    <button
+                      onClick={() => onClearSummon(id)}
+                      data-testid={`summon-acked-${id}`}
+                      title="Gruppa har kvittert «på vei» — trykk for å fjerne varselet"
+                      className="shrink-0 rounded border border-viking-moss/60 bg-viking-moss/20 px-2 py-1 font-cinzel text-[11px] text-viking-moss hover:bg-viking-moss/30"
+                    >
+                      ✓ på vei
+                    </button>
+                  ) : g.summon ? (
+                    <button
+                      onClick={() => onClearSummon(id)}
+                      data-testid={`summon-waiting-${id}`}
+                      title="Varsel sendt — venter på kvittering. Trykk for å avbryte."
+                      className="shrink-0 animate-pulse rounded border border-viking-gold/60 bg-viking-gold/15 px-2 py-1 font-cinzel text-[11px] text-viking-gold-soft"
+                    >
+                      📣 kalt …
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onSummon(id, g.shipName)}
+                      data-testid={`summon-${id}`}
+                      title="Kall gruppa til læreren"
+                      className="shrink-0 rounded border border-viking-gold/40 px-2 py-1 font-cinzel text-[11px] text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold"
+                    >
+                      📣 Kall hit
+                    </button>
+                  )}
+                </div>
 
                 {/* Detalj */}
                 {isOpen && (

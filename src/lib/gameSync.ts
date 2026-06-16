@@ -81,6 +81,16 @@ export interface SyncedGroup {
   // Tinget — gruppa kan stemme fram en ny høvding (§Tinget):
   ting?: TingSession | null;             // pågående/avsluttet ting (avstemning om høvding)
   lastTingAt?: number;                   // tidspunkt forrige ting ble kalt inn (3-min cooldown)
+  summon?: GroupSummon | null;           // lærer-varsel «kom til meg» (§8 klasseromsstyring)
+}
+
+/** Lærer-varsel til én gruppe — «kom til læreren». Vises som overlay på alle gruppas
+ *  enheter til en av dem kvitterer («Vi er på vei!»), så læreren ser at det er mottatt. */
+export interface GroupSummon {
+  id: string;
+  message: string;
+  at: number;
+  acked?: boolean;   // en elev har kvittert «på vei»
 }
 
 /** Tinget: en avstemning der gruppa kan velge en ny høvding. Kalles inn av et hvilket
@@ -358,6 +368,25 @@ export function taskBonusForApproval(status: ApprovalStatus | undefined | null):
     case 'rejected': return -1;
     default: return 0;
   }
+}
+
+// === Lærer-varsel «kom til meg» (§8 klasseromsstyring) ============================
+
+/** Lærer: kall en gruppe hit. Skriver et ferskt varsel (ny id) til gruppa. */
+export function sendSummon(code: string, groupId: string, message: string): Promise<void> {
+  const summon: GroupSummon = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, message, at: Date.now(), acked: false };
+  return patchGroup(code, groupId, { summon });
+}
+
+/** Elev: kvitter «vi er på vei» — varselet blir stående til læreren fjerner det,
+ *  så læreren ser at gruppa har sett det. */
+export function ackSummon(code: string, groupId: string, summon: GroupSummon): Promise<void> {
+  return patchGroup(code, groupId, { summon: { ...summon, acked: true } });
+}
+
+/** Lærer: fjern varselet (etter at gruppa har kommet). */
+export function clearSummon(code: string, groupId: string): Promise<void> {
+  return patchGroup(code, groupId, { summon: null });
 }
 
 // === Gudenes prøve (§3.4 / §8.5) ==================================================

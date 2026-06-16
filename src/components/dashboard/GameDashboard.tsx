@@ -25,11 +25,12 @@ import { HINTS, type HintKey } from '../../data/firstTimeHints';
 import { isAccessible } from '../../lib/unlocks';
 import TradeMarket from './TradeMarket';
 import type { Session } from '../../hooks/useSession';
-import { removeGroup, requestApproval, subscribeApproval, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, callTing, castTingVote, resolveTing, clearTing, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeWheelSpin, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type TingSession, type Trial, type TrialResult, type FateEvent, type WheelSpin, type RagnarokEvent, type TradeOffer, type GameSettings, type ApprovalRequest } from '../../lib/gameSync';
+import { removeGroup, requestApproval, subscribeApproval, ackSummon, subscribeGroup, subscribeGroups, patchGroup, transferChief, setEncounterAdvice, callTing, castTingVote, resolveTing, clearTing, subscribeTrial, subscribeTrialResult, subscribeFate, subscribeWheelSpin, subscribeRagnarok, subscribeTrades, createTradeOffer, acceptTrade, declineTrade, cancelTrade, subscribeGameSettings, type SyncedGroup, type TingSession, type Trial, type TrialResult, type FateEvent, type WheelSpin, type RagnarokEvent, type TradeOffer, type GameSettings, type ApprovalRequest } from '../../lib/gameSync';
 import TingOverlay from '../ting/TingOverlay';
 import Icon from '../decor/Icon';
 import NorseIcon, { SKILL_PNG, TRADE_PNG } from '../decor/NorseIcon';
 import SagaReader from '../saga/SagaReader';
+import SummonOverlay from '../summon/SummonOverlay';
 import GudenesProveOverlay from '../trial/GudenesProveOverlay';
 import SeaBattle from '../duel/SeaBattle';
 import FateCardOverlay from '../fate/FateCardOverlay';
@@ -455,6 +456,18 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   }, [previewDestId]);
 
   if (!state) return <LoadingScreen text="Henter skipets logg …" />;
+
+  // Lærer-varsel «kom til meg» (§8) — tar over skjermen på alle gruppas enheter til
+  // en elev kvitterer. Høyest prioritet, så det aldri drukner i et kulturmøte.
+  const summon = isOnline ? (syncedGroup?.summon ?? null) : null;
+  if (summon && !summon.acked) {
+    return (
+      <SummonOverlay
+        message={summon.message}
+        onAck={() => ackSummon(gameCode, myGroupId, summon).catch(() => {})}
+      />
+    );
+  }
 
   if (showOwnSaga) {
     return (

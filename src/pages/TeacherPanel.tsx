@@ -20,6 +20,8 @@ import {
   importGame,
   deleteGame,
   removeGroup,
+  sendSummon,
+  clearSummon,
   subscribeGroups,
   subscribeApprovals,
   setApprovalStatus,
@@ -309,6 +311,14 @@ export default function TeacherPanel() {
     if (!window.confirm(`Fjerne «${shipName}» fra spillet? Gruppas fremgang slettes. Dette kan ikke angres.`)) return;
     removeGroup(code, groupId).catch(() => {});
   };
+  /** «Kom til meg» (§8): kall en gruppe til læreren med en valgfri kort beskjed. */
+  const summonGroup = (groupId: string, shipName: string) => {
+    if (!code) return;
+    const msg = (window.prompt(`Beskjed til «${shipName}»:`, 'Kom til læreren ved kateteret') ?? '').trim();
+    if (!msg) return; // avbrutt
+    sendSummon(code, groupId, msg).catch(() => {});
+  };
+  const clearSummonNow = (groupId: string) => { if (code) clearSummon(code, groupId).catch(() => {}); };
 
   if (showRules) return <RulesScreen role="teacher" onDone={dismissRules} />;
 
@@ -365,8 +375,8 @@ export default function TeacherPanel() {
               <SeaMap groups={groups} />
             </div>
 
-            {/* §8.2 Leaderboard — med per-gruppe-detalj og live status */}
-            <Leaderboard ranked={ranked} onRemoveGroup={removeGroupNow} />
+            {/* §8.2 Leaderboard — med per-gruppe-detalj, live status og «kom til meg» */}
+            <Leaderboard ranked={ranked} onRemoveGroup={removeGroupNow} onSummon={summonGroup} onClearSummon={clearSummonNow} />
           </div>
 
           {/* HØYRE — lærerens kontroller + godkjenning */}
