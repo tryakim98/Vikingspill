@@ -684,15 +684,17 @@ export default function EncounterFlow({
     const test = hidden?.test;
     const renderChoiceCard = (c: typeof d.choices[number], isHidden = false) => {
       const meets = meetsRequirement(c, skills);
-      const lateAvailable = lateGame && !meets;
-      const available = meets || lateAvailable;
+      // REGEL: kjernevalg (grunnvalg) er ALLTID valgbare — ferdigheter FORBEDRER odds
+      // (skillBonusForChoice) og gir en myk −2 sent i reisen om de mangler (§3.3), men
+      // de LÅSER aldri kjernevalget. Skjulte ekstra-valg beholder sin egen gating.
+      const available = isHidden ? (meets || lateGame) : true;
+      const lateUnmet = !isHidden && !meets && lateGame; // myk «fravær straffer sent»-markør
       const reqText = c.skillReq
         ? (Object.entries(c.skillReq) as [SkillKey, number][]).map(([s, n]) => `${skillName(s)} ${n}`).join(', ')
         : null;
       const cardCls = isHidden
         ? 'border-viking-gold bg-viking-gold/10 ring-2 ring-viking-gold/50 shadow-[0_0_18px_rgba(205,195,173,0.25)]'
-        : !available ? 'border-viking-crimson/40 bg-viking-darkblue/40 opacity-70'
-        : lateAvailable ? 'border-viking-gold-soft/70 bg-viking-surface ring-2 ring-viking-gold-soft/20'
+        : lateUnmet ? 'border-viking-gold-soft/70 bg-viking-surface ring-2 ring-viking-gold-soft/20'
         : 'border-viking-gold/40 bg-viking-surface';
       return (
         <div key={c.id} className={`rounded-lg border-2 p-4 ${cardCls}`} data-testid={`valg-${c.id}`}>
@@ -704,13 +706,15 @@ export default function EncounterFlow({
           <p className="mb-3 font-inter text-sm text-viking-paper/85">{c.desc}</p>
           {reqText && (
             meets ? (
-              <p className="mb-2 font-mono text-xs text-viking-moss">✓ Krever {reqText}</p>
-            ) : lateAvailable ? (
+              <p className="mb-2 font-mono text-xs text-viking-moss">✓ {reqText} — bedre odds her</p>
+            ) : lateUnmet ? (
               <p className="mb-2 font-mono text-xs text-viking-gold-soft" data-testid={`late-warning-${c.id}`}>
-                Krever {reqText} — dere mangler den, og det straffer seg sent i reisen (−2 på terningen).
+                Uten {reqText} straffer reisen dere −2 på terningen sent — men valget er fritt.
               </p>
-            ) : (
+            ) : isHidden ? (
               <p className="mb-2 font-mono text-xs text-viking-crimson">Krever {reqText}</p>
+            ) : (
+              <p className="mb-2 font-mono text-xs text-viking-gold-soft">Går bedre med {reqText} — valget er fritt.</p>
             )
           )}
           <OddsBar baseRoll={c.baseRoll} />
