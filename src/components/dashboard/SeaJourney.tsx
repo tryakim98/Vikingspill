@@ -13,6 +13,7 @@
 import { motion } from 'motion/react';
 import type { Destination, ShipSymbol, SkillKey, TradeGoodId } from '../../types';
 import { EngravedShip } from '../decor';
+import Icon from '../decor/Icon';
 import { isAccessible, describeRequirement, missingForRequirement, meetsRequirement, haveForRequirement } from '../../lib/unlocks';
 import { ACTIONS_BY_DEST, type SpecialAction, type ActionCategory } from '../../data/specialActions';
 import { evaluateAction, describeCost, describeEffect } from '../../lib/specialActions';
@@ -297,7 +298,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                   className="pointer-events-none absolute left-1/2 top-2 z-30 -translate-x-1/2 rounded-md border border-viking-gold/60 bg-viking-darkblue/90 px-3 py-1 font-cinzel text-xs text-viking-gold shadow-lg sm:text-sm"
                   data-testid="sailing-bubble"
                 >
-                  ⚓ Seiler mot {sailingDest.name} …
+                  <Icon name="anchor" size={13} className="mr-1 inline-block align-[-1px]" /> Seiler mot {sailingDest.name} …
                 </motion.div>
               )}
             </>
@@ -405,7 +406,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                       data-testid={`take-svenneprove-${dest.id}`}
                       className="mt-3 w-full rounded-md border-2 border-viking-gold bg-viking-gold/15 px-4 py-2.5 font-cinzel text-sm font-bold text-viking-gold transition hover:bg-viking-gold hover:text-viking-darkblue"
                     >
-                      📜 Ta svenneprøven i {skillTreeData[svenneReq.skill].name} →
+                      <Icon name="scroll" size={15} className="mr-1 inline-block align-[-2px]" /> Ta svenneprøven i {skillTreeData[svenneReq.skill].name} →
                     </button>
                   )}
                   {svenneReq && svenneReq.type === 'svenneprove' && !isChief && (
@@ -432,12 +433,12 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                   data-testid="confirm-sailing"
                   className="rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
                 >
-                  ⚓ Bekreft seilas →
+                  <Icon name="anchor" size={15} className="mr-1 inline-block align-[-2px]" /> Bekreft seilas →
                 </button>
               ) : isChief && stedStengt ? (
                 <p className="font-inter text-sm italic text-viking-crimson">Stedet er stengt for dere — tidligere valg har låst det.</p>
               ) : !isChief ? (
-                <p className="font-inter text-sm text-viking-gold-soft/70">⚓ Høvdingen bestemmer om dere skal seile dit.</p>
+                <p className="font-inter text-sm text-viking-gold-soft/70"><Icon name="anchor" size={13} className="mr-1 inline-block align-[-1px]" /> Høvdingen bestemmer om dere skal seile dit.</p>
               ) : null}
               {isChief && !sailingTo && (
                 <button

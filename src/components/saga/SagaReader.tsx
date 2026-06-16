@@ -9,6 +9,7 @@
 import { motion } from 'motion/react';
 import type { SagaEntry } from '../../types';
 import MaterialPanel from '../decor/MaterialPanel';
+import Icon from '../decor/Icon';
 
 interface SagaGroup {
   shipName: string;
@@ -27,7 +28,7 @@ export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props)
     <div className="min-h-screen viking-screen px-4 py-6 text-viking-paper" data-testid="saga-reader">
       <div className="mx-auto max-w-3xl">
         <div className="mb-5 flex items-center justify-between border-b-2 border-viking-gold/40 pb-3">
-          <h1 className="font-cinzel text-3xl font-bold text-viking-gold">📜 {title}</h1>
+          <h1 className="inline-flex items-center gap-2 font-cinzel text-3xl font-bold text-viking-gold"><Icon name="scroll" size={28} /> {title}</h1>
           <button onClick={onClose} className="rounded border-2 border-viking-gold/50 px-3 py-1 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold">✕ Lukk</button>
         </div>
 
@@ -68,12 +69,12 @@ export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props)
                         <div className="mt-3 space-y-1.5 border-t border-viking-rust/30 pt-2" data-testid="saga-perspectives">
                           {e.vikingPerspective && (
                             <p className="text-sm text-viking-darkblue" style={{ fontFamily: 'serif' }}>
-                              <span className="font-cinzel text-xs text-viking-rust">⚔️ Vikingenes side:</span> {e.vikingPerspective}
+                              <span className="inline-flex items-center gap-1 font-cinzel text-xs text-viking-rust"><Icon name="axe" size={13} /> Vikingenes side:</span> {e.vikingPerspective}
                             </p>
                           )}
                           {e.otherPerspective && (
                             <p className="text-sm text-viking-darkblue" style={{ fontFamily: 'serif' }}>
-                              <span className="font-cinzel text-xs text-viking-rust">👁️ {e.otherLabel ?? 'De andres'} side:</span> {e.otherPerspective}
+                              <span className="inline-flex items-center gap-1 font-cinzel text-xs text-viking-rust"><Icon name="eye" size={13} /> {e.otherLabel ?? 'De andres'} side:</span> {e.otherPerspective}
                             </p>
                           )}
                         </div>
@@ -81,7 +82,7 @@ export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props)
                       {e.bridgeReflection && (
                         <div className="mt-3 border-t border-viking-rust/30 pt-2" data-testid="saga-bridge">
                           <p className="text-sm text-viking-darkblue" style={{ fontFamily: 'serif' }}>
-                            <span className="font-cinzel text-xs text-viking-rust">🌉 Bro til i dag{e.bridgeTopic ? ` (${e.bridgeTopic})` : ''}:</span> {e.bridgeReflection}
+                            <span className="inline-flex items-center gap-1 font-cinzel text-xs text-viking-rust"><Icon name="bridge" size={13} /> Bro til i dag{e.bridgeTopic ? ` (${e.bridgeTopic})` : ''}:</span> {e.bridgeReflection}
                           </p>
                         </div>
                       )}
@@ -93,7 +94,7 @@ export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props)
           </motion.section>
         ))}
 
-        <p className="mt-6 text-center font-cinzel text-xs italic text-viking-gold-soft/60">Sagaen huskes — selv lenge etter skipet ikke lenger seiler. ⚓</p>
+        <p className="mt-6 inline-flex w-full items-center justify-center gap-1.5 text-center font-cinzel text-xs italic text-viking-gold-soft/60">Sagaen huskes — selv lenge etter skipet ikke lenger seiler. <Icon name="anchor" size={13} /></p>
       </div>
     </div>
   );

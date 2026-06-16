@@ -57,6 +57,7 @@ import TeacherLanding from '../components/teacher/TeacherLanding';
 import { rememberTeacherGame, forgetTeacherGame } from '../lib/teacherGames';
 import { downloadBackup } from '../lib/gameBackup';
 import { Raven } from '../components/decor';
+import Icon from '../components/decor/Icon';
 import ConnectionBanner from '../components/common/ConnectionBanner';
 import VikingShip from '../components/ship/VikingShip';
 import RulesScreen from '../components/rules/RulesScreen';
@@ -386,7 +387,7 @@ export default function TeacherPanel() {
             Svaret gir nå reell terningbonus til gruppa (§6.2): Velsign +2 · Delvis +1 · Forkast −1. */}
         <div className={`rounded-lg border-2 p-4 ${pending.length > 0 ? 'border-viking-crimson bg-viking-crimson/10' : 'border-viking-gold/40 bg-viking-surface'}`} data-testid="approvals-panel">
           <div className="mb-1 flex items-baseline justify-between">
-            <h2 className="font-cinzel text-2xl text-viking-gold xl:text-3xl">⚡ Tors velsignelse</h2>
+            <h2 className="inline-flex items-center gap-2 font-cinzel text-2xl text-viking-gold xl:text-3xl"><Icon name="bolt" size={24} /> Tors velsignelse</h2>
             {pending.length > 0 && <span className="animate-pulse rounded-full bg-viking-crimson px-2.5 py-0.5 font-mono text-xs text-viking-paper">{pending.length} venter</span>}
           </div>
           <p className="mb-3 font-inter text-xs text-viking-paper/70">Godkjenn oppgaver gruppene gjør. Svaret gir terningbonus: <strong className="text-viking-moss">Velsign +2</strong> · <strong className="text-viking-gold">Delvis +1</strong> · <strong className="text-viking-crimson">Forkast −1</strong>.</p>
@@ -399,7 +400,7 @@ export default function TeacherPanel() {
                   <p className="font-cinzel text-viking-gold">{a.shipName}</p>
                   <p className="mb-3 font-inter text-sm text-viking-paper/85">{a.taskTitle}</p>
                   <div className="flex gap-2">
-                    <button onClick={() => resolve(groupId, 'approved')} className="flex-1 rounded border-2 border-viking-moss bg-viking-moss/30 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-moss/50">Velsign ⚡ (+2)</button>
+                    <button onClick={() => resolve(groupId, 'approved')} className="flex-1 rounded border-2 border-viking-moss bg-viking-moss/30 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-moss/50"><span className="inline-flex items-center gap-1">Velsign <Icon name="bolt" size={14} /> (+2)</span></button>
                     <button onClick={() => resolve(groupId, 'partial')} className="flex-1 rounded border-2 border-viking-gold bg-viking-gold/20 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-gold/40">Delvis (+1)</button>
                     <button onClick={() => resolve(groupId, 'rejected')} className="flex-1 rounded border-2 border-viking-crimson bg-viking-crimson/30 px-2 py-1.5 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-crimson/50">Forkast (−1)</button>
                   </div>
@@ -427,7 +428,7 @@ export default function TeacherPanel() {
 
         {/* Etterspill: kåring av Gudenes prøve, sist event, ragnarok-status */}
         <div className="rounded-lg border-2 border-viking-plum/60 bg-viking-plum/15 p-4">
-          <h3 className="font-cinzel text-lg text-viking-gold">⚡ Gudenes prøve — etterspill</h3>
+          <h3 className="inline-flex items-center gap-2 font-cinzel text-lg text-viking-gold"><Icon name="bolt" size={18} /> Gudenes prøve — etterspill</h3>
           {!trial && (
             <p className="mt-1 font-inter text-sm italic text-viking-paper/65">Ingen aktiv prøve. Spinn skjebnehjulet for å utløse en.</p>
           )}
@@ -460,12 +461,12 @@ export default function TeacherPanel() {
                             onClick={() => { setTrialWinner(id); if (trialRunnerUp === id) setTrialRunnerUp(null); }}
                             data-testid={`pick-winner-${id}`}
                             className={`rounded px-2 py-1 font-cinzel text-xs ${isWinner ? 'bg-viking-gold text-viking-darkblue' : 'border border-viking-gold/40 text-viking-gold-soft hover:border-viking-gold'}`}
-                          >🏆 Vinner</button>
+                          ><span className="inline-flex items-center gap-1"><Icon name="trophy" size={13} /> Vinner</span></button>
                           <button
                             onClick={() => { setTrialRunnerUp(isRunnerUp ? null : id); if (trialWinner === id) setTrialWinner(null); }}
                             disabled={trialWinner === id}
                             className={`rounded px-2 py-1 font-cinzel text-xs ${isRunnerUp ? 'bg-viking-gold-soft text-viking-darkblue' : 'border border-viking-gold/40 text-viking-gold-soft hover:border-viking-gold disabled:opacity-30'}`}
-                          >🥈 2.</button>
+                          ><span className="inline-flex items-center gap-1"><Icon name="medal" size={13} /> 2.</span></button>
                         </div>
                       );
                     })}
@@ -490,9 +491,9 @@ export default function TeacherPanel() {
           {trial && trialResult?.trialId === trial.id && (
             <div className="mt-4 rounded-md border-2 border-viking-moss/60 bg-viking-moss/15 p-3" data-testid="trial-resolved">
               <p className="font-cinzel text-sm text-viking-gold-soft">Avgjort — belønningen er sendt til alle skip</p>
-              <p className="mt-1 font-inter text-sm text-viking-paper">
-                🏆 Vinner: <strong>{trialResult.winnerName}</strong>
-                {trialResult.runnerUpName && <> · 🥈 2. plass: <strong>{trialResult.runnerUpName}</strong></>}
+              <p className="mt-1 inline-flex flex-wrap items-center gap-1.5 font-inter text-sm text-viking-paper">
+                <Icon name="trophy" size={15} /> Vinner: <strong>{trialResult.winnerName}</strong>
+                {trialResult.runnerUpName && <> · <Icon name="medal" size={15} /> 2. plass: <strong>{trialResult.runnerUpName}</strong></>}
               </p>
             </div>
           )}
@@ -502,7 +503,7 @@ export default function TeacherPanel() {
         <div className="rounded-lg border-2 border-viking-rust/60 bg-viking-rust/15 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="font-cinzel text-xl text-viking-gold">📜 Saga-logg</h2>
+              <h2 className="inline-flex items-center gap-2 font-cinzel text-xl text-viking-gold"><Icon name="scroll" size={20} /> Saga-logg</h2>
               <p className="font-inter text-sm text-viking-paper/80">Gruppene begrunner valgene sine før terningen kastes. Brukes til etterarbeid og vurdering.</p>
             </div>
             <button
@@ -510,11 +511,11 @@ export default function TeacherPanel() {
               data-testid="open-sagas"
               className="rounded-md border-2 border-viking-gold bg-viking-gold px-6 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
             >
-              📖 Les sagaer
+              <span className="inline-flex items-center gap-2"><Icon name="book" size={16} /> Les sagaer</span>
             </button>
           </div>
           <div className="mt-4 border-t border-viking-rust/30 pt-3">
-            <p className="mb-2 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold-soft">⚙ Spillregler <span className="font-inter text-xs italic text-viking-paper/55">— settes vanligvis før timen</span></p>
+            <p className="mb-2 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold-soft"><Icon name="gear" size={15} /> Spillregler <span className="font-inter text-xs italic text-viking-paper/55">— settes vanligvis før timen</span></p>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             <label className="inline-flex cursor-pointer items-center gap-2">
               <input
@@ -580,7 +581,7 @@ export default function TeacherPanel() {
 
           {/* Tekstlengde — differensiering for yrkesfag */}
           <div className="mt-4 border-t border-viking-rust/30 pt-3" data-testid="text-length-controls">
-            <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">📖 Tekstmengde for klassen</p>
+            <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold-soft"><Icon name="book" size={15} /> Tekstmengde for klassen</p>
             <p className="mb-2 font-inter text-xs text-viking-paper/65">Kortversjon = 2–3 setninger per historie og kulturmøte, beholder handlingen.</p>
             <div className="flex flex-wrap gap-2">
               {(['full', 'short', 'group'] as const).map((v) => {
@@ -605,7 +606,7 @@ export default function TeacherPanel() {
         {/* Handelstorg — kompakt aktivitetspanel */}
         <div className="rounded-lg border-2 border-viking-teal/60 bg-viking-teal/15 p-4" data-testid="teacher-trade-panel">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="font-cinzel text-xl text-viking-gold">🏛 Handelstorg</h2>
+            <h2 className="inline-flex items-center gap-2 font-cinzel text-xl text-viking-gold"><Icon name="market" size={20} /> Handelstorg</h2>
             <p className="font-mono text-xs text-viking-gold-soft">
               {Object.values(trades).filter((t) => t.status === 'pending').length} ventende ·{' '}
               {Object.values(trades).filter((t) => t.status === 'accepted').length} akseptert
@@ -619,7 +620,8 @@ export default function TeacherPanel() {
                 .sort((a, b) => (b.resolvedAt ?? b.createdAt) - (a.resolvedAt ?? a.createdAt))
                 .slice(0, 8)
                 .map((t) => {
-                  const sym = t.status === 'accepted' ? '✓' : t.status === 'declined' ? '✕' : t.status === 'cancelled' ? '↩' : '⏳';
+                  const sym = t.status === 'accepted' ? '✓' : t.status === 'declined' ? '✕' : t.status === 'cancelled' ? '↩'
+                    : <Icon name="hourglass" size={12} className="inline-block align-[-1px]" />;
                   const summary = (g: TradeOffer['giving']) =>
                     Object.entries(g).map(([k, n]) => `${n}× ${k}`).join(', ');
                   return (
@@ -639,16 +641,18 @@ export default function TeacherPanel() {
         {/* Sist trukne fate-kort (vises bare når et er trukket) */}
         {fate && (
           <div className="rounded-lg border-2 border-viking-rust/60 bg-viking-rust/15 p-4">
-            <h3 className="font-cinzel text-lg text-viking-gold">🎴 Sist gripe fra gudene</h3>
+            <h3 className="inline-flex items-center gap-2 font-cinzel text-lg text-viking-gold"><Icon name="die" size={18} /> Sist gripe fra gudene</h3>
             <p className="mt-1 font-mono text-xs text-viking-gold-soft">{fate.title} → {fate.targetMode === 'group' ? fate.targetName : fate.conditionLabel}</p>
           </div>
         )}
 
         {/* §6.3 Ragnarok-status (informasjon — selve utløsningen skjer fra hjulet) */}
         <div className={`rounded-lg border-2 p-4 ${ragnarokReady ? 'border-viking-crimson bg-viking-crimson/15' : 'border-viking-gold/20 bg-viking-surface/40 opacity-70'}`}>
-          <h3 className="font-cinzel text-lg text-viking-gold">⚰️ Ragnarok-status</h3>
+          <h3 className="inline-flex items-center gap-2 font-cinzel text-lg text-viking-gold"><Icon name="urn" size={18} /> Ragnarok-status</h3>
           <p className="mt-1 font-mono text-xs text-viking-gold-soft">
-            Største avstand: {leadGap} poeng {ragnarokReady ? '— Tor er rasende! Hjulets ⚰️-felt vil ramme hardt.' : '(flåten er jevn — Ragnarok merkes lite)'}
+            Største avstand: {leadGap} poeng {ragnarokReady
+              ? <>— Tor er rasende! Hjulets <Icon name="urn" size={12} className="inline-block align-[-1px]" />-felt vil ramme hardt.</>
+              : '(flåten er jevn — Ragnarok merkes lite)'}
           </p>
         </div>
 
@@ -657,7 +661,7 @@ export default function TeacherPanel() {
 
         {/* Lagring / gjenopptaking — §lagre over flere økter */}
         <div className="mt-8 rounded-lg border-2 border-viking-gold/40 bg-viking-surface/60 p-4">
-          <h3 className="mb-1 font-cinzel text-lg text-viking-gold">💾 Lagring & økter</h3>
+          <h3 className="mb-1 inline-flex items-center gap-2 font-cinzel text-lg text-viking-gold"><Icon name="save" size={18} /> Lagring & økter</h3>
           <p className="mb-3 font-inter text-sm text-viking-paper/80">
             Spillet lagres fortløpende under runeordet <strong className="font-mono text-viking-gold">{code}</strong>. Du kan trygt lukke
             fanen og gjenoppta senere med samme kode. Last gjerne ned en sikkerhetskopi før en lang pause.
@@ -669,13 +673,13 @@ export default function TeacherPanel() {
               data-testid="download-backup"
               className="rounded border-2 border-viking-gold bg-viking-gold/20 px-5 py-2 font-cinzel font-bold text-viking-gold hover:bg-viking-gold/40 disabled:opacity-50"
             >
-              {backupBusy ? 'Lagrer …' : '⬇️ Last ned sikkerhetskopi'}
+              {backupBusy ? 'Lagrer …' : <span className="inline-flex items-center gap-2"><Icon name="download" size={16} /> Last ned sikkerhetskopi</span>}
             </button>
             <button onClick={pauseGame} data-testid="pause-game" className="rounded border-2 border-viking-gold bg-viking-plum px-5 py-2 font-bold text-viking-paper hover:bg-viking-plum/80">
-              ⏸ Sett på pause (kan gjenopptas)
+              <span className="inline-flex items-center gap-2"><Icon name="pause" size={16} /> Sett på pause (kan gjenopptas)</span>
             </button>
             <button onClick={() => void deleteGameForGood()} data-testid="delete-game" className="rounded border-2 border-viking-crimson bg-viking-crimson/30 px-5 py-2 font-bold text-viking-paper hover:bg-viking-crimson/50">
-              🗑 Avslutt for godt
+              <span className="inline-flex items-center gap-2"><Icon name="trash" size={16} /> Avslutt for godt</span>
             </button>
             <button onClick={switchRole} className="rounded border-2 border-viking-gold/60 px-5 py-2 font-bold text-viking-gold-soft hover:border-viking-gold">Bytt rolle</button>
           </div>

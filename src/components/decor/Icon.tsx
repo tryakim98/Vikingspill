@@ -89,6 +89,10 @@ const GLYPHS: Record<string, string> = {
   download:  'M12 3v12 M7 11l5 5 5-5 M5 20h14',
   trash:     'M5 7h14 M9 7V5h6v2 M6 7l1 13h10l1-13 M10 10v7 M14 10v7',
   people:    'M9 5.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5Z M4 20c0-3 2-5 5-5s5 2 5 5 M16 7a2 2 0 100 4 2 2 0 000-4Z M15 15c3-1 6 1 6 5',
+  // kontroll
+  gear:      'M12 9a3 3 0 100 6 3 3 0 000-6Z M12 3v3 M12 18v3 M3 12h3 M18 12h3 M5.6 5.6l2.1 2.1 M16.3 16.3l2.1 2.1 M18.4 5.6l-2.1 2.1 M5.6 18.4l2.1-2.1',
+  pause:     'M9 5v14 M15 5v14',
+  hourglass: 'M6 3h12 M6 21h12 M6 3c0 5 6 6 6 9 0-3 6-4 6-9 M6 21c0-5 6-6 6-9 0 3 6 4 6 9',
 };
 
 const isRune = (n: string): n is RuneName => n in RUNES;

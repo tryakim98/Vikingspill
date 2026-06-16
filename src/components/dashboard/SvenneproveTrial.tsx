@@ -109,7 +109,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
             {last ? 'Fullfør prøven' : 'Neste spørsmål →'}
           </button>
         ) : (
-          <p className="mt-6 text-center font-cinzel text-viking-gold-soft">⚓ Høvdingen styrer skipet — dere ser med</p>
+          <p className="mt-6 inline-flex w-full items-center justify-center gap-1.5 text-center font-cinzel text-viking-gold-soft"><AutoIcon name="anchor" size={16} /> Høvdingen styrer skipet — dere ser med</p>
         ))}
       </Shell>
     );

@@ -115,7 +115,7 @@ export default function TradeMarket({
       <div className="mx-auto max-w-3xl px-4 py-6">
         <div className="mb-5 flex items-center justify-between border-b-2 border-viking-gold/40 pb-3">
           <div>
-            <h1 className="font-cinzel text-2xl font-bold text-viking-gold">🏛 Handelstorg</h1>
+            <h1 className="inline-flex items-center gap-2 font-cinzel text-2xl font-bold text-viking-gold"><AutoIcon name="market" size={22} /> Handelstorg</h1>
             <p className="font-inter text-xs italic text-viking-gold-soft">Bytt varer med andre skip — fyll hverandres mangler.</p>
           </div>
           <button onClick={onClose} className="rounded border-2 border-viking-gold/50 px-3 py-1 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold">✕ Lukk</button>
@@ -130,7 +130,7 @@ export default function TradeMarket({
 
         {/* Innkommende tilbud */}
         <section className="mb-5">
-          <h2 className="mb-2 font-cinzel text-lg text-viking-gold">📥 Innkommende tilbud {incoming.length > 0 && <span className="ml-1 rounded bg-viking-crimson px-1.5 py-0.5 font-mono text-xs text-viking-paper">{incoming.length}</span>}</h2>
+          <h2 className="mb-2 inline-flex items-center gap-2 font-cinzel text-lg text-viking-gold"><AutoIcon name="inbox" size={18} /> Innkommende tilbud {incoming.length > 0 &&<span className="ml-1 rounded bg-viking-crimson px-1.5 py-0.5 font-mono text-xs text-viking-paper">{incoming.length}</span>}</h2>
           {incoming.length === 0 ? (
             <p className="font-inter text-sm italic text-viking-paper/55">Ingen tilbud venter på svar.</p>
           ) : incoming.map((t) => (
@@ -147,7 +147,7 @@ export default function TradeMarket({
                   <button onClick={() => onDecline(t.id)} data-testid={`decline-${t.id}`} className="rounded border-2 border-viking-crimson bg-viking-crimson/30 px-3 py-1 font-cinzel text-sm font-bold text-viking-paper hover:bg-viking-crimson/50">Avslå</button>
                 </div>
               ) : (
-                <p className="mt-1 font-inter text-xs italic text-viking-gold-soft">⚓ Høvdingen svarer på tilbudet.</p>
+                <p className="mt-1 inline-flex items-center gap-1.5 font-inter text-xs italic text-viking-gold-soft"><AutoIcon name="anchor" size={13} /> Høvdingen svarer på tilbudet.</p>
               )}
             </MaterialPanel>
           ))}
@@ -155,7 +155,7 @@ export default function TradeMarket({
 
         {/* Utgående tilbud */}
         <section className="mb-5">
-          <h2 className="mb-2 font-cinzel text-lg text-viking-gold">📤 Sendt</h2>
+          <h2 className="mb-2 inline-flex items-center gap-2 font-cinzel text-lg text-viking-gold"><AutoIcon name="outbox" size={18} /> Sendt</h2>
           {outgoing.length === 0 ? (
             <p className="font-inter text-sm italic text-viking-paper/55">Ingen tilbud venter på svar.</p>
           ) : outgoing.map((t) => (
@@ -172,7 +172,7 @@ export default function TradeMarket({
 
         {/* Andre skip — send nytt tilbud */}
         <section className="mb-5">
-          <h2 className="mb-2 font-cinzel text-lg text-viking-gold">⛵ Andre skip i spillet</h2>
+          <h2 className="mb-2 inline-flex items-center gap-2 font-cinzel text-lg text-viking-gold"><AutoIcon name="sail" size={18} /> Andre skip i spillet</h2>
           {opponents.length === 0 ? (
             <p className="font-inter text-sm italic text-viking-paper/55">Ingen andre skip har lagt fra land ennå.</p>
           ) : opponents.map(([id, g]) => {
@@ -225,7 +225,7 @@ export default function TradeMarket({
         {/* Historikk */}
         {history.length > 0 && (
           <section className="mb-5">
-            <h2 className="mb-2 font-cinzel text-lg text-viking-gold-soft">📜 Tidligere handler</h2>
+            <h2 className="mb-2 inline-flex items-center gap-2 font-cinzel text-lg text-viking-gold-soft"><AutoIcon name="scroll" size={18} /> Tidligere handler</h2>
             {history.map((t) => {
               const statusLabel = t.status === 'accepted' ? '✓ Akseptert' : t.status === 'declined' ? '✕ Avslått' : '↩ Trukket';
               const color = t.status === 'accepted' ? 'text-viking-moss' : 'text-viking-paper/55';
@@ -238,7 +238,7 @@ export default function TradeMarket({
           </section>
         )}
 
-        <p className="mt-6 text-center font-cinzel text-xs text-viking-gold-soft/60">Vikingen som ikke handler, blir aldri rik. ⚓</p>
+        <p className="mt-6 inline-flex w-full items-center justify-center gap-1.5 text-center font-cinzel text-xs text-viking-gold-soft/60">Vikingen som ikke handler, blir aldri rik. <AutoIcon name="anchor" size={13} /></p>
       </div>
     </div>
   );
