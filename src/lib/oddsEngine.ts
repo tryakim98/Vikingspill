@@ -5,7 +5,7 @@
  * Modifikatorer (stedsquiz-bonus, ferdighet over krav) skyver terningen oppover.
  */
 
-import type { RollOdds, SkillKey, Choice } from '../types';
+import type { RollOdds } from '../types';
 
 export type Tier = 'bad' | 'mid' | 'good' | 'crit';
 export const TIER_ORDER: Tier[] = ['bad', 'mid', 'good', 'crit'];
@@ -58,36 +58,5 @@ export function rollDice(baseRoll: RollOdds, modifier: number): RollResult {
   return { raw, effective, modifier, tier: rollToTier(baseRoll, effective) };
 }
 
-/** §6.2: ferdighet over kravet gir +1 per nivå. */
-export function skillBonusForChoice(choice: Choice, skills: Record<SkillKey, number>): number {
-  if (!choice.skillReq) return 0;
-  let bonus = 0;
-  for (const [skill, req] of Object.entries(choice.skillReq) as [SkillKey, number][]) {
-    bonus += Math.max(0, (skills[skill] ?? 0) - req);
-  }
-  return bonus;
-}
-
-/** Et valg er tilgjengelig bare hvis gruppen oppfyller alle ferdighetskrav (§3.3). */
-export function meetsRequirement(choice: Choice, skills: Record<SkillKey, number>): boolean {
-  if (!choice.skillReq) return true;
-  return (Object.entries(choice.skillReq) as [SkillKey, number][])
-    .every(([skill, req]) => (skills[skill] ?? 0) >= req);
-}
-
-/** Sen-spill-straff (§3.3): når gruppa er sent i reisen (har besøkt minst 6 destinasjoner)
- *  og tar et valg de mangler ferdighet til, blir valget tilgjengelig — men terningen
- *  straffes med −2 («dere mangler ferdigheten og blir lurt»). Tidlig i spillet er valget
- *  fortsatt utilgjengelig som før. Belønner balansert ferdighetsbygging. */
-export const LATE_GAME_THRESHOLD = 6;
-export const LATE_GAME_PENALTY = -2;
-
-export function lateGamePenalty(
-  choice: Choice,
-  skills: Record<SkillKey, number>,
-  isLateGame: boolean,
-): number {
-  if (!isLateGame) return 0;
-  if (meetsRequirement(choice, skills)) return 0;
-  return LATE_GAME_PENALTY;
-}
+// Odds = grunnsjanse + stedsquiz-bonus. Ferdigheter påvirker IKKE terningen lenger
+// (ingen skill-bonus, ingen sen-spill-straff, ingen ferdighets-gating av valg).

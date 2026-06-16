@@ -10,17 +10,13 @@
 
 import { useState, useEffect, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import type { Destination, Choice, RollOdds, SkillKey, SagaEntry } from '../../types';
+import type { Destination, Choice, RollOdds, SagaEntry } from '../../types';
 import type { SyncedEncounter, CouncilAdvice, ApprovalRequest } from '../../lib/gameSync';
 import { taskBonusForApproval } from '../../lib/gameSync';
-import { skillTreeData } from '../../data';
 import { SCARRED_RECEPTION } from '../../data/consequences';
 import {
   rollDice,
   oddsPercent,
-  skillBonusForChoice,
-  meetsRequirement,
-  lateGamePenalty,
   TIER_LABEL,
   TIER_COLOR,
   TIER_ORDER,
@@ -45,7 +41,6 @@ const TASK_TYPE_ICON: Record<string, string> = {
 
 interface EncounterFlowProps {
   destination: Destination;
-  skills: Record<SkillKey, number>;
   onComplete: (apply: OutcomeApply) => void;
   onExit: () => void;
   /** Sett kun når online — viser «Be om godkjenning» på oppgavesiden (§8.3). */
@@ -58,9 +53,6 @@ interface EncounterFlowProps {
   isChief?: boolean;
   syncedEncounter?: SyncedEncounter | null;
   onUpdateEncounter?: (partial: Partial<SyncedEncounter>) => void;
-  /** Sent i spillet (§3.3): valg som krever en ferdighet gruppa mangler blir
-   *  tilgjengelige med −2 straff i stedet for å være låst. */
-  lateGame?: boolean;
   /** Lærer-styrt: krev en saga-begrunnelse mellom valg og terningkast. */
   requireSaga?: boolean;
   /** Lærer-styrt: krev perspektivskifte før valg på destinasjoner som har prompts. */
@@ -91,7 +83,6 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   farlig: '#8B2929',
 };
 
-const skillName = (s: SkillKey) => skillTreeData[s].name;
 
 function Shell({ name, onExit, children }: { name: string; onExit: () => void; children: ReactNode }) {
   return (
@@ -163,9 +154,9 @@ function AdviceSummary({ advice, memberIds, choices }: {
 }
 
 export default function EncounterFlow({
-  destination, skills, onComplete, onExit, onRequestApproval, approval = null,
+  destination, onComplete, onExit, onRequestApproval, approval = null,
   isChief = true, syncedEncounter = null, onUpdateEncounter,
-  lateGame = false, requireSaga = false, requirePerspective = false, requireBridge = false, requireQuiz = false,
+  requireSaga = false, requirePerspective = false, requireBridge = false, requireQuiz = false,
   requireCouncil = false, myMemberId, memberIds = [], onGiveAdvice, textLength = 'full', onToggleTextLength,
   saga = [],
 }: EncounterFlowProps) {
@@ -316,8 +307,9 @@ export default function EncounterFlow({
   const approvalForHere = approval && approval.destId === d.id ? approval : null;
   const taskBonus = taskBonusForApproval(approvalForHere?.status);
 
-  const choiceLatePenalty = choice ? lateGamePenalty(choice, skills, lateGame) : 0;
-  const modifier = choice ? quizBonus + taskBonus + skillBonusForChoice(choice, skills) + choiceLatePenalty + scarPenalty : 0;
+  // Odds = grunnsjanse + stedsquiz-bonus (+ lærergodkjenning + svidd mottakelse).
+  // Ferdigheter påvirker IKKE terningen lenger.
+  const modifier = choice ? quizBonus + taskBonus + scarPenalty : 0;
   const outcome = choice && roll ? choice.outcomes[roll.tier] : null;
 
   const ChiefBanner = () => (
@@ -693,18 +685,10 @@ export default function EncounterFlow({
     const hidden = d.hiddenChoice;
     const test = hidden?.test;
     const renderChoiceCard = (c: typeof d.choices[number], isHidden = false) => {
-      const meets = meetsRequirement(c, skills);
-      // REGEL: kjernevalg (grunnvalg) er ALLTID valgbare — ferdigheter FORBEDRER odds
-      // (skillBonusForChoice) og gir en myk −2 sent i reisen om de mangler (§3.3), men
-      // de LÅSER aldri kjernevalget. Skjulte ekstra-valg beholder sin egen gating.
-      const available = isHidden ? (meets || lateGame) : true;
-      const lateUnmet = !isHidden && !meets && lateGame; // myk «fravær straffer sent»-markør
-      const reqText = c.skillReq
-        ? (Object.entries(c.skillReq) as [SkillKey, number][]).map(([s, n]) => `${skillName(s)} ${n}`).join(', ')
-        : null;
+      // Alle kjernevalg er alltid valgbare (ferdigheter gater ikke valg lenger).
+      // Skjulte ekstra-valg vises bare når lesetesten er bestått (gates over).
       const cardCls = isHidden
         ? 'border-viking-gold bg-viking-gold/10 ring-2 ring-viking-gold/50 shadow-[0_0_18px_rgba(205,195,173,0.25)]'
-        : lateUnmet ? 'border-viking-gold-soft/70 bg-viking-surface ring-2 ring-viking-gold-soft/20'
         : 'border-viking-gold/40 bg-viking-surface';
       return (
         <div key={c.id} className={`rounded-lg border-2 p-4 ${cardCls}`} data-testid={`valg-${c.id}`}>
@@ -714,26 +698,12 @@ export default function EncounterFlow({
             <span className="rounded bg-viking-darkblue/70 px-2 py-0.5 font-mono text-[10px] uppercase text-viking-gold-soft/80">{c.tag}</span>
           </div>
           <p className="mb-3 font-inter text-sm text-viking-paper/85">{c.desc}</p>
-          {reqText && (
-            meets ? (
-              <p className="mb-2 font-mono text-xs text-viking-moss">✓ {reqText} — bedre odds her</p>
-            ) : lateUnmet ? (
-              <p className="mb-2 font-mono text-xs text-viking-gold-soft" data-testid={`late-warning-${c.id}`}>
-                Uten {reqText} straffer reisen dere −2 på terningen sent — men valget er fritt.
-              </p>
-            ) : isHidden ? (
-              <p className="mb-2 font-mono text-xs text-viking-crimson">Krever {reqText}</p>
-            ) : (
-              <p className="mb-2 font-mono text-xs text-viking-gold-soft">Går bedre med {reqText} — valget er fritt.</p>
-            )
-          )}
           <OddsBar baseRoll={c.baseRoll} />
           {isChief ? (
             <button
-              disabled={!available}
               onClick={() => { playSound('click'); updateMany({ choiceId: c.id, roll: null, step: requireSaga ? 'saga' : 'roll', reason: '' }); }}
               data-testid={`pick-${c.id}`}
-              className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-saga text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-saga text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft"
             >
               Velg dette
             </button>
@@ -858,7 +828,6 @@ export default function EncounterFlow({
 
   // 5b) TERNINGKAST
   if (step === 'roll' && choice) {
-    const skillBonus = skillBonusForChoice(choice, skills);
     return (
       <Shell name={d.name} onExit={onExit}>
         <h1 className="mb-4 font-cinzel text-2xl font-bold text-viking-gold">{choice.title}</h1>
@@ -869,12 +838,6 @@ export default function EncounterFlow({
             {taskBonus !== 0 && (
               <p className={taskBonus > 0 ? 'text-viking-moss' : 'text-viking-crimson'} data-testid="task-bonus-line">
                 Oppgave (lærer): {taskBonus > 0 ? '+' : ''}{taskBonus}
-              </p>
-            )}
-            <p>Ferdighet over krav: +{skillBonus}</p>
-            {choiceLatePenalty < 0 && (
-              <p className="text-viking-crimson" data-testid="late-penalty-line">
-                Sen-spill-straff (mangler ferdighet): {choiceLatePenalty}
               </p>
             )}
             {scarPenalty < 0 && (

@@ -646,7 +646,6 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
       <>
       <EncounterFlow
         destination={activeDest}
-        skills={state.skills}
         onComplete={(apply) => { applyOutcome(apply); setActiveDest(null); }}
         onExit={() => isChief && setActiveDest(null)}
         onRequestApproval={session.mode === 'online'
@@ -654,7 +653,6 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           : undefined}
         approval={isOnline ? myApproval : null}
         isChief={isChief}
-        lateGame={state.visited.length >= 6}
         requireSaga={requireSaga}
         requirePerspective={requirePerspective}
         requireBridge={requireBridge}
