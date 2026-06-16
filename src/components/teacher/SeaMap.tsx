@@ -47,7 +47,7 @@ export default function SeaMap({ groups }: { groups: Record<string, SyncedGroup>
   return (
     <div
       className="relative w-full overflow-hidden rounded-lg border-4 border-viking-gold/70 bg-[#14110b]"
-      style={{ aspectRatio: '16 / 9', backgroundImage: 'repeating-linear-gradient(0deg, rgba(212,168,67,0.05) 0 1px, transparent 1px 40px), repeating-linear-gradient(90deg, rgba(212,168,67,0.05) 0 1px, transparent 1px 40px)' }}
+      style={{ aspectRatio: '16 / 9', backgroundImage: 'repeating-linear-gradient(0deg, rgba(205,195,173,0.05) 0 1px, transparent 1px 40px), repeating-linear-gradient(90deg, rgba(205,195,173,0.05) 0 1px, transparent 1px 40px)' }}
     >
       {/* Dekorative landmasser (grovt, lav opasitet) */}
       <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 56" preserveAspectRatio="none">
@@ -68,7 +68,7 @@ export default function SeaMap({ groups }: { groups: Record<string, SyncedGroup>
       {/* Destinasjoner */}
       {Object.entries(MAP_POS).map(([id, p]) => (
         <div key={id} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${p.x}%`, top: `${p.y}%` }}>
-          <div className="h-2.5 w-2.5 rounded-full bg-viking-gold shadow-[0_0_8px_2px_rgba(212,168,67,0.6)]" />
+          <div className="h-2.5 w-2.5 rounded-full bg-viking-gold shadow-[0_0_8px_2px_rgba(205,195,173,0.6)]" />
           <span className="absolute left-1/2 top-3 -translate-x-1/2 whitespace-nowrap font-inter text-[9px] text-viking-gold-soft/70">{NAME[id] ?? id}</span>
         </div>
       ))}

@@ -168,7 +168,7 @@ export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpi
                 x={p.x} y={p.y}
                 textAnchor="middle" dominantBaseline="middle"
                 fontSize="34" fill="#CDC3AD"
-                style={{ filter: 'drop-shadow(0 0 6px rgba(212,168,67,0.6))' }}
+                style={{ filter: 'drop-shadow(0 0 6px rgba(205,195,173,0.6))' }}
               >
                 {rune}
               </text>
@@ -213,7 +213,7 @@ export default function SkjebneHjul({ onLanded, onSpinStart, disabled, remoteSpi
               className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"
               data-testid="skjebnehjul-reveal"
             >
-              <div className="rounded-lg border-4 border-viking-gold bg-viking-darkblue/95 px-8 py-6 text-center shadow-2xl" style={{ boxShadow: '0 0 60px rgba(212,168,67,0.6)' }}>
+              <div className="rounded-lg border-4 border-viking-gold bg-viking-darkblue/95 px-8 py-6 text-center shadow-2xl" style={{ boxShadow: '0 0 60px rgba(205,195,173,0.6)' }}>
                 <p className="font-cinzel text-xs uppercase tracking-[0.35em] text-viking-gold-soft">Skjebnen har talt</p>
                 <p className="mt-2 font-cinzel text-4xl font-bold text-viking-gold drop-shadow-lg">
                   {result.icon} {result.label}!

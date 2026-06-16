@@ -53,7 +53,7 @@ export default function JoinGame({ onJoin, onOffline, onSwitchRole }: Props) {
         </div>
 
         {/* PRIMÆR: Bli med i lærerens spill */}
-        <section className="rounded-lg border-2 border-viking-gold bg-viking-surface p-5 shadow-[0_0_18px_rgba(212,168,67,0.15)]">
+        <section className="rounded-lg border-2 border-viking-gold bg-viking-surface p-5 shadow-[0_0_18px_rgba(205,195,173,0.15)]">
           <div className="mb-2 flex items-center gap-2">
             <span className="text-2xl" aria-hidden>🟢</span>
             <h2 className="font-cinzel text-xl font-bold text-viking-gold">Bli med i lærerens spill</h2>

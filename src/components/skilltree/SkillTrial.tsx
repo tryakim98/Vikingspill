@@ -146,8 +146,8 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
     return (
       <TrialShell title={title} iconName={SKILL_PNG[skill]} onClose={onClose}>
         <motion.p
-          initial={{ scale: 0.6, opacity: 0, textShadow: '0 0 0px rgba(212,168,67,0)' }}
-          animate={{ scale: 1, opacity: 1, textShadow: ['0 0 0px rgba(212,168,67,0)', '0 0 26px rgba(212,168,67,0.9)', '0 0 10px rgba(212,168,67,0.5)'] }}
+          initial={{ scale: 0.6, opacity: 0, textShadow: '0 0 0px rgba(205,195,173,0)' }}
+          animate={{ scale: 1, opacity: 1, textShadow: ['0 0 0px rgba(205,195,173,0)', '0 0 26px rgba(205,195,173,0.9)', '0 0 10px rgba(205,195,173,0.5)'] }}
           transition={{ duration: 1.1, type: 'spring', stiffness: 180, damping: 12 }}
           className="mb-3 font-cinzel text-3xl text-viking-gold"
         >

@@ -17,9 +17,9 @@ export const TIER_LABEL: Record<Tier, string> = {
 };
 export const TIER_COLOR: Record<Tier, string> = {
   bad: '#8B2929',
-  mid: '#D4A843',
+  mid: '#A9A08D', // bein-grå (monokrom) — middels skal ikke ha gull
   good: '#2B6B6B',
-  crit: '#E8C97A',
+  crit: '#A07F32', // dempet brass — Trumf er det sjeldne gull-høydepunktet
 };
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));

@@ -131,7 +131,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
     <Shell>
       <motion.p
         initial={{ scale: 0.6, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1, textShadow: ['0 0 0 transparent', '0 0 26px rgba(212,168,67,0.9)', '0 0 10px rgba(212,168,67,0.5)'] }}
+        animate={{ scale: 1, opacity: 1, textShadow: ['0 0 0 transparent', '0 0 26px rgba(205,195,173,0.9)', '0 0 10px rgba(205,195,173,0.5)'] }}
         transition={{ duration: 1.1, type: 'spring', stiffness: 180, damping: 12 }}
         className="mb-3 font-cinzel text-3xl text-viking-gold"
       >

@@ -212,7 +212,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                 <span
                   aria-hidden
                   className="absolute inset-0 rounded-full"
-                  style={{ background: 'rgba(11,20,38,0.6)', border: '1px solid rgba(212,168,67,0.55)' }}
+                  style={{ background: 'rgba(11,20,38,0.6)', border: '1px solid rgba(205,195,173,0.55)' }}
                 />
                 {/* Selve prikken */}
                 <span

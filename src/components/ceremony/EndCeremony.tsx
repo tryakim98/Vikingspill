@@ -113,14 +113,14 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
           initial={{ scale: 0.4, opacity: 0, filter: 'blur(8px)' }}
           animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
           transition={{ type: 'spring', stiffness: 180, damping: 14, delay: 0.4 }}
-          className="mb-5 text-[100px] drop-shadow-[0_0_28px_rgba(212,168,67,0.55)]"
+          className="mb-5 text-[100px] drop-shadow-[0_0_28px_rgba(205,195,173,0.55)]"
         >
           {archetype.icon}
         </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
-          className="mb-6 font-cinzel text-5xl font-bold text-viking-gold drop-shadow-[0_0_28px_rgba(212,168,67,0.5)] md:text-6xl"
+          className="mb-6 font-cinzel text-5xl font-bold text-viking-brass drop-shadow-[0_0_28px_rgba(205,195,173,0.5)] md:text-6xl"
           data-testid="archetype-title"
         >
           {archetype.title}

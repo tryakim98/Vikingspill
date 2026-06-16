@@ -664,7 +664,7 @@ export default function EncounterFlow({
         ? (Object.entries(c.skillReq) as [SkillKey, number][]).map(([s, n]) => `${skillName(s)} ${n}`).join(', ')
         : null;
       const cardCls = isHidden
-        ? 'border-viking-gold bg-viking-gold/10 ring-2 ring-viking-gold/50 shadow-[0_0_18px_rgba(212,168,67,0.25)]'
+        ? 'border-viking-gold bg-viking-gold/10 ring-2 ring-viking-gold/50 shadow-[0_0_18px_rgba(205,195,173,0.25)]'
         : !available ? 'border-viking-crimson/40 bg-viking-darkblue/40 opacity-70'
         : lateAvailable ? 'border-viking-gold-soft/70 bg-viking-surface ring-2 ring-viking-gold-soft/20'
         : 'border-viking-gold/40 bg-viking-surface';
@@ -986,7 +986,7 @@ export default function EncounterFlow({
         )}
 
         <div
-          className="mb-3 rounded-lg border-4 border-viking-gold/60 p-3 shadow-[0_0_18px_rgba(212,168,67,0.18)]"
+          className="mb-3 rounded-lg border-4 border-viking-gold/60 p-3 shadow-[0_0_18px_rgba(205,195,173,0.18)]"
           style={{
             background: 'linear-gradient(135deg, #FDFBF6 0%, #F4EDDC 100%)',
             backgroundImage: 'repeating-linear-gradient(0deg, transparent 0 23px, rgba(160,82,45,0.07) 23px 24px)',

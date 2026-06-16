@@ -62,7 +62,7 @@ export const WHEEL_FIELDS: WheelField[] = [
     icon: '🎁',
     label: 'Gudenes gave',
     shortLabel: 'Gave',
-    color: '#D4A843', // gold
+    color: '#A07F32', // dempet brass (gudegave — sjelden gull-aksent)
     description: 'En av flåten får en uventet velsignelse.',
   },
   {
