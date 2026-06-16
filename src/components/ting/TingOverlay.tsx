@@ -7,7 +7,7 @@
  */
 
 import type { TingSession } from '../../lib/gameSync';
-import Icon from '../decor/Icon';
+import NorseIcon from '../decor/NorseIcon';
 
 interface Props {
   ting: TingSession;
@@ -34,7 +34,7 @@ export default function TingOverlay({ ting, myMemberId, memberIds, memberLabel, 
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-viking-darkblue/95 px-4 text-center text-viking-paper" data-testid="ting-overlay">
         <p className="font-cinzel text-sm uppercase tracking-[0.3em] text-viking-gold-soft/70">Tinget har talt</p>
-        <Icon name="scales" size={72} className="mt-3 text-viking-gold" />
+        <NorseIcon name="motiv-vekt" size={96} className="mt-3 text-viking-gold" />
         <h1 className="mt-3 font-cinzel text-3xl font-bold text-viking-gold drop-shadow-lg md:text-4xl" data-testid="ting-result">
           {kept ? `${incumbentName} beholder roret` : `${newChiefName} tar nå roret`}
         </h1>
@@ -65,7 +65,7 @@ export default function TingOverlay({ ting, myMemberId, memberIds, memberLabel, 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-viking-darkblue/95 px-4 text-center text-viking-paper" data-testid="ting-overlay">
       <p className="font-cinzel text-sm uppercase tracking-[0.3em] text-viking-gold-soft/70">Tinget er kalt inn</p>
-      <Icon name="scales" size={60} className="mt-2 text-viking-gold" />
+      <NorseIcon name="motiv-vekt" size={84} className="mt-2 text-viking-gold" />
       <h1 className="mt-2 mb-1 font-cinzel text-2xl font-bold text-viking-gold md:text-3xl">Hvem skal styre skipet?</h1>
       <p className="mb-6 max-w-md font-inter text-sm italic text-viking-paper/85">
         {memberLabel(ting.calledBy)} foreslår at <strong className="text-viking-gold-soft">{candidateName}</strong> tar roret. Gi din stemme.

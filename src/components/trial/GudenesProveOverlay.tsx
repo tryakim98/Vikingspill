@@ -12,7 +12,7 @@ import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import type { SkillKey } from '../../types';
 import { skillTreeData } from '../../data';
-import { AutoIcon } from '../decor/NorseIcon';
+import NorseIcon, { AutoIcon } from '../decor/NorseIcon';
 import Icon from '../decor/Icon';
 import { playSound } from '../../lib/sound';
 import type { TrialResult } from '../../lib/gameSync';
@@ -59,7 +59,7 @@ export default function GudenesProveOverlay({ navn, desc, skill, skillLevel, res
           transition={{ duration: 0.7 }}
           className="relative text-viking-gold"
         >
-          <Icon name="eye" size={72} />
+          <NorseIcon name="motiv-gudeoye" size={104} />
         </motion.div>
         <motion.h1
           initial={{ scale: 0.7, opacity: 0 }}

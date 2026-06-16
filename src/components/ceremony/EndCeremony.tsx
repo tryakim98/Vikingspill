@@ -17,7 +17,7 @@ import type { GroupSetup } from '../../hooks/useGroupSetup';
 import { determineArchetype, topSkillTitle } from '../../data/archetypes';
 import VikingShip from '../ship/VikingShip';
 import MaterialPanel, { type Material } from '../decor/MaterialPanel';
-import { AutoIcon } from '../decor/NorseIcon';
+import NorseIcon, { AutoIcon } from '../decor/NorseIcon';
 
 interface Scores {
   culturalUnderstanding: number;
@@ -60,7 +60,7 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
     return (
       <div className="flex min-h-screen flex-col items-center justify-center viking-screen px-4 text-center text-viking-paper">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <AutoIcon name="longhouse" size={60} className="mb-4 text-viking-gold" />
+          <NorseIcon name="motiv-hall" size={104} className="mb-4 text-viking-gold" />
           <h1 className="mb-3 font-cinzel text-3xl font-bold text-viking-gold md:text-4xl">Kongen kaller alle hjem til Avaldsnes</h1>
           <p className="mb-8 font-inter italic text-viking-gold-soft">Reisen er over. Stig i land og hør hvordan det gikk.</p>
           <div className="mb-8 flex justify-center">

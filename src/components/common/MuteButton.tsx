@@ -5,7 +5,7 @@
  */
 
 import { useMute } from '../../hooks/useMute';
-import Icon from '../decor/Icon';
+import NorseIcon from '../decor/NorseIcon';
 
 export default function MuteButton() {
   const { muted, toggle } = useMute();
@@ -16,7 +16,7 @@ export default function MuteButton() {
       title={muted ? 'Slå på lyd' : 'Slå av lyd'}
       className="fixed bottom-4 right-4 z-[70] flex h-12 w-12 items-center justify-center rounded-full border-2 border-viking-gold/70 bg-viking-surface text-viking-gold-soft transition-colors hover:border-viking-gold hover:text-viking-gold"
     >
-      <Icon name={muted ? 'horn-muted' : 'horn'} size={24} />
+      <NorseIcon name={muted ? 'ikon-lyd-av' : 'ikon-lyd-pa'} size={26} />
     </button>
   );
 }
