@@ -74,9 +74,14 @@ For å låse opp nivå 2 og 3 i en ferdighet må gruppen **bevise at de er verdi
 Læreren godkjenner mesterhandlingen. Dette gjør opplåsing til en **prestasjon** som føles fortjent.
 
 ### 3.3 Ferdigheter gir reell fordel — og fravær gir reelle problemer
-- **Låste valg:** Mange av de beste valgene krever et ferdighetsnivå. Uten Diplomati 2 kan du ikke inngå Rollos avtale i Paris. Uten Sjømannskap 2 kan du ikke nå Vinland.
-- **Terningmodifikatorer:** Ferdigheter over kravet gir +1 per nivå.
-- **Sårbarhet:** Hvis du IKKE har låst opp nok ferdigheter innen visse punkter, blir senere destinasjoner vanskeligere. Eksempel: kommer du til Bagdad (sent i spillet) med Språk 0, får alle valg der -2 på terningen («dere forstår ingenting og blir lurt»).
+
+> **Kjerneregel:** Hver besøkt havn skal ALLTID ha minst 2–3 ekte, omstridte kjernevalg **uten lås**. Ferdigheter og ressurser **UTVIDER** (flere havner, sidetokt, et ekstra ferdighetsspesifikt valg via skjult valg) og **FORBEDRER** (bedre odds), men de **låser aldri selve kjernevalget**. Ferdigheter avgjør hvor *godt* det går — ikke *om* gruppen får velge.
+
+- **Kjernevalgene er alltid valgbare.** Ved hver havn kan gruppen alltid velge fritt mellom grunnvalgene, uansett ferdighetsnivå. Ingen «Velg dette»-knapp deaktiveres av en manglende ferdighet.
+- **Terningmodifikatorer (forbedrer):** Ferdighet over et valgs kravnivå gir +1 per nivå (`skillBonusForChoice`). Har du ferdigheten, ruller valget bedre; mangler du den, ruller det som normalt — ingen lås.
+- **Sårbarhet (fravær straffer *sent*):** Mangler du den relevante ferdigheten sent i reisen, får valget en myk **−2** på terningen («dere forstår ingenting og blir lurt») — men valget er fortsatt fritt. Eksempel: Bagdad med Språk 0 sent i spillet → −2, ikke en stengt dør.
+- **Utvider (ekstra valg):** Et **skjult valg** (låst opp ved et lesespørsmål, ofte ferdighetsfarget) kan dukke opp *i tillegg* til kjernevalgene. Dette er en additiv belønning — det erstatter eller stenger aldri grunnvalgene.
+- **Destinasjonstilgang er noe annet:** Ferdigheter/ressurser kan fortsatt kreves for å NÅ visse havner og sidetokt (f.eks. Sjømannskap 2 for å nå Vinland, ferdsbrev for et sidested). Det styrer *hvor* gruppen kan seile — ikke *valgene* når de først er framme.
 
 ### 3.4 «Gudenes prøve» — lærertrigget konkurranse, spesialisering blir et tveegget sverd
 Læreren kan når som helst utløse **«Gudenes prøve»** fra konsollen. Dette er den sentrale tilfeldighetsmekanikken, og den følger én streng regel:
