@@ -1,9 +1,11 @@
 /**
  * SkillTrial.tsx
- * Verdighetsprøven (§3.2) for å låse opp ferdighetsnivå:
- *   - Lærlingeprøven (1→2): 3 ferdighetstre-spørsmål om besøkte steder, 2 må være rette.
- *   - Mesterprøven (2→3): 4 spørsmål, 3 rette + en ferdighetsspesifikk handling læreren godkjenner.
- * Spørsmålene kommer fra ferdighetstre-quizen (vikingspill_quiz.json), filtrert på
+ * Verdighetsprøven (§3.2) for å heve ferdighetsnivå — TODELT (begge deler kreves):
+ *   DEL 1 (teori): ferdighetstre-quiz om besøkte steder (Lærling 1→2: 3 spm/2 rette,
+ *                  Mester 2→3: 4 spm/3 rette). Uendret quiz-mekanikk.
+ *   DEL 2 (praksis): en ferdighetsspesifikk, aktiv oppgave (SkillPractice) som må
+ *                  fullføres. Først når BÅDE quiz og praksis er bestått, heves ferdigheten.
+ * Quiz-spørsmålene kommer fra ferdighetstre-quizen (vikingspill_quiz.json), filtrert på
  * besøkte destinasjoner — IKKE stedsquizen.
  */
 
@@ -15,16 +17,9 @@ import { playSound } from '../../lib/sound';
 import QuestionCard from '../quiz/QuestionCard';
 import NorseIcon, { SKILL_PNG } from '../decor/NorseIcon';
 import MaterialPanel from '../decor/MaterialPanel';
+import SkillPractice from './SkillPractice';
 
-const MASTER_ACTION: Record<SkillKey, string> = {
-  språk: 'Lær en hel setning på et fremmedspråk (norrønt, arabisk eller gresk) og fremfør den for læreren.',
-  sjømannskap: 'Tegn en korrekt navigasjonsrute mellom to destinasjoner dere har besøkt, og forklar den for læreren.',
-  krigskunst: 'Demonstrer en skjoldborg-formasjon med hele gruppen — fysisk, for læreren.',
-  diplomati: 'Forhandle frem en «avtale» med en medelev eller noen på biblioteket, live.',
-  tro: 'Fremfør et selvlaget skaldekvad på fire linjer om reisen deres.',
-};
-
-type Phase = 'quiz' | 'failed' | 'action' | 'passed';
+type Phase = 'quiz' | 'failed' | 'practice' | 'passed';
 
 function TrialShell({ title, iconName, onClose, children }: { title: string; iconName?: string; onClose: () => void; children: ReactNode }) {
   return (
@@ -46,11 +41,12 @@ interface Props {
   skill: SkillKey;
   level: number;
   visited: string[];
+  isChief: boolean;
   onPass: (newLevel: number) => void;
   onClose: () => void;
 }
 
-export default function SkillTrial({ skill, level, visited, onPass, onClose }: Props) {
+export default function SkillTrial({ skill, level, visited, isChief, onPass, onClose }: Props) {
   const branch = skillTreeData[skill];
   const tier: 2 | 3 = level >= 2 ? 3 : 2;
   const count = tier === 2 ? 3 : 4;
@@ -92,11 +88,9 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
   };
 
   const finishQuiz = () => {
-    if (isQuizPassed(tier, correct)) {
-      setPhase(tier === 2 ? 'passed' : 'action');
-    } else {
-      setPhase('failed');
-    }
+    // DEL 1 bestått → videre til praksis (DEL 2). Ferdigheten heves først når begge er klart.
+    if (isQuizPassed(tier, correct)) setPhase('practice');
+    else setPhase('failed');
   };
 
   if (phase === 'quiz') {
@@ -105,7 +99,7 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
     return (
       <TrialShell title={title} iconName={SKILL_PNG[skill]} onClose={onClose}>
         <div className="mb-4 flex items-center justify-between">
-          <p className="font-cinzel text-sm text-viking-gold-soft">Spørsmål {idx + 1}/{count} · trenger {passNeeded} rette</p>
+          <p className="font-cinzel text-sm text-viking-gold-soft">DEL 1 (teori) · Spørsmål {idx + 1}/{count} · trenger {passNeeded} rette</p>
           <p className="font-mono text-xs text-viking-gold-soft">Riktige: {correct}</p>
         </div>
         <MaterialPanel material="jern" className="p-5">
@@ -154,23 +148,17 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
         >
           ✦ Bestått!
         </motion.p>
-        <p className="mb-6 font-inter text-viking-paper/90">Dere fikk {correct} av {count} riktige og har låst opp <strong className="text-viking-gold-soft">{targetTierName}</strong> (nivå 2) i {branch.name}.</p>
-        <button onClick={() => onPass(2)} className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">Fullfør</button>
+        <p className="mb-6 font-inter text-viking-paper/90">Dere fullførte både teori (DEL 1) og praksis (DEL 2) — <strong className="text-viking-gold-soft">{targetTierName}</strong> (nivå {tier}) i {branch.name} er hevet.</p>
+        <button onClick={() => onPass(tier)} className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">Fullfør</button>
       </TrialShell>
     );
   }
 
-  // phase === 'action' (mesterprøven, nivå 2→3)
+  // phase === 'practice' (DEL 2) — ferdighetsspesifikk, aktiv oppgave (begge nivå)
   return (
     <TrialShell title={title} iconName={SKILL_PNG[skill]} onClose={onClose}>
-      <p className="mb-2 font-cinzel text-2xl text-viking-gold">Quiz bestått — siste prøve</p>
-      <p className="mb-5 font-inter text-viking-paper/90">Dere fikk {correct} av {count} riktige. For å bli <strong className="text-viking-gold-soft">{targetTierName}</strong> (nivå 3) må dere fullføre mesterhandlingen:</p>
-      <MaterialPanel material="jern" framed className="p-5">
-        <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">Mesterhandling — {branch.name}</p>
-        <p className="font-inter text-viking-paper">{MASTER_ACTION[skill]}</p>
-      </MaterialPanel>
-      <div className="mt-7 flex gap-3">
-        <button onClick={() => { playSound('bell'); onPass(3); }} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2.5 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Læreren godkjenner ✓</button>
+      <SkillPractice skill={skill} isChief={isChief} onDone={() => setPhase('passed')} />
+      <div className="mt-7">
         <button onClick={onClose} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Avbryt</button>
       </div>
     </TrialShell>

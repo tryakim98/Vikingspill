@@ -684,6 +684,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         skill={activeSkill}
         level={state.skills[activeSkill] ?? 0}
         visited={state.visited}
+        isChief={isChief}
         onPass={(lvl) => { setSkillLevel(activeSkill, lvl); setActiveSkill(null); }}
         onClose={() => setActiveSkill(null)}
       />
