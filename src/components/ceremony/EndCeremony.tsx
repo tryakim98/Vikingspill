@@ -16,6 +16,7 @@ import type { SkillKey, SagaEntry, Destination } from '../../types';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
 import { determineArchetype, topSkillTitle } from '../../data/archetypes';
 import VikingShip from '../ship/VikingShip';
+import MaterialPanel, { type Material } from '../decor/MaterialPanel';
 
 interface Scores {
   culturalUnderstanding: number;
@@ -48,10 +49,10 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
   const archetype = determineArchetype({ saga, destinations, acceptedTradesCount, scores });
   const top = topSkillTitle(skills);
 
-  const pillars = [
-    { label: 'Kulturforståelse', v: scores.culturalUnderstanding },
-    { label: 'Handelsutbytte', v: scores.tradeGain },
-    { label: 'Rykte', v: scores.reputation },
+  const pillars: { label: string; v: number; material: Material }[] = [
+    { label: 'Kulturforståelse', v: scores.culturalUnderstanding, material: 'pergament' },
+    { label: 'Handelsutbytte', v: scores.tradeGain, material: 'tre' },
+    { label: 'Rykte', v: scores.reputation, material: 'jern' },
   ];
 
   if (step === 'intro') {
@@ -78,17 +79,20 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
           <p className="mb-2 font-cinzel text-xs uppercase tracking-[0.3em] text-viking-gold-soft/70">Et øyeblikks regnskap</p>
           <h1 className="mb-6 font-cinzel text-3xl font-bold text-viking-gold">Hva dere samlet</h1>
           <div className="mb-4 grid grid-cols-3 gap-3">
-            {pillars.map((p) => (
-              <div key={p.label} className="rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-4">
-                <p className="font-mono text-xs text-viking-gold-soft">{p.label}</p>
-                <p className="font-cinzel text-3xl font-bold text-viking-gold">{p.v}</p>
-              </div>
-            ))}
+            {pillars.map((p) => {
+              const ink = p.material === 'pergament';
+              return (
+                <MaterialPanel key={p.label} material={p.material} className="p-4">
+                  <p className={`font-mono text-xs ${ink ? 'text-viking-rust' : 'text-viking-gold-soft'}`}>{p.label}</p>
+                  <p className={`font-cinzel text-3xl font-bold ${ink ? 'text-[#5C3E22]' : 'text-viking-gold'}`}>{p.v}</p>
+                </MaterialPanel>
+              );
+            })}
           </div>
-          <div className="mb-3 rounded-lg border-2 border-viking-gold bg-viking-darkblue/60 p-4">
+          <MaterialPanel material="stein" framed className="mb-3 p-4">
             <p className="font-mono text-xs text-viking-gold-soft">Totalt</p>
             <p className="font-cinzel text-4xl font-bold text-viking-gold-soft">{total}</p>
-          </div>
+          </MaterialPanel>
           <p className="mb-8 max-w-md mx-auto font-inter text-sm italic text-viking-paper/65">
             Men poengsummen forteller bare HVA dere samlet — ikke HVORDAN.
             Det er HVORDAN som avgjør hvem dere ble.

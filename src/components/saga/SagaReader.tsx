@@ -8,6 +8,7 @@
 
 import { motion } from 'motion/react';
 import type { SagaEntry } from '../../types';
+import MaterialPanel from '../decor/MaterialPanel';
 
 interface SagaGroup {
   shipName: string;
@@ -51,7 +52,7 @@ export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props)
               <ol className="space-y-3">
                 {g.entries.map((e, i) => (
                   <li key={`${e.destId}-${e.at}-${i}`}>
-                    <div className="viking-parchment rounded-lg p-4">
+                    <MaterialPanel material="pergament" className="p-4">
                       <p className="font-cinzel text-xs uppercase tracking-widest text-viking-rust">Kapittel {i + 1} — {e.destName}</p>
                       <p className="mt-1 font-cinzel text-lg text-viking-darkblue">«{e.choiceTitle}»</p>
                       {e.reason && (
@@ -84,7 +85,7 @@ export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props)
                           </p>
                         </div>
                       )}
-                    </div>
+                    </MaterialPanel>
                   </li>
                 ))}
               </ol>

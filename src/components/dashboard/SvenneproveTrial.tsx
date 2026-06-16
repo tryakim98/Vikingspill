@@ -14,6 +14,7 @@ import type { SkillKey } from '../../types';
 import { skillTreeData, getQuizQuestionsForSkill, isQuizPassed } from '../../data';
 import QuestionCard from '../quiz/QuestionCard';
 import { playSound } from '../../lib/sound';
+import MaterialPanel from '../decor/MaterialPanel';
 
 interface Props {
   skill: SkillKey;
@@ -89,7 +90,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
           <p className="font-cinzel text-sm text-viking-gold-soft">Spørsmål {idx + 1}/{COUNT} · trenger {PASS_NEEDED} rette</p>
           <p className="font-mono text-xs text-viking-gold-soft">Riktige: {correct}</p>
         </div>
-        <div className="rounded-lg border-2 border-viking-gold/40 bg-viking-darkblue/50 p-5">
+        <MaterialPanel material="jern" className="p-5">
           <QuestionCard
             q={q.q}
             opts={q.opts}
@@ -98,7 +99,7 @@ export default function SvenneproveTrial({ skill, destName, visited, isChief, on
             answer={answer}
             onAnswer={isChief ? ((i) => { setAnswer(i); if (i === q.correct) setCorrect(correct + 1); }) : () => {}}
           />
-        </div>
+        </MaterialPanel>
         {answer !== null && (isChief ? (
           <button
             onClick={() => { if (last) finishQuiz(); else { setIdx(idx + 1); setAnswer(null); } }}

@@ -14,6 +14,7 @@ import type { TradeGoodId } from '../../types';
 import { TRADE_GOODS } from '../../data/tradeGoods';
 import { playSound } from '../../lib/sound';
 import type { SyncedGroup, TradeOffer } from '../../lib/gameSync';
+import MaterialPanel from '../decor/MaterialPanel';
 
 export const TRADE_GOOD_ORDER: TradeGoodId[] = ['pelsverk', 'solv', 'jern', 'rav', 'silke', 'hvalrosstann', 'krydder', 'salt'];
 
@@ -132,9 +133,9 @@ export default function TradeMarket({
           {incoming.length === 0 ? (
             <p className="font-inter text-sm italic text-viking-paper/55">Ingen tilbud venter på svar.</p>
           ) : incoming.map((t) => (
-            <div key={t.id} className="mb-2 rounded-lg border-2 border-viking-gold bg-viking-surface p-3" data-testid={`incoming-${t.id}`}>
+            <MaterialPanel key={t.id} material="tre" className="mb-2 p-3" data-testid={`incoming-${t.id}`}>
               <p className="font-cinzel text-viking-gold">{t.fromGroupName} tilbyr</p>
-              <p className="mt-1 font-inter text-sm text-viking-paper/90">
+              <p className="mt-1 font-inter text-sm text-viking-paper">
                 <strong className="text-viking-moss">{goodsSummary(t.giving)}</strong>
                 <span className="mx-2">↔</span>
                 <strong className="text-viking-gold-soft">{goodsSummary(t.receiving)}</strong>
@@ -147,7 +148,7 @@ export default function TradeMarket({
               ) : (
                 <p className="mt-1 font-inter text-xs italic text-viking-gold-soft">⚓ Høvdingen svarer på tilbudet.</p>
               )}
-            </div>
+            </MaterialPanel>
           ))}
         </section>
 
@@ -177,7 +178,7 @@ export default function TradeMarket({
             const opponentGoods = g.goods ?? {};
             const isComposing = composing === id;
             return (
-              <div key={id} className="mb-2 rounded-lg border border-viking-gold/40 bg-viking-surface p-3">
+              <MaterialPanel key={id} material="tre" className="mb-2 p-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-cinzel text-viking-paper">{g.shipName}</p>
@@ -215,7 +216,7 @@ export default function TradeMarket({
                     </div>
                   </div>
                 )}
-              </div>
+              </MaterialPanel>
             );
           })}
         </section>

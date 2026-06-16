@@ -12,6 +12,7 @@ import type { Destination, SkillKey } from '../../types';
 import { SIDE_UNLOCKS } from '../../data/routes';
 import { skillTreeData } from '../../data/skillTree';
 import NorseIcon, { SKILL_PNG } from '../decor/NorseIcon';
+import MaterialPanel from '../decor/MaterialPanel';
 
 interface Props {
   destinations: Destination[];
@@ -46,7 +47,7 @@ export default function SvennepoverPanel({ destinations, unlockedSides, isChief,
   const passedCount = rows.filter((r) => r.passed).length;
 
   return (
-    <div className="viking-frame mb-4 bg-viking-darkblue/40 p-3" data-testid="svenneprover-panel">
+    <MaterialPanel material="jern" framed className="mb-4 p-3" data-testid="svenneprover-panel">
       <div className="mb-2 flex items-baseline justify-between">
         <h3 className="inline-flex items-center gap-2 font-saga text-lg text-viking-gold"><NorseIcon name="ikon-svenneprove" size={16} /> Svenneprøver</h3>
         <p className="font-mono text-[10px] text-viking-gold-soft/80">{passedCount}/{rows.length} bestått</p>
@@ -95,6 +96,6 @@ export default function SvennepoverPanel({ destinations, unlockedSides, isChief,
           );
         })}
       </ul>
-    </div>
+    </MaterialPanel>
   );
 }

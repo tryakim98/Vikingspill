@@ -316,3 +316,80 @@ code {
   text-shadow: 0 1px 1px rgba(0,0,0,0.6), 0 0 6px rgba(205, 196, 176,0.25);
   user-select: none;
 }
+
+/* === MATERIALSYSTEM — <MaterialPanel material="…"> ==================================
+   Hvert materiale bærer en SEMANTISK betydning og brukes KONSEKVENT på alle
+   elevskjermer (dashbord, kart, encounter, ferdigheter, saga, sluttseremoni):
+     pergament → kulturforståelse · kunnskap · saga · refleksjon  (mørk blekk-tekst)
+     tre       → varer · handel · handelsutbytte                  (lys tekst)
+     jern      → rykte · ferdigheter · prøver · kamp              (lys tekst)
+     stein     → kart · verden · oversikt                          (lys tekst)
+   Teksturen er TYDELIG synlig på selve panelet. Et eget veil-lag (::before) legger
+   en LETT scrim BAK teksten — sterkere mot bunnen der mest tekst ligger — så teksten
+   forblir godt lesbar uten å dekke materialet til en nesten-ensfarget flate. */
+.mat {
+  position: relative;
+  border-radius: 0;                 /* hugget, ikke avrundet (de-KI) */
+  background-size: cover;
+  background-position: center;
+  isolation: isolate;
+}
+.mat > * { position: relative; z-index: 1; }
+.mat::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Mørke materialer: lys pergamenttekst + tekstskygge så den løftes av teksturen. */
+.mat-tre, .mat-skinn, .mat-jern, .mat-stein {
+  color: #F0E6D2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.78);
+}
+.mat-tre {
+  background-image: url('/textures/tre-gammelt.jpg');
+  background-color: #3A2615;
+  box-shadow: inset 0 0 0 1.5px rgba(150, 110, 60, 0.55), 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+.mat-skinn {
+  background-image: url('/textures/reinskinn.png');
+  background-color: #2A1810;
+  box-shadow: inset 0 0 0 1.5px rgba(150, 110, 60, 0.50), 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+.mat-jern {
+  background-image: url('/textures/jern-smidd.png');
+  background-color: #1A1E24;
+  box-shadow: inset 0 0 0 1.5px rgba(150, 162, 178, 0.45), 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+.mat-stein {
+  background-image: url('/textures/mose-stein.jpg');
+  background-color: #14130E;
+  box-shadow: inset 0 0 0 1.5px rgba(140, 138, 120, 0.42), 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+/* Varm scrim for tre/skinn/stein, kjølig for jern — lett øverst, litt tettere nederst. */
+.mat-tre::before, .mat-skinn::before, .mat-stein::before {
+  background: linear-gradient(180deg, rgba(16, 10, 4, 0.32) 0%, rgba(10, 7, 3, 0.52) 100%);
+}
+.mat-jern::before {
+  background: linear-gradient(180deg, rgba(10, 13, 18, 0.34) 0%, rgba(6, 8, 12, 0.54) 100%);
+}
+
+/* Pergament: lys flate med mørk blekk-tekst. En myk lys scrim jevner ut fiberen
+   så mørk tekst aldri kolliderer med en mørk flekk, men fiberpreget skinner gjennom. */
+.mat-pergament {
+  background-image: url('/textures/pergament.jpg');
+  background-color: #E9DEC4;
+  color: #2A1C0E;
+  box-shadow: inset 0 0 0 1.5px rgba(120, 96, 56, 0.45), 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+.mat-pergament::before {
+  background: linear-gradient(135deg, rgba(249, 244, 233, 0.50) 0%, rgba(238, 229, 207, 0.56) 100%);
+}
+/* Pergament-tekst: la barn arve mørk blekk med mindre de selv overstyrer fargen. */
+.mat-pergament :where(p, h1, h2, h3, h4, span, li, label):not([class*="text-"]) { color: #2A1C0E; }
+
+/* Når et materialpanel også er innrammet (viking-frame), er flettverket kanten —
+   da skal ikke materialets egen inset-kant tegnes. */
+.mat.viking-frame { box-shadow: none; }

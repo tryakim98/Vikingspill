@@ -16,6 +16,7 @@ import type { SkillKey } from '../../types';
 import { skillTreeData, holmgangDueller } from '../../data';
 import { subscribeGroups, subscribeDuels, createDuel, updateDuel, submitChampionResult, type SyncedGroup, type Duel, type DuelChampionResult } from '../../lib/gameSync';
 import HolmgangMiniGame from './HolmgangMiniGame';
+import MaterialPanel from '../decor/MaterialPanel';
 
 const APPLIED_KEY = 'vikingspill_applied_duels';
 
@@ -100,7 +101,7 @@ export default function SeaBattle({ code, myGroupId, myShipName, mySkills, onRes
   const pendingOut = Object.entries(duels).filter(([, d]) => d.challengerId === myGroupId && d.status === 'pending');
 
   return (
-    <div className="rounded-lg border-2 border-viking-crimson/50 bg-viking-surface p-5">
+    <MaterialPanel material="jern" className="border-2 border-viking-crimson/50 p-5">
       <h2 className="mb-1 font-cinzel text-2xl text-viking-gold">⚔️ Sjøslag — Holmgang på bølgene</h2>
       <p className="mb-4 font-inter text-sm text-viking-paper/75">Utfordre et annet skip. Hver gruppe utnevner en holmgangsmann. Vinner: +3 handel · taper: −2 · begge: −1 rykte.</p>
 
@@ -173,6 +174,6 @@ export default function SeaBattle({ code, myGroupId, myShipName, mySkills, onRes
           })}
         </div>
       )}
-    </div>
+    </MaterialPanel>
   );
 }

@@ -11,6 +11,7 @@ import { destinations, skillTreeData } from '../../data';
 import { useGameState } from '../../hooks/useGameState';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
 import { EngravedShip, BraidDivider } from '../decor';
+import MaterialPanel from '../decor/MaterialPanel';
 import EncounterFlow from '../encounter/EncounterFlow';
 import SkillTrial from '../skilltree/SkillTrial';
 import EndCeremony from '../ceremony/EndCeremony';
@@ -685,8 +686,8 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
 
   // Sekundærtallene står ved siden av kjernestatusen (Kulturforståelse) — bevisst hierarki.
   const secondaryStats = [
-    { label: 'Handelsutbytte', v: state.scores.tradeGain, icon: TRADE_PNG },
-    { label: 'Rykte', v: state.scores.reputation, icon: 'ikon-rykte' },
+    { label: 'Handelsutbytte', v: state.scores.tradeGain, icon: TRADE_PNG, material: 'tre' as const },
+    { label: 'Rykte', v: state.scores.reputation, icon: 'ikon-rykte', material: 'jern' as const },
   ];
 
   return (
@@ -776,24 +777,25 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         {/* Poeng — bevisst asymmetri: kjernestatusen (Kulturforståelse) dominerer,
             sekundærtallene står mindre ved siden av. Ikke en jevn 3-kolonners grid. */}
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-stretch">
-          {/* Hero: Kulturforståelse — spillets pedagogiske kjerne, størst vekt, venstrejustert */}
-          <div className="viking-frame relative flex-1 overflow-hidden bg-viking-surface p-5 sm:flex-[1.8]" data-testid="stat-hero">
-            <span aria-hidden className="pointer-events-none absolute -right-5 -top-4 text-viking-gold/10">
+          {/* Hero: Kulturforståelse — spillets pedagogiske kjerne på pergament (kunnskap),
+              med mørk blekk-tekst. Størst vekt, venstrejustert. */}
+          <MaterialPanel material="pergament" framed className="relative flex-1 overflow-hidden p-5 sm:flex-[1.8]" data-testid="stat-hero">
+            <span aria-hidden className="pointer-events-none absolute -right-5 -top-4 text-viking-rust/15">
               <NorseIcon name="ikon-kultur" size={132} />
             </span>
-            <p className="font-saga text-base uppercase tracking-[0.18em] text-viking-gold-soft">Kulturforståelse</p>
-            <p className="mt-1 font-cinzel text-6xl font-bold leading-none text-viking-brass">{state.scores.culturalUnderstanding}</p>
-            <p className="mt-2 max-w-[22ch] font-inter text-[11px] italic leading-snug text-viking-paper/60">Respekt, læring og tilpasning — reisens egentlige mål.</p>
-          </div>
-          {/* Sekundærtall: handel + rykte — mindre celler, stablet ved siden av hero-kortet */}
+            <p className="font-saga text-base uppercase tracking-[0.18em] text-viking-rust">Kulturforståelse</p>
+            <p className="mt-1 font-cinzel text-6xl font-bold leading-none text-[#5C3E22]">{state.scores.culturalUnderstanding}</p>
+            <p className="mt-2 max-w-[22ch] font-inter text-[11px] italic leading-snug text-viking-darkblue/70">Respekt, læring og tilpasning — reisens egentlige mål.</p>
+          </MaterialPanel>
+          {/* Sekundærtall: handel (tre) + rykte (jern) — materiale per innholdstype */}
           <div className="flex gap-3 sm:flex-1 sm:flex-col">
             {secondaryStats.map((s) => (
-              <div key={s.label} className="flex flex-1 items-baseline justify-between gap-2 rounded-lg border border-viking-gold/30 bg-viking-surface/70 px-3 py-2.5 sm:flex-col sm:items-start sm:justify-center" data-testid="stat-secondary">
-                <p className="inline-flex items-center gap-1.5 font-saga text-sm uppercase tracking-wide text-viking-gold-soft/90">
+              <MaterialPanel key={s.label} material={s.material} className="flex flex-1 items-baseline justify-between gap-2 px-3 py-2.5 sm:flex-col sm:items-start sm:justify-center" data-testid="stat-secondary">
+                <p className="inline-flex items-center gap-1.5 font-saga text-sm uppercase tracking-wide text-viking-gold-soft">
                   <NorseIcon name={s.icon} size={14} /> {s.label}
                 </p>
                 <p className="font-cinzel text-3xl font-bold leading-none text-viking-gold">{s.v}</p>
-              </div>
+              </MaterialPanel>
             ))}
           </div>
         </div>
@@ -822,9 +824,10 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           unlockedSides={state.unlockedSides ?? []}
         />
 
-        {/* Ferdigheter — trykk en på nivå 1–2 for å ta verdighetsprøven (§3.2) */}
-        <p className="mb-2 font-inter text-xs text-viking-gold-soft/70">Ferdigheter{isChief ? ' — trykk en uthevet for å ta verdighetsprøven' : ''}</p>
-        <div className="mb-6 flex flex-wrap gap-2">
+        {/* Ferdigheter (jern) — trykk en på nivå 1–2 for å ta verdighetsprøven (§3.2) */}
+        <MaterialPanel material="jern" className="mb-6 p-3">
+        <p className="mb-2 font-inter text-xs text-viking-gold-soft">Ferdigheter{isChief ? ' — trykk en uthevet for å ta verdighetsprøven' : ''}</p>
+        <div className="flex flex-wrap gap-2">
           {SKILL_KEYS.map((key) => {
             const lvl = state.skills[key] ?? 0;
             const eligible = (lvl === 1 || lvl === 2) && isChief;
@@ -844,6 +847,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             );
           })}
         </div>
+        </MaterialPanel>
 
         {/* Gruppe-styrt tekstlengde — vises bare når lærer har valgt "La gruppene velge" */}
         {isOnline && teacherTextLength === 'group' && (

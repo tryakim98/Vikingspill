@@ -14,6 +14,7 @@ import { skillTreeData, getQuizQuestionsForSkill, isQuizPassed } from '../../dat
 import { playSound } from '../../lib/sound';
 import QuestionCard from '../quiz/QuestionCard';
 import NorseIcon, { SKILL_PNG } from '../decor/NorseIcon';
+import MaterialPanel from '../decor/MaterialPanel';
 
 const MASTER_ACTION: Record<SkillKey, string> = {
   språk: 'Lær en hel setning på et fremmedspråk (norrønt, arabisk eller gresk) og fremfør den for læreren.',
@@ -107,7 +108,7 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
           <p className="font-cinzel text-sm text-viking-gold-soft">Spørsmål {idx + 1}/{count} · trenger {passNeeded} rette</p>
           <p className="font-mono text-xs text-viking-gold-soft">Riktige: {correct}</p>
         </div>
-        <div className="rounded-lg border-2 border-viking-gold/40 bg-viking-darkblue/50 p-5">
+        <MaterialPanel material="jern" className="p-5">
           <QuestionCard
             q={q.q}
             opts={q.opts}
@@ -116,7 +117,7 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
             answer={answer}
             onAnswer={(i) => { setAnswer(i); if (i === q.correct) setCorrect((c) => c + 1); }}
           />
-        </div>
+        </MaterialPanel>
         {answer !== null && (
           <button
             onClick={() => { if (last) finishQuiz(); else { setIdx((n) => n + 1); setAnswer(null); } }}
@@ -164,10 +165,10 @@ export default function SkillTrial({ skill, level, visited, onPass, onClose }: P
     <TrialShell title={title} iconName={SKILL_PNG[skill]} onClose={onClose}>
       <p className="mb-2 font-cinzel text-2xl text-viking-gold">Quiz bestått — siste prøve</p>
       <p className="mb-5 font-inter text-viking-paper/90">Dere fikk {correct} av {count} riktige. For å bli <strong className="text-viking-gold-soft">{targetTierName}</strong> (nivå 3) må dere fullføre mesterhandlingen:</p>
-      <div className="rounded-lg border-2 border-viking-gold bg-viking-surface p-5">
+      <MaterialPanel material="jern" framed className="p-5">
         <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">Mesterhandling — {branch.name}</p>
-        <p className="font-inter text-viking-paper/90">{MASTER_ACTION[skill]}</p>
-      </div>
+        <p className="font-inter text-viking-paper">{MASTER_ACTION[skill]}</p>
+      </MaterialPanel>
       <div className="mt-7 flex gap-3">
         <button onClick={() => { playSound('bell'); onPass(3); }} className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2.5 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Læreren godkjenner ✓</button>
         <button onClick={onClose} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft hover:border-viking-gold">Avbryt</button>

@@ -18,6 +18,10 @@ interface QuestionCardProps {
   feedback: string;
   answer: number | null;
   onAnswer: (i: number) => void;
+  /** Tilpasser tekst-/kantfarger til underlaget. 'parchment' = mørk blekk på lys
+   *  pergament (stedsquiz/kulturmøte = kunnskap); 'dark' = lys tekst på mørkt
+   *  materiale (ferdighetsprøver = jern). */
+  tone?: 'dark' | 'parchment';
 }
 
 /** Fisher–Yates: returner en permutasjon der perm[visIdx] = originalIdx. */
@@ -30,7 +34,8 @@ function shufflePermutation(n: number): number[] {
   return perm;
 }
 
-export default function QuestionCard({ q, opts, correct, feedback, answer, onAnswer }: QuestionCardProps) {
+export default function QuestionCard({ q, opts, correct, feedback, answer, onAnswer, tone = 'dark' }: QuestionCardProps) {
+  const parchment = tone === 'parchment';
   // Stabil per spørsmål: stokk bare når q/opts faktisk endres (nytt spørsmål),
   // ikke ved hver re-render. Bruker en streng-nøkkel så useMemo ikke trigges av
   // nye array-referanser med samme innhold.
@@ -41,17 +46,20 @@ export default function QuestionCard({ q, opts, correct, feedback, answer, onAns
   const displayedCorrect = perm.indexOf(correct);
   const displayedAnswer = answer === null ? null : perm.indexOf(answer);
 
+  const base = parchment
+    ? 'border-viking-rust/40 text-viking-darkblue hover:border-viking-rust'
+    : 'border-viking-gold/30 text-viking-paper hover:border-viking-gold/70';
   return (
     <div className="text-left">
-      <p className="mb-4 font-cinzel text-xl text-viking-paper">{q}</p>
+      <p className={`mb-4 font-cinzel text-xl ${parchment ? 'text-viking-darkblue' : 'text-viking-paper'}`}>{q}</p>
       <div className="grid gap-2">
         {displayedOpts.map((opt, i) => {
           const answered = displayedAnswer !== null;
-          let cls = 'border-viking-gold/30 hover:border-viking-gold/70';
+          let cls = base;
           if (answered) {
-            if (i === displayedCorrect) cls = 'border-viking-moss bg-viking-moss/25';
-            else if (i === displayedAnswer) cls = 'border-viking-crimson bg-viking-crimson/25';
-            else cls = 'border-viking-gold/15 opacity-60';
+            if (i === displayedCorrect) cls = parchment ? 'border-viking-moss bg-viking-moss/30 text-viking-darkblue' : 'border-viking-moss bg-viking-moss/25 text-viking-paper';
+            else if (i === displayedAnswer) cls = parchment ? 'border-viking-crimson bg-viking-crimson/20 text-viking-darkblue' : 'border-viking-crimson bg-viking-crimson/25 text-viking-paper';
+            else cls = parchment ? 'border-viking-rust/20 text-viking-darkblue/55 opacity-70' : 'border-viking-gold/15 text-viking-paper opacity-60';
           }
           return (
             <button
@@ -66,7 +74,7 @@ export default function QuestionCard({ q, opts, correct, feedback, answer, onAns
         })}
       </div>
       {answer !== null && (
-        <p className="mt-3 rounded-md bg-viking-darkblue/60 p-3 font-inter text-sm text-viking-gold-soft">{feedback}</p>
+        <p className={`mt-3 rounded-md p-3 font-inter text-sm ${parchment ? 'border border-viking-rust/30 bg-viking-paper/70 text-viking-darkblue' : 'bg-viking-darkblue/60 text-viking-gold-soft'}`}>{feedback}</p>
       )}
     </div>
   );

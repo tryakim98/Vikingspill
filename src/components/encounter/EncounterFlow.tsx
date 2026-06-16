@@ -32,6 +32,7 @@ import QuestionCard from '../quiz/QuestionCard';
 import DiceRoll from '../dice/DiceRoll';
 import Icon from '../decor/Icon';
 import { BraidDivider } from '../decor';
+import MaterialPanel from '../decor/MaterialPanel';
 
 type Step = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'radslagning' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
 
@@ -381,7 +382,7 @@ export default function EncounterFlow({
             </p>
           </div>
         </div>
-        <div className="rounded-lg border-2 border-viking-gold/40 bg-viking-darkblue/50 p-5">
+        <MaterialPanel material="pergament" className="p-5">
           <QuestionCard
             q={km.kulturmøteSpørsmål.q}
             opts={km.kulturmøteSpørsmål.opts}
@@ -389,8 +390,9 @@ export default function EncounterFlow({
             feedback={km.kulturmøteSpørsmål.feedback}
             answer={kmAnswer}
             onAnswer={isChief ? setKmAnswer : () => {}}
+            tone="parchment"
           />
-        </div>
+        </MaterialPanel>
         {kmAnswer !== null && (isChief ? (
           <button onClick={() => { playSound('page'); setStep('oppgave'); }} className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
         ) : <ChiefBanner />)}
@@ -404,34 +406,34 @@ export default function EncounterFlow({
       <Shell name={d.name} onExit={onExit}>
         <h1 className="mb-5 font-saga text-3xl text-viking-gold">På stedet</h1>
         <div className="space-y-4">
-          <div className="rounded-lg border-2 border-viking-teal/50 bg-viking-teal/10 p-4">
-            <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">Visste du?</p>
-            <Html html={d.funFact ?? ''} className="font-inter text-sm text-viking-paper/90 [&_strong]:text-viking-gold-soft" />
-          </div>
-          <div className="rounded-lg border-2 border-viking-plum/50 bg-viking-plum/10 p-4">
-            <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">Kjent person</p>
-            <Html html={d.famousPerson ?? ''} className="font-inter text-sm text-viking-paper/90 [&_strong]:text-viking-gold-soft" />
-          </div>
-          <div className="rounded-lg border-2 border-viking-gold bg-viking-surface p-5">
-            <p className="mb-1 font-mono text-xs text-viking-gold-soft">{d.task.icon} {d.task.typeLabel}</p>
-            <h3 className="mb-2 font-cinzel text-xl text-viking-gold">{d.task.title}</h3>
-            <p className="mb-3 font-inter text-sm text-viking-paper/90">{d.task.desc}</p>
-            <p className="font-inter text-xs italic text-viking-paper/60">{d.task.rationale}</p>
+          <MaterialPanel material="pergament" className="p-4">
+            <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-rust">Visste du?</p>
+            <Html html={d.funFact ?? ''} className="font-inter text-sm text-viking-darkblue [&_strong]:text-viking-rust" />
+          </MaterialPanel>
+          <MaterialPanel material="pergament" className="p-4">
+            <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-rust">Kjent person</p>
+            <Html html={d.famousPerson ?? ''} className="font-inter text-sm text-viking-darkblue [&_strong]:text-viking-rust" />
+          </MaterialPanel>
+          <MaterialPanel material="pergament" framed className="p-5">
+            <p className="mb-1 font-mono text-xs text-viking-rust">{d.task.icon} {d.task.typeLabel}</p>
+            <h3 className="mb-2 font-cinzel text-xl text-[#5C3E22]">{d.task.title}</h3>
+            <p className="mb-3 font-inter text-sm text-viking-darkblue">{d.task.desc}</p>
+            <p className="font-inter text-xs italic text-viking-darkblue/65">{d.task.rationale}</p>
             {onRequestApproval && (
-              <div className="mt-4 border-t border-viking-gold/20 pt-3">
+              <div className="mt-4 border-t border-viking-rust/25 pt-3">
                 {approvalSent ? (
                   <p className="inline-flex items-center gap-1.5 font-inter text-sm text-viking-moss"><Icon name="hand" size={14} /> Sendt til læreren — venter på godkjenning</p>
                 ) : (
                   <button
                     onClick={() => { onRequestApproval(d.id, d.task.title); setApprovalSent(true); }}
-                    className="rounded-md border-2 border-viking-gold/60 px-4 py-1.5 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold"
+                    className="rounded-md border-2 border-viking-rust/50 px-4 py-1.5 font-cinzel text-sm text-viking-rust hover:border-viking-rust hover:bg-viking-rust/10"
                   >
                     <span className="inline-flex items-center gap-1.5"><Icon name="hand" size={14} /> Be læreren om godkjenning</span>
                   </button>
                 )}
               </div>
             )}
-          </div>
+          </MaterialPanel>
         </div>
         {isChief ? (
           <>
@@ -502,7 +504,7 @@ export default function EncounterFlow({
           <p className="font-cinzel text-sm text-viking-gold-soft">Stedsquiz {quizIdx + 1}/{d.stedsquiz.length}</p>
           <p className="font-mono text-xs text-viking-gold-soft">Riktige: {quizCorrect}</p>
         </div>
-        <div className="rounded-lg border-2 border-viking-gold/40 bg-viking-darkblue/50 p-5">
+        <MaterialPanel material="pergament" className="p-5">
           <QuestionCard
             q={q.q}
             opts={q.opts}
@@ -510,8 +512,9 @@ export default function EncounterFlow({
             feedback={q.feedback}
             answer={quizAnswer}
             onAnswer={isChief ? ((i) => updateMany({ quizAnswer: i, ...(i === q.correct ? { quizCorrect: quizCorrect + 1 } : {}) })) : () => {}}
+            tone="parchment"
           />
-        </div>
+        </MaterialPanel>
         {quizAnswer !== null && (isChief ? (
           <button
             onClick={() => {
@@ -533,7 +536,7 @@ export default function EncounterFlow({
     const p = d.perspectivePrompt;
     const canContinue = vikingPerspective.trim().length > 0 && otherPerspective.trim().length > 0;
     const Pergament = ({ children, ...rest }: React.PropsWithChildren<{ 'data-testid'?: string }>) => (
-      <div className="viking-parchment rounded-lg p-3" {...rest}>{children}</div>
+      <MaterialPanel material="pergament" className="p-3" {...rest}>{children}</MaterialPanel>
     );
     return (
       <Shell name={d.name} onExit={onExit}>
@@ -797,8 +800,8 @@ export default function EncounterFlow({
           <p className="font-cinzel text-lg text-viking-gold">{choice.title}</p>
           <p className="font-inter text-sm italic text-viking-paper/85">{choice.desc}</p>
         </div>
-        {/* Pergamentinspirert tekstområde */}
-        <div className="viking-parchment mb-3 rounded-lg p-3">
+        {/* Pergament — sagaen skrives på selve materialet (kunnskap) */}
+        <MaterialPanel material="pergament" className="mb-3 p-3">
           <textarea
             value={reason}
             onChange={(e) => isChief && setReason(e.target.value.slice(0, 600))}
@@ -810,7 +813,7 @@ export default function EncounterFlow({
             style={{ fontFamily: 'serif' }}
           />
           <p className="mt-1 text-right font-mono text-[10px] text-viking-darkblue/50">{reason.length}/600</p>
-        </div>
+        </MaterialPanel>
         {isChief ? (
           <button
             onClick={() => updateMany({ step: 'roll' })}
@@ -833,9 +836,9 @@ export default function EncounterFlow({
     return (
       <Shell name={d.name} onExit={onExit}>
         <h1 className="mb-4 font-cinzel text-2xl font-bold text-viking-gold">{choice.title}</h1>
-        <div className="rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-5">
+        <MaterialPanel material="jern" className="p-5">
           <OddsBar baseRoll={choice.baseRoll} />
-          <div className="mt-4 font-mono text-sm text-viking-paper/80">
+          <div className="mt-4 font-mono text-sm text-viking-paper/90">
             <p>Quizbonus: +{quizBonus}</p>
             <p>Ferdighet over krav: +{skillBonus}</p>
             {choiceLatePenalty < 0 && (
@@ -845,7 +848,7 @@ export default function EncounterFlow({
             )}
             <p className="mt-1 text-viking-gold">Terningmodifikator: {modifier >= 0 ? '+' : ''}{modifier}</p>
           </div>
-        </div>
+        </MaterialPanel>
         {isChief ? (
           <button
             onClick={() => {
@@ -927,10 +930,10 @@ export default function EncounterFlow({
             </div>
           ))}
         </div>
-        <div className="rounded-lg border-l-4 border-viking-gold bg-viking-surface p-4">
-          <p className="mb-1 font-cinzel text-sm text-viking-gold-soft">Lærdom</p>
-          <p className="font-inter text-sm italic text-viking-paper/90">{choice.lesson}</p>
-        </div>
+        <MaterialPanel material="pergament" className="border-l-4 border-viking-rust p-4">
+          <p className="mb-1 font-cinzel text-sm text-viking-rust">Lærdom</p>
+          <p className="font-inter text-sm italic text-viking-darkblue">{choice.lesson}</p>
+        </MaterialPanel>
         {isChief ? (
           requireBridge && d.modernBridge ? (
             <button
@@ -1001,13 +1004,7 @@ export default function EncounterFlow({
           </div>
         )}
 
-        <div
-          className="mb-3 rounded-lg border-4 border-viking-gold/60 p-3 shadow-[0_0_18px_rgba(205,195,173,0.18)]"
-          style={{
-            background: 'linear-gradient(135deg, #FDFBF6 0%, #F4EDDC 100%)',
-            backgroundImage: 'repeating-linear-gradient(0deg, transparent 0 23px, rgba(160,82,45,0.07) 23px 24px)',
-          }}
-        >
+        <MaterialPanel material="pergament" className="mb-3 p-3">
           <textarea
             value={bridgeReflection}
             onChange={(e) => isChief && setBridgeReflection(e.target.value.slice(0, 600))}
@@ -1018,7 +1015,7 @@ export default function EncounterFlow({
             className="w-full resize-none bg-transparent font-inter text-sm leading-relaxed text-viking-darkblue placeholder:italic placeholder:text-viking-darkblue/40 focus:outline-none"
             style={{ fontFamily: 'serif' }}
           />
-        </div>
+        </MaterialPanel>
 
         {isChief ? (
           <button
