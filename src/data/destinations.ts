@@ -74,7 +74,10 @@ export const destinations: Destination[] = baseDestinations.map((base): Destinat
     choices: base.choices,
     task: v2.task,               // v2-oppgave erstatter prototypens gamle oppgave (§14)
     episkeKulturmote: v2.episkeKulturmote,
-    stedsquiz: v2.stedsquiz,
+    // Stedsquizen er NØYAKTIG 4 spørsmål: kulturmøte-spørsmålet (som før lå som et eget
+    // steg etter scenen) er nå første spørsmål, etterfulgt av tre stedsquiz-spørsmål.
+    // (Selve utvalget av de tre er midlertidig — riktig innhold per havn kommer i del 3.)
+    stedsquiz: [v2.episkeKulturmote.kulturmøteSpørsmål, ...v2.stedsquiz].slice(0, 4),
     goodsReward: GOODS_BY_DEST[base.id] ?? [],
     route: MAIN_ROUTE.has(base.id) ? 'main' : 'side',
     unlocks: SIDE_UNLOCKS[base.id],

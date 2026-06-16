@@ -185,7 +185,6 @@ export default function EncounterFlow({
   // Synket eller lokal state — én og samme variabel for resten av komponenten.
   const [_step, _setStep] = useState<Step>('history');
   const [_approvalSent, _setApprovalSent] = useState(false);
-  const [_kmAnswer, _setKmAnswer] = useState<number | null>(null);
   const [_quizIdx, _setQuizIdx] = useState(0);
   const [_quizCorrect, _setQuizCorrect] = useState(0);
   const [_quizAnswer, _setQuizAnswer] = useState<number | null>(null);
@@ -207,7 +206,6 @@ export default function EncounterFlow({
 
   const step = syncMode ? (syncedEncounter?.step ?? 'history') : _step;
   const approvalSent = syncMode ? (syncedEncounter?.approvalSent ?? false) : _approvalSent;
-  const kmAnswer = syncMode ? (syncedEncounter?.kmAnswer ?? null) : _kmAnswer;
   const quizIdx = syncMode ? (syncedEncounter?.quizIdx ?? 0) : _quizIdx;
   const quizCorrect = syncMode ? (syncedEncounter?.quizCorrect ?? 0) : _quizCorrect;
   const quizAnswer = syncMode ? (syncedEncounter?.quizAnswer ?? null) : _quizAnswer;
@@ -247,7 +245,6 @@ export default function EncounterFlow({
   // Ikke-høvding må uansett ikke trigge skriv — vi gater på UI-nivå.
   const setStep = (v: Step) => syncMode ? onUpdateEncounter?.({ step: v }) : _setStep(v);
   const setApprovalSent = (v: boolean) => syncMode ? onUpdateEncounter?.({ approvalSent: v }) : _setApprovalSent(v);
-  const setKmAnswer = (v: number | null) => syncMode ? onUpdateEncounter?.({ kmAnswer: v }) : _setKmAnswer(v);
 
   // Når flere felter skal endres i én og samme handler (f.eks. «Hopp til valgene»
   // setter både quizBonus og step), MÅ vi gjøre ett samlet skriv — to separate
@@ -257,7 +254,6 @@ export default function EncounterFlow({
     if (syncMode) { onUpdateEncounter?.(partial); return; }
     if (partial.step !== undefined) _setStep(partial.step);
     if (partial.approvalSent !== undefined) _setApprovalSent(partial.approvalSent);
-    if (partial.kmAnswer !== undefined) _setKmAnswer(partial.kmAnswer);
     if (partial.quizIdx !== undefined) _setQuizIdx(partial.quizIdx);
     if (partial.quizCorrect !== undefined) _setQuizCorrect(partial.quizCorrect);
     if (partial.quizAnswer !== undefined) _setQuizAnswer(partial.quizAnswer);
@@ -396,20 +392,11 @@ export default function EncounterFlow({
             </p>
           </div>
         </div>
-        <MaterialPanel material="pergament" className="p-5">
-          <QuestionCard
-            q={km.kulturmøteSpørsmål.q}
-            opts={km.kulturmøteSpørsmål.opts}
-            correct={km.kulturmøteSpørsmål.correct}
-            feedback={km.kulturmøteSpørsmål.feedback}
-            answer={kmAnswer}
-            onAnswer={isChief ? setKmAnswer : () => {}}
-            tone="parchment"
-          />
-        </MaterialPanel>
-        {kmAnswer !== null && (isChief ? (
+        {/* Kulturmøte-spørsmålet er flyttet inn i stedsquizen (første av 4) og vises
+            ikke lenger som et eget steg her — scenen leses, så går vi videre. */}
+        {isChief ? (
           <button onClick={() => { playSound('page'); setStep('oppgave'); }} className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft">Videre →</button>
-        ) : <ChiefBanner />)}
+        ) : <ChiefBanner />}
       </Shell>
     );
   }
