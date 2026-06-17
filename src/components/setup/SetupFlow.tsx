@@ -11,7 +11,7 @@ import { useState } from 'react';
 import type { ShipSymbol, SkillKey } from '../../types';
 import { CREW_ROLES } from '../../data';
 import VikingShip from '../ship/VikingShip';
-import { AutoIcon } from '../decor/NorseIcon';
+import NorseIcon, { AutoIcon } from '../decor/NorseIcon';
 import RolePicker from './RolePicker';
 import { playSound } from '../../lib/sound';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
@@ -132,10 +132,14 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
                     <button
                       key={s.key}
                       onClick={() => setSymbol(s.key)}
-                      className={`flex flex-col items-center gap-1 rounded-lg border-2 py-3 transition-all ${symbol === s.key ? 'border-viking-gold bg-viking-gold/15' : 'border-viking-gold/30 hover:border-viking-gold/70'}`}
+                      className={`flex flex-col items-center gap-1.5 rounded-lg border-2 py-3 transition-all ${symbol === s.key ? 'border-viking-gold bg-viking-gold/15' : 'border-viking-gold/30 hover:border-viking-gold/70'}`}
                     >
-                      <AutoIcon name={s.icon} size={30} className="text-viking-gold" />
-                      <span className="font-inter text-sm">{s.label}</span>
+                      {/* Stort gallion-figurhode (gravyr-maske via NorseIcon) som hovedmotiv;
+                          strek-glyfen beholdes liten ved etiketten. */}
+                      <NorseIcon name={`gallion-${s.key}`} size={64} className={symbol === s.key ? 'text-viking-gold' : 'text-viking-gold-soft/80'} />
+                      <span className="inline-flex items-center gap-1 font-inter text-sm">
+                        <AutoIcon name={s.icon} size={15} className="text-viking-gold-soft" /> {s.label}
+                      </span>
                     </button>
                   ))}
                 </div>
