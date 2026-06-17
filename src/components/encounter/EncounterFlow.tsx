@@ -725,6 +725,13 @@ export default function EncounterFlow({
       <Shell name={d.name} onExit={onExit}>
         <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft/80">Rådslagning</p>
         <h1 className="mb-2 inline-flex items-center gap-2 font-cinzel text-2xl font-bold text-viking-gold"><Icon name="ansuz" size={22} /> Mannskapet rådslår</h1>
+        {/* Vekt (vekt.png — heldekkende gravyr) som motiv for avveiingen/avgjørelsen.
+            Heldekkende bilde → rammes inn (ikke maskes). */}
+        <img
+          src={`${import.meta.env.BASE_URL}ornamenter/vekt.png`}
+          alt="" aria-hidden="true"
+          className="mx-auto mb-3 w-24 rounded-lg border-2 border-viking-gold/40 shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
+        />
         <p className="mb-4 font-inter text-sm italic text-viking-paper/75">
           Les kildene, hør hva mannskapet mener — så er avgjørelsen din.
         </p>
