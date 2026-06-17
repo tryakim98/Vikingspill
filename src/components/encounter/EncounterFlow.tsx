@@ -13,6 +13,7 @@ import { motion } from 'motion/react';
 import type { Destination, Choice, RollOdds, SagaEntry, SkillKey, Svennebrev } from '../../types';
 import { skillTreeData } from '../../data/skillTree';
 import { CREW_ROLES } from '../../data/crewRoles';
+import { tallyVotes } from '../../lib/council';
 import type { SyncedEncounter, CouncilAdvice, ApprovalRequest } from '../../lib/gameSync';
 import { taskBonusForApproval } from '../../lib/gameSync';
 import { SCARRED_RECEPTION } from '../../data/consequences';
@@ -234,7 +235,6 @@ export default function EncounterFlow({
   const councilEnabled = requireCouncil && syncMode && memberIds.length >= 2;
   const advice: Record<string, CouncilAdvice> = syncMode ? (syncedEncounter?.advice ?? {}) : {};
   const adviceCount = memberIds.filter((id) => advice[id]).length;
-  const allAdvised = memberIds.length > 0 && adviceCount >= memberIds.length;
   const myAdvice = myMemberId ? advice[myMemberId] : undefined;
 
   // Hvor skal vi gå når vi er ferdige med oppgave/quiz og inn mot valgene?
@@ -614,26 +614,45 @@ export default function EncounterFlow({
     );
   }
 
-  // 5a-iii) RÅDSLAGNING — alle medlemmer gir råd FØR høvdingen får velge.
-  // Dette er det ENE steget der ikke-høvdinger har en interaktiv kontroll.
+  // 5a-iii) RÅDSLAGNING — BINDENDE avstemning (§3.3). Hvert medlems choiceId er en
+  // stemme; flertallet avgjør. Hemmelig votering: ingen tally vises før alle har stemt.
+  // Når alle har stemt låses stemmene, resultatet avsløres, og høvdingen forsegler det
+  // via commitDecision (felles utgang). Likhet brytes av høvdingens EGEN stemme; bare
+  // når toppen står likt mellom alternativer høvdingen IKKE stemte på, får han en liten
+  // velger med kun de likestilte. Ingen vetorett.
   if (step === 'radslagning') {
-    const giveChoice = (id: string) => onGiveAdvice?.({ choiceId: id });
-    const sendNote = () => { if (councilNote.trim()) { onGiveAdvice?.({ note: councilNote }); setCouncilNote(''); } };
+    const councilIds = councilChoices.map((c) => c.id);
+    const { counts, topIds, votedCount } = tallyVotes(advice, memberIds, councilIds);
+    const allVoted = memberIds.length > 0 && votedCount >= memberIds.length;
+    const titleOf = (id: string) => councilChoices.find((c) => c.id === id)?.title ?? id;
+
+    // Stemmer kan endres/legges til helt til ALLE har stemt — da låses de og avsløres.
+    const giveChoice = (id: string) => { if (!allVoted) onGiveAdvice?.({ choiceId: id, note: myAdvice?.note }); };
+    const sendNote = () => { if (!allVoted && councilNote.trim()) { onGiveAdvice?.({ choiceId: myAdvice?.choiceId ?? null, note: councilNote }); setCouncilNote(''); } };
+
+    // Avgjørelse (kun meningsfull når allVoted). Klar vinner ved ett toppvalg; ellers
+    // likhet → høvdingens egen stemme avgjør hvis den er blant de likestilte.
+    const isTie = topIds.length > 1;
+    const chiefVote = isChief && myMemberId ? advice[myMemberId]?.choiceId ?? null : null;
+    const chiefBreaksTie = isTie && !!chiefVote && topIds.includes(chiefVote);
+    const winnerId = !allVoted ? null : (!isTie ? topIds[0] : (chiefBreaksTie ? chiefVote : null));
+    const needsChiefPick = allVoted && isTie && isChief && !chiefBreaksTie; // høvding må bryte aktivt
+
     return (
       <Shell name={d.name} onExit={onExit}>
         <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft/80">Rådslagning</p>
-        <h1 className="mb-2 inline-flex items-center gap-2 font-cinzel text-2xl font-bold text-viking-gold"><Icon name="ansuz" size={22} /> Hva mener mannskapet?</h1>
+        <h1 className="mb-2 inline-flex items-center gap-2 font-cinzel text-2xl font-bold text-viking-gold"><Icon name="ansuz" size={22} /> Mannskapet stemmer</h1>
         <p className="mb-4 font-inter text-sm italic text-viking-paper/75">
-          Hver i mannskapet gir sitt råd på egen enhet før høvdingen bestemmer — trykk på alternativet du helst vil, eller skriv én kort setning.
+          Hver i mannskapet avgir sin stemme på egen enhet. Flertallet avgjør — ved likhet bryter høvdingen. Stemmene er skjult til alle har stemt.
         </p>
 
-        {/* Teller */}
+        {/* Teller — kun antall, aldri innhold før alle har stemt (hemmelig votering) */}
         <div className="mb-4 flex items-center gap-3 rounded-md border-2 border-viking-gold/40 bg-viking-darkblue/50 px-4 py-2" data-testid="advice-counter">
-          <span className="font-cinzel text-lg text-viking-gold">{adviceCount} av {memberIds.length}</span>
-          <span className="font-inter text-sm text-viking-gold-soft">har gitt råd</span>
+          <span className="font-cinzel text-lg text-viking-gold">{votedCount} av {memberIds.length}</span>
+          <span className="font-inter text-sm text-viking-gold-soft">har stemt</span>
         </div>
 
-        {/* Gi din stemme: trykk på et alternativ (kjernevalg + opplåst bonus) */}
+        {/* Avgi/endre stemme (kjernevalg + opplåst bonus). Låses når alle har stemt. */}
         <div className="space-y-2" data-testid="advice-options">
           {councilChoices.map((c) => {
             const mine = myAdvice?.choiceId === c.id;
@@ -641,8 +660,9 @@ export default function EncounterFlow({
               <button
                 key={c.id}
                 onClick={() => giveChoice(c.id)}
+                disabled={allVoted}
                 data-testid={`advice-pick-${c.id}`}
-                className={`w-full rounded-md border-2 px-4 py-2.5 text-left font-inter text-sm transition-all ${mine ? 'border-viking-gold bg-viking-gold/20 text-viking-paper' : 'border-viking-gold/30 text-viking-paper/85 hover:border-viking-gold/70'}`}
+                className={`w-full rounded-md border-2 px-4 py-2.5 text-left font-inter text-sm transition-all disabled:cursor-not-allowed disabled:opacity-60 ${mine ? 'border-viking-gold bg-viking-gold/20 text-viking-paper' : 'border-viking-gold/30 text-viking-paper/85 hover:border-viking-gold/70'}`}
               >
                 <span className="font-cinzel text-viking-gold">{mine ? '✓ ' : ''}{c.title}</span>
                 <span className="ml-2 rounded bg-viking-darkblue/70 px-1.5 py-0.5 font-mono text-[10px] uppercase text-viking-gold-soft/80">{c.tag}</span>
@@ -651,47 +671,77 @@ export default function EncounterFlow({
           })}
         </div>
 
-        {/* … eller skriv én kort setning */}
-        <div className="mt-3 flex gap-2">
-          <input
-            type="text"
-            value={councilNote}
-            onChange={(e) => setCouncilNote(e.target.value.slice(0, 120))}
-            onKeyDown={(e) => { if (e.key === 'Enter') sendNote(); }}
-            placeholder="… eller skriv ett kort råd"
-            maxLength={120}
-            data-testid="advice-note-input"
-            className="flex-1 rounded-md border-2 border-viking-gold/40 bg-viking-darkblue/60 px-3 py-2 font-inter text-sm text-viking-paper placeholder:text-viking-paper/30 focus:border-viking-gold focus:outline-none"
-          />
-          <button onClick={sendNote} disabled={!councilNote.trim()} data-testid="advice-note-send" className="rounded-md border-2 border-viking-gold/60 px-4 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold disabled:opacity-40">Send råd</button>
-        </div>
+        {/* Valgfri begrunnelse ved siden av stemmen (teller IKKE som stemme) */}
+        {!allVoted && (
+          <div className="mt-3 flex gap-2">
+            <input
+              type="text"
+              value={councilNote}
+              onChange={(e) => setCouncilNote(e.target.value.slice(0, 120))}
+              onKeyDown={(e) => { if (e.key === 'Enter') sendNote(); }}
+              placeholder="… valgfri begrunnelse"
+              maxLength={120}
+              data-testid="advice-note-input"
+              className="flex-1 rounded-md border-2 border-viking-gold/40 bg-viking-darkblue/60 px-3 py-2 font-inter text-sm text-viking-paper placeholder:text-viking-paper/30 focus:border-viking-gold focus:outline-none"
+            />
+            <button onClick={sendNote} disabled={!councilNote.trim()} data-testid="advice-note-send" className="rounded-md border-2 border-viking-gold/60 px-4 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold disabled:opacity-40">Legg ved</button>
+          </div>
+        )}
 
-        {myAdvice && (
+        {myAdvice?.choiceId && !allVoted && (
           <p className="mt-2 font-inter text-xs text-viking-moss" data-testid="advice-mine">
-            ✓ Du har gitt ditt råd{myAdvice.note ? `: «${myAdvice.note}»` : ''} — du kan endre det til høvdingen velger.
+            ✓ Din stemme er avgitt{myAdvice.note ? ` (begrunnelse: «${myAdvice.note}»)` : ''} — du kan endre den til alle har stemt.
           </p>
         )}
 
-        {/* Når alle har bidratt: oppsummering + høvdingen går videre */}
-        {allAdvised ? (
+        {!allVoted ? (
+          <p className="mt-6 text-center font-inter text-sm italic text-viking-gold-soft/70" data-testid="council-waiting">
+            Venter på resten av mannskapet … stemmene avsløres når alle har stemt.
+          </p>
+        ) : (
           <div className="mt-6">
+            {/* Avsløring: anonym opptelling per valg */}
             <AdviceSummary advice={advice} memberIds={memberIds} choices={councilChoices} />
-            {isChief ? (
-              <button
-                onClick={() => updateMany({ step: 'valg' })}
-                data-testid="council-continue"
-                className="rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
-              >
-                Til den endelige avgjørelsen →
-              </button>
+
+            {winnerId ? (
+              <>
+                <p className="mb-3 font-cinzel text-viking-gold" data-testid="council-result">
+                  {isTie
+                    ? <>Likt — høvdingens stemme avgjør: «{titleOf(winnerId)}»</>
+                    : <>Mannskapet har talt: «{titleOf(winnerId)}» ({counts[winnerId]} {counts[winnerId] === 1 ? 'stemme' : 'stemmer'})</>}
+                </p>
+                {isChief ? (
+                  <button
+                    onClick={() => commitDecision(winnerId)}
+                    data-testid="council-seal"
+                    className="rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+                  >
+                    Forsegl avgjørelsen →
+                  </button>
+                ) : (
+                  <p className="text-center font-cinzel text-viking-gold-soft" data-testid="council-wait-chief"><Icon name="anchor" size={13} className="mr-1 inline" /> Høvdingen forsegler avgjørelsen.</p>
+                )}
+              </>
+            ) : needsChiefPick ? (
+              <div data-testid="council-tiebreak">
+                <p className="mb-3 font-cinzel text-viking-gold">Likt mellom {topIds.map(titleOf).map((t) => `«${t}»`).join(' og ')} — du må bryte likheten:</p>
+                <div className="space-y-2">
+                  {topIds.map((id) => (
+                    <button
+                      key={id}
+                      onClick={() => commitDecision(id)}
+                      data-testid={`tiebreak-${id}`}
+                      className="w-full rounded-md border-2 border-viking-gold/60 px-4 py-2.5 text-left font-cinzel text-viking-gold hover:border-viking-gold hover:bg-viking-gold/10"
+                    >
+                      {titleOf(id)}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ) : (
-              <p className="text-center font-cinzel text-viking-gold-soft" data-testid="council-wait-chief"><Icon name="anchor" size={13} className="mr-1 inline" /> Alle har gitt råd — høvdingen tar den endelige avgjørelsen.</p>
+              <p className="text-center font-cinzel text-viking-gold-soft" data-testid="council-wait-chief"><Icon name="anchor" size={13} className="mr-1 inline" /> Likt — høvdingen bryter likheten.</p>
             )}
           </div>
-        ) : (
-          <p className="mt-6 text-center font-inter text-sm italic text-viking-gold-soft/70" data-testid="council-waiting">
-            Venter på resten av mannskapet …{isChief ? ' Du kan velge når alle har gitt råd.' : ''}
-          </p>
         )}
       </Shell>
     );
