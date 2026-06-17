@@ -565,6 +565,13 @@ export default function EncounterFlow({
   if (step === 'transition') {
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-viking-darkblue text-viking-gold">
+        {/* Storm til havs som dempet bakteppe (skip-storm.png — heldekkende gravyr).
+            Sjøtåke-gradienten + skjoldet ligger oppå, så lys gulltekst forblir lesbar. */}
+        <img
+          src={`${import.meta.env.BASE_URL}ornamenter/skip-storm.png`}
+          alt="" aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-30"
+        />
         {/* Sjøtåke som legger seg over faktaene */}
         <motion.div
           initial={{ opacity: 0 }}
