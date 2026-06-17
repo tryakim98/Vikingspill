@@ -9,6 +9,47 @@
 import type { Choice, ChoiceTag, SkillKey } from '../types';
 import { CREW_ROLES } from '../data/crewRoles';
 
+/** Ett medlems stemme (delen av CouncilAdvice vi bryr oss om her). */
+export interface VoteLike {
+  choiceId?: string | null;
+}
+
+export interface VoteTally {
+  /** Antall stemmer per choiceId (kun valg som har minst én stemme). */
+  counts: Record<string, number>;
+  /** choiceId-ene som deler flest stemmer (1 = klar vinner, >1 = likhet). */
+  topIds: string[];
+  /** Hvor mange medlemmer som har avgitt en bindende stemme (choiceId). */
+  votedCount: number;
+}
+
+/**
+ * Tell opp bindende stemmer (§3.3). Ren funksjon. Kun `choiceId` teller som stemme —
+ * `note` er ren begrunnelse og telles ikke. `choiceIds` er de gyldige alternativene
+ * (kjernevalg + opplåst bonus), i visningsrekkefølge; `topIds` returneres i den samme
+ * rekkefølgen så likhets-visning blir deterministisk.
+ */
+export function tallyVotes(
+  advice: Record<string, VoteLike>,
+  memberIds: string[],
+  choiceIds: string[],
+): VoteTally {
+  const valid = new Set(choiceIds);
+  const counts: Record<string, number> = {};
+  let votedCount = 0;
+  for (const id of memberIds) {
+    const cid = advice[id]?.choiceId;
+    if (cid && valid.has(cid)) {
+      counts[cid] = (counts[cid] ?? 0) + 1;
+      votedCount++;
+    }
+  }
+  let max = 0;
+  for (const id of choiceIds) if ((counts[id] ?? 0) > max) max = counts[id];
+  const topIds = max > 0 ? choiceIds.filter((id) => (counts[id] ?? 0) === max) : [];
+  return { counts, topIds, votedCount };
+}
+
 export interface NpcVote {
   role: SkillKey;
   choiceId: string;
