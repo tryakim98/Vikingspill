@@ -12,9 +12,9 @@ import { useState, useEffect, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import type { Destination, Choice, RollOdds, SagaEntry, SkillKey, Svennebrev } from '../../types';
 import { skillTreeData } from '../../data/skillTree';
-import { CREW_ROLES } from '../../data/crewRoles';
+import { CREW_ROLES, CREW_ROLE_ORDER } from '../../data/crewRoles';
 import { KEY_CARDS } from '../../data/keyCards';
-import { tallyVotes } from '../../lib/council';
+import { tallyVotes, npcVotes } from '../../lib/council';
 import type { SyncedEncounter, CouncilAdvice, ApprovalRequest } from '../../lib/gameSync';
 import { taskBonusForApproval } from '../../lib/gameSync';
 import { SCARRED_RECEPTION } from '../../data/consequences';
@@ -33,6 +33,7 @@ import { playAmbienceForDestination, stopAmbience } from '../../lib/ambience';
 import QuestionCard from '../quiz/QuestionCard';
 import DiceRoll from '../dice/DiceRoll';
 import Icon from '../decor/Icon';
+import { AutoIcon } from '../decor/NorseIcon';
 import { BraidDivider } from '../decor';
 import MaterialPanel from '../decor/MaterialPanel';
 
@@ -249,7 +250,10 @@ export default function EncounterFlow({
 
   // Hvor skal vi gå når vi er ferdige med oppgave/quiz og inn mot valgene?
   // Rådslagning skytes inn rett før valg-steget når den er på.
-  const valgEntryStep: Step = councilEnabled ? 'radslagning' : 'valg';
+  // Solo (§3.4): mannskapsrollene som NPC-stemmer rådslår før valget. Offline er
+  // requireCouncil alltid på (ingen lærer-UI), så solo går alltid via radslagning.
+  const soloCouncil = !syncMode && requireCouncil && d.choices.length > 0;
+  const valgEntryStep: Step = (councilEnabled || soloCouncil) ? 'radslagning' : 'valg';
   const preValgStep: Step = (requirePerspective && d.perspectivePrompt) ? 'perspektiv' : valgEntryStep;
 
   // Setter-wrappere: skriver til Firebase i synkmodus, ellers oppdaterer lokal state.
@@ -650,6 +654,73 @@ export default function EncounterFlow({
   // via commitDecision (felles utgang). Likhet brytes av høvdingens EGEN stemme; bare
   // når toppen står likt mellom alternativer høvdingen IKKE stemte på, får han en liten
   // velger med kun de likestilte. Ingen vetorett.
+  // 5a-iii-SOLO) RÅDSLAGNING for solo (§3.4): mannskapsrollene er NPC-stemmer som
+  // argumenterer ulikt (npcVotes + argues). Spilleren leser kildene, hører stemmene,
+  // og går så til valg-steget for å velge + begrunne. Manus, ingen dynamisk AI.
+  if (step === 'radslagning' && !syncMode) {
+    const playerRole = crewRoles[0];
+    const npcRoles = CREW_ROLE_ORDER.filter((r) => !crewRoles.includes(r));
+    const voices = npcVotes(d.choices, npcRoles); // [{ role, choiceId }] — deterministisk
+    const titleOf = (id: string) => d.choices.find((c) => c.id === id)?.title ?? id;
+    const soloKeyCards = KEY_CARDS[d.id] ?? [];
+    return (
+      <Shell name={d.name} onExit={onExit}>
+        <p className="font-cinzel text-xs uppercase tracking-widest text-viking-gold-soft/80">Rådslagning</p>
+        <h1 className="mb-2 inline-flex items-center gap-2 font-cinzel text-2xl font-bold text-viking-gold"><Icon name="ansuz" size={22} /> Mannskapet rådslår</h1>
+        <p className="mb-4 font-inter text-sm italic text-viking-paper/75">
+          Les kildene, hør hva mannskapet mener — så er avgjørelsen din.
+        </p>
+
+        {/* Kildene (§3 trinn 1) — flyttet hit, øverst i deliberasjonen */}
+        {soloKeyCards.length > 0 && (
+          <div className="mb-4 rounded-lg border-2 border-viking-teal/50 bg-viking-teal/10 p-4" data-testid="keycard-solo">
+            <p className="mb-2 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold-soft"><Icon name="book" size={13} /> Kildene du har samlet</p>
+            {soloKeyCards.map((c) => (
+              <p key={c.id} className="font-inter text-sm text-viking-paper/90">{c.text}</p>
+            ))}
+          </div>
+        )}
+
+        {/* Mannskapsrollenes stemmer */}
+        <div className="space-y-2" data-testid="solo-voices">
+          {voices.map(({ role, choiceId }) => {
+            const r = CREW_ROLES[role];
+            return (
+              <div key={role} className="rounded-md border-2 border-viking-gold/30 bg-viking-surface p-3" data-testid={`solo-voice-${role}`}>
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="leading-none" style={{ color: skillTreeData[role].color }}><AutoIcon name={r.icon} size={20} /></span>
+                  <span className="font-cinzel text-base text-viking-gold">{r.title}</span>
+                  <span className="ml-auto rounded bg-viking-darkblue/70 px-2 py-0.5 font-mono text-[10px] uppercase text-viking-gold-soft/80" data-testid={`solo-voice-backs-${role}`}>backer «{titleOf(choiceId)}»</span>
+                </div>
+                <p className="font-inter text-sm italic text-viking-paper/85">«{r.argues}»</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {playerRole && (
+          <p className="mt-3 font-inter text-sm text-viking-moss" data-testid="solo-you">
+            Du er <strong className="text-viking-gold-soft">{CREW_ROLES[playerRole].title}</strong> — du tar avgjørelsen.
+          </p>
+        )}
+
+        <button
+          onClick={() => updateMany({ step: 'valg' })}
+          data-testid="solo-council-continue"
+          className="mt-6 rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
+        >
+          Ta avgjørelsen →
+        </button>
+      </Shell>
+    );
+  }
+
+  // 5a-iii) RÅDSLAGNING — BINDENDE avstemning (§3.3). Hvert medlems choiceId er en
+  // stemme; flertallet avgjør. Hemmelig votering: ingen tally vises før alle har stemt.
+  // Når alle har stemt låses stemmene, resultatet avsløres, og høvdingen forsegler det
+  // via commitDecision (felles utgang). Likhet brytes av høvdingens EGEN stemme; bare
+  // når toppen står likt mellom alternativer høvdingen IKKE stemte på, får han en liten
+  // velger med kun de likestilte. Ingen vetorett.
   if (step === 'radslagning') {
     const councilIds = councilChoices.map((c) => c.id);
     const { counts, topIds, votedCount } = tallyVotes(advice, memberIds, councilIds);
@@ -822,16 +893,7 @@ export default function EncounterFlow({
 
         {renderKeyCard()}
 
-        {/* Solo (§3 trinn 1): ingen asymmetri — i stedet leser spilleren «kildene» selv,
-            den samme beslutningsrelevante nøkkelinfoen, før valget tas. */}
-        {!syncMode && (KEY_CARDS[d.id]?.length ?? 0) > 0 && (
-          <div className="mb-4 rounded-lg border-2 border-viking-teal/50 bg-viking-teal/10 p-4" data-testid="keycard-solo">
-            <p className="mb-2 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold-soft"><Icon name="book" size={13} /> Kildene du har samlet</p>
-            {(KEY_CARDS[d.id] ?? []).map((c) => (
-              <p key={c.id} className="font-inter text-sm text-viking-paper/90">{c.text}</p>
-            ))}
-          </div>
-        )}
+        {/* Solo «Kildene» (§3 trinn 1) er flyttet inn øverst i solo-rådslagningen (§3.4). */}
 
         {/* Gruppas råd fra rådslagningen — så høvdingen ser mannskapets stemme mens hun velger */}
         {councilEnabled && adviceCount > 0 && (
