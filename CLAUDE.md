@@ -33,23 +33,34 @@ og gjør terningbaserte valg med konsekvenser. Én React-app, to roller (lærer/
 - **Rådslagning (`CouncilAdvice` / `onGiveAdvice`):** når `requireCouncil` er på, gir
   HVERT medlem et råd (trykk et alternativ → `choiceId`, eller skriv `note`) før
   høvdingens valgknapper åpnes.
-- **`hiddenChoice`:** ett ekstra valg på utvalgte havner, låst opp ved et lese-
-  spørsmål (ikke ferdighet). Det UTVIDER kjernevalgene. Kjernevalg er alltid
-  valgbare — ferdigheter forbedrer/straffer odds, men låser dem aldri.
+- **Progresjonsmodell:** ÉN tallakse — `svennebrev` `0|1|2` per domene (0=ingen,
+  1=sveinn, 2=mester). **Svenneprøven er eneste opplåsing** (hever ett domene ett
+  hakk). Det finnes IKKE et eget «ferdighetsnivå». Arketypen er en **rolle/stemme**
+  (`data/crewRoles.ts`, 1:1 med domenene), ikke et tall — den gir ingen odds-bonus.
+- **`hiddenChoice` (bonus-valg):** ett ekstra valg på 5 havner, åpnet av svennebrev-
+  grad i et domene (sveinn/mester) ELLER en matchende mannskapsrolle ombord. Det
+  UTVIDER kjernevalgene — kommer alltid I TILLEGG, aldri i stedet, og manglende
+  opplåsing gir ingen straff. Kjernevalg (3 per havn) er ALLTID valgbare.
+- **Odds = grunnsjanse (`baseRoll`) + stedsquiz-bonus + lærer-godkjenning + svidd
+  mottakelse.** Svennebrev/rolle påvirker IKKE terningen — de åpner havner/bonus-valg,
+  ikke utfall. Ingen ferdighets-gating av valg, ingen sen-spill-straff.
 - **`textLength` per elev:** hver elev kan veksle `full`/`short` på historie- og
   kulturmøte-tekst; lærer setter standard (`full`/`short`/`group`).
-- **Tilgang & konsekvenser:** Hovedsporet (7 havner, `MAIN_ROUTE`) er alltid åpent.
-  Sidesteder (5, `SIDE_UNLOCKS`) er gated, men hver har ≥1 vei som ikke krever en
-  bestemt ferdighet (varer eller ferdsbrev). Valg-konsekvenser *forgrener* — en
-  «svidd mottakelse» ved en senere havn (`data/consequences.ts`, myk −2 + banner) —
-  de **amputerer aldri** en havn.
+- **Tilgang & konsekvenser:** Hovedsporet (7 havner, `MAIN_ROUTE`) er **alltid åpent**
+  — alle får f.eks. Paris-møtet uansett tidligere valg. Sidesteder (5, `SIDE_UNLOCKS`)
+  er gated på svennebrev-grad + score/goods (aldri et rått ferdighetstall), og hver har
+  ≥1 vei som ikke krever ett bestemt domene (varer eller rykte). Valg-konsekvenser
+  *forgrener* — en «svidd mottakelse» ved en senere havn (`data/consequences.ts`, myk
+  −2 + banner, f.eks. Lindisfarne-plyndring → kaldt Paris) — de **amputerer aldri** en
+  havn.
 - **Solo-prinsippet (samme valg, to spor):** online = bindende individuell stemme
   (høvding bryter likhet); solo (offline) = mannskapet som NPC-arketyp-stemmer,
   spilleren velger + begrunner. Felles konsekvens og saga-logg.
 
 Nøkkelfiler: `lib/gameSync.ts` (Firebase + typer), `hooks/useGameState.ts`
-(poeng/ferdigheter), `lib/oddsEngine.ts` (terning/modifikatorer),
-`data/destinations.ts` (fletter alle 12 havner).
+(poeng/svennebrev), `lib/oddsEngine.ts` (terning/modifikatorer), `lib/unlocks.ts` +
+`data/routes.ts` (sidested-gating), `data/crewRoles.ts` (mannskapsroller),
+`data/consequences.ts` (svidd mottakelse), `data/destinations.ts` (fletter alle 12 havner).
 
 ## 3. Estetikk-regler (ikke bryt)
 - **Svart-hvitt-gravyr** som grunnuttrykk; **matt gull/bronse** som SJELDEN aksent
@@ -86,10 +97,12 @@ Nøkkelfiler: `lib/gameSync.ts` (Firebase + typer), `hooks/useGameState.ts`
 **Ferdig:** emoji → monokrome ikoner (Icon/NorseIcon); ny estetikk koblet inn
 (teksturer, ornament-ikoner, flettverksrammer); stedsquiz omstrukturert til 4 spm
 (kulturmøte-spm som spm 1); todelt svenneprøve (teori-quiz + ferdighetsspesifikk
-praksis); prøve-navn ryddet — **svenneprøve** hever ferdighet, **ferdsbrev** låser
-opp sidested.
+praksis); prøve-navn ryddet — **svenneprøve** hever svennebrev, **ferdsbrev** låser
+opp sidested. **Mannskapsroller** (2.3, `crewRoles.ts`): unik rolle per medlem ved
+innmelding, ingen odds-effekt. **Valg-gating ferdig** (2.4): kjernevalg alltid
+valgbare; bonus-valg åpnes av svennebrev/rolle; sidesteder på svennebrev+score/goods;
+Paris (hovedspor) alltid åpent — Lindisfarne-plyndring gir myk svidd mottakelse, ikke
+stenging.
 
-**Bygges nå:** valg-gating — kjernevalg ved hver havn er alltid valgbare
-(ferdigheter forbedrer/straffer odds, låser ikke). **Neste:** deliberasjons-
-ryggraden — dobbeltspor online (flere enheter) + solo, så diskusjonen/rådslagningen
-bærer spillet.
+**Neste:** deliberasjons-ryggraden — rådslagningens rolle-STEMMER (forberedt i
+`crewRoles.argues`), så diskusjonen bærer spillet i både online- og solo-sporet.
