@@ -49,20 +49,7 @@ export default function SvennepoverPanel({ destinations, svennebrev, isChief, on
   const passedCount = rows.filter((r) => r.passed).length;
 
   return (
-    <MaterialPanel
-      material="jern"
-      framed
-      className="mb-4 p-3"
-      data-testid="svenneprover-panel"
-      style={{
-        // Ferdighets-emblemene (ark-ferdigheter.png) som panel-bakgrunn i stedet for jern-
-        // teksturen. Mørk gradient-scrim (+ .mat::before-veil) så lys tekst er lesbar.
-        backgroundImage: `linear-gradient(180deg, rgba(10,8,4,0.70) 0%, rgba(8,6,3,0.84) 100%), url(${import.meta.env.BASE_URL}textures/ark-ferdigheter.png)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
+    <MaterialPanel material="jern" framed className="mb-4 p-3" data-testid="svenneprover-panel">
       <div className="mb-2 flex items-baseline justify-between">
         <h3 className="inline-flex items-center gap-2 font-saga text-lg text-viking-gold"><NorseIcon name="ikon-svenneprove" size={16} /> Svenneprøver</h3>
         <p className="font-mono text-[10px] text-viking-gold-soft/80">{passedCount}/{rows.length} bestått</p>

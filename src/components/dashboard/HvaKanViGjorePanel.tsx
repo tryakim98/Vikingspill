@@ -83,21 +83,7 @@ export default function HvaKanViGjorePanel({ destinations, scores, svennebrev, g
   const far = rows.filter((r) => r.status === 'far');
 
   return (
-    <MaterialPanel
-      material="stein"
-      framed
-      className="mb-6 p-4"
-      data-testid="hva-kan-vi-gjore"
-      style={{
-        // Ressurs-emblemene (ark-ressurser.png) som panel-bakgrunn i stedet for stein-
-        // teksturen. Mørk gradient-scrim i bakgrunnen (+ .mat::before-veil) så lys tekst
-        // forblir lesbar over den detaljerte graveringen.
-        backgroundImage: `linear-gradient(180deg, rgba(10,8,4,0.70) 0%, rgba(8,6,3,0.84) 100%), url(${import.meta.env.BASE_URL}textures/ark-ressurser.png)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
+    <MaterialPanel material="stein" framed className="mb-6 p-4" data-testid="hva-kan-vi-gjore">
       <h3 className="mb-2 inline-flex items-center gap-2 font-saga text-xl text-viking-gold"><Icon name="compass" size={17} /> Hva kan vi gjøre?</h3>
       {jorvikUnlocked(svennebrev) && (
         <p className="mb-3 inline-flex items-center gap-2 rounded-md border-2 border-viking-gold bg-viking-gold/15 px-3 py-2 font-cinzel text-xs text-viking-gold" data-testid="jorvik-waiting">
