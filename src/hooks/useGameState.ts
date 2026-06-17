@@ -22,7 +22,7 @@ import type { SpecialAction } from '../data/specialActions';
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const KEY = 'vikingspill_state';
 
-/** Klem til gyldig svennebrev (0 = ingen · 1 = fagbrev · 2 = mesterbrev). */
+/** Klem til gyldig svennebrev (0 = ingen · 1 = sveinn · 2 = mester). */
 const clampBrev = (n: number): 0 | 1 | 2 => (n <= 0 ? 0 : n >= 2 ? 2 : 1);
 /** Tomt svennebrev-kart (migrering: gamle lagrede `skills`-tall ignoreres → alle 0). */
 const emptyBrev = (): Svennebrev => Object.fromEntries(SKILL_KEYS.map((k) => [k, 0])) as Svennebrev;
@@ -48,7 +48,7 @@ export interface OutcomeApply {
 
 function seed(setup: GroupSetup): GameProgress {
   const svennebrev = Object.fromEntries(SKILL_KEYS.map((k) => [k, 0])) as Svennebrev;
-  svennebrev[setup.startSkill] = 1; // start-fagbrev (startSkill→rolle kommer i 2.3)
+  svennebrev[setup.startSkill] = 1; // start-sveinn (startSkill→rolle kommer i 2.3)
   return {
     scores: { culturalUnderstanding: 0, tradeGain: 0, reputation: 0 },
     svennebrev,
@@ -164,7 +164,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     });
   };
 
-  /** Tildel et svennebrev (1 = fagbrev, 2 = mesterbrev) i et domene. */
+  /** Tildel et svennebrev (1 = sveinn, 2 = mester) i et domene. */
   const setSkillLevel = (skill: SkillKey, brev: 0 | 1 | 2) => {
     const base = state ?? seed(setup);
     persist({ ...base, svennebrev: { ...base.svennebrev, [skill]: brev } });

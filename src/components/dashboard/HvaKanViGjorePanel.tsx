@@ -64,7 +64,7 @@ export default function HvaKanViGjorePanel({ destinations, scores, svennebrev, g
       if (sp && sp.type === 'svenneprove') {
         return [{
           destId, destName: dest.name, status: 'far',
-          bestPath: `Trenger ${sp.nivå === 2 ? 'mesterbrev' : 'fagbrev'} i ${skillTreeData[sp.skill].name}`,
+          bestPath: `Trenger ${sp.nivå === 2 ? 'mester' : 'sveinn'} i ${skillTreeData[sp.skill].name}`,
         }];
       }
       return [];
@@ -87,7 +87,7 @@ export default function HvaKanViGjorePanel({ destinations, scores, svennebrev, g
       <h3 className="mb-2 inline-flex items-center gap-2 font-saga text-xl text-viking-gold"><Icon name="compass" size={17} /> Hva kan vi gjøre?</h3>
       {jorvikUnlocked(svennebrev) && (
         <p className="mb-3 inline-flex items-center gap-2 rounded-md border-2 border-viking-gold bg-viking-gold/15 px-3 py-2 font-cinzel text-xs text-viking-gold" data-testid="jorvik-waiting">
-          ✦ Jorvik venter — alle fem mesterbrev er tatt. Et siste kapittel åpner seg.
+          ✦ Jorvik venter — alle fem mester-prøver er tatt. Et siste kapittel åpner seg.
         </p>
       )}
       <p className="mb-3 font-inter text-[11px] italic text-viking-gold-soft/75">

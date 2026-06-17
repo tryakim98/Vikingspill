@@ -1,17 +1,17 @@
 /**
  * unlocks.ts
  * Evaluerer opplåsingskrav for sidesteder, og lager de menneskelige tekstene
- * som vises på infokortet («Dere mangler: 1 sølv» / «Krever fagbrev i …»).
+ * som vises på infokortet («Dere mangler: 1 sølv» / «Krever sveinn i …»).
  */
 
 import type { Destination, SkillKey, ScoreKey, TradeGoodId, UnlockRequirement } from '../types';
 import { TRADE_GOODS } from '../data/tradeGoods';
 import { skillTreeData } from '../data/skillTree';
 
-/** «Fagbrev» (1) eller «Mesterbrev» (2). */
-const brevLabel = (nivå: 1 | 2) => (nivå === 2 ? 'Mesterbrev' : 'Fagbrev');
+/** Grad-navn: «Sveinn» (1) eller «Mester» (2). */
+const gradeLabel = (nivå: 1 | 2) => (nivå === 2 ? 'Mester' : 'Sveinn');
 
-/** Jorvik-krok (capstone, §6.3): venter når gruppa har MESTERBREV i ALLE fem domener.
+/** Jorvik-krok (capstone, §6.3): venter når gruppa har MESTER i ALLE fem domener.
  *  Her bygger vi kun betingelsen + en markør for at Jorvik venter — selve havne-/
  *  seremoni-innholdet kommer senere (gjenbruker eksisterende mekanikk). */
 export function jorvikUnlocked(svennebrev: Record<SkillKey, number>): boolean {
@@ -33,7 +33,7 @@ const SCORE_LABEL: Record<ScoreKey, string> = {
 };
 
 /** Sann hvis kravet er oppfylt av gjeldende tilstand. Et svenneprøve-krav er møtt
- *  når gruppa har minst det brevet (fagbrev/mesterbrev) i domenet. */
+ *  når gruppa har minst den graden (sveinn/mester) i domenet. */
 export function meetsRequirement(r: UnlockRequirement, s: GameStateLike): boolean {
   switch (r.type) {
     case 'svenneprove': return (s.svennebrev[r.skill] ?? 0) >= r.nivå;
@@ -55,7 +55,7 @@ export function isAccessible(d: Destination, s: GameStateLike): boolean {
 /** Menneskelig beskrivelse av et krav («Sjømannskap nivå 2», «3 sølv», …). */
 export function describeRequirement(r: UnlockRequirement): string {
   switch (r.type) {
-    case 'svenneprove': return `${brevLabel(r.nivå)} i ${skillTreeData[r.skill].name}`;
+    case 'svenneprove': return `${gradeLabel(r.nivå)} i ${skillTreeData[r.skill].name}`;
     case 'score':       return `${SCORE_LABEL[r.key]} ≥ ${r.min}`;
     case 'goods':
       return Object.entries(r.goods)
@@ -70,7 +70,7 @@ export function missingForRequirement(r: UnlockRequirement, s: GameStateLike): s
   switch (r.type) {
     case 'svenneprove': {
       const cur = s.svennebrev[r.skill] ?? 0;
-      return cur >= r.nivå ? null : `${brevLabel(r.nivå)} i ${skillTreeData[r.skill].name}`;
+      return cur >= r.nivå ? null : `${gradeLabel(r.nivå)} i ${skillTreeData[r.skill].name}`;
     }
     case 'score': {
       const cur = s.scores[r.key];
@@ -92,8 +92,8 @@ export function haveForRequirement(r: UnlockRequirement, s: GameStateLike): stri
   switch (r.type) {
     case 'svenneprove': {
       const cur = s.svennebrev[r.skill] ?? 0;
-      return cur >= 2 ? `mesterbrev i ${skillTreeData[r.skill].name}`
-        : cur >= 1 ? `fagbrev i ${skillTreeData[r.skill].name}` : null;
+      return cur >= 2 ? `mester i ${skillTreeData[r.skill].name}`
+        : cur >= 1 ? `sveinn i ${skillTreeData[r.skill].name}` : null;
     }
     case 'score': {
       const cur = s.scores[r.key];

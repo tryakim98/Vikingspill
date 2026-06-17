@@ -831,7 +831,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           unlockedSides={state.unlockedSides ?? []}
         />
 
-        {/* Domener (jern) — trykk for å ta svenneprøven (fagbrev → mesterbrev) */}
+        {/* Domener (jern) — trykk for å ta svenneprøven (sveinn → mester) */}
         <MaterialPanel material="jern" framed className="mb-6 p-3">
         <p className="mb-2 font-inter text-xs text-viking-gold-soft">Svennebrev{isChief ? ' — trykk et domene for å ta svenneprøven' : ''}</p>
         <div className="flex flex-wrap gap-2">
@@ -843,12 +843,12 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
                 key={key}
                 disabled={!eligible}
                 onClick={() => setActiveSkill(key)}
-                title={eligible ? (brev === 0 ? 'Ta fagbrev-svenneprøven' : 'Ta mesterbrev-svenneprøven') : brev >= 2 ? 'Mesterbrev (fullført)' : !isChief ? 'Kun høvdingen kan starte prøven' : 'Ikke tilgjengelig'}
+                title={eligible ? (brev === 0 ? 'Ta sveinn-svenneprøven' : 'Ta mester-svenneprøven') : brev >= 2 ? 'Mester (fullført)' : !isChief ? 'Kun høvdingen kan starte prøven' : 'Ikke tilgjengelig'}
                 className={`flex items-center gap-2 rounded-full border-2 px-3 py-1 transition-all ${brev > 0 ? 'border-viking-gold/60 bg-viking-gold/10' : 'border-viking-gold/20 opacity-60'} ${eligible ? 'cursor-pointer hover:border-viking-gold hover:bg-viking-gold/20' : 'cursor-default'}`}
               >
                 <NorseIcon name={SKILL_PNG[key]} size={16} className="text-viking-gold-soft" />
                 <span className="font-inter text-xs text-viking-paper/90">{skillTreeData[key].name}</span>
-                <span className="font-mono text-xs text-viking-gold">{brev === 0 ? '—' : brev === 1 ? 'fagbrev' : 'mesterbrev'}</span>
+                <span className="font-mono text-xs text-viking-gold">{brev === 0 ? '—' : brev === 1 ? 'sveinn' : 'mester'}</span>
                 {eligible && <Icon name="axe" size={12} className="text-viking-gold" />}
               </button>
             );

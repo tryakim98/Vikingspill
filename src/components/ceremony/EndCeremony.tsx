@@ -161,7 +161,7 @@ export default function EndCeremony({ setup, scores, svennebrev, saga, destinati
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.7 }}
             className="mb-8 inline-flex items-center justify-center gap-1.5 font-cinzel text-viking-gold-soft"
           >
-            <AutoIcon name={top.icon} size={16} /> Sterkest i {top.name} — {top.level >= 2 ? 'mesterbrev' : 'fagbrev'}
+            <AutoIcon name={top.icon} size={16} /> Sterkest i {top.name} — {top.level >= 2 ? 'mester' : 'sveinn'}
           </motion.p>
         )}
 

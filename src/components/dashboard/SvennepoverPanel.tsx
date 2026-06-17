@@ -71,7 +71,7 @@ export default function SvennepoverPanel({ destinations, svennebrev, isChief, on
               <NorseIcon name={SKILL_PNG[r.skill]} size={18} className="text-viking-gold-soft" />
               <div className="flex-1">
                 <p className="font-cinzel text-sm text-viking-paper">
-                  {r.nivå === 2 ? 'Mesterbrev' : 'Fagbrev'} i <strong className="text-viking-gold">{branch.name}</strong>
+                  {r.nivå === 2 ? 'Mester' : 'Sveinn'} i <strong className="text-viking-gold">{branch.name}</strong>
                 </p>
                 <p className="font-inter text-[10.5px] text-viking-gold-soft/80">
                   Låser opp: <strong>{r.destName}</strong>

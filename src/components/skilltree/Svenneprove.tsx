@@ -1,10 +1,10 @@
 /**
  * Svenneprove.tsx
  * Den ENE svenneprøve-flyten per domene — TODELT (begge deler kreves):
- *   DEL 1 (teori): ferdighetstre-quiz om besøkte steder (fagbrev: 3 spm/2 rette,
- *                  mesterbrev: 4 spm/3 rette). Quiz fra vikingspill_quiz.json.
+ *   DEL 1 (teori): ferdighetstre-quiz om besøkte steder (sveinn: 3 spm/2 rette,
+ *                  mester: 4 spm/3 rette). Quiz fra vikingspill_quiz.json.
  *   DEL 2 (praksis): en domene-spesifikk, aktiv oppgave (SkillPractice).
- * Bestått fagbrev → svennebrev[domene]=1; bestått mesterbrev (vanskeligere) → =2.
+ * Bestått sveinn → svennebrev[domene]=1; bestått mester (vanskeligere) → =2.
  * Opplåsingen (havn/evne) avledes av svennebrev via SIDE_UNLOCKS/isAccessible.
  */
 
@@ -38,7 +38,7 @@ function TrialShell({ title, iconName, onClose, children }: { title: string; ico
 
 interface Props {
   skill: SkillKey;
-  /** Gjeldende svennebrev i domenet: 0 = ingen, 1 = fagbrev. (2 = mesterbrev → ikke åpne.) */
+  /** Gjeldende svennebrev i domenet: 0 = ingen, 1 = sveinn. (2 = mester → ikke åpne.) */
   brev: 0 | 1 | 2;
   visited: string[];
   isChief: boolean;
@@ -48,13 +48,13 @@ interface Props {
 
 export default function Svenneprove({ skill, brev, visited, isChief, onPass, onClose }: Props) {
   const branch = skillTreeData[skill];
-  // brev 0 → fagbrev-prøven (lettere quiz); brev 1 → mesterbrev-prøven (vanskeligere).
+  // brev 0 → sveinn-prøven (lettere quiz); brev 1 → mester-prøven (vanskeligere).
   const isMester = brev >= 1;
   const targetBrev: 1 | 2 = isMester ? 2 : 1;
   const tier: 2 | 3 = isMester ? 3 : 2;           // quiz-vanskelighet fra ferdighetstreet
   const count = tier === 2 ? 3 : 4;
   const passNeeded = tier === 2 ? 2 : 3;
-  const proveName = isMester ? 'Mesterbrev' : 'Fagbrev';
+  const proveName = isMester ? 'Mester' : 'Sveinn';
   const targetTierName = branch.tiers[tier - 1].name; // tiers[1]/[2] = opplåsings-beskrivelsen
   const title = `${branch.name} — ${proveName}`;
 

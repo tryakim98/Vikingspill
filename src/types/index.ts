@@ -33,7 +33,7 @@ export type SkillTree = {
 };
 
 /** Kompetansebevis per domene: høyeste beståtte svenneprøve.
- *  0 = ingen · 1 = fagbrev · 2 = mesterbrev. Stiger IKKE som et ferdighetsnivå. */
+ *  0 = ingen · 1 = sveinn · 2 = mester. Stiger IKKE som et ferdighetsnivå. */
 export type Svennebrev = {
   [key in SkillKey]: 0 | 1 | 2;
 };
@@ -187,7 +187,7 @@ export interface SagaEntry {
 /** Én vei å låse opp et sidested. Et sidested har FLERE slike — gruppa velger
  *  den de har forutsetning for. */
 export type UnlockRequirement =
-  | { type: 'svenneprove'; skill: SkillKey; nivå: 1 | 2 } // 1 = fagbrev, 2 = mesterbrev
+  | { type: 'svenneprove'; skill: SkillKey; nivå: 1 | 2 } // 1 = sveinn, 2 = mester
   | { type: 'score'; key: ScoreKey; min: number }
   | { type: 'goods'; goods: Partial<Record<TradeGoodId, number>> };
 
