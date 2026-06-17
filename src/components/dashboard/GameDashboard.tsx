@@ -13,11 +13,10 @@ import type { GroupSetup } from '../../hooks/useGroupSetup';
 import { EngravedShip, BraidDivider } from '../decor';
 import MaterialPanel from '../decor/MaterialPanel';
 import EncounterFlow from '../encounter/EncounterFlow';
-import SkillTrial from '../skilltree/SkillTrial';
+import Svenneprove from '../skilltree/Svenneprove';
 import EndCeremony from '../ceremony/EndCeremony';
 import SeaJourney, { SAILING_DURATION_S } from './SeaJourney';
 import TradeGoodsPanel from './TradeGoodsPanel';
-import SvenneproveTrial from './SvenneproveTrial';
 import SvennepoverPanel from './SvennepoverPanel';
 import HintToast from './HintToast';
 import HvaKanViGjorePanel from './HvaKanViGjorePanel';
@@ -55,8 +54,7 @@ interface Props {
 }
 
 export default function GameDashboard({ setup, session, onResetSetup, onLeaveGame, onSwitchRole }: Props) {
-  const { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, unlockSide, performAction, resetProgress } = useGameState(setup, session);
-  const [svenneprove, setSvenneprove] = useState<{ destId: string; skill: SkillKey } | null>(null);
+  const { state, applyOutcome, setSkillLevel, addReward, applyFateEffect, performAction, resetProgress } = useGameState(setup, session);
 
   // I online-modus er gruppe-tilstanden delt blant alle medlemmer. Vi lytter på hele
   // gruppe-noden her (parallelt med useGameState) for å få chief-status, medlemsliste
@@ -508,20 +506,6 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     );
   }
 
-  if (svenneprove) {
-    const dest = destinations.find((d) => d.id === svenneprove.destId);
-    return (
-      <SvenneproveTrial
-        skill={svenneprove.skill}
-        destName={dest?.name ?? svenneprove.destId}
-        visited={state.visited}
-        isChief={isChief}
-        onPass={() => { unlockSide(svenneprove.destId); setSvenneprove(null); }}
-        onClose={() => setSvenneprove(null)}
-      />
-    );
-  }
-
   // Skjebnehjulet vises og spinner synkront når læreren spinner. Når det lander, kommer
   // selve effekten (storm/gave/ragnarok/prøve) som egne overlays rett etterpå.
   if (activeWheelSpin) {
@@ -679,7 +663,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
 
   if (activeSkill) {
     return (
-      <SkillTrial
+      <Svenneprove
         skill={activeSkill}
         brev={state.svennebrev[activeSkill] ?? 0}
         visited={state.visited}
@@ -831,9 +815,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         {/* Svenneprøver — fast panel så funksjonen er synlig og lett å finne */}
         <SvennepoverPanel
           destinations={destinations}
-          unlockedSides={state.unlockedSides ?? []}
+          svennebrev={state.svennebrev}
           isChief={isChief}
-          onStartSvenneprove={(destId, skill) => setSvenneprove({ destId, skill })}
+          onStartSvenneprove={(_destId, skill) => setActiveSkill(skill)}
         />
 
         {/* "Hva kan vi gjøre?"-panel — forklarer ressurser og viser muligheter */}
@@ -943,7 +927,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             sailingTo={sailingTo}
             onSelect={setPreviewDestId}
             onConfirm={confirmSailingTo}
-            onStartSvenneprove={(destId, skill) => setSvenneprove({ destId, skill })}
+            onStartSvenneprove={(_destId, skill) => setActiveSkill(skill)}
             onPerformAction={performAction}
           />
         </div>

@@ -406,12 +406,12 @@ export default function SeaJourney({ destinations, visited, locked, goods, svenn
                       data-testid={`take-svenneprove-${dest.id}`}
                       className="mt-3 w-full rounded-md border-2 border-viking-gold bg-viking-gold/15 px-4 py-2.5 font-cinzel text-sm font-bold text-viking-gold transition hover:bg-viking-gold hover:text-viking-darkblue"
                     >
-                      <Icon name="scroll" size={15} className="mr-1 inline-block align-[-2px]" /> Ta ferdsbrevet i {skillTreeData[svenneReq.skill].name} →
+                      <Icon name="scroll" size={15} className="mr-1 inline-block align-[-2px]" /> Ta svenneprøven i {skillTreeData[svenneReq.skill].name} →
                     </button>
                   )}
                   {svenneReq && svenneReq.type === 'svenneprove' && !isChief && (
                     <p className="mt-3 rounded-md border border-viking-gold/30 bg-viking-darkblue/40 px-3 py-2 font-cinzel text-xs italic text-viking-gold-soft/80">
-                      Høvdingen kan ta ferdsbrevet i {skillTreeData[svenneReq.skill].name}
+                      Høvdingen kan ta svenneprøven i {skillTreeData[svenneReq.skill].name}
                     </p>
                   )}
                 </div>

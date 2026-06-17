@@ -12,7 +12,7 @@
 
 import type { Destination, SkillKey, TradeGoodId } from '../../types';
 import { SIDE_UNLOCKS } from '../../data/routes';
-import { meetsRequirement, missingForRequirement } from '../../lib/unlocks';
+import { meetsRequirement, missingForRequirement, jorvikUnlocked } from '../../lib/unlocks';
 import { skillTreeData } from '../../data/skillTree';
 import Icon from '../decor/Icon';
 import NorseIcon from '../decor/NorseIcon';
@@ -64,7 +64,7 @@ export default function HvaKanViGjorePanel({ destinations, scores, svennebrev, g
       if (sp && sp.type === 'svenneprove') {
         return [{
           destId, destName: dest.name, status: 'far',
-          bestPath: `Trenger ferdsbrev i ${skillTreeData[sp.skill].name}`,
+          bestPath: `Trenger ${sp.nivå === 2 ? 'mesterbrev' : 'fagbrev'} i ${skillTreeData[sp.skill].name}`,
         }];
       }
       return [];
@@ -85,6 +85,11 @@ export default function HvaKanViGjorePanel({ destinations, scores, svennebrev, g
   return (
     <MaterialPanel material="stein" framed className="mb-6 p-4" data-testid="hva-kan-vi-gjore">
       <h3 className="mb-2 inline-flex items-center gap-2 font-saga text-xl text-viking-gold"><Icon name="compass" size={17} /> Hva kan vi gjøre?</h3>
+      {jorvikUnlocked(svennebrev) && (
+        <p className="mb-3 inline-flex items-center gap-2 rounded-md border-2 border-viking-gold bg-viking-gold/15 px-3 py-2 font-cinzel text-xs text-viking-gold" data-testid="jorvik-waiting">
+          ✦ Jorvik venter — alle fem mesterbrev er tatt. Et siste kapittel åpner seg.
+        </p>
+      )}
       <p className="mb-3 font-inter text-[11px] italic text-viking-gold-soft/75">
         Ressursene gir konkrete muligheter. Slik bruker dere det dere har samlet.
       </p>
@@ -97,7 +102,7 @@ export default function HvaKanViGjorePanel({ destinations, scores, svennebrev, g
         <ResourceTip icon="ikon-rykte" label="Rykte" tip="Diplomati-valg, fjerne havner" className="min-w-[8.5rem] flex-[1.4]" />
         <ResourceTip icon="ikon-hvalrosstann" label="Handelsvarer" tip="Lås opp sidesteder, bytt med andre" className="min-w-[8.5rem] flex-[1.4]" />
         <ResourceTip icon="ikon-krigskunst" label="Ferdigheter" tip="Bonus på terning, låser opp valg" className="min-w-[8.5rem] flex-1" />
-        <ResourceTip icon="ikon-svenneprove" label="Ferdsbrev" tip="Lås opp sidesteder via quiz" className="min-w-[8.5rem] flex-1" />
+        <ResourceTip icon="ikon-svenneprove" label="Svenneprøver" tip="Lås opp havner og evner" className="min-w-[8.5rem] flex-1" />
       </div>
 
       {/* Klare til å seile */}

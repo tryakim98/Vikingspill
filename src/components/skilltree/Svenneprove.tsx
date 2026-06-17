@@ -1,12 +1,11 @@
 /**
- * SkillTrial.tsx
- * Svenneprøven (§3.2) for å heve ferdighetsnivå — TODELT (begge deler kreves):
- *   DEL 1 (teori): ferdighetstre-quiz om besøkte steder (Lærling 1→2: 3 spm/2 rette,
- *                  Mester 2→3: 4 spm/3 rette). Uendret quiz-mekanikk.
- *   DEL 2 (praksis): en ferdighetsspesifikk, aktiv oppgave (SkillPractice) som må
- *                  fullføres. Først når BÅDE quiz og praksis er bestått, heves ferdigheten.
- * Quiz-spørsmålene kommer fra ferdighetstre-quizen (vikingspill_quiz.json), filtrert på
- * besøkte destinasjoner — IKKE stedsquizen.
+ * Svenneprove.tsx
+ * Den ENE svenneprøve-flyten per domene — TODELT (begge deler kreves):
+ *   DEL 1 (teori): ferdighetstre-quiz om besøkte steder (fagbrev: 3 spm/2 rette,
+ *                  mesterbrev: 4 spm/3 rette). Quiz fra vikingspill_quiz.json.
+ *   DEL 2 (praksis): en domene-spesifikk, aktiv oppgave (SkillPractice).
+ * Bestått fagbrev → svennebrev[domene]=1; bestått mesterbrev (vanskeligere) → =2.
+ * Opplåsingen (havn/evne) avledes av svennebrev via SIDE_UNLOCKS/isAccessible.
  */
 
 import { useState, useEffect, type ReactNode } from 'react';
@@ -47,7 +46,7 @@ interface Props {
   onClose: () => void;
 }
 
-export default function SkillTrial({ skill, brev, visited, isChief, onPass, onClose }: Props) {
+export default function Svenneprove({ skill, brev, visited, isChief, onPass, onClose }: Props) {
   const branch = skillTreeData[skill];
   // brev 0 → fagbrev-prøven (lettere quiz); brev 1 → mesterbrev-prøven (vanskeligere).
   const isMester = brev >= 1;
