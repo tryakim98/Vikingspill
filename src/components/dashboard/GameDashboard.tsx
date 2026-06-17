@@ -7,7 +7,8 @@
 
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import type { Destination, SkillKey } from '../../types';
-import { dealKeyCard, shouldDealKeyCard } from '../../lib/keyCards';
+import { dealPrivateCard, shouldDealKeyCard, agendaAllowed } from '../../lib/keyCards';
+import { AGENDA_CARDS } from '../../data/agendaCards';
 import { destinations, skillTreeData } from '../../data';
 import { useGameState } from '../../hooks/useGameState';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
@@ -257,11 +258,17 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         patchGroup(session.gameCode, myGroupId, { forceSkjebneNextSail: false }).catch(() => {});
       }
       if (isOnline) {
-        // Nøkkelkort (§3 trinn 1): ved ~1/3 av møtene deles ett privat kort til ÉN elev
-        // (vektet mot den som har fått færrest). Krever ≥2 medlemmer for å ha noen verdi.
+        // Privat kort: ved ~1/3 av møtene deles ett privat kort til ÉN elev (vektet mot
+        // den som har fått færrest). Krever ≥2 medlemmer. SJELDEN, og kun når lærer-
+        // bryteren `saboteur` er på, er kortet et skjult agenda-kort (§3 trinn 2) — med
+        // min-gap regnet fra forrige agenda i `agendaLog` vs. besøkte havner.
         const dealEnabled = gameSettings.keyCards !== false && memberIds.length >= 2;
+        const visited = state?.visited ?? [];
+        const aLog = syncedGroup?.agendaLog ?? [];
+        let roundsSinceAgenda = Infinity;
+        if (aLog.length) { const idx = visited.indexOf(aLog[aLog.length - 1].destId); if (idx >= 0) roundsSinceAgenda = visited.length - idx; }
         const deal = dealEnabled && shouldDealKeyCard()
-          ? dealKeyCard(destId, memberIds, syncedGroup?.keyCardHistory ?? [])
+          ? dealPrivateCard(destId, memberIds, syncedGroup?.keyCardHistory ?? [], { saboteur: gameSettings.saboteur === true, canAgenda: agendaAllowed(roundsSinceAgenda) })
           : null;
         const patch: Partial<SyncedGroup> = {
           activeDestId: destId,
@@ -644,7 +651,24 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
       <>
       <EncounterFlow
         destination={activeDest}
-        onComplete={(apply) => { applyOutcome(apply); setActiveDest(null); }}
+        onComplete={(apply) => {
+          applyOutcome(apply);
+          // Sabotør (§3 trinn 2): logg agenda-utfallet ved forsegling (kun høvding, online).
+          // Per-elev-ære AVLEDES av denne loggen — ingen skriv til medlemsnoden.
+          if (isOnline && isChief) {
+            const enc = syncedGroup?.encounter;
+            if (enc?.keyCard?.kind === 'agenda') {
+              const ag = (AGENDA_CARDS[enc.destId] ?? []).find((c) => c.id === enc.keyCard!.cardId);
+              if (ag) {
+                const adv = enc.advice ?? {};
+                const vigilantIds = memberIds.filter((id) => { const c = adv[id]?.choiceId; return !!c && c !== ag.pushChoiceId; });
+                const entry = { destId: enc.destId, agentId: enc.keyCard.holderId, pushChoiceId: ag.pushChoiceId, succeeded: enc.choiceId === ag.pushChoiceId, vigilantIds };
+                patchGroup(session.gameCode, myGroupId, { agendaLog: [...(syncedGroup?.agendaLog ?? []), entry] }).catch(() => {});
+              }
+            }
+          }
+          setActiveDest(null);
+        }}
         onExit={() => isChief && setActiveDest(null)}
         onRequestApproval={session.mode === 'online'
           ? (destId, taskTitle) => requestApproval(session.gameCode, myGroupId, { destId, taskTitle, shipName: setup.shipName }).catch(() => {})

@@ -14,6 +14,7 @@ import type { Destination, Choice, RollOdds, SagaEntry, SkillKey, Svennebrev } f
 import { skillTreeData } from '../../data/skillTree';
 import { CREW_ROLES, CREW_ROLE_ORDER } from '../../data/crewRoles';
 import { KEY_CARDS } from '../../data/keyCards';
+import { AGENDA_CARDS } from '../../data/agendaCards';
 import { tallyVotes, npcVotes } from '../../lib/council';
 import type { SyncedEncounter, CouncilAdvice, ApprovalRequest } from '../../lib/gameSync';
 import { taskBonusForApproval } from '../../lib/gameSync';
@@ -238,14 +239,24 @@ export default function EncounterFlow({
   const advice: Record<string, CouncilAdvice> = syncMode ? (syncedEncounter?.advice ?? {}) : {};
   const myAdvice = myMemberId ? advice[myMemberId] : undefined;
 
-  // Nøkkelkort (§3 trinn 1): rundens private kort (online). Innholdet vises KUN for
-  // holderen; de andre ser en nøytral banner. Solo kobles inn i neste commit.
+  // Privat kort (online): rundens private kort. Innholdet vises KUN for holderen; de
+  // andre ser en nøytral banner (samme for ærlig og agenda → ekte deduksjon).
   const keyCard = syncMode ? (syncedEncounter?.keyCard ?? null) : null;
-  const keyCardData = keyCard ? (KEY_CARDS[d.id] ?? []).find((c) => c.id === keyCard.cardId) ?? null : null;
+  const isAgenda = keyCard?.kind === 'agenda';
+  const keyCardData = keyCard && !isAgenda ? (KEY_CARDS[d.id] ?? []).find((c) => c.id === keyCard.cardId) ?? null : null;
+  const agendaData = keyCard && isAgenda ? (AGENDA_CARDS[d.id] ?? []).find((c) => c.id === keyCard.cardId) ?? null : null;
   const iHoldKeyCard = !!keyCard && !!myMemberId && myMemberId === keyCard.holderId;
   const keyCardHolderLabel = keyCard ? (keyCard.holderId === myMemberId ? 'Du' : `Medlem ${keyCard.holderId.slice(2, 6)}`) : '';
-  // Felles saga-felt for nøkkelkort-avsløringen (begge onComplete-byggerne bruker det).
+  // Saga logger KUN ærlig nøkkelinfo (agenda har sin egen rolle-avsløring + agendaLog).
   const keyCardSaga = keyCard && keyCardData ? { keyCardHolderLabel, keyCardText: keyCardData.text } : {};
+  // Sabotør-avsløring (§3 trinn 2, online): hvem hadde agendaen, lyktes den, hvem
+  // gjennomskuet den (stemte mot push). Utledet av stemmene — vises etter avgjørelsen.
+  const agendaReveal = (syncMode && agendaData) ? {
+    pushChoiceId: agendaData.pushChoiceId,
+    twist: agendaData.twist,
+    succeeded: choiceId === agendaData.pushChoiceId,
+    vigilantIds: memberIds.filter((id) => { const c = advice[id]?.choiceId; return !!c && c !== agendaData.pushChoiceId; }),
+  } : null;
 
   // Hvor skal vi gå når vi er ferdige med oppgave/quiz og inn mot valgene?
   // Rådslagning skytes inn rett før valg-steget når den er på.
@@ -304,10 +315,20 @@ export default function EncounterFlow({
     updateMany({ choiceId, roll: null, step: requireSaga ? 'saga' : 'roll', reason: '' });
   };
 
-  // Nøkkelkort-visning (§3 trinn 1): holderen ser innholdet privat; alle andre ser en
-  // nøytral banner som skaper presset til å spørre — uten å røpe hvem eller hva.
+  // Privat-kort-visning: holderen ser innholdet privat; alle andre ser en NØYTRAL banner
+  // — identisk for ærlig nøkkelkort og sabotør-agenda, så ingen vet hvem som har hva.
   const renderKeyCard = () => {
     if (!keyCard) return null;
+    if (iHoldKeyCard && agendaData) {
+      // Sabotør (§3 trinn 2): holderen får et hemmelig oppdrag — kun hen ser det.
+      return (
+        <div className="mb-4 rounded-lg border-2 border-viking-crimson/70 bg-viking-crimson/10 p-4 shadow-[0_0_18px_rgba(139,41,41,0.25)]" data-testid="agenda-private">
+          <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-crimson"><Icon name="book" size={13} /> Skjult rolle — kun du ser dette</p>
+          <p className="font-inter text-sm text-viking-paper">{agendaData.brief}</p>
+          <p className="mt-2 font-inter text-xs italic text-viking-gold-soft">Spill rollen — overbevis mannskapet, men røp aldri hvorfor.</p>
+        </div>
+      );
+    }
     if (iHoldKeyCard && keyCardData) {
       return (
         <div className="mb-4 rounded-lg border-2 border-viking-gold bg-viking-gold/12 p-4 shadow-[0_0_18px_rgba(205,195,173,0.25)]" data-testid="keycard-private">
@@ -1088,6 +1109,22 @@ export default function EncounterFlow({
         {keyCard && keyCardData && (
           <div className="mt-4 rounded-md border-2 border-viking-gold/50 bg-viking-darkblue/40 px-3 py-2" data-testid="keycard-reveal">
             <p className="font-inter text-sm text-viking-paper/90"><Icon name="book" size={13} className="mr-1 inline text-viking-gold-soft" /> Nøkkelkort: <strong className="text-viking-gold-soft">{keyCardHolderLabel}</strong> visste at «{keyCardData.text}»</p>
+          </div>
+        )}
+        {agendaReveal && (
+          <div className="mt-4 rounded-md border-2 border-viking-crimson/60 bg-viking-crimson/10 px-3 py-3" data-testid="agenda-reveal">
+            <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-crimson"><Icon name="book" size={13} /> En skjult rolle ble spilt</p>
+            <p className="font-inter text-sm text-viking-paper/90">
+              Spillet ga <strong className="text-viking-gold-soft">{keyCardHolderLabel}</strong> en skjult rolle denne runden: en hemmelig interesse i «{d.choices.find((c) => c.id === agendaReveal.pushChoiceId)?.title ?? agendaReveal.pushChoiceId}». {keyCardHolderLabel === 'Du' ? 'Du' : 'Hen'} {agendaReveal.twist}
+            </p>
+            <p className="mt-1 font-inter text-sm text-viking-paper/85">
+              {agendaReveal.succeeded ? 'Mannskapet lot seg styre dit.' : 'Mannskapet sto imot manipulasjonen.'}
+            </p>
+            {agendaReveal.vigilantIds.length > 0 && (
+              <p className="mt-1 inline-flex items-center gap-1.5 font-inter text-sm text-viking-moss" data-testid="agenda-vigilant">
+                <Icon name="eye" size={13} /> Gjennomskuet av: {agendaReveal.vigilantIds.map((id) => id === myMemberId ? 'Du' : `Medlem ${id.slice(2, 6)}`).join(', ')}.
+              </p>
+            )}
           </div>
         )}
         {isChief ? (
