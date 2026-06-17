@@ -12,6 +12,7 @@ import { ref, set, get, remove, update, runTransaction, onValue, type Unsubscrib
 import { db } from './firebase';
 import type { SkillKey, TradeGoodId, SagaEntry, Svennebrev } from '../types';
 import type { FateEffect } from '../data/fateCards';
+import type { KeyCardLogEntry } from './keyCards';
 
 export interface GroupMember {
   joinedAt: number;
@@ -44,6 +45,9 @@ export interface SyncedEncounter {
   choiceId?: string | null;
   roll?: { raw: number; effective: number; modifier: number; tier: string } | null;
   reason?: string; // saga-tekst som høvdingen skriver før terningen kastes
+  // Nøkkelkort (§3 trinn 1): hvem som fikk det private kortet denne runden + kort-id.
+  // Settes av høvdingen ved møte-start; innholdet vises KUN på holderens skjerm.
+  keyCard?: { holderId: string; cardId: string } | null;
   // DEPRECATED (§2.4): lesetest-opplåsing av bonus-valg er erstattet av svennebrev/rolle.
   // Feltene skrives/leses ikke lenger; beholdt så reglene slipper ny deploy.
   hiddenAnswered?: boolean;
@@ -84,6 +88,7 @@ export interface SyncedGroup {
   lastSkjebneAtVisited?: number;         // visited.length da forrige ble utløst
   forceSkjebneNextSail?: boolean;        // settes av Skjebnehjulet — tvinger Skjebnemøte ved neste seilas
   seenHints?: string[];                  // førstegangs-forklaringer gruppa har sett (HintKey)
+  keyCardHistory?: KeyCardLogEntry[];    // §3 trinn 1: hvem fikk hvilket nøkkelkort hvor (fairness + saga-avsløring)
   // Tinget — gruppa kan stemme fram en ny høvding (§Tinget):
   ting?: TingSession | null;             // pågående/avsluttet ting (avstemning om høvding)
   lastTingAt?: number;                   // tidspunkt forrige ting ble kalt inn (3-min cooldown)
@@ -178,6 +183,7 @@ export interface GameSettings {
   requireCouncil?: boolean; // rådslagning: alle medlemmer må gi råd før høvdingen velger (default på)
   textLength?: TextLength; // 'full' = alle, 'short' = alle, 'group' = la hver gruppe velge
   showHints?: boolean;     // førstegangs-forklaringer på/av (default på)
+  keyCards?: boolean;      // §3 trinn 1: del ut private nøkkelkort ved ~1/3 av møtene (default på)
 }
 
 export function setGameSettings(code: string, settings: Partial<GameSettings>): Promise<void> {

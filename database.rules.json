@@ -28,6 +28,7 @@
           "requireCouncil":     { ".validate": "newData.isBoolean()" },
           "textLength":         { ".validate": "newData.isString() && newData.val().matches(/^(full|short|group)$/)" },
           "showHints":          { ".validate": "newData.isBoolean()" },
+          "keyCards":           { ".validate": "newData.isBoolean()" },
           "$other":             { ".validate": false }
         },
 
@@ -72,6 +73,15 @@
             "forceSkjebneNextSail": { ".validate": "newData.isBoolean()" },
             "seenHints":     { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
             "seenSkjebne":   { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
+            "keyCardHistory": {
+              "$i": {
+                ".validate": "newData.hasChildren(['destId','memberId','cardId'])",
+                "destId":   { ".validate": "newData.isString() && newData.val().length <= 40" },
+                "memberId": { ".validate": "newData.isString() && newData.val().matches(/^m-[a-z0-9]{1,16}$/)" },
+                "cardId":   { ".validate": "newData.isString() && newData.val().length <= 60" },
+                "$other":   { ".validate": false }
+              }
+            },
             "activeSkjebne": {
               ".validate": "newData.hasChildren(['id','pendingDestId'])",
               "id":            { ".validate": "newData.isString() && newData.val().length <= 40" },
@@ -106,6 +116,11 @@
               "quizBonus":    { ".validate": "newData.isNumber()" },
               "choiceId":     { ".validate": "newData.isString() && newData.val().length <= 40" },
               "reason":       { ".validate": "newData.isString() && newData.val().length <= 600" },
+              "keyCard": {
+                "holderId": { ".validate": "newData.isString() && newData.val().matches(/^m-[a-z0-9]{1,16}$/)" },
+                "cardId":   { ".validate": "newData.isString() && newData.val().length <= 60" },
+                "$other":   { ".validate": false }
+              },
               "hiddenAnswered":  { ".validate": "newData.isBoolean()" },
               "hiddenCorrect":   { ".validate": "newData.isBoolean()" },
               "hiddenAnswerIdx": { ".validate": "newData.isNumber()" },
