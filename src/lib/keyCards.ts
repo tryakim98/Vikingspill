@@ -7,6 +7,7 @@
  */
 
 import { KEY_CARDS, type KeyCard } from '../data/keyCards';
+import { pickAgenda } from '../data/agendaCards';
 
 /** Andel av møtene som deler ut et nøkkelkort (~1 av 3 — ikke hver runde). */
 export const KEY_CARD_CHANCE = 1 / 3;
@@ -69,4 +70,47 @@ export function dealKeyCard(
   const holderId = pickCardHolder(memberIds, history, rng);
   if (!holderId) return null;
   return { holderId, cardId: card.id };
+}
+
+// === SABOTØR (§3 trinn 2) =========================================================
+// Et privat kort kan SJELDEN være et agenda-kort i stedet for et ærlig nøkkelkort —
+// kun når lærer-bryteren `saboteur` er på, og bare hvis det er gått nok runder siden
+// forrige agenda (min-gap). Samme holder-utvelging (vektet); kun innholdet/typen skiller.
+
+/** Andel av de UTDELTE private kortene som blir et agenda-kort når saboteur er på. */
+export const SABOTEUR_CHANCE = 1 / 4;
+/** Minste antall runder mellom to agenda-kort (så det forblir sjeldent). */
+export const SABOTEUR_MIN_GAP = 3;
+
+/** Er nok runder gått siden forrige agenda til at en ny er tillatt? */
+export function agendaAllowed(roundsSinceLastAgenda: number): boolean {
+  return roundsSinceLastAgenda >= SABOTEUR_MIN_GAP;
+}
+
+export interface PrivateCardDeal {
+  holderId: string;
+  cardId: string;
+  kind: 'honest' | 'agenda';
+}
+
+/**
+ * Komplett utdeling av rundens private kort: hvem, hvilket kort, og om det er et ÆRLIG
+ * nøkkelkort eller (sjelden) et AGENDA-kort. Holder-utvelgingen er den samme vektede
+ * som for nøkkelkort. Agenda velges kun når `saboteur` er på, `canAgenda` (min-gap) er
+ * oppfylt, havna har et agenda-kort, og en lav sjanse slår til. Ren funksjon.
+ */
+export function dealPrivateCard(
+  destId: string,
+  memberIds: string[],
+  history: KeyCardLogEntry[],
+  opts: { saboteur: boolean; canAgenda: boolean },
+  rng: () => number = Math.random,
+): PrivateCardDeal | null {
+  const base = dealKeyCard(destId, memberIds, history, rng);
+  if (!base) return null;
+  const agenda = pickAgenda(destId);
+  if (opts.saboteur && opts.canAgenda && agenda && rng() < SABOTEUR_CHANCE) {
+    return { holderId: base.holderId, cardId: agenda.id, kind: 'agenda' };
+  }
+  return { holderId: base.holderId, cardId: base.cardId, kind: 'honest' };
 }
