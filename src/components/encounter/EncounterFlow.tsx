@@ -99,7 +99,7 @@ function Shell({ name, onExit, children }: { name: string; onExit: () => void; c
   return (
     <div className="relative min-h-screen viking-screen text-viking-paper">
       <div className="mx-auto max-w-2xl px-4 py-8">
-        <div className="flex items-center justify-between pb-2">
+        <div className="flex items-center justify-between pb-2 pr-10">
           <h2 className="font-saga text-2xl text-viking-gold">{name}</h2>
           <button onClick={onExit} className="font-inter text-xs text-viking-gold-soft/70 hover:text-viking-gold-soft">✕ Avbryt</button>
         </div>
@@ -732,8 +732,11 @@ export default function EncounterFlow({
           </div>
         )}
 
-        {/* Mannskapsrollenes stemmer. Stol du på alle? Flagg én stemme som mistenkt. */}
-        <p className="mb-1 font-inter text-xs italic text-viking-gold-soft/70">Hør etter — mener alle det de sier? Du kan flagge én stemme som mistenkt.</p>
+        {/* Mannskapsrollenes stemmer. Mistanke-affordansen vises kun når en NPC faktisk
+            bærer en skjult agenda (soloAgenda) — ellers er det ingenting å gjennomskue. */}
+        {soloAgenda && (
+          <p className="mb-1 font-inter text-xs italic text-viking-gold-soft/70">Hør etter — mener alle det de sier? Du kan flagge én stemme som mistenkt.</p>
+        )}
         <div className="space-y-2" data-testid="solo-voices">
           {voices.map(({ role, choiceId, line }) => {
             const r = CREW_ROLES[role];
@@ -746,13 +749,15 @@ export default function EncounterFlow({
                   <span className="ml-auto rounded bg-viking-darkblue/70 px-2 py-0.5 font-mono text-[10px] uppercase text-viking-gold-soft/80" data-testid={`solo-voice-backs-${role}`}>backer «{titleOf(choiceId)}»</span>
                 </div>
                 <p className="font-inter text-sm italic text-viking-paper/85">«{line}»</p>
-                <button
-                  onClick={() => setSuspectedRole(suspected ? null : role)}
-                  data-testid={`solo-suspect-${role}`}
-                  className={`mt-2 rounded border px-2 py-0.5 font-cinzel text-[11px] ${suspected ? 'border-viking-crimson bg-viking-crimson/20 text-viking-crimson' : 'border-viking-gold/40 text-viking-gold-soft hover:border-viking-gold'}`}
-                >
-                  {suspected ? '✓ Mistenkt' : 'Mistenk denne'}
-                </button>
+                {soloAgenda && (
+                  <button
+                    onClick={() => setSuspectedRole(suspected ? null : role)}
+                    data-testid={`solo-suspect-${role}`}
+                    className={`mt-2 rounded border px-2 py-0.5 font-cinzel text-[11px] ${suspected ? 'border-viking-crimson bg-viking-crimson/20 text-viking-crimson' : 'border-viking-gold/40 text-viking-gold-soft hover:border-viking-gold'}`}
+                  >
+                    {suspected ? '✓ Mistenkt' : 'Mistenk denne'}
+                  </button>
+                )}
               </div>
             );
           })}
