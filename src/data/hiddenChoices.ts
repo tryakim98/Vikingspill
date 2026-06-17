@@ -1,35 +1,27 @@
 /**
  * hiddenChoices.ts
- * Skjulte valg på utvalgte destinasjoner. Hvis gruppen svarer riktig på et
- * lesespørsmål om historien/kulturmøtet, låses et ekstra (og ofte klokere)
- * valg opp. Feil svar = bare standardvalgene, ingen straff.
+ * Bonus-valg på utvalgte destinasjoner. Et ekstra (og ofte klokere) valg som
+ * låses opp av svennebrev-grad i et domene (sveinn=1/mester=2) ELLER en matchende
+ * mannskapsrolle (rollene er 1:1 med domenene, se crewRoles.ts). Bonusen kommer
+ * I TILLEGG til de tre kjernevalgene — den erstatter dem aldri, og fravær av
+ * opplåsing gir ingen straff.
  *
- * Brukt skjønn: 5 destinasjoner med klare, konkrete detaljer i historien som
- * man finner ved å lese nøye, og der et alternativt klokere valg gir mening.
+ * Brukt skjønn: 5 destinasjoner der et alternativt klokere valg gir mening, og
+ * der domenet/rollen som åpner det passer kulturmøtet.
  */
 
-import type { Choice } from '../types';
-
-export interface ReadingTest {
-  q: string;
-  opts: string[];
-  correct: number;
-  feedback?: string;
-}
+import type { Choice, SkillKey } from '../types';
 
 export interface HiddenChoiceEntry {
-  test: ReadingTest;
+  /** Åpnes når svennebrev[skill] ≥ nivå (default sveinn=1) ELLER en i mannskapet
+   *  har rollen som matcher dette domenet. */
+  unlock: { skill: SkillKey; nivå?: 1 | 2 };
   choice: Choice;
 }
 
 export const HIDDEN_CHOICES: Record<string, HiddenChoiceEntry> = {
   lindisfarne: {
-    test: {
-      q: 'Hva dato falt det første store vikingangrepet på Lindisfarne?',
-      opts: ['1. juni 793', '8. juni 793', '8. juli 793'],
-      correct: 1,
-      feedback: 'Det stod tydelig i historien: 8. juni 793.',
-    },
+    unlock: { skill: 'språk' }, // Skald/Tolk verner det skrevne ord
     choice: {
       id: 'lindisfarne-bevare-manuskripter',
       title: 'Bevare manuskriptene',
@@ -47,12 +39,7 @@ export const HIDDEN_CHOICES: Record<string, HiddenChoiceEntry> = {
   },
 
   paris: {
-    test: {
-      q: 'Hvor mye sølv fikk Ragnar i 845 av Karl den skallede?',
-      opts: ['3000 pund', '5000 pund', '7000 pund'],
-      correct: 2,
-      feedback: '7000 pund — en astronomisk sum som satte standarden for danegeld.',
-    },
+    unlock: { skill: 'diplomati' }, // Handelsmann forhandler avtalen
     choice: {
       id: 'paris-handelsavtale',
       title: 'Forhandle frem en langvarig handelsavtale',
@@ -70,12 +57,7 @@ export const HIDDEN_CHOICES: Record<string, HiddenChoiceEntry> = {
   },
 
   sameland: {
-    test: {
-      q: 'Hva het høvdingen som beskrev det respektfulle forholdet mellom nordmenn og samer?',
-      opts: ['Egil Skallagrimsson', 'Ottar fra Hålogaland', 'Harald Hårfagre'],
-      correct: 1,
-      feedback: 'Ottar fra Hålogaland — hans beretning til kong Alfred er en av kildene.',
-    },
+    unlock: { skill: 'tro' }, // Seer forstår seid og noaidiens verden
     choice: {
       id: 'sameland-noaidi-drommesyn',
       title: 'Be om noaidiens drømmesyn',
@@ -93,12 +75,7 @@ export const HIDDEN_CHOICES: Record<string, HiddenChoiceEntry> = {
   },
 
   vinland: {
-    test: {
-      q: 'Hva het Leif Erikssons far, mannen som koloniserte Grønland?',
-      opts: ['Olav Tryggvason', 'Erik den røde', 'Harald Hardråde'],
-      correct: 1,
-      feedback: 'Erik den røde — landflyktet fra Island, koloniserte Grønland rundt 985.',
-    },
+    unlock: { skill: 'språk' }, // Skald/Tolk lytter og forstår sangen
     choice: {
       id: 'vinland-skraelingenes-sang',
       title: 'Lytt til skrælingenes sang før dere handler',
@@ -116,12 +93,7 @@ export const HIDDEN_CHOICES: Record<string, HiddenChoiceEntry> = {
   },
 
   baghdad: {
-    test: {
-      q: 'Hvilket år møtte den arabiske diplomaten Ibn Fadlan rus-vikingene ved Volga?',
-      opts: ['812', '921', '966'],
-      correct: 1,
-      feedback: 'År 921 — hans beretning er en av de mest detaljerte vi har om vikinger.',
-    },
+    unlock: { skill: 'diplomati' }, // Handelsmann forhandler seg til rollen som veiviser
     choice: {
       id: 'baghdad-ibn-fadlans-veiviser',
       title: 'Bli Ibn Fadlans norrøn-veiviser',

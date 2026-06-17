@@ -138,6 +138,11 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   const isChief = !isOnline || chiefId === myMemberId || !chiefId;
   const members = syncedGroup?.members ?? {};
   const memberIds = Object.keys(members);
+  // Mannskapets roller (§2.4): online fra medlemsnodene, solo fra setup. Brukes til å
+  // åpne bonus-valg i encounter (en matchende rolle teller som opplåsing).
+  const crewRoles: SkillKey[] = isOnline
+    ? Object.values(members).map((m) => m.role).filter((r): r is SkillKey => !!r)
+    : (setup.role ? [setup.role] : []);
   const memberLabel = (mid: string) => mid === myMemberId ? 'Du' : `Medlem ${mid.slice(2, 6)}`;
 
   // Tinget (§Tinget): avstemning om ny høvding. Sesjonen ligger på syncedGroup.ting.
@@ -648,6 +653,8 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         textLength={displayTextLength}
         onToggleTextLength={togglePersonalTextLength}
         saga={state.saga ?? []}
+        svennebrev={state.svennebrev}
+        crewRoles={crewRoles}
         syncedEncounter={isOnline ? syncedGroup?.encounter ?? null : null}
         onUpdateEncounter={isOnline && isChief
           ? (partial) => {

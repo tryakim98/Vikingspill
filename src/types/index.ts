@@ -133,10 +133,11 @@ export interface Destination {
   // og en note i utfallet. Mangler på destinasjoner der ingen klar historisk fasit fins.
   historicalChoiceId?: string;
 
-  // Skjult valg som låses opp ved riktig svar på et lesespørsmål om historien.
-  // Feil svar = bare standardvalgene, ingen straff. Se data/hiddenChoices.ts.
+  // Bonus-valg som låses opp av svennebrev-grad (sveinn=1/mester=2) i et domene
+  // ELLER en matchende mannskapsrolle (rollene er 1:1 med domenene, se data/crewRoles.ts).
+  // Kommer I TILLEGG til kjernevalgene — erstatter dem aldri. Se data/hiddenChoices.ts.
   hiddenChoice?: {
-    test: { q: string; opts: string[]; correct: number; feedback?: string };
+    unlock: { skill: SkillKey; nivå?: 1 | 2 };
     choice: Choice;
   };
 

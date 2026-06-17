@@ -41,9 +41,11 @@ export interface SyncedEncounter {
   choiceId?: string | null;
   roll?: { raw: number; effective: number; modifier: number; tier: string } | null;
   reason?: string; // saga-tekst som høvdingen skriver før terningen kastes
-  hiddenAnswered?: boolean;     // lesetesten for det skjulte valget er forsøkt
-  hiddenCorrect?: boolean;      // svaret var riktig (skjult valg er låst opp)
-  hiddenAnswerIdx?: number;     // synket valgindeks så alle medlemmer ser samme klikk
+  // DEPRECATED (§2.4): lesetest-opplåsing av bonus-valg er erstattet av svennebrev/rolle.
+  // Feltene skrives/leses ikke lenger; beholdt så reglene slipper ny deploy.
+  hiddenAnswered?: boolean;
+  hiddenCorrect?: boolean;
+  hiddenAnswerIdx?: number;
   vikingPerspective?: string;   // perspektivskifte: vikingenes side
   otherPerspective?: string;    // perspektivskifte: de andres side
   bridgeReflection?: string;    // bro til i dag: refleksjonstekst

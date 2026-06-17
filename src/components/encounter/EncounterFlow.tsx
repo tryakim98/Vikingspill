@@ -10,7 +10,9 @@
 
 import { useState, useEffect, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import type { Destination, Choice, RollOdds, SagaEntry } from '../../types';
+import type { Destination, Choice, RollOdds, SagaEntry, SkillKey, Svennebrev } from '../../types';
+import { skillTreeData } from '../../data/skillTree';
+import { CREW_ROLES } from '../../data/crewRoles';
 import type { SyncedEncounter, CouncilAdvice, ApprovalRequest } from '../../lib/gameSync';
 import { taskBonusForApproval } from '../../lib/gameSync';
 import { SCARRED_RECEPTION } from '../../data/consequences';
@@ -75,6 +77,10 @@ interface EncounterFlowProps {
   onToggleTextLength?: () => void;
   /** Gruppens saga (tidligere valg) — brukes til «svidd mottakelse» (SCARRED_RECEPTION). */
   saga?: SagaEntry[];
+  /** Gruppens svennebrev — åpner bonus-valget når graden er nådd i riktig domene. */
+  svennebrev?: Svennebrev;
+  /** Mannskapets roller (domene-nøkler) — en matchende rolle åpner også bonus-valget. */
+  crewRoles?: SkillKey[];
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -158,7 +164,7 @@ export default function EncounterFlow({
   isChief = true, syncedEncounter = null, onUpdateEncounter,
   requireSaga = false, requirePerspective = false, requireBridge = false, requireQuiz = false,
   requireCouncil = false, myMemberId, memberIds = [], onGiveAdvice, textLength = 'full', onToggleTextLength,
-  saga = [],
+  saga = [], svennebrev, crewRoles = [],
 }: EncounterFlowProps) {
   const d = destination;
   const syncMode = !!syncedEncounter;
@@ -193,9 +199,6 @@ export default function EncounterFlow({
   const [_choice, _setChoice] = useState<Choice | null>(null);
   const [_roll, _setRoll] = useState<RollResult | null>(null);
   const [_reason, _setReason] = useState('');
-  const [_hiddenAnswered, _setHiddenAnswered] = useState(false);
-  const [_hiddenCorrect, _setHiddenCorrect] = useState(false);
-  const [_hiddenAnswerIdx, _setHiddenAnswerIdx] = useState<number | undefined>(undefined);
   const [_vikingPerspective, _setVikingPerspective] = useState('');
   const [_otherPerspective, _setOtherPerspective] = useState('');
   const [_bridgeReflection, _setBridgeReflection] = useState('');
@@ -219,9 +222,6 @@ export default function EncounterFlow({
     : _roll;
   const reason = syncMode ? (syncedEncounter?.reason ?? '') : _reason;
   const setReason = (v: string) => syncMode ? onUpdateEncounter?.({ reason: v }) : _setReason(v);
-  const hiddenAnswered = syncMode ? !!syncedEncounter?.hiddenAnswered : _hiddenAnswered;
-  const hiddenCorrect = syncMode ? !!syncedEncounter?.hiddenCorrect : _hiddenCorrect;
-  const hiddenAnswerIdx = syncMode ? syncedEncounter?.hiddenAnswerIdx : _hiddenAnswerIdx;
   const vikingPerspective = syncMode ? (syncedEncounter?.vikingPerspective ?? '') : _vikingPerspective;
   const otherPerspective = syncMode ? (syncedEncounter?.otherPerspective ?? '') : _otherPerspective;
   const setVikingPerspective = (v: string) => syncMode ? onUpdateEncounter?.({ vikingPerspective: v }) : _setVikingPerspective(v);
@@ -266,9 +266,6 @@ export default function EncounterFlow({
     if (partial.roll !== undefined) {
       _setRoll(partial.roll ? { raw: partial.roll.raw, effective: partial.roll.effective, modifier: partial.roll.modifier, tier: partial.roll.tier as RollResult['tier'] } : null);
     }
-    if (partial.hiddenAnswered !== undefined) _setHiddenAnswered(partial.hiddenAnswered);
-    if (partial.hiddenCorrect !== undefined) _setHiddenCorrect(partial.hiddenCorrect);
-    if (partial.hiddenAnswerIdx !== undefined) _setHiddenAnswerIdx(partial.hiddenAnswerIdx);
     if (partial.vikingPerspective !== undefined) _setVikingPerspective(partial.vikingPerspective);
     if (partial.otherPerspective !== undefined) _setOtherPerspective(partial.otherPerspective);
     if (partial.bridgeReflection !== undefined) _setBridgeReflection(partial.bridgeReflection);
@@ -683,10 +680,13 @@ export default function EncounterFlow({
   // 5a) VALG
   if (step === 'valg') {
     const hidden = d.hiddenChoice;
-    const test = hidden?.test;
+    // Bonus-valget åpnes av svennebrev-grad i domenet ELLER en matchende rolle ombord
+    // (§2.4). Kjernevalgene er ALLTID valgbare — bonusen kommer i tillegg, aldri i stedet.
+    const unlock = hidden?.unlock;
+    const bonusNivå = unlock?.nivå ?? 1;
+    const bonusUnlocked = !!unlock && (((svennebrev?.[unlock.skill] ?? 0) >= bonusNivå) || crewRoles.includes(unlock.skill));
+    const bonusGradeLabel = bonusNivå === 2 ? 'Mester' : 'Sveinn';
     const renderChoiceCard = (c: typeof d.choices[number], isHidden = false) => {
-      // Alle kjernevalg er alltid valgbare (ferdigheter gater ikke valg lenger).
-      // Skjulte ekstra-valg vises bare når lesetesten er bestått (gates over).
       const cardCls = isHidden
         ? 'border-viking-gold bg-viking-gold/10 ring-2 ring-viking-gold/50 shadow-[0_0_18px_rgba(205,195,173,0.25)]'
         : 'border-viking-gold/40 bg-viking-surface';
@@ -729,52 +729,28 @@ export default function EncounterFlow({
           <AdviceSummary advice={advice} memberIds={memberIds} choices={d.choices} />
         )}
 
-        {/* Lesetest for skjult valg — kun hvis destinasjonen har et og ikke er forsøkt */}
-        {hidden && test && !hiddenAnswered && (
-          <div className="mb-5 rounded-lg border-2 border-viking-gold/60 bg-viking-darkblue/60 p-4" data-testid="reading-test">
-            <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold-soft"><Icon name="book" size={13} /> Et skjult valg venter</p>
-            <p className="mb-3 font-inter text-base text-viking-paper">{test.q}</p>
-            <div className="grid gap-2">
-              {test.opts.map((opt, i) => (
-                <button
-                  key={i}
-                  disabled={!isChief}
-                  onClick={() => updateMany({ hiddenAnswered: true, hiddenCorrect: i === test.correct, hiddenAnswerIdx: i })}
-                  data-testid={`reading-opt-${i}`}
-                  className="rounded-md border-2 border-viking-gold/40 bg-viking-surface px-3 py-2 text-left font-inter text-sm text-viking-paper hover:border-viking-gold disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-            {!isChief && <p className="mt-2 text-center font-cinzel text-xs text-viking-gold-soft"><Icon name="anchor" size={11} className="mr-1 inline" /> Høvdingen svarer for gruppa.</p>}
-          </div>
-        )}
-
-        {/* Resultat av lesetesten — to varianter */}
-        {hidden && hiddenAnswered && hiddenCorrect && (
+        {/* Bonus-valg som er åpnet av svennebrev/rolle — melding før kortet */}
+        {hidden && bonusUnlocked && unlock && (
           <motion.div
             initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
             className="mb-5 rounded-md border-2 border-viking-gold bg-viking-gold/15 px-3 py-2"
-            data-testid="reading-unlocked"
+            data-testid="bonus-unlocked"
           >
-            <p className="inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold"><Icon name="book" size={13} /> Fordi dere leste nøye, ser dere en vei de andre ikke ser.</p>
-            {test?.feedback && <p className="mt-0.5 font-inter text-xs italic text-viking-paper/80">{test.feedback}</p>}
+            <p className="inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold"><Icon name="book" size={13} /> {CREW_ROLES[unlock.skill].title} ombord ser en vei de andre ikke ser.</p>
           </motion.div>
         )}
-        {hidden && hiddenAnswered && !hiddenCorrect && (
-          <div className="mb-5 rounded-md border border-viking-gold/30 bg-viking-darkblue/40 px-3 py-2" data-testid="reading-missed">
+        {/* Bonus-valg som ennå er låst — vis kravet, men ALDRI som straff */}
+        {hidden && !bonusUnlocked && unlock && (
+          <div className="mb-5 rounded-md border border-viking-gold/30 bg-viking-darkblue/40 px-3 py-2" data-testid="bonus-locked">
             <p className="font-inter text-sm text-viking-paper/85">
-              Standardvalgene gjelder denne gangen — ingen straff.
-              {hiddenAnswerIdx !== undefined && test && (
-                <span className="ml-1 text-viking-gold-soft">Riktig svar var: <strong>{test.opts[test.correct]}</strong>.</span>
-              )}
+              <Icon name="book" size={13} className="mr-1 inline text-viking-gold-soft" />
+              Et bonus-valg venter — åpnes av <strong className="text-viking-gold-soft">{bonusGradeLabel} i {skillTreeData[unlock.skill].name}</strong>, eller en <strong className="text-viking-gold-soft">{CREW_ROLES[unlock.skill].title}</strong> ombord. Kjernevalgene står åpne uansett.
             </p>
           </div>
         )}
 
         <div className="space-y-4">
-          {hidden && hiddenAnswered && hiddenCorrect && renderChoiceCard(hidden.choice, true)}
+          {hidden && bonusUnlocked && renderChoiceCard(hidden.choice, true)}
           {d.choices.map((c) => renderChoiceCard(c, false))}
         </div>
         {!isChief && <ChiefBanner />}
