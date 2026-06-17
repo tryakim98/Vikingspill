@@ -179,7 +179,14 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
         {step === 'role' && (
           <div className="text-center">
             <h1 className="font-saga text-3xl md:text-5xl viking-engraved-large mb-2">Velg din rolle</h1>
-            <p className="font-inter text-viking-gold-soft italic mb-8">Hvilken stemme har du i mannskapsrådet?</p>
+            <p className="font-inter text-viking-gold-soft italic mb-5">Hvilken stemme har du i mannskapsrådet?</p>
+            {/* Ulve-knotwork (motiv-ulver.png — heldekkende gravyr) som innrammet motiv
+                for mannskapsrådet/flokken. Heldekkende bilde → rammes inn (ikke maskes). */}
+            <img
+              src={`${import.meta.env.BASE_URL}ornamenter/motiv-ulver.png`}
+              alt="" aria-hidden="true"
+              className="mx-auto mb-6 w-32 rounded-lg border-2 border-viking-gold/40 shadow-[0_4px_18px_rgba(0,0,0,0.5)]"
+            />
             <RolePicker value={role} onPick={setRole} />
             <div className="mt-8 flex justify-center gap-4">
               <button onClick={() => setStep('info')} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft transition-colors hover:border-viking-gold">Tilbake</button>
