@@ -30,9 +30,21 @@ og gjør terningbaserte valg med konsekvenser. Én React-app, to roller (lærer/
   i én handler, bruk `updateMany` (ett samlet skriv — to separate patcher racer).
 - **Høvding-modell:** bare høvdingen har interaktive kontroller i encounter; andre
   «ser med» (synket). Eneste unntak: rådslagning.
-- **Rådslagning (`CouncilAdvice` / `onGiveAdvice`):** når `requireCouncil` er på, gir
-  HVERT medlem et råd (trykk et alternativ → `choiceId`, eller skriv `note`) før
-  høvdingens valgknapper åpnes.
+- **Deliberasjons-ryggraden (ferdig) — dobbeltspor, felles utgang:** valget avgjøres i
+  `radslagning`-steget og føres ALLTID gjennom `commitDecision()` → saga → roll →
+  resultat → onComplete (identisk konsekvens/avsløring/saga i begge spor).
+  - *Online (bindende):* hvert medlems `CouncilAdvice.choiceId` er en STEMME (`note` =
+    valgfri begrunnelse). Hemmelig votering (kun «X av Y» til alle har stemt), så låses
+    stemmene, `tallyVotes()` avgjør — flertall vinner, **høvding teller som én stemme og
+    bryter KUN ved likhet** (ingen vetorett). Online hopper over `valg`-steget.
+  - *Solo (offline):* mannskapsrollene er NPC-stemmer som argumenterer ulikt via
+    `npcVotes()` (lib/council.ts) + `crewRoles.argues`; spilleren leser «Kildene», hører
+    stemmene, og velger + begrunner i `valg`→`saga`.
+- **Nøkkelkort (trinn 1, ærlige — `data/keyCards.ts` + `lib/keyCards.ts`):** ved ~1/3
+  av møtene (lærerbryter `keyCards`) deler høvdingen ut ÉT privat, beslutningsrelevant
+  kort til ÉN elev (online), VEKTET mot den som har fått færrest (`pickCardHolder`).
+  Holderen ser kortet privat, andre ser nøytral banner; avsløres i resultat + saga. Solo
+  leser de samme «Kildene» (ulogget kontekst). Kortet OPPLYSER, binder ikke.
 - **Progresjonsmodell:** ÉN tallakse — `svennebrev` `0|1|2` per domene (0=ingen,
   1=sveinn, 2=mester). **Svenneprøven er eneste opplåsing** (hever ett domene ett
   hakk). Det finnes IKKE et eget «ferdighetsnivå». Arketypen er en **rolle/stemme**
@@ -102,7 +114,11 @@ opp sidested. **Mannskapsroller** (2.3, `crewRoles.ts`): unik rolle per medlem v
 innmelding, ingen odds-effekt. **Valg-gating ferdig** (2.4): kjernevalg alltid
 valgbare; bonus-valg åpnes av svennebrev/rolle; sidesteder på svennebrev+score/goods;
 Paris (hovedspor) alltid åpent — Lindisfarne-plyndring gir myk svidd mottakelse, ikke
-stenging.
+stenging. **Deliberasjons-ryggraden ferdig** (3.1–3.5): dobbeltspor med felles utgang —
+online bindende stemme (høvding som tie-break, ingen vetorett) / solo NPC-stemmer via
+`npcVotes`; nøkkelkort (trinn 1, ærlige) med vektet utdeling; alt gjennom
+`commitDecision()` så konsekvens/avsløring/saga er identisk i begge spor.
 
-**Neste:** deliberasjons-ryggraden — rådslagningens rolle-STEMMER (forberedt i
-`crewRoles.argues`), så diskusjonen bærer spillet i både online- og solo-sporet.
+**Neste (påbygg, ikke startet):** **sabotøren** (trinn 2 — ekte elev online med hemmelig
+agenda + per-elev belønning for å lure/gjennomskue, NPC i solo, sjelden/lærerstyrt/helt
+avskrubar) og **«belønn årvåkenhet»**; **styresett-atlas**; **definisjonsmakt**.
