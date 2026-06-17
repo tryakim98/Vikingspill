@@ -21,8 +21,11 @@ export interface GroupMember {
 
 export type EncounterStep = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'radslagning' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
 
-/** Ett medlems råd i rådslagningen før et valg: enten et foretrukket alternativ
- *  (choiceId) ELLER en kort setning (note). Holdes lett — ikke en stil. */
+/** Ett medlems STEMME i rådslagningen før et valg (§3): `choiceId` er medlemmets
+ *  bindende stemme på et alternativ (kjernevalg eller opplåst bonus), `note` er en
+ *  valgfri kort begrunnelse ved siden av. Online telles stemmene opp og avgjør valget
+ *  (høvdingen bryter kun ved likhet — bygges i 3.3). Samme felt som før; tidligere var
+ *  dette reint rådgivende. */
 export interface CouncilAdvice {
   choiceId?: string | null;
   note?: string;

@@ -271,6 +271,26 @@ export default function EncounterFlow({
     if (partial.bridgeReflection !== undefined) _setBridgeReflection(partial.bridgeReflection);
   };
 
+  // Bonus-valget (§2.4) åpnes av svennebrev-grad i domenet ELLER en matchende rolle
+  // ombord. Utledet på KOMPONENTNIVÅ (§3.1) så både rådslagningen og valg-steget kan
+  // tilby det samme settet med valgbare alternativer.
+  const hidden = d.hiddenChoice;
+  const unlock = hidden?.unlock;
+  const bonusNivå = unlock?.nivå ?? 1;
+  const bonusUnlocked = !!unlock && (((svennebrev?.[unlock.skill] ?? 0) >= bonusNivå) || crewRoles.includes(unlock.skill));
+  const bonusGradeLabel = bonusNivå === 2 ? 'Mester' : 'Sveinn';
+  // Valgene mannskapet kan stemme på / velge mellom: kjernevalg + opplåst bonus.
+  const councilChoices = bonusUnlocked && hidden ? [...d.choices, hidden.choice] : d.choices;
+
+  // FELLES UTGANG (§3): begge spor — online bindende avstemning og solo NPC-stemmer —
+  // konvergerer HER. Sett beslutningen (choiceId) og gå inn i den uendrede
+  // saga → roll → resultat → onComplete-pipelinen. Ett samlet skriv (updateMany) så
+  // online-feltene ikke racer mot hverandre.
+  const commitDecision = (choiceId: string) => {
+    playSound('click');
+    updateMany({ choiceId, roll: null, step: requireSaga ? 'saga' : 'roll', reason: '' });
+  };
+
   // Kort bølgeeffekt idet vi seiler inn til destinasjonen (§10).
   useEffect(() => { playSound('waves'); }, []);
 
@@ -613,9 +633,9 @@ export default function EncounterFlow({
           <span className="font-inter text-sm text-viking-gold-soft">har gitt råd</span>
         </div>
 
-        {/* Gi råd: trykk på et alternativ */}
+        {/* Gi din stemme: trykk på et alternativ (kjernevalg + opplåst bonus) */}
         <div className="space-y-2" data-testid="advice-options">
-          {d.choices.map((c) => {
+          {councilChoices.map((c) => {
             const mine = myAdvice?.choiceId === c.id;
             return (
               <button
@@ -655,7 +675,7 @@ export default function EncounterFlow({
         {/* Når alle har bidratt: oppsummering + høvdingen går videre */}
         {allAdvised ? (
           <div className="mt-6">
-            <AdviceSummary advice={advice} memberIds={memberIds} choices={d.choices} />
+            <AdviceSummary advice={advice} memberIds={memberIds} choices={councilChoices} />
             {isChief ? (
               <button
                 onClick={() => updateMany({ step: 'valg' })}
@@ -677,15 +697,9 @@ export default function EncounterFlow({
     );
   }
 
-  // 5a) VALG
+  // 5a) VALG — kjernevalg er ALLTID valgbare; bonus vises når opplåst (utledet på
+  // komponentnivå over). Høvdingen forsegler beslutningen via felles commitDecision.
   if (step === 'valg') {
-    const hidden = d.hiddenChoice;
-    // Bonus-valget åpnes av svennebrev-grad i domenet ELLER en matchende rolle ombord
-    // (§2.4). Kjernevalgene er ALLTID valgbare — bonusen kommer i tillegg, aldri i stedet.
-    const unlock = hidden?.unlock;
-    const bonusNivå = unlock?.nivå ?? 1;
-    const bonusUnlocked = !!unlock && (((svennebrev?.[unlock.skill] ?? 0) >= bonusNivå) || crewRoles.includes(unlock.skill));
-    const bonusGradeLabel = bonusNivå === 2 ? 'Mester' : 'Sveinn';
     const renderChoiceCard = (c: typeof d.choices[number], isHidden = false) => {
       const cardCls = isHidden
         ? 'border-viking-gold bg-viking-gold/10 ring-2 ring-viking-gold/50 shadow-[0_0_18px_rgba(205,195,173,0.25)]'
@@ -701,7 +715,7 @@ export default function EncounterFlow({
           <OddsBar baseRoll={c.baseRoll} />
           {isChief ? (
             <button
-              onClick={() => { playSound('click'); updateMany({ choiceId: c.id, roll: null, step: requireSaga ? 'saga' : 'roll', reason: '' }); }}
+              onClick={() => commitDecision(c.id)}
               data-testid={`pick-${c.id}`}
               className="mt-3 rounded-md border-2 border-viking-gold bg-viking-gold px-5 py-1.5 font-saga text-sm font-bold text-viking-darkblue hover:bg-viking-gold-soft"
             >
@@ -726,7 +740,7 @@ export default function EncounterFlow({
 
         {/* Gruppas råd fra rådslagningen — så høvdingen ser mannskapets stemme mens hun velger */}
         {councilEnabled && adviceCount > 0 && (
-          <AdviceSummary advice={advice} memberIds={memberIds} choices={d.choices} />
+          <AdviceSummary advice={advice} memberIds={memberIds} choices={councilChoices} />
         )}
 
         {/* Bonus-valg som er åpnet av svennebrev/rolle — melding før kortet */}
