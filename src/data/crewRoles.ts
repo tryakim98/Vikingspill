@@ -8,7 +8,7 @@
  * skal lese: hvordan rollen typisk argumenterer. Selve stemmene bygges IKKE her.
  */
 
-import type { SkillKey } from '../types';
+import type { ChoiceTag, SkillKey } from '../types';
 
 export interface CrewRole {
   /** Disposisjonen rollen er knyttet til (= nøkkelen i CREW_ROLES). */
@@ -19,8 +19,12 @@ export interface CrewRole {
   icon: string;
   /** Kort beskrivelse av rollen. */
   blurb: string;
-  /** Hvordan rollen argumenterer — forberedt for rådslagnings-stemmen. */
+  /** Hvordan rollen argumenterer — leses av rådslagnings-stemmen (§3.4). */
   argues: string;
+  /** Holdningen rollen lener mot i et valg (§3.2). En ekte ChoiceTag, eller `'bold'`
+   *  (utforsker-markøren: ingen tag, utledes fra odds — det dristigste valget). Brukes
+   *  av npcVotes() for å regne ut solo-mannskapets stemmer. */
+  leansToward: ChoiceTag | 'bold';
 }
 
 export const CREW_ROLES: Record<SkillKey, CrewRole> = {
@@ -30,6 +34,7 @@ export const CREW_ROLES: Record<SkillKey, CrewRole> = {
     icon: 'ikon-krigskunst',
     blurb: 'Skipets sverdarm. Tenker forsvar, styrke og handling.',
     argues: 'Møt trusler med fasthet; beskytt mannskapet; vis at vi ikke er svake.',
+    leansToward: 'aggressive',
   },
   diplomati: {
     disposition: 'diplomati',
@@ -37,13 +42,15 @@ export const CREW_ROLES: Record<SkillKey, CrewRole> = {
     icon: 'ikon-diplomati',
     blurb: 'Forhandleren. Søker avtaler og gjensidig vinning.',
     argues: 'Finn det fredelige byttet; gaver og avtaler åpner dører makt stenger.',
+    leansToward: 'trade',
   },
   sjømannskap: {
     disposition: 'sjømannskap',
     title: 'Navigatør',
     icon: 'ikon-sjomannskap',
-    blurb: 'Styrmannen. Veier risiko mot trygg kurs.',
-    argues: 'Tenk på vær, ruter og skipets sikkerhet; ikke ta unødig sjanse.',
+    blurb: 'Styrmannen. Nysgjerrig på det fremmede, villig til å våge det ukjente.',
+    argues: 'Vi seilte hit for å se det ingen har sett — våg det dristige; det trygge lærer oss ingenting.',
+    leansToward: 'bold',
   },
   språk: {
     disposition: 'språk',
@@ -51,6 +58,7 @@ export const CREW_ROLES: Record<SkillKey, CrewRole> = {
     icon: 'ikon-sprak',
     blurb: 'Stemmen. Forstår og oversetter de fremmede.',
     argues: 'Lytt og tolk før vi handler; ord kan løse det stål ikke kan.',
+    leansToward: 'respect',
   },
   tro: {
     disposition: 'tro',
@@ -58,6 +66,7 @@ export const CREW_ROLES: Record<SkillKey, CrewRole> = {
     icon: 'ikon-tro',
     blurb: 'Den vise. Tolker varsler, skikker og det hellige.',
     argues: 'Akt på tegnene og de fremmedes skikker; ære og tro veier tungt.',
+    leansToward: 'respect',
   },
 };
 
