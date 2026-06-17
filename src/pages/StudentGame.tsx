@@ -10,6 +10,8 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
+import ErrorFallback from '../components/common/ErrorFallback';
 import { useRole } from '../hooks/useRole';
 import { useSession } from '../hooks/useSession';
 import { useGroupSetup } from '../hooks/useGroupSetup';
@@ -146,14 +148,19 @@ export default function StudentGame() {
     if (!setup) {
       content = <SetupFlow onComplete={saveSetup} />;
     } else {
+      // Lokal krasjsikring rundt solo-flaten: en uventet feil i ett solo-spill
+      // viser feilskjermen (med «Prøv igjen» = lokal remount) i stedet for å rive
+      // hele appen. Fremgang ligger i localStorage, så reload mister ingenting.
       content = (
-        <GameDashboard
-          setup={setup}
-          session={session}
-          onResetSetup={clearSetup}
-          onLeaveGame={leave}
-          onSwitchRole={handleSwitchRole}
-        />
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <GameDashboard
+            setup={setup}
+            session={session}
+            onResetSetup={clearSetup}
+            onLeaveGame={leave}
+            onSwitchRole={handleSwitchRole}
+          />
+        </ErrorBoundary>
       );
     }
   } else {
