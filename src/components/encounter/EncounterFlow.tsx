@@ -961,7 +961,7 @@ export default function EncounterFlow({
   if (step === 'valg') {
     const renderChoiceCard = (c: typeof d.choices[number], isHidden = false) => {
       const cardCls = isHidden
-        ? 'border-viking-gold bg-viking-gold/10 ring-2 ring-viking-gold/50 shadow-[0_0_18px_rgba(205,195,173,0.25)]'
+        ? 'border-viking-gold bg-viking-gold/10 ring-2 ring-viking-gold/50'
         : 'border-viking-gold/40 bg-viking-surface';
       return (
         <div key={c.id} className={`rounded-lg border-2 p-4 ${cardCls}`} data-testid={`valg-${c.id}`}>

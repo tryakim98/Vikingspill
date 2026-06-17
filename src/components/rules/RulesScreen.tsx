@@ -140,7 +140,7 @@ export default function RulesScreen({ role, onDone }: Props) {
           <button
             onClick={onDone}
             data-testid="rules-ready"
-            className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-saga text-lg font-bold text-viking-darkblue shadow-[0_0_24px_rgba(205,195,173,0.35)] hover:bg-viking-gold-soft"
+            className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-3 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
           >
             <span className="inline-flex items-center gap-2">Jeg er klar <Icon name="axe" size={18} /></span>
           </button>
