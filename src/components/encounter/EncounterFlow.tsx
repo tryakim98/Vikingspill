@@ -14,8 +14,9 @@ import type { Destination, Choice, RollOdds, SagaEntry, SkillKey, Svennebrev } f
 import { skillTreeData } from '../../data/skillTree';
 import { CREW_ROLES, CREW_ROLE_ORDER } from '../../data/crewRoles';
 import { KEY_CARDS } from '../../data/keyCards';
-import { AGENDA_CARDS } from '../../data/agendaCards';
+import { AGENDA_CARDS, pickAgenda, type AgendaCard } from '../../data/agendaCards';
 import { tallyVotes, npcVotes } from '../../lib/council';
+import { SOLO_AGENDA_CHANCE } from '../../lib/keyCards';
 import type { SyncedEncounter, CouncilAdvice, ApprovalRequest } from '../../lib/gameSync';
 import { taskBonusForApproval } from '../../lib/gameSync';
 import { SCARRED_RECEPTION } from '../../data/consequences';
@@ -208,6 +209,18 @@ export default function EncounterFlow({
   const [_bridgeReflection, _setBridgeReflection] = useState('');
   const [councilNote, setCouncilNote] = useState(''); // lokal input for ett kort råd (ikke synket)
 
+  // Solo sabotør (§3 trinn 2): avgjøres ÉN gang når møtet åpnes (useState-init, stabil
+  // gjennom stegene). Sjelden — én NPC-stemme kan bære en skjult agenda spilleren må
+  // gjennomskue. Kun solo (offline); online-agenten kommer fra encounter.keyCard.
+  const [soloAgenda] = useState<{ agentRole: SkillKey; card: AgendaCard } | null>(() => {
+    if (syncedEncounter) return null; // kun solo
+    const npc = CREW_ROLE_ORDER.filter((r) => !crewRoles.includes(r));
+    const card = pickAgenda(destination.id);
+    if (!card || npc.length === 0 || Math.random() >= SOLO_AGENDA_CHANCE) return null;
+    return { agentRole: npc[Math.floor(Math.random() * npc.length)], card };
+  });
+  const [suspectedRole, setSuspectedRole] = useState<SkillKey | null>(null);
+
   // Alle valg å slå opp i når et choice-id må mappes til Choice-objekt — inkluderer
   // det skjulte valget hvis destinasjonen har et og lesetesten ble svart riktig på.
   const allChoices = d.hiddenChoice ? [...d.choices, d.hiddenChoice.choice] : d.choices;
@@ -257,6 +270,13 @@ export default function EncounterFlow({
     succeeded: choiceId === agendaData.pushChoiceId,
     vigilantIds: memberIds.filter((id) => { const c = advice[id]?.choiceId; return !!c && c !== agendaData.pushChoiceId; }),
   } : null;
+
+  // Sabotør solo (§3 trinn 2): gjennomskuet = flagget agenten ELLER valgte mot push.
+  // Belønningen er ære/anerkjennelse i den personlige sagaen (ingen poeng).
+  const soloSawThrough = !!soloAgenda && (suspectedRole === soloAgenda.agentRole || (!!choiceId && choiceId !== soloAgenda.card.pushChoiceId));
+  const soloAgendaSaga = soloAgenda ? {
+    agendaNote: `${CREW_ROLES[soloAgenda.agentRole].title} ${soloAgenda.card.twist} ${soloSawThrough ? 'Du gjennomskuet rollen.' : 'Den lurte deg denne gangen.'}`,
+  } : {};
 
   // Hvor skal vi gå når vi er ferdige med oppgave/quiz og inn mot valgene?
   // Rådslagning skytes inn rett før valg-steget når den er på.
@@ -680,7 +700,11 @@ export default function EncounterFlow({
   if (step === 'radslagning' && !syncMode) {
     const playerRole = crewRoles[0];
     const npcRoles = CREW_ROLE_ORDER.filter((r) => !crewRoles.includes(r));
-    const voices = npcVotes(d.choices, npcRoles); // [{ role, choiceId }] — deterministisk
+    // Sabotør (§3 trinn 2): agentens stemme overstyres — den presser push-valget og sier
+    // det OFFENTLIGE pitch-argumentet (skjult motiv røpes aldri). Resten stemmer ærlig.
+    const voices = npcVotes(d.choices, npcRoles).map((v) => v.role === soloAgenda?.agentRole
+      ? { role: v.role, choiceId: soloAgenda.card.pushChoiceId, line: soloAgenda.card.pitch }
+      : { role: v.role, choiceId: v.choiceId, line: CREW_ROLES[v.role].argues });
     const titleOf = (id: string) => d.choices.find((c) => c.id === id)?.title ?? id;
     const soloKeyCards = KEY_CARDS[d.id] ?? [];
     return (
@@ -701,18 +725,27 @@ export default function EncounterFlow({
           </div>
         )}
 
-        {/* Mannskapsrollenes stemmer */}
+        {/* Mannskapsrollenes stemmer. Stol du på alle? Flagg én stemme som mistenkt. */}
+        <p className="mb-1 font-inter text-xs italic text-viking-gold-soft/70">Hør etter — mener alle det de sier? Du kan flagge én stemme som mistenkt.</p>
         <div className="space-y-2" data-testid="solo-voices">
-          {voices.map(({ role, choiceId }) => {
+          {voices.map(({ role, choiceId, line }) => {
             const r = CREW_ROLES[role];
+            const suspected = suspectedRole === role;
             return (
-              <div key={role} className="rounded-md border-2 border-viking-gold/30 bg-viking-surface p-3" data-testid={`solo-voice-${role}`}>
+              <div key={role} className={`rounded-md border-2 p-3 ${suspected ? 'border-viking-crimson/70 bg-viking-crimson/10' : 'border-viking-gold/30 bg-viking-surface'}`} data-testid={`solo-voice-${role}`}>
                 <div className="mb-1 flex items-center gap-2">
                   <span className="leading-none" style={{ color: skillTreeData[role].color }}><AutoIcon name={r.icon} size={20} /></span>
                   <span className="font-cinzel text-base text-viking-gold">{r.title}</span>
                   <span className="ml-auto rounded bg-viking-darkblue/70 px-2 py-0.5 font-mono text-[10px] uppercase text-viking-gold-soft/80" data-testid={`solo-voice-backs-${role}`}>backer «{titleOf(choiceId)}»</span>
                 </div>
-                <p className="font-inter text-sm italic text-viking-paper/85">«{r.argues}»</p>
+                <p className="font-inter text-sm italic text-viking-paper/85">«{line}»</p>
+                <button
+                  onClick={() => setSuspectedRole(suspected ? null : role)}
+                  data-testid={`solo-suspect-${role}`}
+                  className={`mt-2 rounded border px-2 py-0.5 font-cinzel text-[11px] ${suspected ? 'border-viking-crimson bg-viking-crimson/20 text-viking-crimson' : 'border-viking-gold/40 text-viking-gold-soft hover:border-viking-gold'}`}
+                >
+                  {suspected ? '✓ Mistenkt' : 'Mistenk denne'}
+                </button>
               </div>
             );
           })}
@@ -1127,6 +1160,17 @@ export default function EncounterFlow({
             )}
           </div>
         )}
+        {soloAgenda && (
+          <div className="mt-4 rounded-md border-2 border-viking-crimson/60 bg-viking-crimson/10 px-3 py-3" data-testid="agenda-reveal-solo">
+            <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-crimson"><Icon name="book" size={13} /> En skjult rolle ble spilt</p>
+            <p className="font-inter text-sm text-viking-paper/90">
+              <strong className="text-viking-gold-soft">{CREW_ROLES[soloAgenda.agentRole].title}</strong> {soloAgenda.card.twist}
+            </p>
+            <p className={`mt-1 inline-flex items-center gap-1.5 font-inter text-sm ${soloSawThrough ? 'text-viking-moss' : 'text-viking-paper/80'}`} data-testid="agenda-solo-verdict">
+              <Icon name="eye" size={13} /> {soloSawThrough ? 'Du gjennomskuet rollen — godt sett.' : 'Du lot deg lure denne gangen.'}
+            </p>
+          </div>
+        )}
         {isChief ? (
           requireBridge && d.modernBridge ? (
             <button
@@ -1143,7 +1187,7 @@ export default function EncounterFlow({
                 deltas: { und: undWithBonus, trade: outcome.trade, rep: outcome.rep },
                 locks: choice.locks ?? [],
                 goodsReward: d.goodsReward,
-                sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim() || keyCardData) ? {
+                sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim() || keyCardData || soloAgenda) ? {
                   destId: d.id, destName: d.name,
                   choiceId: choice.id, choiceTitle: choice.title,
                   reason: reason.trim(), at: Date.now(),
@@ -1151,6 +1195,7 @@ export default function EncounterFlow({
                   ...(otherPerspective.trim() ? { otherPerspective: otherPerspective.trim() } : {}),
                   ...(d.perspectivePrompt ? { otherLabel: d.perspectivePrompt.otherLabel } : {}),
                   ...keyCardSaga,
+                  ...soloAgendaSaga,
                 } : undefined,
               })}
               className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
@@ -1217,7 +1262,7 @@ export default function EncounterFlow({
               deltas: { und: undWithBonus, trade: outcome.trade, rep: outcome.rep },
               locks: choice.locks ?? [],
               goodsReward: d.goodsReward,
-              sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim() || bridgeReflection.trim() || keyCardData) ? {
+              sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim() || bridgeReflection.trim() || keyCardData || soloAgenda) ? {
                 destId: d.id, destName: d.name,
                 choiceId: choice.id, choiceTitle: choice.title,
                 reason: reason.trim(), at: Date.now(),
@@ -1226,6 +1271,7 @@ export default function EncounterFlow({
                 ...(d.perspectivePrompt ? { otherLabel: d.perspectivePrompt.otherLabel } : {}),
                 ...(bridgeReflection.trim() ? { bridgeReflection: bridgeReflection.trim(), bridgeTopic: br.topic } : {}),
                 ...keyCardSaga,
+                ...soloAgendaSaga,
               } : undefined,
             })}
             disabled={!canContinue}

@@ -187,6 +187,9 @@ export interface SagaEntry {
   // Den ÆRLIGE delen av «hvem delte nøkkelinfo»; agenda/gjennomskuet kommer i trinn 2.
   keyCardHolderLabel?: string;
   keyCardText?: string;
+  // Sabotør solo (§3 trinn 2): rolle-framet notat om at en NPC-stemme spilte en skjult
+  // agenda denne runden, og om spilleren gjennomskuet den. Personlig saga-belønning.
+  agendaNote?: string;
 }
 
 /** Én vei å låse opp et sidested. Et sidested har FLERE slike — gruppa velger

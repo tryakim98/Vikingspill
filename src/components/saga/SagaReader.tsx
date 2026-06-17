@@ -86,6 +86,13 @@ export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props)
                           </p>
                         </div>
                       )}
+                      {e.agendaNote && (
+                        <div className="mt-3 border-t border-viking-crimson/30 pt-2" data-testid="saga-agenda">
+                          <p className="text-sm text-viking-darkblue" style={{ fontFamily: 'serif' }}>
+                            <span className="inline-flex items-center gap-1 font-cinzel text-xs text-viking-crimson"><Icon name="book" size={13} /> Skjult rolle:</span> {e.agendaNote}
+                          </p>
+                        </div>
+                      )}
                       {e.bridgeReflection && (
                         <div className="mt-3 border-t border-viking-rust/30 pt-2" data-testid="saga-bridge">
                           <p className="text-sm text-viking-darkblue" style={{ fontFamily: 'serif' }}>

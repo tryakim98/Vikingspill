@@ -81,6 +81,9 @@ export function dealKeyCard(
 export const SABOTEUR_CHANCE = 1 / 4;
 /** Minste antall runder mellom to agenda-kort (så det forblir sjeldent). */
 export const SABOTEUR_MIN_GAP = 3;
+/** Solo (§3 trinn 2): sjanse for at én NPC-stemme bærer en skjult agenda i et møte —
+ *  innebygd øvelse i å gjennomskue manipulasjon (solo har ingen lærerbryter). */
+export const SOLO_AGENDA_CHANCE = 1 / 4;
 
 /** Er nok runder gått siden forrige agenda til at en ny er tillatt? */
 export function agendaAllowed(roundsSinceLastAgenda: number): boolean {
