@@ -745,7 +745,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   ];
 
   return (
-    <div className="min-h-screen viking-screen text-viking-paper p-6">
+    <div className="min-h-screen viking-screen-sea text-viking-paper p-6">
       <ConnectionBanner active={session.mode === 'online'} />
       <div className="mx-auto max-w-3xl">
         {/* Header */}

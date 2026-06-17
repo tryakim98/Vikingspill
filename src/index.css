@@ -22,21 +22,33 @@ html, body {
 body {
   font-family: 'Inter', sans-serif;
   /* Mørkt forvitret tre som gjennomgående base — ikke en flat blåfarge. En mørk scrim
-     over fotoet holder kontrasten til lys tekst. background-color er fallback. */
+     over fotoet holder kontrasten til lys tekst. background-color er fallback.
+     natt-hav er reservert til sjø-konteksten (.viking-screen-sea, dashboardets kart). */
   background-color: #17100A;
   background-image:
-    linear-gradient(180deg, rgba(16,18,26,0.32), rgba(6,8,14,0.56)),
-    url('/textures/natt-hav.png');
+    linear-gradient(180deg, rgba(20,14,8,0.34), rgba(8,6,3,0.58)),
+    url('/textures/tre.png');
   background-size: cover, cover;
   background-position: center;
   background-attachment: fixed;
   color: #FDFBF6;
 }
 
-/* Fullskjerm-bakgrunn for alle hovedvisninger — erstatter den blå
-   `bg-gradient-to-b from-viking-darkblue to-viking-surface`. Forvitret tre med en
-   mørk scrim på toppen (litt lysere øverst, mørkere nederst) så teksten er lesbar. */
+/* Fullskjerm-bakgrunn for alle hovedvisninger — forvitret tre (land/hall) med en mørk
+   scrim (litt lysere øverst, mørkere nederst) så lys tekst er lesbar. Dette er
+   gjennomgående base; sjø-konteksten bruker .viking-screen-sea i stedet. */
 .viking-screen {
+  background-color: #17100A;
+  background-image:
+    linear-gradient(180deg, rgba(20,14,8,0.36) 0%, rgba(8,6,3,0.60) 100%),
+    url('/textures/tre.png');
+  background-size: cover, cover;
+  background-position: center;
+}
+
+/* Sjø/seilas-kontekst — natt-hav reservert hit (dashboardets skip-på-sjøen-hub med
+   kartet). Samme mørke scrim som før, så lys tekst forblir lesbar over havet. */
+.viking-screen-sea {
   background-color: #17100A;
   background-image:
     linear-gradient(180deg, rgba(16,18,26,0.34) 0%, rgba(6,8,14,0.58) 100%),
