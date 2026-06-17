@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import type { Destination, SkillKey } from '../../types';
+import { dealKeyCard, shouldDealKeyCard } from '../../lib/keyCards';
 import { destinations, skillTreeData } from '../../data';
 import { useGameState } from '../../hooks/useGameState';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
@@ -256,11 +257,19 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         patchGroup(session.gameCode, myGroupId, { forceSkjebneNextSail: false }).catch(() => {});
       }
       if (isOnline) {
-        patchGroup(session.gameCode, myGroupId, {
+        // Nøkkelkort (§3 trinn 1): ved ~1/3 av møtene deles ett privat kort til ÉN elev
+        // (vektet mot den som har fått færrest). Krever ≥2 medlemmer for å ha noen verdi.
+        const dealEnabled = gameSettings.keyCards !== false && memberIds.length >= 2;
+        const deal = dealEnabled && shouldDealKeyCard()
+          ? dealKeyCard(destId, memberIds, syncedGroup?.keyCardHistory ?? [])
+          : null;
+        const patch: Partial<SyncedGroup> = {
           activeDestId: destId,
-          encounter: { destId, step: 'history' },
+          encounter: { destId, step: 'history' as const, ...(deal ? { keyCard: deal } : {}) },
           sailingTo: null,
-        }).catch(() => {});
+        };
+        if (deal) patch.keyCardHistory = [...(syncedGroup?.keyCardHistory ?? []), { destId, memberId: deal.holderId, cardId: deal.cardId }];
+        patchGroup(session.gameCode, myGroupId, patch).catch(() => {});
       } else {
         setLocalSailingTo(null);
         setLocalActiveDestId(destId);

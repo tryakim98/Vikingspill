@@ -183,6 +183,10 @@ export interface SagaEntry {
   otherLabel?: string;       // hvem «de andre» var (munkene, irene, samene, araberne)
   bridgeTopic?: string;      // navnet på samtidsbroen (f.eks. «Sannhetskommisjonen»)
   bridgeReflection?: string; // gruppens refleksjon
+  // Nøkkelkort (§3 trinn 1): hvem som hadde den private nøkkelinfoen + hva den var.
+  // Den ÆRLIGE delen av «hvem delte nøkkelinfo»; agenda/gjennomskuet kommer i trinn 2.
+  keyCardHolderLabel?: string;
+  keyCardText?: string;
 }
 
 /** Én vei å låse opp et sidested. Et sidested har FLERE slike — gruppa velger

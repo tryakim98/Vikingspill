@@ -13,6 +13,7 @@ import { motion } from 'motion/react';
 import type { Destination, Choice, RollOdds, SagaEntry, SkillKey, Svennebrev } from '../../types';
 import { skillTreeData } from '../../data/skillTree';
 import { CREW_ROLES } from '../../data/crewRoles';
+import { KEY_CARDS } from '../../data/keyCards';
 import { tallyVotes } from '../../lib/council';
 import type { SyncedEncounter, CouncilAdvice, ApprovalRequest } from '../../lib/gameSync';
 import { taskBonusForApproval } from '../../lib/gameSync';
@@ -237,6 +238,15 @@ export default function EncounterFlow({
   const adviceCount = memberIds.filter((id) => advice[id]).length;
   const myAdvice = myMemberId ? advice[myMemberId] : undefined;
 
+  // Nøkkelkort (§3 trinn 1): rundens private kort (online). Innholdet vises KUN for
+  // holderen; de andre ser en nøytral banner. Solo kobles inn i neste commit.
+  const keyCard = syncMode ? (syncedEncounter?.keyCard ?? null) : null;
+  const keyCardData = keyCard ? (KEY_CARDS[d.id] ?? []).find((c) => c.id === keyCard.cardId) ?? null : null;
+  const iHoldKeyCard = !!keyCard && !!myMemberId && myMemberId === keyCard.holderId;
+  const keyCardHolderLabel = keyCard ? (keyCard.holderId === myMemberId ? 'Du' : `Medlem ${keyCard.holderId.slice(2, 6)}`) : '';
+  // Felles saga-felt for nøkkelkort-avsløringen (begge onComplete-byggerne bruker det).
+  const keyCardSaga = keyCard && keyCardData ? { keyCardHolderLabel, keyCardText: keyCardData.text } : {};
+
   // Hvor skal vi gå når vi er ferdige med oppgave/quiz og inn mot valgene?
   // Rådslagning skytes inn rett før valg-steget når den er på.
   const valgEntryStep: Step = councilEnabled ? 'radslagning' : 'valg';
@@ -289,6 +299,26 @@ export default function EncounterFlow({
   const commitDecision = (choiceId: string) => {
     playSound('click');
     updateMany({ choiceId, roll: null, step: requireSaga ? 'saga' : 'roll', reason: '' });
+  };
+
+  // Nøkkelkort-visning (§3 trinn 1): holderen ser innholdet privat; alle andre ser en
+  // nøytral banner som skaper presset til å spørre — uten å røpe hvem eller hva.
+  const renderKeyCard = () => {
+    if (!keyCard) return null;
+    if (iHoldKeyCard && keyCardData) {
+      return (
+        <div className="mb-4 rounded-lg border-2 border-viking-gold bg-viking-gold/12 p-4 shadow-[0_0_18px_rgba(205,195,173,0.25)]" data-testid="keycard-private">
+          <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold"><Icon name="book" size={13} /> Nøkkelkort — kun du ser dette</p>
+          <p className="font-inter text-sm text-viking-paper">{keyCardData.text}</p>
+          <p className="mt-2 font-inter text-xs italic text-viking-gold-soft">Del det med mannskapet og overbevis dem.</p>
+        </div>
+      );
+    }
+    return (
+      <div className="mb-4 rounded-md border-2 border-viking-teal/50 bg-viking-teal/10 px-3 py-2" data-testid="keycard-banner">
+        <p className="inline-flex items-center gap-1.5 font-inter text-sm text-viking-paper/90"><Icon name="chat" size={13} className="text-viking-teal" /> Noen i mannskapet har et nøkkelkort — spør og hør etter.</p>
+      </div>
+    );
   };
 
   // Kort bølgeeffekt idet vi seiler inn til destinasjonen (§10).
@@ -646,6 +676,8 @@ export default function EncounterFlow({
           Hver i mannskapet avgir sin stemme på egen enhet. Flertallet avgjør — ved likhet bryter høvdingen. Stemmene er skjult til alle har stemt.
         </p>
 
+        {renderKeyCard()}
+
         {/* Teller — kun antall, aldri innhold før alle har stemt (hemmelig votering) */}
         <div className="mb-4 flex items-center gap-3 rounded-md border-2 border-viking-gold/40 bg-viking-darkblue/50 px-4 py-2" data-testid="advice-counter">
           <span className="font-cinzel text-lg text-viking-gold">{votedCount} av {memberIds.length}</span>
@@ -787,6 +819,8 @@ export default function EncounterFlow({
         <p className="mb-3 font-inter text-sm text-viking-gold-soft">
           Terningbonus fra quiz: <strong className="text-viking-gold">+{quizBonus}</strong>
         </p>
+
+        {renderKeyCard()}
 
         {/* Gruppas råd fra rådslagningen — så høvdingen ser mannskapets stemme mens hun velger */}
         {councilEnabled && adviceCount > 0 && (
@@ -973,6 +1007,11 @@ export default function EncounterFlow({
           <p className="mb-1 font-cinzel text-sm text-viking-rust">Lærdom</p>
           <p className="font-inter text-sm italic text-viking-darkblue">{choice.lesson}</p>
         </MaterialPanel>
+        {keyCard && keyCardData && (
+          <div className="mt-4 rounded-md border-2 border-viking-gold/50 bg-viking-darkblue/40 px-3 py-2" data-testid="keycard-reveal">
+            <p className="font-inter text-sm text-viking-paper/90"><Icon name="book" size={13} className="mr-1 inline text-viking-gold-soft" /> Nøkkelkort: <strong className="text-viking-gold-soft">{keyCardHolderLabel}</strong> visste at «{keyCardData.text}»</p>
+          </div>
+        )}
         {isChief ? (
           requireBridge && d.modernBridge ? (
             <button
@@ -989,13 +1028,14 @@ export default function EncounterFlow({
                 deltas: { und: undWithBonus, trade: outcome.trade, rep: outcome.rep },
                 locks: choice.locks ?? [],
                 goodsReward: d.goodsReward,
-                sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim()) ? {
+                sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim() || keyCardData) ? {
                   destId: d.id, destName: d.name,
                   choiceId: choice.id, choiceTitle: choice.title,
                   reason: reason.trim(), at: Date.now(),
                   ...(vikingPerspective.trim() ? { vikingPerspective: vikingPerspective.trim() } : {}),
                   ...(otherPerspective.trim() ? { otherPerspective: otherPerspective.trim() } : {}),
                   ...(d.perspectivePrompt ? { otherLabel: d.perspectivePrompt.otherLabel } : {}),
+                  ...keyCardSaga,
                 } : undefined,
               })}
               className="mt-7 rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft"
@@ -1062,7 +1102,7 @@ export default function EncounterFlow({
               deltas: { und: undWithBonus, trade: outcome.trade, rep: outcome.rep },
               locks: choice.locks ?? [],
               goodsReward: d.goodsReward,
-              sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim() || bridgeReflection.trim()) ? {
+              sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim() || bridgeReflection.trim() || keyCardData) ? {
                 destId: d.id, destName: d.name,
                 choiceId: choice.id, choiceTitle: choice.title,
                 reason: reason.trim(), at: Date.now(),
@@ -1070,6 +1110,7 @@ export default function EncounterFlow({
                 ...(otherPerspective.trim() ? { otherPerspective: otherPerspective.trim() } : {}),
                 ...(d.perspectivePrompt ? { otherLabel: d.perspectivePrompt.otherLabel } : {}),
                 ...(bridgeReflection.trim() ? { bridgeReflection: bridgeReflection.trim(), bridgeTopic: br.topic } : {}),
+                ...keyCardSaga,
               } : undefined,
             })}
             disabled={!canContinue}
