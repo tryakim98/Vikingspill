@@ -996,15 +996,16 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           </div>
         )}
 
-        {/* Dev-modus */}
-        <div className="rounded-lg border-2 border-viking-plum/60 bg-viking-plum/15 p-5">
-          <h3 className="mb-3 font-cinzel text-lg text-viking-plum">Utvikler-modus</h3>
+        {/* Dev-modus — samme kort-/knappespråk som resten (gull-på-mørkt, matt crimson-
+            aksent på destruktive valg), ikke mettede flatefarger. */}
+        <div className="rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-5">
+          <h3 className="mb-3 font-cinzel text-lg text-viking-gold-soft">Utvikler-modus</h3>
           <div className="flex flex-wrap gap-3">
-            <button onClick={resetProgress} className="rounded border-2 border-viking-gold bg-viking-teal px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-teal/80">Nullstill reise</button>
-            <button onClick={() => setShowCeremony(true)} className="rounded border-2 border-viking-gold bg-viking-gold/80 px-4 py-2 text-sm font-bold text-viking-darkblue hover:bg-viking-gold">Sluttseremoni</button>
-            <button onClick={onResetSetup} className="rounded border-2 border-viking-gold bg-viking-rust px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-rust/80">Start oppsett på nytt</button>
-            <button onClick={() => { if (session.mode === 'online' && session.groupId && isChief && memberIds.length <= 1) removeGroup(session.gameCode, session.groupId).catch(() => {}); onLeaveGame(); }} className="rounded border-2 border-viking-gold bg-viking-crimson px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-crimson/80">Forlat spill</button>
-            <button onClick={onSwitchRole} className="rounded border-2 border-viking-gold bg-viking-plum px-4 py-2 text-sm font-bold text-viking-paper hover:bg-viking-plum/80">Bytt rolle</button>
+            <button onClick={resetProgress} className="rounded-md border-2 border-viking-crimson/50 bg-viking-darkblue/40 px-4 py-2 font-cinzel text-sm text-viking-crimson hover:border-viking-crimson hover:bg-viking-crimson/10">Nullstill reise</button>
+            <button onClick={() => setShowCeremony(true)} className="rounded-md border-2 border-viking-gold/50 bg-viking-darkblue/40 px-4 py-2 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold">Sluttseremoni</button>
+            <button onClick={onResetSetup} className="rounded-md border-2 border-viking-gold/50 bg-viking-darkblue/40 px-4 py-2 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold">Start oppsett på nytt</button>
+            <button onClick={() => { if (session.mode === 'online' && session.groupId && isChief && memberIds.length <= 1) removeGroup(session.gameCode, session.groupId).catch(() => {}); onLeaveGame(); }} className="rounded-md border-2 border-viking-crimson/50 bg-viking-darkblue/40 px-4 py-2 font-cinzel text-sm text-viking-crimson hover:border-viking-crimson hover:bg-viking-crimson/10">Forlat spill</button>
+            <button onClick={onSwitchRole} className="rounded-md border-2 border-viking-gold/50 bg-viking-darkblue/40 px-4 py-2 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold">Bytt rolle</button>
           </div>
         </div>
       </div>
