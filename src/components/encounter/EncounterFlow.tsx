@@ -236,7 +236,6 @@ export default function EncounterFlow({
   // meningsfull i synkmodus med minst to medlemmer (offline/solo hopper vi over).
   const councilEnabled = requireCouncil && syncMode && memberIds.length >= 2;
   const advice: Record<string, CouncilAdvice> = syncMode ? (syncedEncounter?.advice ?? {}) : {};
-  const adviceCount = memberIds.filter((id) => advice[id]).length;
   const myAdvice = myMemberId ? advice[myMemberId] : undefined;
 
   // Nøkkelkort (§3 trinn 1): rundens private kort (online). Innholdet vises KUN for
@@ -905,13 +904,6 @@ export default function EncounterFlow({
         </p>
 
         {renderKeyCard()}
-
-        {/* Solo «Kildene» (§3 trinn 1) er flyttet inn øverst i solo-rådslagningen (§3.4). */}
-
-        {/* Gruppas råd fra rådslagningen — så høvdingen ser mannskapets stemme mens hun velger */}
-        {councilEnabled && adviceCount > 0 && (
-          <AdviceSummary advice={advice} memberIds={memberIds} choices={councilChoices} />
-        )}
 
         {/* Bonus-valg som er åpnet av svennebrev/rolle — melding før kortet */}
         {hidden && bonusUnlocked && unlock && (

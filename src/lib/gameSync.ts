@@ -48,11 +48,6 @@ export interface SyncedEncounter {
   // Nøkkelkort (§3 trinn 1): hvem som fikk det private kortet denne runden + kort-id.
   // Settes av høvdingen ved møte-start; innholdet vises KUN på holderens skjerm.
   keyCard?: { holderId: string; cardId: string } | null;
-  // DEPRECATED (§2.4): lesetest-opplåsing av bonus-valg er erstattet av svennebrev/rolle.
-  // Feltene skrives/leses ikke lenger; beholdt så reglene slipper ny deploy.
-  hiddenAnswered?: boolean;
-  hiddenCorrect?: boolean;
-  hiddenAnswerIdx?: number;
   vikingPerspective?: string;   // perspektivskifte: vikingenes side
   otherPerspective?: string;    // perspektivskifte: de andres side
   bridgeReflection?: string;    // bro til i dag: refleksjonstekst
