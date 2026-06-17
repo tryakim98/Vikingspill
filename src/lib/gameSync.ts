@@ -20,6 +20,17 @@ export interface GroupMember {
   role?: SkillKey;
 }
 
+/** Sabotør (§3 trinn 2): én rad per runde der et agenda-kort ble delt ut. Skrives av
+ *  høvdingen ved forsegling. Per-elev «ære» (gjennomskuet / lyktes som agent) AVLEDES
+ *  herfra — ingen skriv til medlemsnoden, ingen ny per-elev-poengakse. */
+export interface AgendaLogEntry {
+  destId: string;
+  agentId: string;        // memberId som hadde agendaen
+  pushChoiceId: string;   // valget agenten i hemmelighet presset
+  succeeded: boolean;     // gruppa valgte push-valget
+  vigilantIds: string[];  // medlemmer som stemte MOT push (gjennomskuet)
+}
+
 export type EncounterStep = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'radslagning' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
 
 /** Ett medlems STEMME i rådslagningen før et valg (§3): `choiceId` er medlemmets
@@ -45,9 +56,10 @@ export interface SyncedEncounter {
   choiceId?: string | null;
   roll?: { raw: number; effective: number; modifier: number; tier: string } | null;
   reason?: string; // saga-tekst som høvdingen skriver før terningen kastes
-  // Nøkkelkort (§3 trinn 1): hvem som fikk det private kortet denne runden + kort-id.
-  // Settes av høvdingen ved møte-start; innholdet vises KUN på holderens skjerm.
-  keyCard?: { holderId: string; cardId: string } | null;
+  // Privat kort denne runden: hvem fikk det + kort-id. `kind` skiller et ÆRLIG nøkkelkort
+  // (§3 trinn 1) fra et SABOTØR-agenda-kort (§3 trinn 2) — begge deles ut i samme slot, så
+  // agenten ikke er til å skille fra en nøkkelkort-holder. Innholdet vises KUN for holderen.
+  keyCard?: { holderId: string; cardId: string; kind?: 'honest' | 'agenda' } | null;
   vikingPerspective?: string;   // perspektivskifte: vikingenes side
   otherPerspective?: string;    // perspektivskifte: de andres side
   bridgeReflection?: string;    // bro til i dag: refleksjonstekst
@@ -84,6 +96,7 @@ export interface SyncedGroup {
   forceSkjebneNextSail?: boolean;        // settes av Skjebnehjulet — tvinger Skjebnemøte ved neste seilas
   seenHints?: string[];                  // førstegangs-forklaringer gruppa har sett (HintKey)
   keyCardHistory?: KeyCardLogEntry[];    // §3 trinn 1: hvem fikk hvilket nøkkelkort hvor (fairness + saga-avsløring)
+  agendaLog?: AgendaLogEntry[];          // §3 trinn 2: én rad per sabotør-runde — kilde til per-elev-ære (avledet, ingen medlems-skriv)
   // Tinget — gruppa kan stemme fram en ny høvding (§Tinget):
   ting?: TingSession | null;             // pågående/avsluttet ting (avstemning om høvding)
   lastTingAt?: number;                   // tidspunkt forrige ting ble kalt inn (3-min cooldown)
@@ -179,6 +192,7 @@ export interface GameSettings {
   textLength?: TextLength; // 'full' = alle, 'short' = alle, 'group' = la hver gruppe velge
   showHints?: boolean;     // førstegangs-forklaringer på/av (default på)
   keyCards?: boolean;      // §3 trinn 1: del ut private nøkkelkort ved ~1/3 av møtene (default på)
+  saboteur?: boolean;      // §3 trinn 2: la SJELDEN et privat kort være et skjult agenda-kort (default AV; virker kun når keyCards på)
 }
 
 export function setGameSettings(code: string, settings: Partial<GameSettings>): Promise<void> {

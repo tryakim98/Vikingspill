@@ -29,6 +29,7 @@
           "textLength":         { ".validate": "newData.isString() && newData.val().matches(/^(full|short|group)$/)" },
           "showHints":          { ".validate": "newData.isBoolean()" },
           "keyCards":           { ".validate": "newData.isBoolean()" },
+          "saboteur":           { ".validate": "newData.isBoolean()" },
           "$other":             { ".validate": false }
         },
 
@@ -82,6 +83,17 @@
                 "$other":   { ".validate": false }
               }
             },
+            "agendaLog": {
+              "$i": {
+                ".validate": "newData.hasChildren(['destId','agentId','pushChoiceId'])",
+                "destId":       { ".validate": "newData.isString() && newData.val().length <= 40" },
+                "agentId":      { ".validate": "newData.isString() && newData.val().matches(/^m-[a-z0-9]{1,16}$/)" },
+                "pushChoiceId": { ".validate": "newData.isString() && newData.val().length <= 40" },
+                "succeeded":    { ".validate": "newData.isBoolean()" },
+                "vigilantIds":  { "$v": { ".validate": "newData.isString() && newData.val().matches(/^m-[a-z0-9]{1,16}$/)" } },
+                "$other":       { ".validate": false }
+              }
+            },
             "activeSkjebne": {
               ".validate": "newData.hasChildren(['id','pendingDestId'])",
               "id":            { ".validate": "newData.isString() && newData.val().length <= 40" },
@@ -119,6 +131,7 @@
               "keyCard": {
                 "holderId": { ".validate": "newData.isString() && newData.val().matches(/^m-[a-z0-9]{1,16}$/)" },
                 "cardId":   { ".validate": "newData.isString() && newData.val().length <= 60" },
+                "kind":     { ".validate": "newData.isString() && newData.val().matches(/^(honest|agenda)$/)" },
                 "$other":   { ".validate": false }
               },
               "hiddenAnswered":  { ".validate": "newData.isBoolean()" },
