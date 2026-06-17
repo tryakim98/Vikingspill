@@ -21,30 +21,29 @@ export const MAIN_ROUTE: ReadonlySet<string> = new Set([
   'lindisfarne', 'hedeby', 'dublin', 'paris', 'hebrides', 'sameland', 'faroyene',
 ]);
 
-/** Sidesteder med opplåsingsveier. Gruppa låser opp så snart ÉN av disse er møtt. */
+/** Sidesteder med opplåsingsveier. Gruppa låser opp så snart ÉN av disse er møtt.
+ *  Hver havn har en svenneprøve-vei (fagbrev=1 / mesterbrev=2 i et HAVN-domene:
+ *  språk · sjømannskap · diplomati) + en alternativ vare-/rykte-vei, så ingen havn
+ *  er låst til ett enkelt domene. Krigskunst/tro låser EVNER, ikke havner. */
 export const SIDE_UNLOCKS: Record<string, UnlockRequirement[]> = {
   island: [
-    { type: 'svenneprove', skill: 'sjømannskap' },
-    { type: 'skill',       key: 'sjømannskap', min: 2 },
+    { type: 'svenneprove', skill: 'sjømannskap', nivå: 1 }, // fagbrev
     { type: 'goods',       goods: { hvalrosstann: 1 } },
   ],
   vinland: [
-    { type: 'svenneprove', skill: 'sjømannskap' },
-    { type: 'skill',       key: 'sjømannskap', min: 2 },
+    { type: 'svenneprove', skill: 'sjømannskap', nivå: 2 }, // mesterbrev
     { type: 'goods',       goods: { hvalrosstann: 2, jern: 1 } },
   ],
   novgorod: [
-    { type: 'svenneprove', skill: 'språk' },
-    { type: 'skill',       key: 'språk', min: 2 },
+    { type: 'svenneprove', skill: 'språk', nivå: 1 },       // fagbrev
     { type: 'goods',       goods: { pelsverk: 2, salt: 1 } },
   ],
   baghdad: [
-    { type: 'svenneprove', skill: 'diplomati' },
-    { type: 'skill',       key: 'diplomati', min: 2 },
+    { type: 'svenneprove', skill: 'språk', nivå: 2 },       // mesterbrev
     { type: 'goods',       goods: { solv: 3 } },
   ],
   miklagard: [
-    { type: 'svenneprove', skill: 'diplomati' },
+    { type: 'svenneprove', skill: 'diplomati', nivå: 2 },   // mesterbrev (Væringgarden)
     { type: 'score',       key: 'reputation', min: 8 },
     { type: 'goods',       goods: { solv: 4 } },
   ],

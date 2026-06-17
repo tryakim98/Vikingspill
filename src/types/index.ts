@@ -197,8 +197,7 @@ export interface SagaEntry {
 /** Én vei å låse opp et sidested. Et sidested har FLERE slike — gruppa velger
  *  den de har forutsetning for. */
 export type UnlockRequirement =
-  | { type: 'svenneprove'; skill: SkillKey }
-  | { type: 'skill'; key: SkillKey; min: number }
+  | { type: 'svenneprove'; skill: SkillKey; nivå: 1 | 2 } // 1 = fagbrev, 2 = mesterbrev
   | { type: 'score'; key: ScoreKey; min: number }
   | { type: 'goods'; goods: Partial<Record<TradeGoodId, number>> };
 
