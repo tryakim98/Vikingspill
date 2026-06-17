@@ -87,10 +87,13 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     const unsub = subscribeGameSettings(session.gameCode, setGameSettings);
     return () => unsub();
   }, [isOnline, session]);
-  // Kjernepedagogikken er PÅ som standard (default !== false) — læreren kan skru av for korte økter.
-  const requireSaga = gameSettings.requireSaga !== false;
-  const requirePerspective = gameSettings.requirePerspective !== false;
-  const requireBridge = gameSettings.requireBridge !== false;
+  // Kjernepedagogikken er PÅ som standard online (default !== false) — læreren kan skru av
+  // for korte økter. I solo/offline finnes ingen lærer-UI; de tvungne fritekst-feltene
+  // (saga, perspektiv, bro) ville bare blokkere en førstegangs-elev på en grået-ut knapp,
+  // så de er AV i solo (krever eksplisitt online). Quiz + rådslagning står på i begge spor.
+  const requireSaga = isOnline && gameSettings.requireSaga !== false;
+  const requirePerspective = isOnline && gameSettings.requirePerspective !== false;
+  const requireBridge = isOnline && gameSettings.requireBridge !== false;
   const requireQuiz = gameSettings.requireQuiz !== false; // default PÅ — stedsquizen er obligatorisk
   const requireCouncil = gameSettings.requireCouncil !== false; // default PÅ — rådslagning før valg
   const [showOwnSaga, setShowOwnSaga] = useState(false);
