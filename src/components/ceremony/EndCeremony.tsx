@@ -60,8 +60,20 @@ export default function EndCeremony({ setup, scores, svennebrev, saga, destinati
 
   if (step === 'intro') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center viking-screen px-4 text-center text-viking-paper">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden viking-screen px-4 text-center text-viking-paper">
+        {/* Langhall (hall.png — heldekkende gravyr) som stort bakteppe bak hall-motivet.
+            Mørk scrim så lys gulltekst er lesbar. Faller tilbake til viking-screen om
+            bildet mangler. */}
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+          <img
+            src={`${import.meta.env.BASE_URL}ornamenter/hall.png`}
+            alt=""
+            className="h-full w-full object-cover"
+            onError={(e) => { (e.currentTarget.closest('div') as HTMLElement).style.display = 'none'; }}
+          />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(10,7,3,0.66) 0%, rgba(8,6,3,0.84) 100%)' }} />
+        </div>
+        <motion.div className="relative z-10" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <NorseIcon name="motiv-hall" size={104} className="mb-4 text-viking-gold" />
           <h1 className="mb-3 font-cinzel text-3xl font-bold text-viking-gold md:text-4xl">Kongen kaller alle hjem til Avaldsnes</h1>
           <p className="mb-8 font-inter italic text-viking-gold-soft">Reisen er over. Stig i land og hør hvordan det gikk.</p>
