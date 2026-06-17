@@ -49,18 +49,23 @@ export default function SvennepoverPanel({ destinations, svennebrev, isChief, on
   const passedCount = rows.filter((r) => r.passed).length;
 
   return (
-    <MaterialPanel material="jern" framed className="mb-4 p-3" data-testid="svenneprover-panel">
+    <MaterialPanel
+      material="jern"
+      framed
+      className="mb-4 p-3"
+      data-testid="svenneprover-panel"
+      style={{
+        // Ferdighets-emblemene (ark-ferdigheter.png) som panel-bakgrunn i stedet for jern-
+        // teksturen. Mørk gradient-scrim (+ .mat::before-veil) så lys tekst er lesbar.
+        backgroundImage: `linear-gradient(180deg, rgba(10,8,4,0.70) 0%, rgba(8,6,3,0.84) 100%), url(${import.meta.env.BASE_URL}textures/ark-ferdigheter.png)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
       <div className="mb-2 flex items-baseline justify-between">
         <h3 className="inline-flex items-center gap-2 font-saga text-lg text-viking-gold"><NorseIcon name="ikon-svenneprove" size={16} /> Svenneprøver</h3>
         <p className="font-mono text-[10px] text-viking-gold-soft/80">{passedCount}/{rows.length} bestått</p>
-      </div>
-      {/* Dekorbanner: ferdighets-emblemene (ark-ferdigheter.png — heldekkende gravyr). */}
-      <div className="mb-2 overflow-hidden rounded-md border border-viking-gold/25 bg-black/30">
-        <img
-          src={`${import.meta.env.BASE_URL}textures/ark-ferdigheter.png`}
-          alt="" aria-hidden="true"
-          className="mx-auto block max-h-24 w-full object-contain"
-        />
       </div>
       <p className="mb-2 font-inter text-[11px] italic text-viking-gold-soft/75">
         Hver svenneprøve låser opp et sidested. Du trenger ikke ta dem — bare hvis dere vil dit.
