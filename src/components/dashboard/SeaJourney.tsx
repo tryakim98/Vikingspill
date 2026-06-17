@@ -137,18 +137,22 @@ export default function SeaJourney({ destinations, visited, locked, goods, svenn
         <h2 className="font-cinzel text-xl text-viking-gold">Sjøkartet</h2>
         <p className="font-mono text-xs text-viking-gold-soft/80">{visited.length}/{destinations.length} besøkt</p>
       </div>
-      <p className="mb-3 font-inter text-xs text-viking-gold-soft/70">
+      <p className="mb-2 font-inter text-xs text-viking-gold-soft/70">
         {isChief ? 'Klikk på et lysende sted for å bestemme neste seilas.' : 'Høvdingen velger neste seilas — du ser med på kartet.'}
       </p>
+
+      {/* Tittel-plakett — flyttet UT av kartet (lå før som absolutt overlay oppå det) */}
+      <p className="mb-2 inline-block rounded bg-viking-darkblue/60 px-2 py-0.5 font-cinzel text-xs tracking-widest text-viking-gold-soft">VIKINGENES VERDEN</p>
 
       <div
         className="relative w-full overflow-hidden rounded-lg border-4 border-viking-gold/70 bg-[#1a140d] shadow-inner"
         style={{ aspectRatio: '16 / 9' }}
         data-testid="sea-journey-map"
       >
-        {/* Ekte gammelt verdenskart som bakgrunn */}
+        {/* Ekte gammelt verdenskart som bakgrunn. BASE_URL-sti (ikke absolutt) så kartet
+            også lastes under en ikke-rot base/deploy — samme mønster som stedsbildene. */}
         <img
-          src="/textures/kart-bakgrunn.jpg"
+          src={`${import.meta.env.BASE_URL}textures/kart-bakgrunn.jpg`}
           alt="Gammelt verdenskart"
           className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover"
           draggable={false}
@@ -158,10 +162,6 @@ export default function SeaJourney({ destinations, visited, locked, goods, svenn
           className="pointer-events-none absolute inset-0"
           style={{ background: 'radial-gradient(ellipse at 50% 42%, rgba(11,20,38,0) 48%, rgba(11,20,38,0.45) 100%)' }}
         />
-
-        {/* Tittel-plakett — mørk bakgrunn for lesbarhet mot kartet */}
-        <p className="absolute left-3 top-2 z-10 rounded bg-viking-darkblue/75 px-2 py-0.5 font-cinzel text-xs tracking-widest text-viking-gold-soft shadow-md">VIKINGENES VERDEN</p>
-
         {/* Linje mellom siste posisjon og forhåndsvist destinasjon — mørk underlinje + gull for kontrast */}
         {previewDest && MAP_POS[previewDest.id] && !sailingTo && !locked.includes(previewDest.id) && (
           <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
