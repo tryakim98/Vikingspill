@@ -822,6 +822,17 @@ export default function EncounterFlow({
 
         {renderKeyCard()}
 
+        {/* Solo (§3 trinn 1): ingen asymmetri — i stedet leser spilleren «kildene» selv,
+            den samme beslutningsrelevante nøkkelinfoen, før valget tas. */}
+        {!syncMode && (KEY_CARDS[d.id]?.length ?? 0) > 0 && (
+          <div className="mb-4 rounded-lg border-2 border-viking-teal/50 bg-viking-teal/10 p-4" data-testid="keycard-solo">
+            <p className="mb-2 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold-soft"><Icon name="book" size={13} /> Kildene du har samlet</p>
+            {(KEY_CARDS[d.id] ?? []).map((c) => (
+              <p key={c.id} className="font-inter text-sm text-viking-paper/90">{c.text}</p>
+            ))}
+          </div>
+        )}
+
         {/* Gruppas råd fra rådslagningen — så høvdingen ser mannskapets stemme mens hun velger */}
         {councilEnabled && adviceCount > 0 && (
           <AdviceSummary advice={advice} memberIds={memberIds} choices={councilChoices} />
