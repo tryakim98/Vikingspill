@@ -43,7 +43,8 @@
               "reputation":            { ".validate": "newData.isNumber()" },
               "$other": { ".validate": false }
             },
-            "skills":  { "$skill": { ".validate": "newData.isNumber()" } },
+            "skills":     { "$skill": { ".validate": "newData.isNumber()" } },
+            "svennebrev": { "$skill": { ".validate": "newData.isNumber()" } },
             "visited":       { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
             "locked":        { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
             "unlockedSides":    { "$i": { ".validate": "newData.isString() && newData.val().length <= 40" } },
@@ -89,6 +90,7 @@
               "$memberId": {
                 ".validate": "$memberId.matches(/^m-[a-z0-9]{1,16}$/)",
                 "joinedAt":   { ".validate": "newData.isNumber()" },
+                "role":       { ".validate": "newData.isString() && newData.val().length <= 24" },
                 "$other":     { ".validate": false }
               }
             },

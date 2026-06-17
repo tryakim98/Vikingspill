@@ -15,6 +15,8 @@ import type { FateEffect } from '../data/fateCards';
 
 export interface GroupMember {
   joinedAt: number;
+  /** Mannskapsrolle (§2.3) — unik per gruppe. Velges ved innmelding. Ingen odds-effekt. */
+  role?: SkillKey;
 }
 
 export type EncounterStep = 'history' | 'kulturmote' | 'oppgave' | 'transition' | 'quiz' | 'perspektiv' | 'radslagning' | 'valg' | 'saga' | 'roll' | 'rolling' | 'resultat' | 'refleksjon';
@@ -52,7 +54,6 @@ export interface SyncedGroup {
   shipName: string;
   shipSymbol: string;
   shipColor: string;
-  startSkill: SkillKey;
   scores: { culturalUnderstanding: number; tradeGain: number; reputation: number };
   svennebrev: Svennebrev;
   visited: string[];
@@ -242,6 +243,12 @@ export async function leaveGroupAsMember(code: string, groupId: string, memberId
     g.members = members;
     return g;
   });
+}
+
+/** Sett (eller endre) et medlems mannskapsrolle (§2.3). Egen leaf — race-trygt mot
+ *  andre medlemmers skriv. Frontend gråer ut roller som allerede er tatt i gruppa. */
+export function setMemberRole(code: string, groupId: string, memberId: string, role: SkillKey): Promise<void> {
+  return set(ref(db, `games/${code}/groups/${groupId}/members/${memberId}/role`), role);
 }
 
 /** Høvdingen gir roret til et annet medlem. Frontend bør gate dette til chief. */

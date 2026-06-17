@@ -11,7 +11,8 @@ export interface GroupSetup {
   shipName: string;
   shipSymbol: ShipSymbol;
   shipColor: string;
-  startSkill: SkillKey;
+  /** Spillerens mannskapsrolle (§2.3). Erstatter tidligere `startSkill`. */
+  role: SkillKey;
 }
 
 const KEY = 'vikingspill_group';

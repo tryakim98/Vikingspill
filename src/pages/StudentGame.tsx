@@ -16,12 +16,14 @@ import { useGroupSetup } from '../hooks/useGroupSetup';
 import JoinGame from '../components/session/JoinGame';
 import GroupPicker from '../components/group/GroupPicker';
 import SetupFlow from '../components/setup/SetupFlow';
+import RoleJoinScreen from '../components/setup/RoleJoinScreen';
 import GameDashboard from '../components/dashboard/GameDashboard';
 import LoadingScreen from '../components/common/LoadingScreen';
 import MuteButton from '../components/common/MuteButton';
 import RulesScreen from '../components/rules/RulesScreen';
 import HelpButton from '../components/rules/HelpButton';
-import { joinGroupAsMember, leaveGroupAsMember, subscribeGroup, writeGroup, type SyncedGroup } from '../lib/gameSync';
+import { joinGroupAsMember, leaveGroupAsMember, setMemberRole, subscribeGroup, writeGroup, type SyncedGroup } from '../lib/gameSync';
+import type { SkillKey } from '../types';
 
 const RULES_KEY = 'vikingspill_rules_seen_student';
 
@@ -90,21 +92,36 @@ export default function StudentGame() {
         onComplete={async (s) => {
           if (!session.groupId) return;
           // Seed gruppen i Firebase med alle felt — denne enheten blir høvding.
+          // §2.3: svennebrev alle 0; chiefens rolle lagres på medlemsnoden.
           await writeGroup(session.gameCode, session.groupId, {
             shipName: s.shipName,
             shipSymbol: s.shipSymbol,
             shipColor: s.shipColor,
-            startSkill: s.startSkill,
             scores: { culturalUnderstanding: 0, tradeGain: 0, reputation: 0 },
-            svennebrev: Object.fromEntries(SKILL_KEYS.map((k) => [k, k === s.startSkill ? 1 : 0])) as SyncedGroup['svennebrev'],
+            svennebrev: Object.fromEntries(SKILL_KEYS.map((k) => [k, 0])) as SyncedGroup['svennebrev'],
             visited: [],
             locked: [],
             updatedAt: Date.now(),
             chiefId: session.memberId,
-            members: { [session.memberId]: { joinedAt: Date.now() } },
+            members: { [session.memberId]: { joinedAt: Date.now(), role: s.role } },
           }).catch(() => {});
           saveSetup(s);
         }}
+      />
+    );
+  } else if (session.mode === 'online' && session.groupId && remoteGroup && !remoteGroup.members?.[session.memberId]?.role) {
+    // Medlem ombord uten valgt rolle ennå → velg rolle (roller tatt av andre gråes ut).
+    const taken = Object.values(remoteGroup.members ?? {})
+      .map((m) => m.role)
+      .filter((r): r is SkillKey => !!r);
+    const code = session.gameCode;
+    const groupId = session.groupId;
+    const memberId = session.memberId;
+    content = (
+      <RoleJoinScreen
+        shipName={remoteGroup.shipName}
+        taken={taken}
+        onConfirm={(role) => { setMemberRole(code, groupId, memberId, role).catch(() => {}); }}
       />
     );
   } else if (session.mode === 'online' && session.groupId && remoteGroup) {
@@ -114,7 +131,7 @@ export default function StudentGame() {
           shipName: remoteGroup.shipName,
           shipSymbol: remoteGroup.shipSymbol as 'drage' | 'ulv' | 'ravn',
           shipColor: remoteGroup.shipColor,
-          startSkill: remoteGroup.startSkill,
+          role: remoteGroup.members![session.memberId].role!,
         }}
         session={session}
         onResetSetup={clearSetup}

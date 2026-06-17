@@ -46,9 +46,10 @@ export interface OutcomeApply {
   sagaEntry?: SagaEntry;
 }
 
-function seed(setup: GroupSetup): GameProgress {
+function seed(): GameProgress {
+  // §2.3: en ny gruppe starter med svennebrev alle 0. Disposisjonen lever nå i
+  // medlemmets ROLLE (members/{id}.role), ikke i et start-svennebrev.
   const svennebrev = Object.fromEntries(SKILL_KEYS.map((k) => [k, 0])) as Svennebrev;
-  svennebrev[setup.startSkill] = 1; // start-sveinn (startSkill→rolle kommer i 2.3)
   return {
     scores: { culturalUnderstanding: 0, tradeGain: 0, reputation: 0 },
     svennebrev,
@@ -84,17 +85,17 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     return () => unsub();
   }, [isOnline, session]);
 
-  // Offline: les fra localStorage, seed med startferdighet om første gang.
+  // Offline: les fra localStorage, seed (svennebrev alle 0) om første gang.
   useEffect(() => {
     if (isOnline) return;
     try {
       const raw = localStorage.getItem(KEY);
-      if (!raw) { setState(seed(setup)); return; }
+      if (!raw) { setState(seed()); return; }
       const parsed = JSON.parse(raw) as GameProgress;
       // Migrering: gamle lagrede spill manglet svennebrev (het `skills`) → start på 0.
       setState({ ...parsed, svennebrev: parsed.svennebrev ?? emptyBrev() });
     } catch {
-      setState(seed(setup));
+      setState(seed());
     }
   }, [isOnline]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -106,7 +107,6 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       shipName: setup.shipName,
       shipSymbol: setup.shipSymbol,
       shipColor: setup.shipColor,
-      startSkill: setup.startSkill,
       scores: state.scores,
       svennebrev: state.svennebrev,
       visited: state.visited,
@@ -138,7 +138,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
   };
 
   const applyOutcome = (a: OutcomeApply) => {
-    const base = state ?? seed(setup);
+    const base = state ?? seed();
     // Valg gir ikke lenger svennebrev (skillReward fjernet) — brev fås kun via svenneprøven.
     const goods: Partial<Record<TradeGoodId, number>> = { ...(base.goods ?? {}) };
     if (a.goodsReward) {
@@ -166,12 +166,12 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
 
   /** Tildel et svennebrev (1 = sveinn, 2 = mester) i et domene. */
   const setSkillLevel = (skill: SkillKey, brev: 0 | 1 | 2) => {
-    const base = state ?? seed(setup);
+    const base = state ?? seed();
     persist({ ...base, svennebrev: { ...base.svennebrev, [skill]: brev } });
   };
 
   const addReward = (deltas: { und: number; trade: number; rep: number }) => {
-    const base = state ?? seed(setup);
+    const base = state ?? seed();
     persist({
       ...base,
       scores: {
@@ -183,7 +183,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
   };
 
   const applyFateEffect = (effect: FateEffect) => {
-    const base = state ?? seed(setup);
+    const base = state ?? seed();
     const svennebrev = { ...base.svennebrev };
     if (effect.skill) {
       const cur = svennebrev[effect.skill.key] ?? 0;
@@ -200,11 +200,11 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     });
   };
 
-  const resetProgress = () => persist(seed(setup));
+  const resetProgress = () => persist(seed());
 
   /** Markér et sidested som låst opp via svenneprøve (vedvarer i state). */
   const unlockSide = (destId: string) => {
-    const base = state ?? seed(setup);
+    const base = state ?? seed();
     if (base.unlockedSides.includes(destId)) return;
     persist({ ...base, unlockedSides: [...base.unlockedSides, destId] });
   };
@@ -212,7 +212,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
   /** Utfør en spesialhandling: trekk kostnad, legg til effekt, marker som utført.
    *  Henter ressurser fra gruppens nåværende tilstand og oppdaterer alt i ÉN persist. */
   const performAction = (action: SpecialAction) => {
-    const base = state ?? seed(setup);
+    const base = state ?? seed();
     if (base.performedActions.includes(action.id)) return;
     const scores = { ...base.scores };
     const svennebrev = { ...base.svennebrev };

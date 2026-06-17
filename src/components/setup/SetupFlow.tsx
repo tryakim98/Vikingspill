@@ -3,15 +3,16 @@
  * Elevens gruppeoppsett (§9.1), fire steg:
  *   1) Skip-valg   — trykk på et vikingskip som gynger på bølgene
  *   2) Skip-info   — gi skipet navn, velg symbol (drage/ulv/ravn) og farge
- *   3) Startferdighet — velg én av de fem ferdighetene
+ *   3) Mannskapsrolle — velg én av de fem rollene
  *   4) Klar        — oppsummering → «Sett seil»
  */
 
 import { useState } from 'react';
 import type { ShipSymbol, SkillKey } from '../../types';
-import { skillTreeData } from '../../data';
+import { CREW_ROLES } from '../../data';
 import VikingShip from '../ship/VikingShip';
-import NorseIcon, { SKILL_PNG, AutoIcon } from '../decor/NorseIcon';
+import { AutoIcon } from '../decor/NorseIcon';
+import RolePicker from './RolePicker';
 import { playSound } from '../../lib/sound';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
 
@@ -30,10 +31,8 @@ const SYMBOLS: { key: ShipSymbol; icon: string; label: string }[] = [
   { key: 'ravn', icon: 'raven', label: 'Ravn' },
 ];
 
-const SKILL_KEYS = Object.keys(skillTreeData) as SkillKey[];
-
-type Step = 'ship' | 'info' | 'skill' | 'summary';
-const STEP_ORDER: Step[] = ['ship', 'info', 'skill', 'summary'];
+type Step = 'ship' | 'info' | 'role' | 'summary';
+const STEP_ORDER: Step[] = ['ship', 'info', 'role', 'summary'];
 
 function Waves() {
   return (
@@ -71,7 +70,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
   const [color, setColor] = useState<string>(SHIP_COLORS[0].value);
   const [shipName, setShipName] = useState('');
   const [symbol, setSymbol] = useState<ShipSymbol>('drage');
-  const [startSkill, setStartSkill] = useState<SkillKey | null>(null);
+  const [role, setRole] = useState<SkillKey | null>(null);
 
   return (
     <div className="relative min-h-screen overflow-hidden viking-screen text-viking-paper">
@@ -162,7 +161,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
             <div className="mt-8 flex justify-center gap-4">
               <button onClick={() => setStep('ship')} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft transition-colors hover:border-viking-gold">Tilbake</button>
               <button
-                onClick={() => setStep('skill')}
+                onClick={() => setStep('role')}
                 disabled={shipName.trim().length === 0}
                 className="rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
               >
@@ -172,35 +171,17 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
           </div>
         )}
 
-        {/* STEG 3 — STARTFERDIGHET */}
-        {step === 'skill' && (
+        {/* STEG 3 — MANNSKAPSROLLE */}
+        {step === 'role' && (
           <div className="text-center">
-            <h1 className="font-saga text-3xl md:text-5xl viking-engraved-large mb-2">Velg startferdighet</h1>
-            <p className="font-inter text-viking-gold-soft italic mb-8">Hvor er skipet deres sterkest fra start?</p>
-            <div className="grid gap-3 md:grid-cols-2">
-              {SKILL_KEYS.map((key) => {
-                const branch = skillTreeData[key];
-                const selected = startSkill === key;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setStartSkill(key)}
-                    className={`flex items-start gap-3 rounded-lg border-2 p-4 text-left transition-all ${selected ? 'border-viking-gold bg-viking-gold/15' : 'border-viking-gold/30 hover:border-viking-gold/70'}`}
-                  >
-                    <span className="leading-none" style={{ color: branch.color }}><AutoIcon name={branch.icon} size={30} /></span>
-                    <span>
-                      <span className="block font-cinzel text-lg text-viking-gold">{branch.name}</span>
-                      <span className="block font-inter text-xs text-viking-paper/80">{branch.tiers[0].desc}</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <h1 className="font-saga text-3xl md:text-5xl viking-engraved-large mb-2">Velg din rolle</h1>
+            <p className="font-inter text-viking-gold-soft italic mb-8">Hvilken stemme har du i mannskapsrådet?</p>
+            <RolePicker value={role} onPick={setRole} />
             <div className="mt-8 flex justify-center gap-4">
               <button onClick={() => setStep('info')} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft transition-colors hover:border-viking-gold">Tilbake</button>
               <button
                 onClick={() => setStep('summary')}
-                disabled={startSkill === null}
+                disabled={role === null}
                 className="rounded-md border-2 border-viking-gold bg-viking-gold px-8 py-2 font-saga font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Videre
@@ -210,7 +191,7 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
         )}
 
         {/* STEG 4 — KLAR */}
-        {step === 'summary' && startSkill && (
+        {step === 'summary' && role && (
           <div className="text-center">
             <h1 className="font-saga text-3xl md:text-5xl viking-engraved-large mb-6">Klar til å seile</h1>
             <div className="mb-6 flex justify-center">
@@ -219,12 +200,12 @@ export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSet
             <div className="mx-auto max-w-sm rounded-lg border-2 border-viking-gold/40 bg-viking-darkblue/50 p-6 text-left font-inter">
               <p className="mb-2"><span className="text-viking-gold-soft">Skip:</span> <span className="font-cinzel text-lg text-viking-paper">{shipName}</span></p>
               <p className="mb-2 inline-flex items-center gap-1.5"><span className="text-viking-gold-soft">Symbol:</span> <AutoIcon name={SYMBOLS.find((s) => s.key === symbol)?.icon ?? 'dragonhead'} size={16} className="text-viking-gold-soft" /> {SYMBOLS.find((s) => s.key === symbol)?.label}</p>
-              <p className="inline-flex items-center gap-1.5"><span className="text-viking-gold-soft">Startferdighet:</span> <NorseIcon name={SKILL_PNG[startSkill]} size={16} className="text-viking-gold-soft" /> {skillTreeData[startSkill].name}</p>
+              <p className="inline-flex items-center gap-1.5"><span className="text-viking-gold-soft">Rolle:</span> <AutoIcon name={CREW_ROLES[role].icon} size={16} className="text-viking-gold-soft" /> {CREW_ROLES[role].title}</p>
             </div>
             <div className="mt-8 flex justify-center gap-4">
-              <button onClick={() => setStep('skill')} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft transition-colors hover:border-viking-gold">Tilbake</button>
+              <button onClick={() => setStep('role')} className="rounded-md border-2 border-viking-gold/50 px-6 py-2 font-cinzel text-viking-gold-soft transition-colors hover:border-viking-gold">Tilbake</button>
               <button
-                onClick={() => onComplete({ shipName: shipName.trim(), shipSymbol: symbol, shipColor: color, startSkill })}
+                onClick={() => onComplete({ shipName: shipName.trim(), shipSymbol: symbol, shipColor: color, role })}
                 className="rounded-md border-2 border-viking-gold bg-viking-gold px-10 py-2 font-saga font-bold text-viking-darkblue transition-all hover:bg-viking-gold-soft"
               >
                 <span className="inline-flex items-center gap-2"><AutoIcon name="sail" size={16} /> Sett seil</span>
