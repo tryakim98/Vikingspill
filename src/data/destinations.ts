@@ -20,6 +20,7 @@ import { HIDDEN_CHOICES } from './hiddenChoices';
 import { PERSPECTIVE_PROMPTS } from './perspectives';
 import { MODERN_BRIDGES } from './modernBridges';
 import { SHORT_TEXTS } from './shortTexts';
+import { GOVERNANCE } from './governance';
 
 /** Hvilket valg på hver destinasjon som er historisk korrekt — det vikingene faktisk
  *  gjorde. Gir +2 kulturforståelse som bonus (§6.1). Bevisst utelatt: Vinland (de
@@ -112,6 +113,7 @@ export const destinations: Destination[] = baseDestinations.map((base): Destinat
     modernBridge: MODERN_BRIDGES[base.id],
     historyShort: SHORT_TEXTS[base.id]?.historyShort,
     kulturmoteSceneShort: SHORT_TEXTS[base.id]?.kulturmoteSceneShort,
+    governance: GOVERNANCE[base.id],
   };
 });
 

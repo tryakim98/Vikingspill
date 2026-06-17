@@ -159,6 +159,14 @@ export interface Destination {
   // Kortversjoner (2-3 setninger) for differensiering. Lærer-styrt via textLength.
   historyShort?: string;
   kulturmoteSceneShort?: string;
+
+  // Styresett-atlas — ett lite, faktabasert kort om hvordan makten er organisert
+  // på stedet (styreform + makthaver). Rent additivt; vist i oppgave-steget.
+  governance?: {
+    styreform: string;
+    makthaver: string;
+    body: string;
+  };
 }
 
 export type TradeGoodId =
