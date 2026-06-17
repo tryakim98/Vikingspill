@@ -577,6 +577,16 @@ export default function TeacherPanel() {
               />
               <span className="font-cinzel text-sm text-viking-gold-soft">Forklaringer: <strong>{settings.showHints !== false ? 'PÅ' : 'AV'}</strong></span>
             </label>
+            <label className="inline-flex cursor-pointer items-center gap-2" title="Ved ~1 av 3 møter får ÉN elev et privat nøkkelkort med beslutningsrelevant info de andre ikke ser — de må dele det og overbevise. Kortet fordeles jevnt over gruppa.">
+              <input
+                type="checkbox"
+                checked={settings.keyCards !== false}
+                onChange={(e) => { if (code) setGameSettings(code, { keyCards: e.target.checked }).catch(() => {}); }}
+                data-testid="keycards-toggle"
+                className="h-4 w-4 accent-viking-gold"
+              />
+              <span className="font-cinzel text-sm text-viking-gold-soft">Nøkkelkort: <strong>{settings.keyCards !== false ? 'PÅ' : 'AV'}</strong></span>
+            </label>
           </div>
 
           {/* Tekstlengde — differensiering for yrkesfag */}

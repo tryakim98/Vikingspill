@@ -79,6 +79,13 @@ export default function SagaReader({ groups, title = 'Sagaen', onClose }: Props)
                           )}
                         </div>
                       )}
+                      {e.keyCardText && (
+                        <div className="mt-3 border-t border-viking-rust/30 pt-2" data-testid="saga-keycard">
+                          <p className="text-sm text-viking-darkblue" style={{ fontFamily: 'serif' }}>
+                            <span className="inline-flex items-center gap-1 font-cinzel text-xs text-viking-rust"><Icon name="book" size={13} /> Nøkkelinfo{e.keyCardHolderLabel ? ` (${e.keyCardHolderLabel})` : ''}:</span> {e.keyCardText}
+                          </p>
+                        </div>
+                      )}
                       {e.bridgeReflection && (
                         <div className="mt-3 border-t border-viking-rust/30 pt-2" data-testid="saga-bridge">
                           <p className="text-sm text-viking-darkblue" style={{ fontFamily: 'serif' }}>
