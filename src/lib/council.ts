@@ -114,3 +114,20 @@ export function npcVotes(choices: Choice[], roles: SkillKey[]): NpcVote[] {
   }
   return out;
 }
+
+// === SABOTØR-ÆRE (§3 trinn 2) =====================================================
+// Per-elev «ære» AVLEDES av gruppas agendaLog — ingen skriv til medlemsnoden, ingen ny
+// per-elev-poengakse. Ren funksjon; kalleren filtrerer + setter etiketter.
+
+export interface AgendaOutcome { agentId: string; succeeded: boolean; vigilantIds: string[]; }
+export interface MemberHonor { id: string; vigilant: number; agentWins: number; }
+
+/** Tell per medlem: hvor mange ganger de gjennomskuet en agenda (stemte mot push), og
+ *  hvor mange ganger de SELV lyktes som skjult agent. Returnerer én rad per memberId. */
+export function deriveHonors(agendaLog: AgendaOutcome[], memberIds: string[]): MemberHonor[] {
+  return memberIds.map((id) => ({
+    id,
+    vigilant: agendaLog.filter((e) => (e.vigilantIds ?? []).includes(id)).length,
+    agentWins: agendaLog.filter((e) => e.agentId === id && e.succeeded).length,
+  }));
+}

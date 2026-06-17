@@ -587,6 +587,17 @@ export default function TeacherPanel() {
               />
               <span className="font-cinzel text-sm text-viking-gold-soft">Nøkkelkort: <strong>{settings.keyCards !== false ? 'PÅ' : 'AV'}</strong></span>
             </label>
+            <label className={`inline-flex items-center gap-2 ${settings.keyCards === false ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`} title="SJELDEN: ett av de private kortene kan i stedet være et skjult agenda-kort — én elev får en hemmelig interesse i å styre gruppa mot ett valg. Avsløres etterpå som en spilt rolle. Krever at nøkkelkort er PÅ. Default AV.">
+              <input
+                type="checkbox"
+                checked={settings.saboteur === true}
+                disabled={settings.keyCards === false}
+                onChange={(e) => { if (code) setGameSettings(code, { saboteur: e.target.checked }).catch(() => {}); }}
+                data-testid="saboteur-toggle"
+                className="h-4 w-4 accent-viking-crimson"
+              />
+              <span className="font-cinzel text-sm text-viking-gold-soft">Sabotør: <strong>{settings.saboteur === true ? 'PÅ' : 'AV'}</strong></span>
+            </label>
           </div>
 
           {/* Tekstlengde — differensiering for yrkesfag */}

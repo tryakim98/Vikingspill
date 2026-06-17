@@ -45,6 +45,15 @@ og gjør terningbaserte valg med konsekvenser. Én React-app, to roller (lærer/
   kort til ÉN elev (online), VEKTET mot den som har fått færrest (`pickCardHolder`).
   Holderen ser kortet privat, andre ser nøytral banner; avsløres i resultat + saga. Solo
   leser de samme «Kildene» (ulogget kontekst). Kortet OPPLYSER, binder ikke.
+- **Sabotør (trinn 2 — `data/agendaCards.ts`):** et agenda-kort er en VARIANT av nøkkel-
+  kortet (`encounter.keyCard.kind='agenda'`), delt ut i samme private-slot — så agenten
+  ikke er til å skille fra en nøkkelkort-holder (ekte deduksjon). Egen lærerbryter
+  `saboteur` (default AV, virker kun når `keyCards` på). Online: agenten får et hemmelig
+  oppdrag (`brief`) om å presse ETT valg; lyktes hvis gruppa velger det. Solo: én NPC-
+  stemme sier `pitch` (manipulativt argument) + spilleren flagger mistanke. Avsløring
+  ALLTID rolle-framet («spillet ga X en skjult rolle»), aldri «X løy». **Belønn årvåkenhet:**
+  de som stemte MOT push gjennomskuer; per-elev-ære AVLEDES av `group.agendaLog`
+  (`deriveHonors`, vist i sluttseremonien) — ingen skriv til medlemsnoden, ingen poengakse.
 - **Progresjonsmodell:** ÉN tallakse — `svennebrev` `0|1|2` per domene (0=ingen,
   1=sveinn, 2=mester). **Svenneprøven er eneste opplåsing** (hever ett domene ett
   hakk). Det finnes IKKE et eget «ferdighetsnivå». Arketypen er en **rolle/stemme**
@@ -119,6 +128,10 @@ online bindende stemme (høvding som tie-break, ingen vetorett) / solo NPC-stemm
 `npcVotes`; nøkkelkort (trinn 1, ærlige) med vektet utdeling; alt gjennom
 `commitDecision()` så konsekvens/avsløring/saga er identisk i begge spor.
 
-**Neste (påbygg, ikke startet):** **sabotøren** (trinn 2 — ekte elev online med hemmelig
-agenda + per-elev belønning for å lure/gjennomskue, NPC i solo, sjelden/lærerstyrt/helt
-avskrubar) og **«belønn årvåkenhet»**; **styresett-atlas**; **definisjonsmakt**.
+**Sabotøren (trinn 2) ferdig:** agenda-kort som variant av nøkkelkort (samme private-slot,
+`kind='agenda'`), lærerstyrt (`saboteur`-bryter, default AV, kun når nøkkelkort på); online
+hemmelig agenda til én elev, solo NPC-agent med mistanke-flagg; rolle-framet avsløring;
+«belønn årvåkenhet» i begge spor; per-elev-ære avledet av `agendaLog` (`deriveHonors`),
+vist i sluttseremonien.
+
+**Neste (påbygg, ikke startet):** **styresett-atlas**; **definisjonsmakt**.

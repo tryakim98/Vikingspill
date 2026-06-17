@@ -32,12 +32,14 @@ interface Props {
   saga: SagaEntry[];
   destinations: Destination[];
   acceptedTradesCount: number;
+  /** Sabotør-ære (§3 trinn 2) avledet av agendaLog — kun avledet visning, ingen poeng. */
+  honors?: { label: string; vigilant: number; agentWins: number }[];
   onClose: () => void;
 }
 
 type Step = 'intro' | 'scores' | 'archetype';
 
-export default function EndCeremony({ setup, scores, svennebrev, saga, destinations, acceptedTradesCount, onClose }: Props) {
+export default function EndCeremony({ setup, scores, svennebrev, saga, destinations, acceptedTradesCount, honors = [], onClose }: Props) {
   const [step, setStep] = useState<Step>('intro');
 
   // Seremonilyd (§8.6): kongen kaller flåten hjem, og senere avsløres arketypen.
@@ -94,6 +96,21 @@ export default function EndCeremony({ setup, scores, svennebrev, saga, destinati
             <p className="font-mono text-xs text-viking-gold-soft">Totalt</p>
             <p className="font-cinzel text-4xl font-bold text-viking-gold-soft">{total}</p>
           </MaterialPanel>
+          {honors.length > 0 && (
+            <div className="mb-6 rounded-lg border-2 border-viking-crimson/50 bg-viking-crimson/10 p-4 text-left" data-testid="ceremony-honors">
+              <p className="mb-2 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-crimson"><NorseIcon name="ikon-tro" size={16} className="text-viking-crimson" /> Skjulte roller på reisen</p>
+              <ul className="space-y-1">
+                {honors.map((h) => (
+                  <li key={h.label} className="font-inter text-sm text-viking-paper/90">
+                    <strong className="text-viking-gold-soft">{h.label}</strong>
+                    {h.vigilant > 0 && <> — gjennomskuet manipulasjon {h.vigilant}×</>}
+                    {h.vigilant > 0 && h.agentWins > 0 && ','}
+                    {h.agentWins > 0 && <> spilte den skjulte rollen godt {h.agentWins}×</>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <p className="mb-8 max-w-md mx-auto font-inter text-sm italic text-viking-paper/65">
             Men poengsummen forteller bare HVA dere samlet — ikke HVORDAN.
             Det er HVORDAN som avgjør hvem dere ble.

@@ -9,6 +9,7 @@ import { useState, useEffect, useRef, type ReactNode } from 'react';
 import type { Destination, SkillKey } from '../../types';
 import { dealPrivateCard, shouldDealKeyCard, agendaAllowed } from '../../lib/keyCards';
 import { AGENDA_CARDS } from '../../data/agendaCards';
+import { deriveHonors } from '../../lib/council';
 import { destinations, skillTreeData } from '../../data';
 import { useGameState } from '../../hooks/useGameState';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
@@ -726,6 +727,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         saga={state.saga ?? []}
         destinations={destinations}
         acceptedTradesCount={acceptedTradesCount}
+        honors={deriveHonors(syncedGroup?.agendaLog ?? [], memberIds)
+          .filter((h) => h.vigilant > 0 || h.agentWins > 0)
+          .map((h) => ({ label: memberLabel(h.id), vigilant: h.vigilant, agentWins: h.agentWins }))}
         onClose={() => setShowCeremony(false)}
       />
     );
