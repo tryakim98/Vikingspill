@@ -135,8 +135,7 @@ export default function EndCeremony({ setup, scores, svennebrev, saga, destinati
 
   // step === 'archetype'
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-viking-darkblue px-4 py-10 text-center text-viking-paper" data-testid="archetype-step">
-      <div className="aurora pointer-events-none absolute inset-0 opacity-30 blur-2xl" />
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden viking-screen-sea px-4 py-10 text-center text-viking-paper" data-testid="archetype-step">
       <div className="relative z-10 w-full max-w-2xl">
         <motion.p
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
@@ -144,17 +143,17 @@ export default function EndCeremony({ setup, scores, svennebrev, saga, destinati
         >Slik vil dere bli husket</motion.p>
 
         <motion.div
-          initial={{ scale: 0.4, opacity: 0, filter: 'blur(8px)' }}
-          animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
+          initial={{ scale: 0.4, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 180, damping: 14, delay: 0.4 }}
-          className="mb-5 flex justify-center text-viking-brass drop-shadow-[0_0_28px_rgba(205,195,173,0.55)]"
+          className="mb-5 flex justify-center text-viking-brass"
         >
           <AutoIcon name={archetype.icon} size={100} />
         </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
-          className="mb-6 font-cinzel text-5xl font-bold text-viking-brass drop-shadow-[0_0_28px_rgba(205,195,173,0.5)] md:text-6xl"
+          className="mb-6 font-cinzel text-5xl font-bold text-viking-brass [text-shadow:0_2px_6px_rgba(0,0,0,0.6)] md:text-6xl"
           data-testid="archetype-title"
         >
           {archetype.title}
