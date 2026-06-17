@@ -947,7 +947,6 @@ export default function EncounterFlow({
               onClick={() => onComplete({
                 destId: d.id,
                 deltas: { und: undWithBonus, trade: outcome.trade, rep: outcome.rep },
-                skillReward: choice.skillReward,
                 locks: choice.locks ?? [],
                 goodsReward: d.goodsReward,
                 sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim()) ? {
@@ -1021,7 +1020,6 @@ export default function EncounterFlow({
             onClick={() => onComplete({
               destId: d.id,
               deltas: { und: undWithBonus, trade: outcome.trade, rep: outcome.rep },
-              skillReward: choice.skillReward,
               locks: choice.locks ?? [],
               goodsReward: d.goodsReward,
               sagaEntry: (reason.trim() || vikingPerspective.trim() || otherPerspective.trim() || bridgeReflection.trim()) ? {

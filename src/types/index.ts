@@ -61,14 +61,6 @@ export interface Task {
 
 export type ChoiceTag = 'respect' | 'trade' | 'aggressive';
 
-export type SkillRequirement = {
-  [key in SkillKey]?: number;
-};
-
-export type SkillReward = {
-  [key in SkillKey]?: number;
-};
-
 export interface RollOdds {
   bad: number;     // Katastrofe (terning)
   mid: number;     // Middels resultat
@@ -97,8 +89,6 @@ export interface Choice {
   title: string;        // Valgknapp-tekst
   desc: string;         // Kort beskrivelse
   tag: ChoiceTag;
-  skillReq: SkillRequirement | null;  // Må ha disse ferdigheter for å velge
-  skillReward: SkillReward | null;    // Bonus ferdighetspunkter
   baseRoll: RollOdds;   // Sannsynligheter før modifikatorer
   outcomes: RollOutcomeMap;
   lesson: string;       // Historisk/pedagogisk lærepoint etter terningkast

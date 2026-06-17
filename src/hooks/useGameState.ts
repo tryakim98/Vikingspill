@@ -41,7 +41,6 @@ export interface GameProgress {
 export interface OutcomeApply {
   destId: string;
   deltas: { und: number; trade: number; rep: number };
-  skillReward: Partial<Record<SkillKey, number>> | null;
   locks: string[];
   goodsReward?: TradeGoodId[];
   sagaEntry?: SagaEntry;
@@ -140,12 +139,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
 
   const applyOutcome = (a: OutcomeApply) => {
     const base = state ?? seed(setup);
-    const svennebrev = { ...base.svennebrev };
-    if (a.skillReward) {
-      for (const [k, v] of Object.entries(a.skillReward) as [SkillKey, number][]) {
-        svennebrev[k] = clampBrev((svennebrev[k] ?? 0) + v);
-      }
-    }
+    // Valg gir ikke lenger svennebrev (skillReward fjernet) — brev fås kun via svenneprøven.
     const goods: Partial<Record<TradeGoodId, number>> = { ...(base.goods ?? {}) };
     if (a.goodsReward) {
       for (const g of a.goodsReward) {
@@ -160,7 +154,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         tradeGain: base.scores.tradeGain + a.deltas.trade,
         reputation: base.scores.reputation + a.deltas.rep,
       },
-      svennebrev,
+      svennebrev: base.svennebrev,
       visited: base.visited.includes(a.destId) ? base.visited : [...base.visited, a.destId],
       locked: [...new Set([...base.locked, ...a.locks])],
       goods,

@@ -120,10 +120,6 @@
           "title": "Plyndre klosteret — alt eller intet",
           "desc": "Munkene er ikke krigere. Sølvet ligger åpent. Dette er hele grunnen til at dere kom.",
           "tag": "aggressive",
-          "skillReq": null,
-          "skillReward": {
-            "krigskunst": 1
-          },
           "baseRoll": {
             "bad": 1,
             "mid": 2,
@@ -164,10 +160,6 @@
           "title": "Ta munker som gisler — krev løsepenger",
           "desc": "Dere viser styrke uten å rasere. Den som vil ha munkene tilbake, må betale.",
           "tag": "trade",
-          "skillReq": null,
-          "skillReward": {
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 1,
             "mid": 2,
@@ -208,10 +200,6 @@
           "title": "Spar munkene — bare ta det dere trenger",
           "desc": "Mange av dere tror på Tor og Odin, men «de kristnes hellige menn» kan likevel være mektige. Hold dere unna alteret.",
           "tag": "respect",
-          "skillReq": null,
-          "skillReward": {
-            "tro": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 2,
@@ -266,11 +254,6 @@
           "title": "Etablere fast handelsstand",
           "desc": "Leie en bod, lære frisisk, bygge nettverk. Det tar tid, men gir varig avkastning.",
           "tag": "trade",
-          "skillReq": null,
-          "skillReward": {
-            "språk": 1,
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 2,
@@ -305,10 +288,6 @@
           "title": "Investere alt i glassperler",
           "desc": "Glassperler fra Bagdad selges for tre ganger prisen i Norge. Men en hel last er en risikabel investering.",
           "tag": "trade",
-          "skillReq": null,
-          "skillReward": {
-            "sjømannskap": 1
-          },
           "baseRoll": {
             "bad": 2,
             "mid": 1,
@@ -349,13 +328,6 @@
           "title": "Spionere på sakserne",
           "desc": "Hedeby ligger på saksisk grense. Få oversikt over kongens troppestyrke. Informasjon kan være verdt mer enn varer.",
           "tag": "aggressive",
-          "skillReq": {
-            "språk": 1
-          },
-          "skillReward": {
-            "krigskunst": 1,
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 2,
             "mid": 3,
@@ -410,12 +382,6 @@
           "title": "Drive slavehandel",
           "desc": "Keltiske slaver er den mest lønnsomme «varen» i kjent verden. Volgaruten venter, og araberne betaler i sølv.",
           "tag": "aggressive",
-          "skillReq": {
-            "krigskunst": 1
-          },
-          "skillReward": {
-            "krigskunst": 1
-          },
           "baseRoll": {
             "bad": 1,
             "mid": 2,
@@ -456,14 +422,6 @@
           "title": "Gifte dere inn i irsk slekt",
           "desc": "En av dere gifter seg med en lokal konges datter. Dere blir delvis irske, lærer gælisk, blir gradvis kristne.",
           "tag": "respect",
-          "skillReq": {
-            "diplomati": 1
-          },
-          "skillReward": {
-            "språk": 1,
-            "diplomati": 1,
-            "tro": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 1,
@@ -498,14 +456,6 @@
           "title": "Bygge eget norrønt rike",
           "desc": "Bli del av Dublin-styringsklassen. Krev tributt fra omkringliggende stammer. Vær både norrøn og hersker.",
           "tag": "aggressive",
-          "skillReq": {
-            "krigskunst": 1,
-            "diplomati": 1
-          },
-          "skillReward": {
-            "krigskunst": 1,
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 1,
             "mid": 2,
@@ -566,8 +516,6 @@
           "title": "Ta sølvet og dra hjem",
           "desc": "Karl den skallede tilbyr 7000 pund sølv hvis dere drar. Dette er en hel formue. Klassisk Danegeld.",
           "tag": "trade",
-          "skillReq": null,
-          "skillReward": {},
           "baseRoll": {
             "bad": 0,
             "mid": 1,
@@ -602,14 +550,6 @@
           "title": "Forhandle om land — bli normannere",
           "desc": "I stedet for sølv: krev land permanent. Gå med på å konvertere til kristendommen og forsvare Paris mot fremtidige vikinger.",
           "tag": "respect",
-          "skillReq": {
-            "diplomati": 2
-          },
-          "skillReward": {
-            "diplomati": 1,
-            "tro": 1,
-            "språk": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 2,
@@ -644,12 +584,6 @@
           "title": "Beleire byen — knus dem helt",
           "desc": "Ingen pakt. Ingen sølv. Dere viser hvem som virkelig styrer. Ett år utenfor Paris.",
           "tag": "aggressive",
-          "skillReq": {
-            "krigskunst": 2
-          },
-          "skillReward": {
-            "krigskunst": 2
-          },
           "baseRoll": {
             "bad": 3,
             "mid": 1,
@@ -710,11 +644,6 @@
           "title": "Slå dere ned som Gall-Gàidheal",
           "desc": "Et roligere liv. Lær gælisk. Bli del av en blandet kultur. «Gall-Gàidheal» betyr «de utenlandske gæliske».",
           "tag": "respect",
-          "skillReq": null,
-          "skillReward": {
-            "språk": 1,
-            "sjømannskap": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 1,
@@ -749,13 +678,6 @@
           "title": "Bli sjørøvere — kontroller havet",
           "desc": "Fra Hebridene kan dere true alle skip mellom Irland og Norge. Lett å plyndre, vanskelig å fange.",
           "tag": "aggressive",
-          "skillReq": {
-            "sjømannskap": 1
-          },
-          "skillReward": {
-            "sjømannskap": 2,
-            "krigskunst": 1
-          },
           "baseRoll": {
             "bad": 1,
             "mid": 2,
@@ -796,13 +718,6 @@
           "title": "Beskytte Iona-klosteret",
           "desc": "Iona er plyndret tre ganger av andre vikinger. Tilby beskyttelse mot betaling. Munkene gir dere mat, vin — og kunnskap.",
           "tag": "respect",
-          "skillReq": {
-            "krigskunst": 1
-          },
-          "skillReward": {
-            "tro": 2,
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 3,
@@ -857,11 +772,6 @@
           "title": "Bytt rettferdig — vare for vare",
           "desc": "Tilby jern og korn for pelsverk og reinskinn. Like mye begge veier. Samene godtar ikke ujevn handel.",
           "tag": "respect",
-          "skillReq": null,
-          "skillReward": {
-            "diplomati": 1,
-            "tro": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 2,
@@ -896,13 +806,6 @@
           "title": "Gift dere inn i samisk slekt",
           "desc": "En av dere gifter seg inn i en samisk familie. Permanent allianse, men dere mister ett gruppemedlem hjem.",
           "tag": "respect",
-          "skillReq": {
-            "diplomati": 1
-          },
-          "skillReward": {
-            "tro": 2,
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 1,
@@ -937,10 +840,6 @@
           "title": "Krev finnskatt",
           "desc": "Bruk vikingmakten. Krev tributt fra samene uten å gi noe tilbake. Historisk vanlig.",
           "tag": "aggressive",
-          "skillReq": {
-            "krigskunst": 1
-          },
-          "skillReward": {},
           "baseRoll": {
             "bad": 2,
             "mid": 3,
@@ -995,12 +894,6 @@
           "title": "Bosette dere — bli færøyinger",
           "desc": "Bygg gard, hold sauer, lag tørrkjøtt. Et hardt liv, men et eget land.",
           "tag": "respect",
-          "skillReq": {
-            "sjømannskap": 1
-          },
-          "skillReward": {
-            "sjømannskap": 1
-          },
           "baseRoll": {
             "bad": 1,
             "mid": 2,
@@ -1041,14 +934,6 @@
           "title": "Snakk med de irske munkene før de flykter",
           "desc": "Munkene har bodd her i 100 år. De vet hvor sauene gresser, hvor stormen kommer fra, hvor kildene ligger.",
           "tag": "respect",
-          "skillReq": {
-            "språk": 1
-          },
-          "skillReward": {
-            "språk": 1,
-            "tro": 1,
-            "sjømannskap": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 1,
@@ -1083,12 +968,6 @@
           "title": "Bruk Færøyene som springbrett mot Island",
           "desc": "Ikke bli her. Hvil mannskapet, bytt til ferskvann, og dra videre. Vest venter noe enda større.",
           "tag": "trade",
-          "skillReq": {
-            "sjømannskap": 2
-          },
-          "skillReward": {
-            "sjømannskap": 2
-          },
           "baseRoll": {
             "bad": 2,
             "mid": 2,
@@ -1149,13 +1028,6 @@
           "title": "Bli lovsigemann",
           "desc": "En av dere stiller som lovsigemann. Dere må huske 130 lover utenat. Gir prestisje, men ingen lønn.",
           "tag": "respect",
-          "skillReq": {
-            "tro": 1
-          },
-          "skillReward": {
-            "tro": 2,
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 1,
             "mid": 2,
@@ -1196,12 +1068,6 @@
           "title": "Hevn for blodsskyld",
           "desc": "En slektning er drept av en nabo. Etter norrøn ære må dere hevne — eller miste hele familiens posisjon.",
           "tag": "aggressive",
-          "skillReq": {
-            "krigskunst": 1
-          },
-          "skillReward": {
-            "krigskunst": 1
-          },
           "baseRoll": {
             "bad": 2,
             "mid": 1,
@@ -1242,13 +1108,6 @@
           "title": "Bli skald — diktekunst og fortellinger",
           "desc": "I stedet for våpen, bli mester av ord. Diktene dine vil overleve deg i hundre år.",
           "tag": "respect",
-          "skillReq": {
-            "tro": 1
-          },
-          "skillReward": {
-            "tro": 2,
-            "språk": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 1,
@@ -1303,13 +1162,6 @@
           "title": "Vis tålmodighet — bygg tillit sakte",
           "desc": "Ta tiden det trenger. Smårøtte. Lær noen tegn. La urfolket lede tempoet.",
           "tag": "respect",
-          "skillReq": {
-            "diplomati": 1
-          },
-          "skillReward": {
-            "språk": 1,
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 1,
             "mid": 2,
@@ -1350,10 +1202,6 @@
           "title": "Få fortgang — vis at dere er sterkere",
           "desc": "Krev raskt bytte. Hvis de ikke gir, ta. Vikingmakten har virket andre steder.",
           "tag": "aggressive",
-          "skillReq": {
-            "krigskunst": 2
-          },
-          "skillReward": {},
           "baseRoll": {
             "bad": 3,
             "mid": 2,
@@ -1388,12 +1236,6 @@
           "title": "Flykt hjem — kall det en suksess uansett",
           "desc": "Det er for fjernt, for fremmed. Ta noen prøver av tre og bær med hjem som «bevis», og dra.",
           "tag": "trade",
-          "skillReq": {
-            "sjømannskap": 2
-          },
-          "skillReward": {
-            "sjømannskap": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 5,
@@ -1442,13 +1284,6 @@
           "title": "Aksepter invitasjonen — bli herskere",
           "desc": "Slaverne ber om en rettferdig dommer. Dere blir det. Dere blir Rus.",
           "tag": "respect",
-          "skillReq": {
-            "diplomati": 2
-          },
-          "skillReward": {
-            "diplomati": 2,
-            "språk": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 3,
@@ -1483,12 +1318,6 @@
           "title": "Bare handel — Volgaruten sørover",
           "desc": "Nei takk til styre. Dere er handelsmenn, ikke konger. Pelsverk og slaver mot arabisk sølv.",
           "tag": "trade",
-          "skillReq": {
-            "sjømannskap": 1
-          },
-          "skillReward": {
-            "sjømannskap": 1
-          },
           "baseRoll": {
             "bad": 1,
             "mid": 2,
@@ -1529,13 +1358,6 @@
           "title": "Bli kristen — bygg en russisk kirke",
           "desc": "Olga av Kiev er nylig kristnet. Følg etter henne. Dette er fremtiden.",
           "tag": "respect",
-          "skillReq": {
-            "tro": 1
-          },
-          "skillReward": {
-            "tro": 2,
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 3,
@@ -1590,13 +1412,6 @@
           "title": "Tilpass dere — vask, lær, respekter",
           "desc": "Følg arabernes skikker. Vask før måltid. Lær hilsenen «As-salamu alaykum». Skriv navnet ditt med arabiske bokstaver.",
           "tag": "respect",
-          "skillReq": {
-            "språk": 1
-          },
-          "skillReward": {
-            "språk": 2,
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 1,
@@ -1631,8 +1446,6 @@
           "title": "Hold på vikingenes egne skikker",
           "desc": "Dere nekter å vaske dere eller endre noe. Forhandler likevel. Dere er nordmenn — det skal de finne ut.",
           "tag": "trade",
-          "skillReq": null,
-          "skillReward": {},
           "baseRoll": {
             "bad": 1,
             "mid": 4,
@@ -1667,10 +1480,6 @@
           "title": "Selg slaver — det araberne vil ha mest",
           "desc": "Bagdad-markedet betaler best for nordeuropeiske slaver. Dere har keltiske kvinner fra Dublin.",
           "tag": "aggressive",
-          "skillReq": null,
-          "skillReward": {
-            "krigskunst": 1
-          },
           "baseRoll": {
             "bad": 1,
             "mid": 2,
@@ -1731,14 +1540,6 @@
           "title": "Tjen i Væringgarden",
           "desc": "Bli leiesoldat for keiseren i 10 år. Dere får gull, men en av dere må bli igjen permanent.",
           "tag": "trade",
-          "skillReq": {
-            "krigskunst": 2
-          },
-          "skillReward": {
-            "krigskunst": 2,
-            "språk": 1,
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 1,
             "mid": 2,
@@ -1779,13 +1580,6 @@
           "title": "Forhandle som handelsmenn",
           "desc": "Pelsverk og rav for silke og krydder. Hold dere unna politikken.",
           "tag": "trade",
-          "skillReq": {
-            "diplomati": 1
-          },
-          "skillReward": {
-            "språk": 1,
-            "diplomati": 1
-          },
           "baseRoll": {
             "bad": 0,
             "mid": 2,
@@ -1820,11 +1614,6 @@
           "title": "Spioner og selg hemmelighetene",
           "desc": "Lat som dere vil tjene keiseren, men spionerer for fienden — bulgarene betaler godt.",
           "tag": "aggressive",
-          "skillReq": {
-            "språk": 1,
-            "krigskunst": 1
-          },
-          "skillReward": {},
           "baseRoll": {
             "bad": 4,
             "mid": 2,

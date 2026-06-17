@@ -43,8 +43,6 @@ export const HIDDEN_CHOICES: Record<string, HiddenChoiceEntry> = {
         crit: { text: 'Munkene takker dere personlig. En kopi av Lindisfarne-evangeliene følger skipet hjem som gave.', und: 5, trade: 1, rep: 3 },
       },
       lesson: 'Det krevde mot å holde tilbake sverdet — og det banet vei for noe ingen viking hadde fått: respekt fra dem dere møtte.',
-      skillReq: null,
-      skillReward: { tro: 1 },
     },
   },
 
@@ -68,8 +66,6 @@ export const HIDDEN_CHOICES: Record<string, HiddenChoiceEntry> = {
         crit: { text: 'Karl utnevner en av dere til rådgiver. Frankrike blir aldri det samme.', und: 3, trade: 5, rep: 3 },
       },
       lesson: 'Den som ser lenger enn det neste byttet, høster lenger enn det neste vinteren.',
-      skillReq: { diplomati: 1 },
-      skillReward: { diplomati: 1 },
     },
   },
 
@@ -93,8 +89,6 @@ export const HIDDEN_CHOICES: Record<string, HiddenChoiceEntry> = {
         crit: { text: 'Noaiden gir dere en liten trumme som amulett. Dere kommer hjem som forandrede menn.', und: 5, trade: 1, rep: 2 },
       },
       lesson: 'Det er en gave å bli sluppet inn i andres helligdom — og en oppgave å bære den med ydmykhet.',
-      skillReq: null,
-      skillReward: { tro: 1 },
     },
   },
 
@@ -118,8 +112,6 @@ export const HIDDEN_CHOICES: Record<string, HiddenChoiceEntry> = {
         crit: { text: 'En skræling blir med tilbake som tolk neste år. Vinland-veien er åpen.', und: 5, trade: 3, rep: 2 },
       },
       lesson: 'Tålmodighet på fremmed strand er det viktigste verktøyet — viktigere enn øksen.',
-      skillReq: null,
-      skillReward: { språk: 1 },
     },
   },
 
@@ -143,8 +135,6 @@ export const HIDDEN_CHOICES: Record<string, HiddenChoiceEntry> = {
         crit: { text: 'Kalifen selv ber om å få lese referatet. Dere får audiens som ingen har fått.', und: 5, trade: 2, rep: 3 },
       },
       lesson: 'Å bli forstått av en fremmed kultur — det er en seier som ingen plyndring kan kjøpe.',
-      skillReq: null,
-      skillReward: { språk: 1 },
     },
   },
 };
