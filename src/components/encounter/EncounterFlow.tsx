@@ -747,6 +747,19 @@ export default function EncounterFlow({
           Hver i mannskapet avgir sin stemme på egen enhet. Flertallet avgjør — ved likhet bryter høvdingen. Stemmene er skjult til alle har stemt.
         </p>
 
+        {/* Samme kontekst ved beslutningen som valg-steget gir (§3.5): online-rådslagning
+            hopper over valg-steget, så svidd mottakelse + bonus-melding vises HER. */}
+        {scarred && (
+          <p className="mb-3 flex items-start gap-2 rounded-md border-2 border-viking-crimson/50 bg-viking-crimson/10 px-3 py-2 font-inter text-sm text-viking-paper/90" data-testid="scarred-reception">
+            <Icon name="warn" size={15} className="mt-0.5 shrink-0 text-viking-crimson" /> {scar!.note}
+          </p>
+        )}
+        {hidden && bonusUnlocked && unlock && (
+          <div className="mb-3 rounded-md border-2 border-viking-gold bg-viking-gold/15 px-3 py-2" data-testid="bonus-unlocked">
+            <p className="inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold"><Icon name="book" size={13} /> {CREW_ROLES[unlock.skill].title} ombord ser en vei de andre ikke ser.</p>
+          </div>
+        )}
+
         {renderKeyCard()}
 
         {/* Teller — kun antall, aldri innhold før alle har stemt (hemmelig votering) */}
