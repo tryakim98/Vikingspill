@@ -500,6 +500,13 @@ export default function EncounterFlow({
       <Shell name={d.name} onExit={onExit}>
         <h1 className="mb-5 font-saga text-3xl text-viking-gold">På stedet</h1>
         <div className="space-y-4">
+          {d.governance && (
+            <MaterialPanel material="pergament" className="p-4" data-testid="governance-card">
+              <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-rust"><Icon name="scales" size={14} /> Styresett</p>
+              <p className="mb-1 font-saga text-base text-[#5C3E22]">{d.governance.styreform}<span className="ml-2 font-inter text-xs font-normal italic text-viking-darkblue/65">{d.governance.makthaver}</span></p>
+              <p className="font-inter text-sm text-viking-darkblue">{d.governance.body}</p>
+            </MaterialPanel>
+          )}
           <MaterialPanel material="pergament" className="p-4">
             <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-rust">Visste du?</p>
             <Html html={d.funFact ?? ''} className="font-inter text-sm text-viking-darkblue [&_strong]:text-viking-rust" />
