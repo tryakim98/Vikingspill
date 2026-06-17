@@ -95,10 +95,24 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 };
 
 
-function Shell({ name, onExit, children }: { name: string; onExit: () => void; children: ReactNode }) {
+function Shell({ name, onExit, backdrop, children }: { name: string; onExit: () => void; backdrop?: string; children: ReactNode }) {
   return (
     <div className="relative min-h-screen viking-screen text-viking-paper">
-      <div className="mx-auto max-w-2xl px-4 py-8">
+      {/* Valgfritt: havnas egen gravering som stort, dempet bakteppe (kun historie- og
+          kulturmøte-stegene). Mørk scrim over så lys gull-/pergamenttekst er lesbar.
+          Faller tilbake til viking-screen (tre) om bildet mangler. */}
+      {backdrop && (
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+          <img
+            src={backdrop}
+            alt=""
+            className="h-full w-full object-cover"
+            onError={(e) => { (e.currentTarget.closest('div') as HTMLElement).style.display = 'none'; }}
+          />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(10,7,3,0.64) 0%, rgba(8,6,3,0.82) 100%)' }} />
+        </div>
+      )}
+      <div className="relative z-10 mx-auto max-w-2xl px-4 py-8">
         <div className="flex items-center justify-between pb-2 pr-10">
           <h2 className="font-saga text-2xl text-viking-gold">{name}</h2>
           <button onClick={onExit} className="font-inter text-xs text-viking-gold-soft/70 hover:text-viking-gold-soft">✕ Avbryt</button>
@@ -412,7 +426,7 @@ export default function EncounterFlow({
   // 1) HISTORIE
   if (step === 'history') {
     return (
-      <Shell name={d.name} onExit={onExit}>
+      <Shell name={d.name} onExit={onExit} backdrop={d.image}>
         {/* Stemningsbilde av ankomsten (public/steder/sted-<id>.jpg). Beskåret til et
             bredt banner; en mørk gradient nederst lar tittelen hvile mot bildet. Skjuler
             seg selv om filen mangler, så historie-steget aldri viser et brukket bilde. */}
@@ -447,7 +461,7 @@ export default function EncounterFlow({
   if (step === 'kulturmote') {
     const km = d.episkeKulturmote;
     return (
-      <Shell name={d.name} onExit={onExit}>
+      <Shell name={d.name} onExit={onExit} backdrop={d.image}>
         <p className="mb-1 font-inter text-xs uppercase tracking-widest text-viking-gold-soft/70">Episk kulturmøte</p>
         <h1 className="mb-2 font-saga text-3xl text-viking-gold">{km.tittel}</h1>
         <TextLenToggle />
