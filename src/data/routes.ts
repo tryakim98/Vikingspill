@@ -30,7 +30,7 @@ export const SIDE_UNLOCKS: Record<string, UnlockRequirement[]> = {
   ],
   vinland: [
     { type: 'svenneprove', skill: 'sjømannskap' },
-    { type: 'skill',       key: 'sjømannskap', min: 3 },
+    { type: 'skill',       key: 'sjømannskap', min: 2 },
     { type: 'goods',       goods: { hvalrosstann: 2, jern: 1 } },
   ],
   novgorod: [

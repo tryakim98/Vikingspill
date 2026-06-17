@@ -28,7 +28,7 @@ interface Scores {
 interface Props {
   setup: GroupSetup;
   scores: Scores;
-  skills: Record<SkillKey, number>;
+  svennebrev: Record<SkillKey, number>;
   saga: SagaEntry[];
   destinations: Destination[];
   acceptedTradesCount: number;
@@ -37,7 +37,7 @@ interface Props {
 
 type Step = 'intro' | 'scores' | 'archetype';
 
-export default function EndCeremony({ setup, scores, skills, saga, destinations, acceptedTradesCount, onClose }: Props) {
+export default function EndCeremony({ setup, scores, svennebrev, saga, destinations, acceptedTradesCount, onClose }: Props) {
   const [step, setStep] = useState<Step>('intro');
 
   // Seremonilyd (§8.6): kongen kaller flåten hjem, og senere avsløres arketypen.
@@ -48,7 +48,7 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
 
   const total = scores.culturalUnderstanding + scores.tradeGain + scores.reputation;
   const archetype = determineArchetype({ saga, destinations, acceptedTradesCount, scores });
-  const top = topSkillTitle(skills);
+  const top = topSkillTitle(svennebrev);
 
   const pillars: { label: string; v: number; material: Material }[] = [
     { label: 'Kulturforståelse', v: scores.culturalUnderstanding, material: 'pergament' },
@@ -161,7 +161,7 @@ export default function EndCeremony({ setup, scores, skills, saga, destinations,
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.7 }}
             className="mb-8 inline-flex items-center justify-center gap-1.5 font-cinzel text-viking-gold-soft"
           >
-            <AutoIcon name={top.icon} size={16} /> Sterkest i {top.name} {top.level >= 3 ? '— Mester' : `(nivå ${top.level})`}
+            <AutoIcon name={top.icon} size={16} /> Sterkest i {top.name} — {top.level >= 2 ? 'mesterbrev' : 'fagbrev'}
           </motion.p>
         )}
 

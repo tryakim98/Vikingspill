@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import type { SkillKey, TradeGoodId, SagaEntry } from '../types';
+import type { SkillKey, TradeGoodId, SagaEntry, Svennebrev } from '../types';
 import type { GroupSetup } from './useGroupSetup';
 import type { Session } from './useSession';
 import { patchGroup, subscribeGroup, writeGroup } from '../lib/gameSync';
@@ -22,9 +22,14 @@ import type { SpecialAction } from '../data/specialActions';
 const SKILL_KEYS: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
 const KEY = 'vikingspill_state';
 
+/** Klem til gyldig svennebrev (0 = ingen · 1 = fagbrev · 2 = mesterbrev). */
+const clampBrev = (n: number): 0 | 1 | 2 => (n <= 0 ? 0 : n >= 2 ? 2 : 1);
+/** Tomt svennebrev-kart (migrering: gamle lagrede `skills`-tall ignoreres → alle 0). */
+const emptyBrev = (): Svennebrev => Object.fromEntries(SKILL_KEYS.map((k) => [k, 0])) as Svennebrev;
+
 export interface GameProgress {
   scores: { culturalUnderstanding: number; tradeGain: number; reputation: number };
-  skills: Record<SkillKey, number>;
+  svennebrev: Svennebrev;
   visited: string[];
   locked: string[];
   goods: Partial<Record<TradeGoodId, number>>;
@@ -43,11 +48,11 @@ export interface OutcomeApply {
 }
 
 function seed(setup: GroupSetup): GameProgress {
-  const skills = Object.fromEntries(SKILL_KEYS.map((k) => [k, 0])) as Record<SkillKey, number>;
-  skills[setup.startSkill] = 1;
+  const svennebrev = Object.fromEntries(SKILL_KEYS.map((k) => [k, 0])) as Svennebrev;
+  svennebrev[setup.startSkill] = 1; // start-fagbrev (startSkill→rolle kommer i 2.3)
   return {
     scores: { culturalUnderstanding: 0, tradeGain: 0, reputation: 0 },
-    skills,
+    svennebrev,
     visited: [],
     locked: [],
     goods: {},
@@ -68,7 +73,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       if (!g) return;
       setState({
         scores: g.scores,
-        skills: g.skills,
+        svennebrev: g.svennebrev ?? emptyBrev(), // migrering: gamle grupper uten svennebrev
         visited: g.visited ?? [],
         locked: g.locked ?? [],
         goods: g.goods ?? {},
@@ -85,7 +90,10 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     if (isOnline) return;
     try {
       const raw = localStorage.getItem(KEY);
-      setState(raw ? (JSON.parse(raw) as GameProgress) : seed(setup));
+      if (!raw) { setState(seed(setup)); return; }
+      const parsed = JSON.parse(raw) as GameProgress;
+      // Migrering: gamle lagrede spill manglet svennebrev (het `skills`) → start på 0.
+      setState({ ...parsed, svennebrev: parsed.svennebrev ?? emptyBrev() });
     } catch {
       setState(seed(setup));
     }
@@ -101,7 +109,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       shipColor: setup.shipColor,
       startSkill: setup.startSkill,
       scores: state.scores,
-      skills: state.skills,
+      svennebrev: state.svennebrev,
       visited: state.visited,
       locked: state.locked,
       goods: state.goods,
@@ -117,7 +125,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     if (isOnline && session?.mode === 'online' && session.groupId) {
       patchGroup(session.gameCode, session.groupId, {
         scores: next.scores,
-        skills: next.skills,
+        svennebrev: next.svennebrev,
         visited: next.visited,
         locked: next.locked,
         goods: next.goods,
@@ -132,10 +140,10 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
 
   const applyOutcome = (a: OutcomeApply) => {
     const base = state ?? seed(setup);
-    const skills = { ...base.skills };
+    const svennebrev = { ...base.svennebrev };
     if (a.skillReward) {
       for (const [k, v] of Object.entries(a.skillReward) as [SkillKey, number][]) {
-        skills[k] = (skills[k] ?? 0) + v;
+        svennebrev[k] = clampBrev((svennebrev[k] ?? 0) + v);
       }
     }
     const goods: Partial<Record<TradeGoodId, number>> = { ...(base.goods ?? {}) };
@@ -152,7 +160,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         tradeGain: base.scores.tradeGain + a.deltas.trade,
         reputation: base.scores.reputation + a.deltas.rep,
       },
-      skills,
+      svennebrev,
       visited: base.visited.includes(a.destId) ? base.visited : [...base.visited, a.destId],
       locked: [...new Set([...base.locked, ...a.locks])],
       goods,
@@ -162,9 +170,10 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     });
   };
 
-  const setSkillLevel = (skill: SkillKey, level: number) => {
+  /** Tildel et svennebrev (1 = fagbrev, 2 = mesterbrev) i et domene. */
+  const setSkillLevel = (skill: SkillKey, brev: 0 | 1 | 2) => {
     const base = state ?? seed(setup);
-    persist({ ...base, skills: { ...base.skills, [skill]: level } });
+    persist({ ...base, svennebrev: { ...base.svennebrev, [skill]: brev } });
   };
 
   const addReward = (deltas: { und: number; trade: number; rep: number }) => {
@@ -181,10 +190,10 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
 
   const applyFateEffect = (effect: FateEffect) => {
     const base = state ?? seed(setup);
-    const skills = { ...base.skills };
+    const svennebrev = { ...base.svennebrev };
     if (effect.skill) {
-      const cur = skills[effect.skill.key] ?? 0;
-      skills[effect.skill.key] = Math.max(0, Math.min(3, cur + effect.skill.delta));
+      const cur = svennebrev[effect.skill.key] ?? 0;
+      svennebrev[effect.skill.key] = clampBrev(cur + effect.skill.delta);
     }
     persist({
       ...base,
@@ -193,7 +202,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
         tradeGain: base.scores.tradeGain + (effect.trade ?? 0),
         reputation: base.scores.reputation + (effect.rep ?? 0),
       },
-      skills,
+      svennebrev,
     });
   };
 
@@ -212,7 +221,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     const base = state ?? seed(setup);
     if (base.performedActions.includes(action.id)) return;
     const scores = { ...base.scores };
-    const skills = { ...base.skills };
+    const svennebrev = { ...base.svennebrev };
     const goods: Partial<Record<TradeGoodId, number>> = { ...base.goods };
     let unlockedSides = base.unlockedSides;
 
@@ -235,8 +244,8 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
       }
     }
     if (action.effect.skill) {
-      const cur = skills[action.effect.skill.key] ?? 0;
-      skills[action.effect.skill.key] = Math.max(0, Math.min(3, cur + action.effect.skill.delta));
+      const cur = svennebrev[action.effect.skill.key] ?? 0;
+      svennebrev[action.effect.skill.key] = clampBrev(cur + action.effect.skill.delta);
     }
     if (action.effect.unlocks?.length) {
       unlockedSides = [...new Set([...unlockedSides, ...action.effect.unlocks])];
@@ -245,7 +254,7 @@ export function useGameState(setup: GroupSetup, session: Session | null) {
     persist({
       ...base,
       scores,
-      skills,
+      svennebrev,
       goods,
       unlockedSides,
       performedActions: [...base.performedActions, action.id],

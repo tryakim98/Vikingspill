@@ -119,7 +119,7 @@ export default function Leaderboard({ ranked, onRemoveGroup, onSummon, onClearSu
                       <p className="mb-1 font-cinzel text-[11px] uppercase tracking-wide text-viking-gold-soft/80">Ferdigheter</p>
                       <div className="flex flex-wrap gap-1.5">
                         {SKILL_KEYS.map((k) => {
-                          const lvl = g.skills?.[k] ?? 0;
+                          const lvl = g.svennebrev?.[k] ?? 0;
                           return (
                             <span key={k} title={skillTreeData[k].name} className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 ${lvl > 0 ? 'border-viking-gold/50 bg-viking-gold/10' : 'border-viking-gold/15 opacity-50'}`}>
                               <NorseIcon name={SKILL_PNG[k]} size={13} className="text-viking-gold-soft" />

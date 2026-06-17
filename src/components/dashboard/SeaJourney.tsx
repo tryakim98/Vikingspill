@@ -85,7 +85,7 @@ interface Props {
   visited: string[];
   locked: string[];
   goods: Partial<Record<TradeGoodId, number>>;
-  skills: Record<SkillKey, number>;
+  svennebrev: Record<SkillKey, number>;
   scores: { culturalUnderstanding: number; tradeGain: number; reputation: number };
   unlockedSides: string[];
   performedActions: string[];
@@ -110,7 +110,7 @@ const CATEGORY_COLOR: Record<ActionCategory, string> = {
   diplomati: 'text-viking-teal',
 };
 
-export default function SeaJourney({ destinations, visited, locked, goods, skills, scores, unlockedSides, performedActions, isChief, previewDestId, sailingTo, onSelect, onConfirm, onStartSvenneprove, onPerformAction }: Props) {
+export default function SeaJourney({ destinations, visited, locked, goods, svennebrev, scores, unlockedSides, performedActions, isChief, previewDestId, sailingTo, onSelect, onConfirm, onStartSvenneprove, onPerformAction }: Props) {
   const previewDest = previewDestId ? destinations.find((d) => d.id === previewDestId) ?? null : null;
   const lastVisited = visited[visited.length - 1];
   const shipStart = (lastVisited && MAP_POS[lastVisited]) || HOME;
@@ -118,7 +118,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
   const sailingPos = sailingDest ? MAP_POS[sailingDest.id] : null;
 
   const stationaryShipPos = shipStart;
-  const stateForLogic = { scores, skills, goods, locked, unlockedSides };
+  const stateForLogic = { scores, svennebrev, goods, locked, unlockedSides };
 
   const accessibleNow = (d: Destination) => isAccessible(d, stateForLogic);
   const isSideLocked = (d: Destination) => d.route === 'side' && !accessibleNow(d) && !locked.includes(d.id);
@@ -329,7 +329,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, skill
                 <p className="mb-2 font-cinzel text-xs text-viking-gold-soft">Spesielle handlinger her:</p>
                 <ul className="space-y-2.5">
                   {ACTIONS_BY_DEST[dest.id].map((a) => {
-                    const av = evaluateAction(a, { scores, skills, goods }, performedActions);
+                    const av = evaluateAction(a, { scores, svennebrev, goods }, performedActions);
                     return (
                       <li key={a.id} className="rounded border border-viking-gold/30 bg-viking-surface/40 p-2.5" data-testid={`action-${a.id}`}>
                         <div className="flex items-start justify-between gap-2">

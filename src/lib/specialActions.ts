@@ -11,7 +11,7 @@ import { skillTreeData } from '../data/skillTree';
 
 interface StateLike {
   scores: { culturalUnderstanding: number; tradeGain: number; reputation: number };
-  skills: Record<SkillKey, number>;
+  svennebrev: Record<SkillKey, number>;
   goods: Partial<Record<TradeGoodId, number>>;
 }
 
@@ -51,7 +51,7 @@ export function evaluateAction(a: SpecialAction, state: StateLike, performedActi
   const missing: string[] = [];
 
   if (a.requires?.skill) {
-    const cur = state.skills[a.requires.skill.key] ?? 0;
+    const cur = state.svennebrev[a.requires.skill.key] ?? 0;
     if (cur < a.requires.skill.min) {
       missing.push(`${skillTreeData[a.requires.skill.key].name} nivå ${a.requires.skill.min} (har ${cur})`);
     }

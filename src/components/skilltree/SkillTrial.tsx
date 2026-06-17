@@ -39,20 +39,24 @@ function TrialShell({ title, iconName, onClose, children }: { title: string; ico
 
 interface Props {
   skill: SkillKey;
-  level: number;
+  /** Gjeldende svennebrev i domenet: 0 = ingen, 1 = fagbrev. (2 = mesterbrev → ikke åpne.) */
+  brev: 0 | 1 | 2;
   visited: string[];
   isChief: boolean;
-  onPass: (newLevel: number) => void;
+  onPass: (newBrev: 0 | 1 | 2) => void;
   onClose: () => void;
 }
 
-export default function SkillTrial({ skill, level, visited, isChief, onPass, onClose }: Props) {
+export default function SkillTrial({ skill, brev, visited, isChief, onPass, onClose }: Props) {
   const branch = skillTreeData[skill];
-  const tier: 2 | 3 = level >= 2 ? 3 : 2;
+  // brev 0 → fagbrev-prøven (lettere quiz); brev 1 → mesterbrev-prøven (vanskeligere).
+  const isMester = brev >= 1;
+  const targetBrev: 1 | 2 = isMester ? 2 : 1;
+  const tier: 2 | 3 = isMester ? 3 : 2;           // quiz-vanskelighet fra ferdighetstreet
   const count = tier === 2 ? 3 : 4;
   const passNeeded = tier === 2 ? 2 : 3;
-  const proveName = tier === 2 ? 'Lærlingeprøven' : 'Mesterprøven';
-  const targetTierName = branch.tiers[tier - 1].name; // tiers[1] = nivå 2, tiers[2] = nivå 3
+  const proveName = isMester ? 'Mesterbrev' : 'Fagbrev';
+  const targetTierName = branch.tiers[tier - 1].name; // tiers[1]/[2] = opplåsings-beskrivelsen
   const title = `${branch.name} — ${proveName}`;
 
   const [questions, setQuestions] = useState(() => getQuizQuestionsForSkill(skill, tier, visited, count));
@@ -148,8 +152,8 @@ export default function SkillTrial({ skill, level, visited, isChief, onPass, onC
         >
           ✦ Bestått!
         </motion.p>
-        <p className="mb-6 font-inter text-viking-paper/90">Dere fullførte både teori (DEL 1) og praksis (DEL 2) — <strong className="text-viking-gold-soft">{targetTierName}</strong> (nivå {tier}) i {branch.name} er hevet.</p>
-        <button onClick={() => onPass(tier)} className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">Fullfør</button>
+        <p className="mb-6 font-inter text-viking-paper/90">Dere fullførte både teori (DEL 1) og praksis (DEL 2) — <strong className="text-viking-gold-soft">{proveName} i {branch.name}</strong> er bestått ({targetTierName}).</p>
+        <button onClick={() => onPass(targetBrev)} className="rounded-md border-2 border-viking-gold bg-viking-gold px-9 py-2.5 font-saga text-lg font-bold text-viking-darkblue hover:bg-viking-gold-soft">Fullfør</button>
       </TrialShell>
     );
   }

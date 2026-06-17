@@ -96,7 +96,7 @@ export default function StudentGame() {
             shipColor: s.shipColor,
             startSkill: s.startSkill,
             scores: { culturalUnderstanding: 0, tradeGain: 0, reputation: 0 },
-            skills: Object.fromEntries(SKILL_KEYS.map((k) => [k, k === s.startSkill ? 1 : 0])) as SyncedGroup['skills'],
+            svennebrev: Object.fromEntries(SKILL_KEYS.map((k) => [k, k === s.startSkill ? 1 : 0])) as SyncedGroup['svennebrev'],
             visited: [],
             locked: [],
             updatedAt: Date.now(),

@@ -10,7 +10,7 @@
 
 import { ref, set, get, remove, update, runTransaction, onValue, type Unsubscribe } from 'firebase/database';
 import { db } from './firebase';
-import type { SkillKey, TradeGoodId, SagaEntry } from '../types';
+import type { SkillKey, TradeGoodId, SagaEntry, Svennebrev } from '../types';
 import type { FateEffect } from '../data/fateCards';
 
 export interface GroupMember {
@@ -54,7 +54,7 @@ export interface SyncedGroup {
   shipColor: string;
   startSkill: SkillKey;
   scores: { culturalUnderstanding: number; tradeGain: number; reputation: number };
-  skills: Record<SkillKey, number>;
+  svennebrev: Svennebrev;
   visited: string[];
   locked: string[];
   goods?: Partial<Record<TradeGoodId, number>>;
@@ -200,7 +200,7 @@ export function removeGroup(code: string, groupId: string): Promise<void> {
   return remove(ref(db, `games/${code}/groups/${groupId}`));
 }
 
-/** Patch et delsett av gruppens felter (scores/skills/visited/locked/UI-state). */
+/** Patch et delsett av gruppens felter (scores/svennebrev/visited/locked/UI-state). */
 export function patchGroup(code: string, groupId: string, patch: Partial<SyncedGroup>): Promise<void> {
   return update(ref(db, `games/${code}/groups/${groupId}`), { ...patch, updatedAt: Date.now() });
 }

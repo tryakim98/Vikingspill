@@ -32,8 +32,10 @@ export type SkillTree = {
   [key in SkillKey]: SkillBranch;
 };
 
-export type GroupSkills = {
-  [key in SkillKey]: number; // 0 = låst, 1 = starter nivå, 2 = tier 2, 3 = tier 3 (meister)
+/** Kompetansebevis per domene: høyeste beståtte svenneprøve.
+ *  0 = ingen · 1 = fagbrev · 2 = mesterbrev. Stiger IKKE som et ferdighetsnivå. */
+export type Svennebrev = {
+  [key in SkillKey]: 0 | 1 | 2;
 };
 
 // ========================
@@ -257,7 +259,7 @@ export interface GroupState {
   reputation: number;
   
   // Ferdigheter
-  skills: GroupSkills;
+  svennebrev: Svennebrev;
   
   // Spill-progresjon
   visitedDestinations: string[];        // Liste over bes økt sted-IDer

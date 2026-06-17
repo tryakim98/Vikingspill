@@ -281,7 +281,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     if (!activeSkjebne) return;
     let rollResult: RollResult | undefined;
     if (choice.roll) {
-      const skillLevel = choice.roll.skill ? (state?.skills[choice.roll.skill] ?? 0) : 0;
+      const skillLevel = choice.roll.skill ? (state?.svennebrev[choice.roll.skill] ?? 0) : 0;
       rollResult = rollSkjebne(choice.roll, skillLevel);
       const branch = rollResult.won ? choice.roll.win : choice.roll.lose;
       applySkjebneEffects(branch.effects);
@@ -436,12 +436,12 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     if (state.scores.culturalUnderstanding > 0) triggerHint('reward-und');
     if (state.scores.tradeGain > 0)             triggerHint('reward-trade');
     if (state.scores.reputation > 0)            triggerHint('reward-rep');
-    const anySkill = Object.values(state.skills).some((lvl) => (lvl ?? 0) > 0);
+    const anySkill = Object.values(state.svennebrev).some((lvl) => (lvl ?? 0) > 0);
     if (anySkill) triggerHint('reward-skill');
     const anyGoods = Object.values(state.goods ?? {}).some((n) => (n ?? 0) > 0);
     if (anyGoods) triggerHint('reward-goods');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state?.scores.culturalUnderstanding, state?.scores.tradeGain, state?.scores.reputation, JSON.stringify(state?.skills), JSON.stringify(state?.goods)]);
+  }, [state?.scores.culturalUnderstanding, state?.scores.tradeGain, state?.scores.reputation, JSON.stringify(state?.svennebrev), JSON.stringify(state?.goods)]);
 
   // Locked-system hint: utløses første gang gruppa preview-er et sidested de IKKE
   // har tilgang til ennå.
@@ -449,7 +449,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     if (!state || !previewDestId) return;
     const dest = destinations.find((d) => d.id === previewDestId);
     if (!dest) return;
-    if (dest.route === 'side' && !isAccessible(dest, { scores: state.scores, skills: state.skills, goods: state.goods ?? {}, locked: state.locked, unlockedSides: state.unlockedSides ?? [] })) {
+    if (dest.route === 'side' && !isAccessible(dest, { scores: state.scores, svennebrev: state.svennebrev, goods: state.goods ?? {}, locked: state.locked, unlockedSides: state.unlockedSides ?? [] })) {
       triggerHint('locked-system');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -536,7 +536,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         navn={activeTrial.navn}
         desc={activeTrial.desc}
         skill={activeTrial.skill}
-        skillLevel={state.skills[activeTrial.skill] ?? 0}
+        skillLevel={state.svennebrev[activeTrial.skill] ?? 0}
         result={matchedResult}
         myGroupId={myGroupId}
         onClose={(reward) => {
@@ -550,7 +550,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   if (activeFate) {
     const affected = activeFate.targetMode === 'group'
       ? activeFate.targetGroupId === myGroupId
-      : (state.skills[activeFate.condition?.skill ?? 'tro'] ?? 0) < (activeFate.condition?.below ?? 0);
+      : (state.svennebrev[activeFate.condition?.skill ?? 'tro'] ?? 0) < (activeFate.condition?.below ?? 0);
     return (
       <FateCardOverlay
         event={activeFate}
@@ -681,10 +681,10 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
     return (
       <SkillTrial
         skill={activeSkill}
-        level={state.skills[activeSkill] ?? 0}
+        brev={state.svennebrev[activeSkill] ?? 0}
         visited={state.visited}
         isChief={isChief}
-        onPass={(lvl) => { setSkillLevel(activeSkill, lvl); setActiveSkill(null); }}
+        onPass={(brev) => { setSkillLevel(activeSkill, brev); setActiveSkill(null); }}
         onClose={() => setActiveSkill(null)}
       />
     );
@@ -698,7 +698,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
       <EndCeremony
         setup={setup}
         scores={state.scores}
-        skills={state.skills}
+        svennebrev={state.svennebrev}
         saga={state.saga ?? []}
         destinations={destinations}
         acceptedTradesCount={acceptedTradesCount}
@@ -840,31 +840,31 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         <HvaKanViGjorePanel
           destinations={destinations}
           scores={state.scores}
-          skills={state.skills}
+          svennebrev={state.svennebrev}
           goods={state.goods ?? {}}
           visited={state.visited}
           locked={state.locked}
           unlockedSides={state.unlockedSides ?? []}
         />
 
-        {/* Ferdigheter (jern) — trykk en på nivå 1–2 for å ta svenneprøven (§3.2) */}
+        {/* Domener (jern) — trykk for å ta svenneprøven (fagbrev → mesterbrev) */}
         <MaterialPanel material="jern" framed className="mb-6 p-3">
-        <p className="mb-2 font-inter text-xs text-viking-gold-soft">Ferdigheter{isChief ? ' — trykk en uthevet for å ta svenneprøven' : ''}</p>
+        <p className="mb-2 font-inter text-xs text-viking-gold-soft">Svennebrev{isChief ? ' — trykk et domene for å ta svenneprøven' : ''}</p>
         <div className="flex flex-wrap gap-2">
           {SKILL_KEYS.map((key) => {
-            const lvl = state.skills[key] ?? 0;
-            const eligible = (lvl === 1 || lvl === 2) && isChief;
+            const brev = state.svennebrev[key] ?? 0;
+            const eligible = (brev === 0 || brev === 1) && isChief;
             return (
               <button
                 key={key}
                 disabled={!eligible}
                 onClick={() => setActiveSkill(key)}
-                title={eligible ? 'Ta svenneprøven' : lvl >= 3 ? 'Mester (maks nivå)' : !isChief ? 'Kun høvdingen kan starte prøven' : 'Ikke låst opp ennå'}
-                className={`flex items-center gap-2 rounded-full border-2 px-3 py-1 transition-all ${lvl > 0 ? 'border-viking-gold/60 bg-viking-gold/10' : 'border-viking-gold/20 opacity-60'} ${eligible ? 'cursor-pointer hover:border-viking-gold hover:bg-viking-gold/20' : 'cursor-default'}`}
+                title={eligible ? (brev === 0 ? 'Ta fagbrev-svenneprøven' : 'Ta mesterbrev-svenneprøven') : brev >= 2 ? 'Mesterbrev (fullført)' : !isChief ? 'Kun høvdingen kan starte prøven' : 'Ikke tilgjengelig'}
+                className={`flex items-center gap-2 rounded-full border-2 px-3 py-1 transition-all ${brev > 0 ? 'border-viking-gold/60 bg-viking-gold/10' : 'border-viking-gold/20 opacity-60'} ${eligible ? 'cursor-pointer hover:border-viking-gold hover:bg-viking-gold/20' : 'cursor-default'}`}
               >
                 <NorseIcon name={SKILL_PNG[key]} size={16} className="text-viking-gold-soft" />
                 <span className="font-inter text-xs text-viking-paper/90">{skillTreeData[key].name}</span>
-                <span className="font-mono text-xs text-viking-gold">{lvl}</span>
+                <span className="font-mono text-xs text-viking-gold">{brev === 0 ? '—' : brev === 1 ? 'fagbrev' : 'mesterbrev'}</span>
                 {eligible && <Icon name="axe" size={12} className="text-viking-gold" />}
               </button>
             );
@@ -933,7 +933,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             visited={state.visited}
             locked={state.locked}
             goods={state.goods ?? {}}
-            skills={state.skills}
+            svennebrev={state.svennebrev}
             scores={state.scores}
             unlockedSides={state.unlockedSides ?? []}
             performedActions={state.performedActions ?? []}
@@ -961,7 +961,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
         {/* §7.2 Sjøslag (kun online — krever andre grupper) */}
         {session.mode === 'online' && (
           <div className="mb-8">
-            <SeaBattle code={session.gameCode} myGroupId={myGroupId} myShipName={setup.shipName} mySkills={state.skills} onResult={addReward} />
+            <SeaBattle code={session.gameCode} myGroupId={myGroupId} myShipName={setup.shipName} mySkills={state.svennebrev} onResult={addReward} />
           </div>
         )}
 

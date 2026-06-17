@@ -21,7 +21,7 @@ import MaterialPanel from '../decor/MaterialPanel';
 interface Props {
   destinations: Destination[];
   scores: { culturalUnderstanding: number; tradeGain: number; reputation: number };
-  skills: Record<SkillKey, number>;
+  svennebrev: Record<SkillKey, number>;
   goods: Partial<Record<TradeGoodId, number>>;
   visited: string[];
   locked: string[];
@@ -35,9 +35,9 @@ interface ReachableRow {
   bestPath: string;
 }
 
-export default function HvaKanViGjorePanel({ destinations, scores, skills, goods, visited, locked, unlockedSides }: Props) {
+export default function HvaKanViGjorePanel({ destinations, scores, svennebrev, goods, visited, locked, unlockedSides }: Props) {
   const destById = Object.fromEntries(destinations.map((d) => [d.id, d]));
-  const stateForLogic = { scores, skills, goods, locked, unlockedSides };
+  const stateForLogic = { scores, svennebrev, goods, locked, unlockedSides };
 
   // For hvert sidested: beste vei og hvor nær den er.
   const rows: ReachableRow[] = Object.entries(SIDE_UNLOCKS).flatMap(([destId, reqs]): ReachableRow[] => {

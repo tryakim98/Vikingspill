@@ -155,12 +155,12 @@ function legacyFromScores(scores: Scores): Archetype {
 }
 
 /** Topp-ferdigheten (høyeste nivå; språk vinner ved likhet) som flavor-tittel. */
-export function topSkillTitle(skills: Record<SkillKey, number>): { name: string; icon: string; level: number } | null {
+export function topSkillTitle(svennebrev: Record<SkillKey, number>): { name: string; icon: string; level: number } | null {
   const order: SkillKey[] = ['språk', 'sjømannskap', 'krigskunst', 'diplomati', 'tro'];
   let best: SkillKey | null = null;
   for (const k of order) {
-    if (skills[k] > 0 && (best === null || skills[k] > skills[best])) best = k;
+    if (svennebrev[k] > 0 && (best === null || svennebrev[k] > svennebrev[best])) best = k;
   }
   if (!best) return null;
-  return { name: skillTreeData[best].name, icon: skillTreeData[best].icon, level: skills[best] };
+  return { name: skillTreeData[best].name, icon: skillTreeData[best].icon, level: svennebrev[best] };
 }

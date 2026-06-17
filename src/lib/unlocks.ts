@@ -10,7 +10,7 @@ import { skillTreeData } from '../data/skillTree';
 
 interface GameStateLike {
   scores: { culturalUnderstanding: number; tradeGain: number; reputation: number };
-  skills: Record<SkillKey, number>;
+  svennebrev: Record<SkillKey, number>;
   goods: Partial<Record<TradeGoodId, number>>;
   locked: string[];
   unlockedSides: string[];
@@ -27,7 +27,7 @@ const SCORE_LABEL: Record<ScoreKey, string> = {
 export function meetsRequirement(r: UnlockRequirement, s: GameStateLike): boolean {
   switch (r.type) {
     case 'svenneprove': return false;
-    case 'skill':       return (s.skills[r.key] ?? 0) >= r.min;
+    case 'skill':       return (s.svennebrev[r.key] ?? 0) >= r.min;
     case 'score':       return s.scores[r.key] >= r.min;
     case 'goods':
       return Object.entries(r.goods).every(([g, n]) => (s.goods[g as TradeGoodId] ?? 0) >= (n ?? 0));
@@ -62,7 +62,7 @@ export function missingForRequirement(r: UnlockRequirement, s: GameStateLike): s
   switch (r.type) {
     case 'svenneprove': return `Ferdsbrev i ${skillTreeData[r.skill].name}`;
     case 'skill': {
-      const cur = s.skills[r.key] ?? 0;
+      const cur = s.svennebrev[r.key] ?? 0;
       return cur >= r.min ? null : `${r.min - cur} nivå i ${skillTreeData[r.key].name}`;
     }
     case 'score': {
@@ -85,7 +85,7 @@ export function haveForRequirement(r: UnlockRequirement, s: GameStateLike): stri
   switch (r.type) {
     case 'svenneprove': return null;
     case 'skill': {
-      const cur = s.skills[r.key] ?? 0;
+      const cur = s.svennebrev[r.key] ?? 0;
       return `nivå ${cur} i ${skillTreeData[r.key].name}`;
     }
     case 'score': {
