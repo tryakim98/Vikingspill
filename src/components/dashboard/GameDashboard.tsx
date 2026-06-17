@@ -741,7 +741,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   // Sekundærtallene står ved siden av kjernestatusen (Kulturforståelse) — bevisst hierarki.
   const secondaryStats = [
     { label: 'Handelsutbytte', v: state.scores.tradeGain, icon: TRADE_PNG, material: 'tre' as const },
-    { label: 'Rykte', v: state.scores.reputation, icon: 'ikon-rykte', material: 'jern' as const },
+    { label: 'Rykte', v: state.scores.reputation, icon: 'ikon-rykte', material: 'stein' as const },
   ];
 
   return (
@@ -844,7 +844,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           {/* Sekundærtall: handel (tre) + rykte (jern) — materiale per innholdstype */}
           <div className="flex gap-3 sm:flex-1 sm:flex-col">
             {secondaryStats.map((s) => (
-              <MaterialPanel key={s.label} material={s.material} className="flex flex-1 items-baseline justify-between gap-2 px-3 py-2.5 sm:flex-col sm:items-start sm:justify-center" data-testid="stat-secondary">
+              <MaterialPanel key={s.label} material={s.material} framed className="flex flex-1 items-baseline justify-between gap-2 px-4 py-3 sm:flex-col sm:items-start sm:justify-center" data-testid="stat-secondary">
                 <p className="inline-flex items-center gap-1.5 font-saga text-sm uppercase tracking-wide text-viking-gold-soft">
                   <NorseIcon name={s.icon} size={14} /> {s.label}
                 </p>
