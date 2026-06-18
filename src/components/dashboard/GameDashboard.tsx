@@ -978,9 +978,9 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
           </div>
         )}
 
-        {/* Dev-modus — samme kort-/knappespråk som resten (gull-på-mørkt, matt crimson-
-            aksent på destruktive valg), ikke mettede flatefarger. */}
-        <div className="rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-5">
+        {/* Dev-modus — samme gravyr-ramme som de øvrige panelene (ingen naken boks ved
+            siden av framede), matt crimson-aksent på destruktive valg. */}
+        <MaterialPanel material="skinn" framed className="p-5">
           <h3 className="mb-3 font-cinzel text-lg text-viking-gold-soft">Utvikler-modus</h3>
           <div className="flex flex-wrap gap-3">
             <button onClick={resetProgress} className="rounded-md border-2 border-viking-crimson/50 bg-viking-darkblue/40 px-4 py-2 font-cinzel text-sm text-viking-crimson hover:border-viking-crimson hover:bg-viking-crimson/10">Nullstill reise</button>
@@ -1007,7 +1007,7 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             </button>
           </div>
           <p className="mt-2 font-inter text-[11px] italic text-viking-gold-soft/60">Laster ned JSON + kopierer til utklippstavlen (localStorage: vikingspill_feedback).</p>
-        </div>
+        </MaterialPanel>
       </div>
 
       {/* Engangs-forklaringer — bobler nederst når gruppa møter et nytt konsept */}
