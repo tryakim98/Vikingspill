@@ -65,6 +65,15 @@ function feedbackOkt(): string {
 }
 
 /**
+ * Fang ?okt FØR ruteren rekker å redirecte (som stripper query-strengen). Kalles én
+ * gang fra main.tsx ved oppstart. Uten dette ville okt være borte fra URL-en når en
+ * elev faktisk sender en post fra en undersides-rute (/student).
+ */
+export function captureFeedbackOkt(): void {
+  feedbackOkt();
+}
+
+/**
  * Tilfeldig, anonym sesjons-id så samme elevs poster grupperes. Ingen personinfo —
  * bare et slumptall lagret lokalt, gjenbrukt på tvers av poster i samme nettleser.
  */
