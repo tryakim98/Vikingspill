@@ -10,7 +10,7 @@ import type { Destination, SkillKey } from '../../types';
 import { dealPrivateCard, shouldDealKeyCard, agendaAllowed } from '../../lib/keyCards';
 import { AGENDA_CARDS } from '../../data/agendaCards';
 import { deriveHonors } from '../../lib/council';
-import { reportFeedbackScreen } from '../../lib/feedback';
+import { reportFeedbackScreen, getStoredFeedback, exportFeedbackJson } from '../../lib/feedback';
 import { destinations } from '../../data';
 import { useGameState } from '../../hooks/useGameState';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
@@ -988,7 +988,25 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
             <button onClick={onResetSetup} className="rounded-md border-2 border-viking-gold/50 bg-viking-darkblue/40 px-4 py-2 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold">Start oppsett på nytt</button>
             <button onClick={() => { if (session.mode === 'online' && session.groupId && isChief && memberIds.length <= 1) removeGroup(session.gameCode, session.groupId).catch(() => {}); onLeaveGame(); }} className="rounded-md border-2 border-viking-crimson/50 bg-viking-darkblue/40 px-4 py-2 font-cinzel text-sm text-viking-crimson hover:border-viking-crimson hover:bg-viking-crimson/10">Forlat spill</button>
             <button onClick={onSwitchRole} className="rounded-md border-2 border-viking-gold/50 bg-viking-darkblue/40 px-4 py-2 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold">Bytt rolle</button>
+            <button
+              onClick={() => {
+                const json = exportFeedbackJson();
+                navigator.clipboard?.writeText(json).catch(() => {});
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'vikingspill_feedback.json';
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              data-testid="export-feedback"
+              className="rounded-md border-2 border-viking-gold/50 bg-viking-darkblue/40 px-4 py-2 font-cinzel text-sm text-viking-gold-soft hover:border-viking-gold hover:text-viking-gold"
+            >
+              <span className="inline-flex items-center gap-1.5"><Icon name="download" size={14} /> Eksporter tilbakemeldinger ({getStoredFeedback().length})</span>
+            </button>
           </div>
+          <p className="mt-2 font-inter text-[11px] italic text-viking-gold-soft/60">Laster ned JSON + kopierer til utklippstavlen (localStorage: vikingspill_feedback).</p>
         </div>
       </div>
 
