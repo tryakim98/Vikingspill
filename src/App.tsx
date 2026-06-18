@@ -4,7 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import './App.css';
 
 // Pages
-import RoleSelect from './pages/RoleSelect';
+import StartScreen from './pages/StartScreen';
 import TeacherPanel from './pages/TeacherPanel';
 import StudentGame from './pages/StudentGame';
 import ForLarere from './pages/ForLarere';
@@ -18,7 +18,7 @@ function App() {
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <Router>
           <Routes>
-            <Route path="/" element={<RoleSelect />} />
+            <Route path="/" element={<StartScreen />} />
             <Route path="/teacher" element={<TeacherPanel />} />
             <Route path="/student" element={<StudentGame />} />
             <Route path="/for-larere" element={<ForLarere />} />
