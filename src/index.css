@@ -107,9 +107,19 @@ code {
   border-image-source: url('/ornamenter/ramme-panel.png');
   border-image-slice: 87 70 80 72;
   border-image-repeat: round;
+  /* ramme-panel.png har en transparent marg OVER selve flettverket (kilde: ~21px topp,
+     ~16px bunn, ~3px sider). Uten dette mapper PNG-kanten til panelkanten og flettverket
+     havner et hakk inn → en stripe panelbakgrunn vises langs kantene og hjørnene møter
+     ikke kanten. border-image-outset drar flettverket UT til panelets faktiske kant
+     (skalert margin: ~7px topp / ~6px bunn / ~1px sider). Outset på border-image klippes
+     ikke av elementets eget overflow:hidden, så også hero-panelet rettes. */
+  border-image-outset: 7px 1px 6px 1px;
 }
 @media (max-width: 640px) {
-  .viking-frame { border-width: 22px 18px 20px 18px; }
+  .viking-frame {
+    border-width: 22px 18px 20px 18px;
+    border-image-outset: 5px 1px 4px 1px;
+  }
 }
 
 /* === Norrøn estetikk: teksturer og graveringer ===================================== */
