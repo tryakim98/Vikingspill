@@ -36,8 +36,10 @@ async function inspectBackdrop(p, expectId) {
     if (!bd) return { found: false };
     const r = bd.getBoundingClientRect();
     const wrap = bd.closest('[aria-hidden="true"]');
-    const scrim = wrap ? [...wrap.children].find((c) => c.tagName === 'DIV') : null;
-    const bg = scrim ? getComputedStyle(scrim).backgroundImage : '';
+    // Backdrop-wrapperen kan ha flere lag (per-kultur materiallag + gradient-scrim);
+    // sjekk om NOEN av barne-div-ene har en gradient-scrim.
+    const divs = wrap ? [...wrap.children].filter((c) => c.tagName === 'DIV') : [];
+    const bg = divs.map((d) => getComputedStyle(d).backgroundImage).join(' ');
     return {
       found: true,
       src: bd.getAttribute('src'),

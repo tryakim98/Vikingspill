@@ -96,12 +96,32 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 };
 
 
-function Shell({ name, onExit, backdrop, children }: { name: string; onExit: () => void; backdrop?: string; children: ReactNode }) {
+/** Per-kultur materialidentitet på lese-stegene: et tynt materiallag + tonet scrim
+ *  OVER havnas foto-bakteppe, så hver kultur «kler seg» distinkt uten å skjule fotoet:
+ *    mosaikk → bysantinsk/arabisk gull (Bagdad, Miklagard)
+ *    stein   → kald nordlig vidde/stein  (Sameland, Island, Færøyene, Vinland)
+ *    tre     → varme kongedømmer/handelsbyer (resten)
+ *  Scrimene er tonet (varm gull / kald stein / varm tre) men holder samme mørkhet som
+ *  før, så gulltekst forblir lesbar. */
+type CultureMaterial = 'mosaikk' | 'stein' | 'tre';
+const CULTURE_WASH: Record<CultureMaterial, { texture: string; opacity: number; scrim: string }> = {
+  mosaikk: { texture: 'mosaikk', opacity: 0.38, scrim: 'linear-gradient(180deg, rgba(26,17,3,0.60) 0%, rgba(14,9,2,0.84) 100%)' },
+  stein:   { texture: 'stein',   opacity: 0.42, scrim: 'linear-gradient(180deg, rgba(9,11,15,0.60) 0%, rgba(6,7,10,0.84) 100%)' },
+  tre:     { texture: 'tre',     opacity: 0.32, scrim: 'linear-gradient(180deg, rgba(10,7,3,0.62) 0%, rgba(8,6,3,0.82) 100%)' },
+};
+function cultureMaterial(id: string): CultureMaterial {
+  if (id === 'baghdad' || id === 'miklagard') return 'mosaikk';
+  if (id === 'sameland' || id === 'island' || id === 'faroyene' || id === 'vinland') return 'stein';
+  return 'tre';
+}
+
+function Shell({ name, onExit, backdrop, material, children }: { name: string; onExit: () => void; backdrop?: string; material?: CultureMaterial; children: ReactNode }) {
+  const wash = material ? CULTURE_WASH[material] : null;
   return (
     <div className="relative min-h-screen viking-screen text-viking-paper">
       {/* Valgfritt: havnas egen gravering som stort, dempet bakteppe (kun historie- og
-          kulturmøte-stegene). Mørk scrim over så lys gull-/pergamenttekst er lesbar.
-          Faller tilbake til viking-screen (tre) om bildet mangler. */}
+          kulturmøte-stegene), med per-kultur materiallag + tonet scrim over. Mørk scrim
+          holder lys gull-/pergamenttekst lesbar. Faller tilbake til viking-screen om bildet mangler. */}
       {backdrop && (
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
           <img
@@ -110,7 +130,18 @@ function Shell({ name, onExit, backdrop, children }: { name: string; onExit: () 
             className="h-full w-full object-cover"
             onError={(e) => { (e.currentTarget.closest('div') as HTMLElement).style.display = 'none'; }}
           />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(10,7,3,0.64) 0%, rgba(8,6,3,0.82) 100%)' }} />
+          {wash && (
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `url("${import.meta.env.BASE_URL}textures/${wash.texture}.png")`,
+                backgroundSize: 'cover',
+                mixBlendMode: 'soft-light',
+                opacity: wash.opacity,
+              }}
+            />
+          )}
+          <div className="absolute inset-0" style={{ background: wash ? wash.scrim : 'linear-gradient(180deg, rgba(10,7,3,0.64) 0%, rgba(8,6,3,0.82) 100%)' }} />
         </div>
       )}
       <div className="relative z-10 mx-auto max-w-2xl px-4 py-8">
@@ -431,7 +462,7 @@ export default function EncounterFlow({
   // 1) HISTORIE
   if (step === 'history') {
     return (
-      <Shell name={d.name} onExit={onExit} backdrop={d.image}>
+      <Shell name={d.name} onExit={onExit} backdrop={d.image} material={cultureMaterial(d.id)}>
         {/* Stemningsbilde av ankomsten (public/steder/sted-<id>.jpg). Beskåret til et
             bredt banner; en mørk gradient nederst lar tittelen hvile mot bildet. Skjuler
             seg selv om filen mangler, så historie-steget aldri viser et brukket bilde. */}
@@ -466,7 +497,7 @@ export default function EncounterFlow({
   if (step === 'kulturmote') {
     const km = d.episkeKulturmote;
     return (
-      <Shell name={d.name} onExit={onExit} backdrop={d.image}>
+      <Shell name={d.name} onExit={onExit} backdrop={d.image} material={cultureMaterial(d.id)}>
         <p className="mb-1 font-inter text-xs uppercase tracking-widest text-viking-gold-soft/70">Episk kulturmøte</p>
         <h1 className="mb-2 font-saga text-3xl text-viking-gold">{km.tittel}</h1>
         <TextLenToggle />
