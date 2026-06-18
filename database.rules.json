@@ -238,6 +238,7 @@
         "kategori":     { ".validate": "newData.isString() && newData.val().matches(/^(bug|forvirrende|forslag|likte)$/)" },
         "kommentar":    { ".validate": "newData.isString() && newData.val().length <= 600" },
         "sesjonsId":    { ".validate": "newData.isString() && newData.val().length <= 40" },
+        "okt":          { ".validate": "newData.isString() && newData.val().length <= 40" },
         "$other":       { ".validate": false }
       }
     }

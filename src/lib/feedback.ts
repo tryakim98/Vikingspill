@@ -42,6 +42,27 @@ export function currentFeedbackScreen(): ScreenContext {
 
 const LS_KEY = 'vikingspill_feedback';
 const SID_KEY = 'vikingspill_feedback_sid';
+const OKT_KEY = 'vikingspill_feedback_okt';
+
+/**
+ * Valgfritt øktmerke fra URL-en (?okt=XXXX) — bare en etikett (f.eks. klasse/økt) så
+ * svar kan sorteres. IKKE en spillkode, gjør INGENTING online. Fanges fra URL og
+ * persisteres lokalt, så den henger med resten av økten selv om eleven navigerer videre.
+ * Mangler den: tom streng (alt fungerer som før).
+ */
+function feedbackOkt(): string {
+  try {
+    const fromUrl = new URLSearchParams(window.location.search).get('okt');
+    if (fromUrl && fromUrl.trim()) {
+      const clean = fromUrl.trim().slice(0, 40);
+      localStorage.setItem(OKT_KEY, clean);
+      return clean;
+    }
+    return localStorage.getItem(OKT_KEY) || '';
+  } catch {
+    return '';
+  }
+}
 
 /**
  * Tilfeldig, anonym sesjons-id så samme elevs poster grupperes. Ingen personinfo —
@@ -70,6 +91,8 @@ export interface FeedbackPost {
   kategori: FeedbackCategory;
   kommentar: string;
   sesjonsId: string;
+  /** Valgfritt øktmerke fra ?okt=XXXX (klasse/økt-etikett). Tom streng hvis ikke satt. */
+  okt: string;
 }
 
 export function getStoredFeedback(): FeedbackPost[] {
@@ -109,6 +132,7 @@ export function submitFeedback(input: {
     kategori: input.kategori,
     kommentar: input.kommentar.trim(),
     sesjonsId: sessionId(),
+    okt: feedbackOkt(),
   };
 
   // 1) ALLTID localStorage — mister aldri noe.
@@ -122,8 +146,12 @@ export function submitFeedback(input: {
 
   // 2) Fire-and-forget til EGEN feedback-node (IKKE i spill-state/session).
   //    Feiler den (offline / regler), svelges den stille — blokkerer aldri UI.
+  //    Firebase SDK KASTER på undefined-verdier, så valgfrie felt (steg/destinasjon/
+  //    rolle) som er undefined må fjernes — ellers kastes hele skrivet og posten når
+  //    aldri Firebase (kun localStorage). Strip undefined før push.
   try {
-    push(ref(db, 'feedback'), post)?.catch?.(() => {});
+    const payload = Object.fromEntries(Object.entries(post).filter(([, v]) => v !== undefined));
+    push(ref(db, 'feedback'), payload)?.catch?.(() => {});
   } catch {
     /* firebase utilgjengelig — posten ligger trygt lokalt */
   }
