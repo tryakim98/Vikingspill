@@ -32,7 +32,7 @@ export default function HintToast({ hint, onDismiss }: Props) {
           className="pointer-events-auto fixed bottom-4 left-1/2 z-50 w-[min(94vw,440px)] -translate-x-1/2"
           data-testid="hint-toast"
         >
-          <div className="rounded-lg border-2 border-viking-gold bg-viking-darkblue/95 p-4 shadow-2xl" style={{ boxShadow: '0 0 32px rgba(205,195,173,0.35)' }}>
+          <div className="border-2 border-viking-gold bg-viking-darkblue/95 p-4" style={{ boxShadow: '0 6px 18px rgba(0,0,0,0.5)' }}>
             <div className="flex items-start gap-3">
               <AutoIcon name={hint.icon} size={30} className="mt-0.5 shrink-0 text-viking-gold" />
               <div className="flex-1">

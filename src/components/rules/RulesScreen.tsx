@@ -110,7 +110,7 @@ export default function RulesScreen({ role, onDone }: Props) {
           className="text-center"
         >
           <p className="font-cinzel text-xs uppercase tracking-[0.3em] text-viking-gold-soft/70">{subtitle}</p>
-          <h1 className="mt-2 font-cinzel text-3xl font-bold text-viking-gold drop-shadow-lg sm:text-4xl">{title}</h1>
+          <h1 className="mt-2 font-cinzel text-3xl font-bold text-viking-gold [text-shadow:0_2px_4px_rgba(0,0,0,0.6)] sm:text-4xl">{title}</h1>
         </motion.div>
 
         <div className="mt-8 space-y-4">
@@ -122,7 +122,7 @@ export default function RulesScreen({ role, onDone }: Props) {
               transition={{ duration: 0.35, delay: 0.08 * i }}
               className="flex gap-4 rounded-lg border-2 border-viking-gold/40 bg-viking-surface p-4"
             >
-              <div className="shrink-0 text-viking-gold drop-shadow"><Icon name={s.icon} size={28} /></div>
+              <div className="shrink-0 text-viking-gold"><Icon name={s.icon} size={28} /></div>
               <div>
                 <h2 className="font-cinzel text-lg text-viking-gold">{s.title}</h2>
                 <p className="mt-1 font-inter text-sm leading-relaxed text-viking-paper/90">{s.body}</p>

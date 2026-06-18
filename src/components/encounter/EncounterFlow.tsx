@@ -361,7 +361,7 @@ export default function EncounterFlow({
     if (iHoldKeyCard && agendaData) {
       // Sabotør (§3 trinn 2): holderen får et hemmelig oppdrag — kun hen ser det.
       return (
-        <div className="mb-4 rounded-lg border-2 border-viking-crimson/70 bg-viking-crimson/10 p-4 shadow-[0_0_18px_rgba(139,41,41,0.25)]" data-testid="agenda-private">
+        <div className="mb-4 border-2 border-viking-crimson/70 bg-viking-crimson/10 p-4" data-testid="agenda-private">
           <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-crimson"><Icon name="book" size={13} /> Skjult rolle — kun du ser dette</p>
           <p className="font-inter text-sm text-viking-paper">{agendaData.brief}</p>
           <p className="mt-2 font-inter text-xs italic text-viking-gold-soft">Spill rollen — overbevis mannskapet, men røp aldri hvorfor.</p>
@@ -370,7 +370,7 @@ export default function EncounterFlow({
     }
     if (iHoldKeyCard && keyCardData) {
       return (
-        <div className="mb-4 rounded-lg border-2 border-viking-gold bg-viking-gold/12 p-4 shadow-[0_0_18px_rgba(205,195,173,0.25)]" data-testid="keycard-private">
+        <div className="mb-4 border-2 border-viking-gold bg-viking-gold/12 p-4" data-testid="keycard-private">
           <p className="mb-1 inline-flex items-center gap-1.5 font-cinzel text-sm text-viking-gold"><Icon name="book" size={13} /> Nøkkelkort — kun du ser dette</p>
           <p className="font-inter text-sm text-viking-paper">{keyCardData.text}</p>
           <p className="mt-2 font-inter text-xs italic text-viking-gold-soft">Del det med mannskapet og overbevis dem.</p>
