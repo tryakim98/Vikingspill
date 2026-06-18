@@ -224,7 +224,6 @@
     },
 
     "feedback": {
-      "_comment": "Enspiller-tilbakemelding — egen node, helt utenfor spill-state. Append-only: elever kan legge til (push), ikke lese/endre/slette. Lærer leser i Firebase-konsollen (admin omgår regler).",
       ".read": false,
       "$id": {
         ".write": "!data.exists()",
