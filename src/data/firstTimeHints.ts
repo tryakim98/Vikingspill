@@ -41,7 +41,7 @@ export const HINTS: Record<HintKey, Hint> = {
   'reward-skill': {
     icon: 'axe',
     title: 'En ferdighet vokser!',
-    body: 'Ferdigheter (språk, sjømannskap, krigskunst, diplomati, tro) gir bonus på terningkast og åpner spesifikke valg. På nivå 1 og 2 kan dere ta en svenneprøve for å stige.',
+    body: 'Ferdigheter (språk, sjømannskap, krigskunst, diplomati, tro) måles i svennebrev. Høyere grad åpner bonus-valg og enkelte sidesteder — men påvirker ikke terningen. På grad sveinn og mester kan dere ta en svenneprøve for å stige.',
   },
   'reward-goods': {
     icon: 'crate',
