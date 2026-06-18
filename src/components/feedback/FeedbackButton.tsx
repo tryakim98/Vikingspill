@@ -54,7 +54,8 @@ export default function FeedbackButton({ rolle, className = '' }: Props) {
           role="dialog"
           aria-label="Send tilbakemelding"
           data-testid="feedback-panel"
-          className="absolute bottom-12 left-0 w-[min(20rem,calc(100vw-2rem))] rounded-lg border-2 border-viking-gold/60 bg-viking-surface p-4 shadow-xl shadow-black/40"
+          className="absolute bottom-12 left-0 w-[min(20rem,calc(100vw-2rem))] border-2 border-viking-gold/60 bg-viking-surface p-4"
+          style={{ boxShadow: '0 6px 18px rgba(0,0,0,0.45)' }}
         >
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-cinzel text-sm uppercase tracking-wide text-viking-gold-soft">Tilbakemelding</h3>

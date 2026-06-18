@@ -67,7 +67,8 @@ export function SkjebneMoteModal({ quest, isChief, selectedChoiceId, rollResult,
           initial={{ y: 30, scale: 0.95 }}
           animate={{ y: 0, scale: 1 }}
           transition={{ type: 'spring', damping: 18 }}
-          className="max-w-lg rounded-lg border-2 border-viking-gold/60 bg-viking-surface p-6 shadow-2xl"
+          className="max-w-lg border-2 border-viking-gold/60 bg-viking-surface p-6"
+          style={{ boxShadow: '0 6px 18px rgba(0,0,0,0.45)' }}
         >
           <p className="mb-1 font-cinzel text-xs uppercase tracking-widest text-viking-gold/70">Skjebnemøte</p>
           <h2 className="mb-4 font-cinzel text-2xl text-viking-gold" data-testid="skjebnemote-title">{quest.title}</h2>

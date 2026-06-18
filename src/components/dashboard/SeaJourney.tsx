@@ -295,7 +295,7 @@ export default function SeaJourney({ destinations, visited, locked, goods, svenn
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.35 }}
-                  className="pointer-events-none absolute left-1/2 top-2 z-30 -translate-x-1/2 rounded-md border border-viking-gold/60 bg-viking-darkblue/90 px-3 py-1 font-cinzel text-xs text-viking-gold shadow-lg sm:text-sm"
+                  className="pointer-events-none absolute left-1/2 top-2 z-30 -translate-x-1/2 border border-viking-gold/60 bg-viking-darkblue/90 px-3 py-1 font-cinzel text-xs text-viking-gold sm:text-sm"
                   data-testid="sailing-bubble"
                 >
                   <Icon name="anchor" size={13} className="mr-1 inline-block align-[-1px]" /> Seiler mot {sailingDest.name} …
