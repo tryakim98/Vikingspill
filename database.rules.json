@@ -221,6 +221,25 @@
 
         "$other": { ".validate": false }
       }
+    },
+
+    "feedback": {
+      "_comment": "Enspiller-tilbakemelding — egen node, helt utenfor spill-state. Append-only: elever kan legge til (push), ikke lese/endre/slette. Lærer leser i Firebase-konsollen (admin omgår regler).",
+      ".read": false,
+      "$id": {
+        ".write": "!data.exists()",
+        ".validate": "newData.hasChildren(['tidspunkt','skjerm','kategori','sesjonsId'])",
+        "tidspunkt":    { ".validate": "newData.isNumber()" },
+        "tidspunktISO": { ".validate": "newData.isString() && newData.val().length <= 40" },
+        "skjerm":       { ".validate": "newData.isString() && newData.val().matches(/^(dashboard|kart|oppsett|encounter|saga|seremoni)$/)" },
+        "steg":         { ".validate": "newData.isString() && newData.val().length <= 30" },
+        "destinasjon":  { ".validate": "newData.isString() && newData.val().length <= 60" },
+        "rolle":        { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "kategori":     { ".validate": "newData.isString() && newData.val().matches(/^(bug|forvirrende|forslag|likte)$/)" },
+        "kommentar":    { ".validate": "newData.isString() && newData.val().length <= 600" },
+        "sesjonsId":    { ".validate": "newData.isString() && newData.val().length <= 40" },
+        "$other":       { ".validate": false }
+      }
     }
   }
 }
