@@ -10,6 +10,7 @@ import type { Destination, SkillKey } from '../../types';
 import { dealPrivateCard, shouldDealKeyCard, agendaAllowed } from '../../lib/keyCards';
 import { AGENDA_CARDS } from '../../data/agendaCards';
 import { deriveHonors } from '../../lib/council';
+import { reportFeedbackScreen } from '../../lib/feedback';
 import { destinations } from '../../data';
 import { useGameState } from '../../hooks/useGameState';
 import type { GroupSetup } from '../../hooks/useGroupSetup';
@@ -450,6 +451,13 @@ export default function GameDashboard({ setup, session, onResetSetup, onLeaveGam
   useEffect(() => { if (!activeDest) playMusic('sailing'); }, [activeDest]);
   // Stopp musikken når dashboardet avmonteres (eleven forlater spillet / bytter rolle).
   useEffect(() => () => stopMusic(), []);
+
+  // Tilbakemelding-kontekst: dashboard/saga/seremoni. Encounter rapporterer sitt eget
+  // steg (EncounterFlow), så vi hopper over når en havn er aktiv. Ren telemetri.
+  useEffect(() => {
+    if (activeDest) return;
+    reportFeedbackScreen({ screen: showCeremony ? 'seremoni' : showOwnSaga ? 'saga' : 'dashboard' });
+  }, [activeDest, showCeremony, showOwnSaga]);
 
   // Førstegangs-forklaringer: utløses når en ressurs blir > 0 første gang,
   // eller når gruppa preview-er et låst sidested for første gang.

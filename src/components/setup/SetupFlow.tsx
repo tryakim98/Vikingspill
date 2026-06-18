@@ -7,8 +7,9 @@
  *   4) Klar        — oppsummering → «Sett seil»
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ShipSymbol, SkillKey } from '../../types';
+import { reportFeedbackScreen } from '../../lib/feedback';
 import { CREW_ROLES } from '../../data';
 import VikingShip from '../ship/VikingShip';
 import NorseIcon, { AutoIcon } from '../decor/NorseIcon';
@@ -67,6 +68,8 @@ function StepDots({ step }: { step: Step }) {
 
 export default function SetupFlow({ onComplete }: { onComplete: (setup: GroupSetup) => void }) {
   const [step, setStep] = useState<Step>('ship');
+  // Tilbakemelding-kontekst: oppsettskjermen (telemetri, påvirker ikke flyten).
+  useEffect(() => { reportFeedbackScreen({ screen: 'oppsett' }); }, []);
   const [color, setColor] = useState<string>(SHIP_COLORS[0].value);
   const [shipName, setShipName] = useState('');
   const [symbol, setSymbol] = useState<ShipSymbol>('drage');

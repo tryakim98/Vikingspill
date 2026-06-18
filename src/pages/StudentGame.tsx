@@ -24,6 +24,7 @@ import LoadingScreen from '../components/common/LoadingScreen';
 import MuteButton from '../components/common/MuteButton';
 import RulesScreen from '../components/rules/RulesScreen';
 import HelpButton from '../components/rules/HelpButton';
+import FeedbackButton from '../components/feedback/FeedbackButton';
 import { joinGroupAsMember, leaveGroupAsMember, setMemberRole, subscribeGroup, writeGroup, type SyncedGroup } from '../lib/gameSync';
 import type { SkillKey } from '../types';
 
@@ -171,6 +172,8 @@ export default function StudentGame() {
     <>
       {content}
       <HelpButton onClick={() => setShowRules(true)} className="fixed right-4 top-4 z-[70]" />
+      {/* Tilbakemelding kun for enspiller (offline) — fanger HVOR i spillet eleven er. */}
+      {session?.mode === 'offline' && <FeedbackButton rolle={setup?.role} />}
       <MuteButton />
     </>
   );

@@ -16,6 +16,7 @@ import { CREW_ROLES, CREW_ROLE_ORDER } from '../../data/crewRoles';
 import { KEY_CARDS } from '../../data/keyCards';
 import { AGENDA_CARDS, pickAgenda, type AgendaCard } from '../../data/agendaCards';
 import { tallyVotes, npcVotes } from '../../lib/council';
+import { reportFeedbackScreen } from '../../lib/feedback';
 import { SOLO_AGENDA_CHANCE } from '../../lib/keyCards';
 import type { SyncedEncounter, CouncilAdvice, ApprovalRequest } from '../../lib/gameSync';
 import { taskBonusForApproval } from '../../lib/gameSync';
@@ -240,6 +241,10 @@ export default function EncounterFlow({
   const allChoices = d.hiddenChoice ? [...d.choices, d.hiddenChoice.choice] : d.choices;
 
   const step = syncMode ? (syncedEncounter?.step ?? 'history') : _step;
+  // Tilbakemelding-kontekst: hvilket encounter-steg + havn (telemetri, endrer ikke flyten).
+  useEffect(() => {
+    reportFeedbackScreen({ screen: 'encounter', step, destinasjon: d.name });
+  }, [step, d.name]);
   const approvalSent = syncMode ? (syncedEncounter?.approvalSent ?? false) : _approvalSent;
   const quizIdx = syncMode ? (syncedEncounter?.quizIdx ?? 0) : _quizIdx;
   const quizCorrect = syncMode ? (syncedEncounter?.quizCorrect ?? 0) : _quizCorrect;
