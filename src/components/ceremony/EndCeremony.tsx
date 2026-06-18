@@ -97,9 +97,9 @@ export default function EndCeremony({ setup, scores, svennebrev, saga, destinati
             {pillars.map((p) => {
               const ink = p.material === 'pergament';
               return (
-                <MaterialPanel key={p.label} material={p.material} className="p-4">
-                  <p className={`font-mono text-xs ${ink ? 'text-viking-rust' : 'text-viking-gold-soft'}`}>{p.label}</p>
-                  <p className={`font-cinzel text-3xl font-bold ${ink ? 'text-[#5C3E22]' : 'text-viking-gold'}`}>{p.v}</p>
+                <MaterialPanel key={p.label} material={p.material} framed className="p-2">
+                  <p className={`font-mono text-[10px] leading-tight ${ink ? 'text-viking-rust' : 'text-viking-gold-soft'}`}>{p.label}</p>
+                  <p className={`font-cinzel text-2xl font-bold ${ink ? 'text-[#5C3E22]' : 'text-viking-gold'}`}>{p.v}</p>
                 </MaterialPanel>
               );
             })}
