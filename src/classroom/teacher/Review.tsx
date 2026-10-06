@@ -5,12 +5,8 @@ import VikingShip from "../../components/ship/VikingShip";
 import { groupStatus } from "../../lib/groupStatus";
 import type { Intent } from "../store";
 import { Button, Field } from "../ui";
-import {
-  ROLE_LABEL,
-  onlineMembers,
-  reviewCount,
-  type Presence,
-} from "./status";
+import { onlineMembers, reviewCount, type Presence } from "./status";
+import { TOPIC_LABEL } from "../../domain/trials";
 
 type Send = (intent: Intent) => Promise<void>;
 type GroupNotes = {
@@ -209,7 +205,6 @@ function EvidenceCard({
       <summary>
         <span>
           <strong>{member?.label ?? `Tidligere medlem ${number}`}</strong>
-          {member && <small>{ROLE_LABEL[member.role]}</small>}
         </span>
         <span className="td-evidence-state">
           {quiz && quiz.total > 0
@@ -351,8 +346,10 @@ function GroupReview({
               <p className="td-caption">
                 {group.members[group.trial!.ownerId]?.label ??
                   "Tidligere medlem"}{" "}
-                · {ROLE_LABEL[group.trial!.skill]} · nivå {group.trial!.level}
+                · {TOPIC_LABEL[group.trial!.skill]} · nivå {group.trial!.level}
               </p>
+              <h4>{group.trial!.practiceTitle}</h4>
+              <p className="td-caption">{group.trial!.practicePrompt}</p>
               <p className="td-prose">{group.trial!.practice}</p>
             </>
           )}

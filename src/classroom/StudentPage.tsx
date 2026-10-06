@@ -6,7 +6,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { content } from "../content";
 import { SKILLS } from "../domain/model";
 import { makeBackup } from "../domain/backup";
-import { CREW_ROLES } from "../data/crewRoles";
+import { TOPIC_LABEL, trialAvailability } from "../domain/trials";
+import FateWheel from "./FateWheel";
 import { getRemote } from "./remote";
 import { loadSession, saveSession, soloSession } from "./store";
 import type { Session, Snapshot, GameStore } from "./store";
@@ -228,6 +229,15 @@ function ActiveStudent({
                 </Button>
               </Panel>
             ))}
+          <Holmgang
+            group={group}
+            view={state.public!}
+            uid={session.uid}
+            busy={busy}
+            send={store.send}
+            clockOffset={state.clockOffset}
+            solo={session.mode === "solo"}
+          />
           {group.encounter ? (
             <Encounter
               key={group.encounter.id}
@@ -256,17 +266,12 @@ function ActiveStudent({
               solo={session.mode === "solo"}
             />
           )}
-          {Object.values(state.public?.challenges ?? {})
-            .filter((c) => c.groups.includes(group.id))
-            .map((c) => (
-              <p className="cg-note" key={c.id}>
-                {c.title}:{" "}
-                {c.status === "open"
-                  ? "Åpen utfordring. Avtal gjennomføring med læreren."
-                  : `${state.public?.groups[c.winnerId!]?.shipName} vant.`}
-              </p>
-            ))}
-          <Holmgang />
+          {state.public?.wheel && (
+            <details className="cg-help">
+              <summary>Skjebnehjulets siste resultat</summary>
+              <FateWheel compact spin={state.public.wheel} />
+            </details>
+          )}
           <TradePanel
             group={group}
             publicView={state.public!}
@@ -327,17 +332,16 @@ function Crew({
         </div>
       </div>
       <p>
-        {Object.keys(group.members).length} medlemmer · {online} tilkoblet.
-        Høvding: {group.members[group.chiefId]?.label}. Din rolle:{" "}
-        {CREW_ROLES[group.members[uid].role].title}.
+        {Object.keys(group.members).length} medlemmer · {online} tilkoblet. Ved
+        roret: {group.members[group.chiefId]?.label}. Alle bidrar uten faste
+        roller.
       </p>
       {Object.values(group.conditions).some((n) => n !== 0) && (
         <p className="cg-small">
           Midlertidig mannskapstilstand:{" "}
           {Object.entries(group.conditions)
             .map(
-              ([k, n]) =>
-                `${CREW_ROLES[k as keyof typeof CREW_ROLES].title} ${n}`,
+              ([k, n]) => `${TOPIC_LABEL[k as keyof typeof TOPIC_LABEL]} ${n}`,
             )
             .join(" · ")}
           . Beståtte kompetansebevis påvirkes ikke av skjebnen.
@@ -473,6 +477,26 @@ function Journey({
         onStartSvenneprove={(_dest, skill) => {
           void store.send({ type: "start_trial", skill });
         }}
+        trialUnlocks={
+          Object.fromEntries(
+            SKILLS.map((skill) => {
+              const a = trialAvailability(group, skill);
+              return [
+                skill,
+                {
+                  available: a.available,
+                  missing: a.missing.map(
+                    (id) =>
+                      content.ports.find((p) => p.port.id === id)!.port.name,
+                  ),
+                },
+              ];
+            }),
+          ) as Record<
+            (typeof SKILLS)[number],
+            { available: boolean; missing: string[] }
+          >
+        }
         onPerformAction={(action) => {
           void store.send({ type: "action", actionId: action.id });
         }}
@@ -495,43 +519,73 @@ function Journey({
           Kompetansebevis åpner sidesteder og ekstra valg. Teori om besøkte
           havner og en faglig praksisoppgave må bestås.
         </p>
-        <div className="cg-actions">
-          {SKILLS.map((k) => (
-            <Button
-              key={k}
-              secondary
-              disabled={!chief || busy || group.svennebrev[k] === 2}
-              onClick={() => {
-                void store.send({ type: "start_trial", skill: k });
-              }}
-            >
-              {CREW_ROLES[k].title} ·{" "}
-              {group.svennebrev[k] === 0
-                ? "ingen brev"
-                : group.svennebrev[k] === 1
-                  ? "Sveinn"
-                  : "Mester"}
-            </Button>
-          ))}
+        <div className="cg-trial-grid">
+          {SKILLS.map((k) => {
+            const a = trialAvailability(group, k);
+            return (
+              <div className="cg-trial-card" key={k}>
+                <h3>{TOPIC_LABEL[k]}</h3>
+                <p className="cg-small">
+                  {group.svennebrev[k] === 2
+                    ? "Begge prøver bestått"
+                    : `${a.level === 1 ? "Svenneprøve" : "Mesterprøve"} · ${a.route.title}`}
+                </p>
+                <p>
+                  {a.route.ports
+                    .map(
+                      (id) =>
+                        `${group.visited.includes(id) ? "Besøkt" : "Gjenstår"}: ${content.ports.find((p) => p.port.id === id)!.port.name}`,
+                    )
+                    .join(" · ")}
+                </p>
+                <Button
+                  secondary
+                  disabled={!chief || busy || !a.available}
+                  onClick={() => {
+                    void store.send({ type: "start_trial", skill: k });
+                  }}
+                >
+                  {group.svennebrev[k] === 2
+                    ? "Bestått"
+                    : a.available
+                      ? `Start ${a.level === 1 ? "svenneprøven" : "mesterprøven"}`
+                      : "Låst · fullfør besøkene"}
+                </Button>
+              </div>
+            );
+          })}
         </div>
       </Panel>
+      {group.visited.length > 0 && (
+        <details className="cg-help">
+          <summary>
+            Reiseboken · {group.visited.length} fullførte havnebesøk
+          </summary>
+          {group.visited.map((id) => (
+            <div key={id}>
+              <h3>{content.ports.find((p) => p.port.id === id)?.port.name}</h3>
+              <ul>
+                {content.journey[id].notes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </details>
+      )}
       {solo && (
         <Panel title="Skjebnehjulet">
-          <p>Prøv en tilfeldig sjøhendelse. Kompetansebevisene beholdes.</p>
-          <Button
-            secondary
-            disabled={busy}
-            onClick={() => {
-              void store.send({
-                type: "event",
-                kind: "fate",
-                title: "Skjebnehjulet",
-                message: "",
-              });
+          <p>
+            Spinn en sjøhendelse eller en laglek. Reisen og kompetansebevisene
+            beholdes.
+          </p>
+          <FateWheel
+            spin={state.public?.wheel ?? null}
+            busy={busy}
+            onSpin={() => {
+              void store.send({ type: "spin_wheel" });
             }}
-          >
-            Trekk skjebne
-          </Button>
+          />
         </Panel>
       )}
     </>

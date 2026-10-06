@@ -4,6 +4,7 @@ import { spawn, execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
+import { verifyJourneyFeatures } from "./journey-browser.mjs";
 import packs from "../src/content/packs.json" with { type: "json" };
 
 const url = "http://127.0.0.1:4178";
@@ -184,13 +185,10 @@ try {
     else
       await page
         .getByLabel("Skip", { exact: true })
-        .selectOption({ label: `Ravnen · ${i}/5 roller` });
+        .selectOption({ label: `Ravnen · ${i} medlemmer` });
     await page
       .getByLabel("Ditt visningsnavn eller kallenavn", { exact: true })
       .fill(`Elev ${i + 1}`);
-    await page
-      .getByLabel("Din rolle", { exact: true })
-      .selectOption(["språk", "sjømannskap", "diplomati", "tro"][i]);
     await click(
       page,
       i === 0 ? "Opprett skipet og bli høvding" : "Bli med ombord",
@@ -765,9 +763,62 @@ try {
   const soloDownload = solo.waitForEvent("download");
   await click(solo, "Last ned tilbakemeldinger");
   await (await soloDownload).saveAs("test-results/solo-feedback.json");
+  // Use the same command store to open a deterministic solo practice game.
+  const soloParty = await solo.evaluate(async () => {
+    const { GameStore, loadSession } = await import("/src/classroom/store.ts");
+    const session = loadSession();
+    const store = new GameStore(session);
+    const stop = store.start();
+    try {
+      await store.send({
+        type: "event",
+        kind: "trial",
+        title: "Gudenes prøve",
+        message: "",
+        activity: "tapping",
+      });
+      if (store.getSnapshot().error) throw new Error(store.getSnapshot().error);
+      const game = store.exportSolo();
+      return {
+        id: Object.keys(game.challenges)[0],
+        storageKey: store.storageKey,
+        groupId: session.groupId,
+        encounter: game.groups[session.groupId].encounter,
+      };
+    } finally {
+      stop();
+    }
+  });
+  await solo.reload();
+  await click(solo, "Jeg er klar");
+  const drum = solo.getByRole("button", { name: "Trykk på Tors tromme" });
+  await wait(async () => drum.isEnabled(), "solo party starts without teacher");
+  await drum.click();
+  await solo.getByRole("button", { name: "Lever mine 1 poeng" }).click();
+  await click(solo, "Avslutt øvingsleken");
+  await wait(
+    async () =>
+      solo.evaluate(
+        ({ storageKey, id }) =>
+          JSON.parse(localStorage.getItem(storageKey)).challenges[id].status ===
+          "resolved",
+        soloParty,
+      ),
+    "solo party is resolved without teacher",
+  );
+  assert.deepEqual(
+    await solo.evaluate(
+      ({ storageKey, groupId }) =>
+        JSON.parse(localStorage.getItem(storageKey)).groups[groupId].encounter,
+      soloParty,
+    ),
+    soloParty.encounter,
+    "Solo party leaves the current culture encounter intact",
+  );
+  await verifyJourneyFeatures(browser, url, watch);
   assert.deepEqual(errors, [], "No uncaught browser errors");
   console.log(
-    "PASS: teacher + four independent learners; private voting; refresh; offline queue; exactly-once reward; reflection; assessment; backup; teacher navigation, settings and private presentation; mobile teacher views; closed-session assessment; solo resume; quick/optional feedback, context, offline retry, teacher inbox, filters, exports and post-lesson feedback.",
+    "PASS: teacher + four independent learners; private voting; refresh; offline queue; exactly-once reward; reflection; assessment; backup; teacher navigation, settings and private presentation; mobile teacher views; closed-session assessment; solo resume and party completion; quick/optional feedback, context, offline retry, teacher inbox, filters, exports and post-lesson feedback.",
   );
 } catch (e) {
   if (browser)

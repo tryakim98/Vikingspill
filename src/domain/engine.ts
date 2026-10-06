@@ -17,8 +17,9 @@ import type {
   PrivateView,
   PublicView,
   Settings,
+  Challenge,
 } from "./model";
-import type { SkillKey, TradeGoodId } from "../types";
+import type { TradeGoodId } from "../types";
 import { seededRandom, shuffle } from "./random";
 import { resolveRoll } from "./odds";
 import { tallyVotes } from "../lib/council";
@@ -26,9 +27,21 @@ import { isAccessible } from "../lib/unlocks";
 import { SPECIAL_ACTIONS } from "../data/specialActions";
 import { evaluateAction } from "../lib/specialActions";
 import { fateCards } from "../data/fateCards";
-import { KEY_CARDS } from "../data/keyCards";
-import { AGENDA_CARDS } from "../data/agendaCards";
 import { SKJEBNEMOTER } from "../data/skjebnemoter";
+import { journeyTrialBank, trialAvailability, trialBank } from "./trials";
+import {
+  PARTY_GAMES,
+  PARTY_IDS,
+  partyMembers,
+  partyScores,
+  partyWinners,
+} from "./party";
+import type { PartyId } from "./party";
+import {
+  WHEEL_FIELDS,
+  GAVE_FATE_IDS,
+  STORM_FATE_IDS,
+} from "../data/wheelFields";
 
 export class RuleError extends Error {
   code: "permission" | "conflict" | "invalid";
@@ -139,46 +152,65 @@ function goodsChange(
     group.goods[id as TradeGoodId] =
       (group.goods[id as TradeGoodId] ?? 0) + sign * amount!;
 }
-function chooseCard(
-  group: Group,
-  encounter: Encounter,
-  game: Game,
-  random: () => number,
-) {
-  if (!game.settings.keyCards || random() >= 1 / 3) return;
-  const members = encounter.eligible;
-  const min = Math.min(...members.map((id) => group.cardCounts[id] ?? 0));
-  const holderId = shuffle(
-    members.filter((id) => (group.cardCounts[id] ?? 0) === min),
-    random,
-  )[0];
-  if (!holderId) return;
-  const agenda = AGENDA_CARDS[encounter.destId]?.[0];
-  const honest = KEY_CARDS[encounter.destId]?.[0];
-  if (game.settings.saboteur && agenda && random() < 0.25)
-    encounter.card = {
-      holderId,
-      kind: "agenda",
-      text: agenda.brief,
-      favors: agenda.pushChoiceId,
-      reveal: `Spillet ga et medlem en skjult rolle: ${agenda.twist}`,
-    };
-  else if (honest)
-    encounter.card = {
-      holderId,
-      kind: "honest",
-      text: honest.text,
-      favors: honest.favors,
-      reveal: `Dramatisert opplysning i spillet: ${honest.text}`,
-    };
-  if (encounter.card)
-    group.cardCounts[holderId] = (group.cardCounts[holderId] ?? 0) + 1;
-}
 function questionBank(group: Group, content: Content) {
-  const trial = group.trial!;
-  return content.skillQuestions[trial.skill][
-    trial.level === 1 ? "tier2" : "tier3"
-  ];
+  return trialBank(group.trial!, content);
+}
+function createParty(
+  game: Game,
+  id: string,
+  kind: Challenge["kind"],
+  groups: string[],
+  activity: PartyId,
+  seed: number,
+  title: string,
+): Challenge {
+  requireRule(
+    groups.length &&
+      groups.every((g) => Object.keys(game.groups[g].members).length),
+    "Alle skip må ha et mannskap.",
+  );
+  requireRule(
+    !Object.values(game.challenges).some(
+      (c) => c.status === "open" && c.groups.some((g) => groups.includes(g)),
+    ),
+    "Fullfør eller avlys den åpne lagleken først.",
+  );
+  return {
+    id,
+    kind,
+    groups,
+    activity,
+    title,
+    status: "open",
+    winnerId: null,
+    winnerIds: [],
+    phase: "waiting",
+    roster: Object.fromEntries(
+      groups.map((g) => [g, Object.keys(game.groups[g].members)]),
+    ),
+    ready: [],
+    excused: {},
+    results: {},
+    startsAt: null,
+    endsAt: null,
+    seed,
+  };
+}
+function beginParty(challenge: Challenge, now: number) {
+  requireRule(
+    challenge.status === "open" && challenge.phase === "waiting",
+    "Lagleken er allerede startet.",
+  );
+  const members = challenge.groups.flatMap((g) => partyMembers(challenge, g));
+  requireRule(
+    challenge.groups.every((g) => partyMembers(challenge, g).length > 0) &&
+      members.every((uid) => challenge.ready.includes(uid)),
+    "Alle aktive medlemmer må være klare før start.",
+  );
+  challenge.phase = "playing";
+  challenge.startsAt = now + 5000;
+  challenge.endsAt =
+    challenge.startsAt + PARTY_GAMES[challenge.activity].duration * 1000;
 }
 
 /** Pure state transition. No UI, clock, network or Math.random; commands supply all context. */
@@ -267,7 +299,6 @@ export function applyCommand(
         shipColor: cmd.shipColor,
         members: {
           [actor.uid]: {
-            role: cmd.role,
             label: cmd.label,
             joinedAt: actor.now,
           },
@@ -290,6 +321,7 @@ export function applyCommand(
         notices: [],
         seenJourneys: [],
         lastJourneyVisits: 0,
+        nextInterlude: false,
       };
       game.members[actor.uid].groupId = cmd.groupId;
       message = `Skipet ${cmd.shipName} ble opprettet.`;
@@ -305,21 +337,8 @@ export function applyCommand(
           game.members[actor.uid].groupId === group.id,
         "Du er allerede ombord på et annet skip.",
       );
-      requireRule(
-        !Object.entries(group.members).some(
-          ([uid, m]) => uid !== actor.uid && m.role === cmd.role,
-        ),
-        "Denne rollen er tatt.",
-      );
-      requireRule(
-        !group.members[actor.uid] ||
-          (!group.encounter && !group.trial) ||
-          group.members[actor.uid].role === cmd.role,
-        "Rollen beholdes gjennom den aktive runden eller prøven.",
-      );
       group.members[actor.uid] = {
         joinedAt: group.members[actor.uid]?.joinedAt ?? actor.now,
-        role: cmd.role,
         label: cmd.label,
       };
       if (!group.members[group.chiefId]) group.chiefId = actor.uid;
@@ -328,6 +347,14 @@ export function applyCommand(
       break;
     case "leave_ship":
       member();
+      requireRule(
+        !Object.values(game.challenges).some(
+          (c) =>
+            c.status === "open" &&
+            partyMembers(c, group!.id).includes(actor.uid),
+        ),
+        "Fullfør lagleken eller be læreren frita deg først.",
+      );
       requireRule(
         group!.trial?.ownerId !== actor.uid,
         "Avslutt prøven før du forlater skipet.",
@@ -380,13 +407,15 @@ export function applyCommand(
         settled: false,
         interlude: null,
       };
-      chooseCard(group!, group!.encounter, game, random);
       if (
-        group!.visited.length - group!.lastJourneyVisits >= 2 &&
-        random() < 0.22
+        group!.nextInterlude ||
+        (group!.visited.length - group!.lastJourneyVisits >= 2 &&
+          random() < 0.22)
       ) {
         const journey = shuffle(
-          SKJEBNEMOTER.filter((j) => !group!.seenJourneys.includes(j.id)),
+          SKJEBNEMOTER.filter(
+            (j) => group!.nextInterlude || !group!.seenJourneys.includes(j.id),
+          ),
           random,
         )[0];
         if (journey) {
@@ -400,6 +429,7 @@ export function applyCommand(
           group!.seenJourneys.push(journey.id);
           group!.lastJourneyVisits = group!.visited.length;
         }
+        group!.nextInterlude = false;
       }
       message = `Seilas til ${pack.port.name}; mannskapet for runden er fastsatt.`;
       break;
@@ -767,15 +797,34 @@ export function applyCommand(
         "Prøven kan ikke åpnes nå.",
       );
       const level = (group!.svennebrev[cmd.skill] + 1) as 1 | 2;
-      const bank =
-        content.skillQuestions[cmd.skill][level === 1 ? "tier2" : "tier3"];
-      const indices = shuffle(
+      const availability = trialAvailability(group!, cmd.skill);
+      requireRule(
+        availability.available,
+        `Fullfør besøkene i ${availability.missing.map((id) => portFor(content, id).port.name).join(", ")} for å låse opp prøven.`,
+      );
+      const bank = journeyTrialBank(content, cmd.skill, level);
+      const candidates = shuffle(
         bank
           .map((q, i) => ({ q, i }))
-          .filter(({ q }) => q.source.some((id) => group!.visited.includes(id)))
+          .filter(({ q }) =>
+            q.source.every((id) => group!.visited.includes(id)),
+          )
           .map(({ i }) => i),
         random,
-      ).slice(0, level === 1 ? 3 : 4);
+      );
+      // Include every prerequisite location, then fill the remaining question slots.
+      const coverage = availability.route.ports.map(
+        (id) => candidates.find((i) => bank[i].source.includes(id))!,
+      );
+      const indices = shuffle(
+        [
+          ...coverage,
+          ...candidates
+            .filter((i) => !coverage.includes(i))
+            .slice(0, (level === 1 ? 3 : 4) - coverage.length),
+        ],
+        random,
+      );
       requireRule(
         indices.length === (level === 1 ? 3 : 4),
         "Besøk flere havner før denne prøven.",
@@ -786,6 +835,10 @@ export function applyCommand(
         skill: cmd.skill,
         level,
         questionIndices: indices,
+        bankVersion: "journey-v1",
+        requiredPorts: [...availability.route.ports],
+        practiceTitle: availability.route.title,
+        practicePrompt: availability.route.practice,
         answers: [],
         phase: "quiz",
         practice: "",
@@ -903,15 +956,98 @@ export function applyCommand(
         game.groups[cmd.to] && cmd.to !== group!.id,
         "Velg et annet skip.",
       );
-      game.challenges[cmd.id] = {
-        id: cmd.id,
-        kind: "duel",
-        groups: [group!.id, cmd.to],
-        title: cmd.title,
-        status: "open",
-        winnerId: null,
-      };
+      game.challenges[cmd.id] = createParty(
+        game,
+        cmd.id,
+        "duel",
+        [group!.id, cmd.to],
+        cmd.activity,
+        actor.seed,
+        `Holmgang · ${PARTY_GAMES[cmd.activity].title}`,
+      );
       break;
+    case "ready_challenge": {
+      member();
+      const c = game.challenges[cmd.challengeId];
+      requireRule(
+        c?.status === "open" &&
+          c.phase === "waiting" &&
+          partyMembers(c, group!.id).includes(actor.uid),
+        "Du deltar ikke i denne åpne lagleken.",
+      );
+      if (!c.ready.includes(actor.uid)) c.ready.push(actor.uid);
+      if (
+        (c.kind === "duel" || game.mode === "solo") &&
+        c.groups
+          .flatMap((g) => partyMembers(c, g))
+          .every((uid) => c.ready.includes(uid))
+      )
+        beginParty(c, actor.now);
+      break;
+    }
+    case "start_challenge": {
+      teacherOnly();
+      const c = game.challenges[cmd.challengeId];
+      requireRule(c, "Lagleken finnes ikke.");
+      beginParty(c, actor.now);
+      break;
+    }
+    case "submit_challenge": {
+      member();
+      const c = game.challenges[cmd.challengeId];
+      requireRule(
+        c?.status === "open" &&
+          c.phase === "playing" &&
+          partyMembers(c, group!.id).includes(actor.uid) &&
+          c.ready.includes(actor.uid),
+        "Du deltar ikke i denne lagleken.",
+      );
+      requireRule(
+        c.endsAt && actor.now >= c.endsAt,
+        "Lagleken pågår fortsatt.",
+      );
+      requireRule(
+        !Object.hasOwn(c.results, actor.uid),
+        "Resultatet ditt er allerede levert.",
+      );
+      const activity = PARTY_GAMES[c.activity];
+      requireRule(
+        activity.digital
+          ? cmd.score <= activity.duration * 25
+          : cmd.score === 0,
+        "Resultatet er utenfor lekens grenser.",
+      );
+      c.results[actor.uid] = cmd.score;
+      break;
+    }
+    case "excuse_challenge": {
+      teacherOnly();
+      const c = game.challenges[cmd.challengeId];
+      requireRule(
+        c?.status === "open" &&
+          c.phase === "waiting" &&
+          Object.values(c.roster).some((ids) => ids.includes(cmd.memberId)),
+        "Fritak må gjøres før leken starter.",
+      );
+      requireRule(
+        !c.groups.some(
+          (g) =>
+            partyMembers(c, g).includes(cmd.memberId) &&
+            partyMembers(c, g).length <= 1,
+        ),
+        "Et skip må ha minst én deltaker.",
+      );
+      c.excused[cmd.memberId] = cmd.reason;
+      break;
+    }
+    case "cancel_challenge": {
+      teacherOnly();
+      const c = game.challenges[cmd.challengeId];
+      requireRule(c?.status === "open", "Lagleken er allerede avsluttet.");
+      c.status = "resolved";
+      c.phase = "finished";
+      break;
+    }
     case "ack":
       member();
       requireRule(
@@ -1012,17 +1148,20 @@ export function applyCommand(
     }
     case "event": {
       teacherOnly();
-      const ids = Object.keys(game.groups);
+      const ids = Object.keys(game.groups).filter(
+        (id) => Object.keys(game.groups[id].members).length > 0,
+      );
       requireRule(ids.length > 0, "Ingen skip i spillet ennå.");
       if (cmd.kind === "trial") {
-        game.challenges[cmd.id] = {
-          id: cmd.id,
-          kind: "trial",
-          groups: ids,
-          title: cmd.title,
-          status: "open",
-          winnerId: null,
-        };
+        game.challenges[cmd.id] = createParty(
+          game,
+          cmd.id,
+          "trial",
+          ids,
+          cmd.activity ?? "tapping",
+          actor.seed,
+          cmd.title,
+        );
       } else {
         const card = cmd.kind === "fate" ? shuffle(fateCards, random)[0] : null;
         const targets =
@@ -1039,10 +1178,8 @@ export function applyCommand(
                 : ids;
         for (const id of targets) {
           const target = game.groups[id];
-          if (cmd.kind === "ragnarok")
-            target.scores.tradeGain = Math.ceil(
-              Math.max(0, target.scores.tradeGain) / 2,
-            );
+          if (cmd.kind === "ragnarok" && target.scores.tradeGain > 0)
+            target.scores.tradeGain = Math.ceil(target.scores.tradeGain / 2);
           if (card) {
             scores(target, card.effect);
             if (card.effect.skill) {
@@ -1064,6 +1201,87 @@ export function applyCommand(
       message = `Lærerhendelse ${cmd.kind} ble gjennomført på serveren.`;
       break;
     }
+    case "spin_wheel": {
+      teacherOnly();
+      const ids = Object.keys(game.groups).filter(
+        (id) => Object.keys(game.groups[id].members).length,
+      );
+      requireRule(ids.length, "Ingen skip i spillet ennå.");
+      const field = shuffle(WHEEL_FIELDS, random)[0];
+      let text: string;
+      if (field.id === "gudenes-prove") {
+        const open = Object.values(game.challenges).find(
+          (c) => c.status === "open",
+        );
+        if (open)
+          text =
+            "Gudenes prøve: fullfør den åpne lagleken først. Reisen og leken fortsetter der dere var.";
+        else {
+          const activity = shuffle(PARTY_IDS, random)[0];
+          game.challenges[cmd.id] = createParty(
+            game,
+            cmd.id,
+            "trial",
+            ids,
+            activity,
+            actor.seed,
+            "Gudenes prøve",
+          );
+          text = `Gudenes prøve · ${PARTY_GAMES[activity].title}. Alle gjør seg klare på sin egen skjerm.`;
+        }
+      } else if (field.id === "ragnarok") {
+        for (const id of ids)
+          if (game.groups[id].scores.tradeGain > 0)
+            game.groups[id].scores.tradeGain = Math.ceil(
+              game.groups[id].scores.tradeGain / 2,
+            );
+        text =
+          "Ragnarok halverer positiv handelsgevinst. Besøk, fagbidrag, stemmer, prøver og kompetansebevis beholdes.";
+      } else if (field.id === "skjebnemote") {
+        for (const id of ids) game.groups[id].nextInterlude = true;
+        text =
+          "Et skjebnemøte venter ved neste seilas. Det pågående havnebesøket fortsetter.";
+      } else {
+        const targetId =
+          field.id === "gunstig-vind"
+            ? [...ids].sort(
+                (a, b) =>
+                  game.groups[a].scores.tradeGain -
+                    game.groups[b].scores.tradeGain || a.localeCompare(b),
+              )[0]
+            : shuffle(ids, random)[0];
+        const pool =
+          field.id === "storm"
+            ? STORM_FATE_IDS
+            : field.id === "gudenes-gave"
+              ? GAVE_FATE_IDS
+              : ["gunstig-vind"];
+        const card = shuffle(
+          fateCards.filter(
+            (c) =>
+              pool.includes(c.id) &&
+              (c.effect.trade || c.effect.rep || c.effect.skill),
+          ),
+          random,
+        )[0];
+        scores(game.groups[targetId], card.effect);
+        if (card.effect.skill) {
+          const { key, delta } = card.effect.skill;
+          game.groups[targetId].conditions[key] = Math.max(
+            -2,
+            Math.min(2, (game.groups[targetId].conditions[key] ?? 0) + delta),
+          );
+        }
+        text = `${game.groups[targetId].shipName}: ${card.title}. ${card.text} Pågående arbeid og beståtte prøver beholdes.`;
+      }
+      game.wheel = { id: cmd.id, fieldId: field.id, at: actor.now, text };
+      for (const id of ids) {
+        notice(game.groups[id], field.label, text);
+        if (game.groups[id] !== group) game.groups[id].version++;
+      }
+      message = `Skjebnehjulet landet på ${field.label}; virkningen ble gjennomført én gang.`;
+      break;
+    }
     case "resolve_challenge": {
       teacherOnly();
       const challenge = game.challenges[cmd.challengeId];
@@ -1071,19 +1289,40 @@ export function applyCommand(
         challenge?.status === "open" && challenge.groups.includes(cmd.winnerId),
         "Utfordringen er avsluttet eller vinneren deltar ikke.",
       );
+      const legacy = Object.keys(challenge.roster).length === 0;
+      if (!legacy)
+        requireRule(
+          challenge.endsAt &&
+            actor.now >= challenge.endsAt &&
+            partyScores(challenge).every((s) => s.complete),
+          "Alle aktive medlemmer må levere resultat eller bekrefte deltakelse før vinneren avgjøres.",
+        );
+      const winners =
+        !legacy && PARTY_GAMES[challenge.activity].digital
+          ? partyWinners(challenge)
+          : [cmd.winnerId];
+      requireRule(
+        winners.includes(cmd.winnerId),
+        "Vinneren må ha høyest snitt. Ved likt resultat deler lagene seieren.",
+      );
       challenge.status = "resolved";
-      challenge.winnerId = cmd.winnerId;
-      const winner = game.groups[cmd.winnerId];
-      scores(winner, { rep: challenge.kind === "trial" ? 4 : 2 });
-      if (winner !== group) winner.version++;
-      for (const id of challenge.groups)
+      challenge.phase = "finished";
+      challenge.winnerId = winners[0];
+      challenge.winnerIds = winners;
+      const winnerNames = winners
+        .map((id) => game.groups[id].shipName)
+        .join(" og ");
+      for (const id of challenge.groups) {
+        if (winners.includes(id))
+          scores(game.groups[id], { rep: challenge.kind === "trial" ? 4 : 2 });
+        if (game.groups[id] !== group) game.groups[id].version++;
         notice(
           game.groups[id],
           challenge.title,
-          `${winner.shipName} vant; læreren bekreftet utfallet.`,
+          `${winnerNames} ${winners.length > 1 ? "delte seieren" : "vant"}; ${game.mode === "solo" ? "øvingsleken er avsluttet" : "læreren bekreftet utfallet"}. Faglig vurdering påvirkes ikke.`,
         );
-      message =
-        "Læreren avgjorde utfordringen; belønningen er gjennomført én gang.";
+      }
+      message = `${game.mode === "solo" ? "Øvingsleken er avsluttet" : "Læreren avgjorde utfordringen"}; belønningen er gjennomført én gang.`;
       break;
     }
   }
@@ -1127,7 +1366,12 @@ export function groupView(group: Group, content: Content): GroupView {
           ...rest,
           questions: trial.questionIndices.map((i) => {
             const q = questionBank(group, content)[i];
-            return { q: q.q, opts: q.opts };
+            return {
+              q: q.q,
+              opts: q.opts,
+              source: q.source,
+              feedback: trial.phase === "quiz" ? null : q.feedback,
+            };
           }),
           correct:
             trial.phase === "quiz"
@@ -1170,6 +1414,7 @@ export function publicView(game: Game): PublicView {
     closed: game.closed,
     trades: game.trades,
     challenges: game.challenges,
+    wheel: game.wheel,
     groups: Object.fromEntries(
       Object.entries(game.groups).map(([id, g]) => [
         id,
@@ -1230,14 +1475,3 @@ export function expectedVersion(game: Game, cmd: Pick<Command, "groupId">) {
     ? game.groups[cmd.groupId].version
     : game.version;
 }
-export const PRACTICE_PROMPTS: Record<SkillKey, string> = {
-  språk:
-    "Forklar et kulturmøte med to begreper fra havnene. Skill mellom hva kilden sier og din tolkning.",
-  sjømannskap:
-    "Planlegg en rute mellom to besøkte havner. Begrunn ett valg ut fra geografi og en risiko.",
-  krigskunst:
-    "Sammenlign maktbruk og forhandling ved en besøkt havn. Hvem bærer risikoen, og hva er alternativet?",
-  diplomati:
-    "Lag et konkret forslag til bytteavtale ved en besøkt havn. Forklar begge partenes interesser.",
-  tro: "Sammenlign en religiøs skikk med mannskapets forventninger. Forklar ett mulig misforstått tegn.",
-};

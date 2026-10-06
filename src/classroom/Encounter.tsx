@@ -11,11 +11,10 @@ import type {
 import { hasAdvantage, rollPenalty } from "../domain/engine";
 import { effectiveOdds } from "../domain/odds";
 import { TIER_LABEL } from "../lib/oddsEngine";
-import { CREW_ROLES } from "../data/crewRoles";
-import { npcVotes } from "../lib/council";
 import { SKJEBNEMOTER } from "../data/skjebnemoter";
 import { Button, Field, Panel } from "./ui";
 import type { Intent } from "./store";
+import { useAnswerDraft, useTextDraft } from "./drafts";
 
 type Props = {
   group: GroupView;
@@ -78,7 +77,7 @@ export default function Encounter(props: Props) {
       </div>
       {privateView.card && !e.settled && (
         <aside className="cg-private">
-          <h2>Ditt private rollekort</h2>
+          <h2>En ekstra opplysning til deg</h2>
           <p>{privateView.card.text}</p>
           <p className="cg-small">
             Opplysningen er dramatisert. Bruk den i samtalen; de andre har ikke
@@ -88,7 +87,7 @@ export default function Encounter(props: Props) {
       )}
       {e.cardAvailable && !privateView.card && !e.settled && (
         <p className="cg-note">
-          Ett medlem har et privat rollekort. Lytt til mannskapets opplysninger
+          Ett medlem har en ekstra opplysning. Lytt til mannskapets opplysninger
           før dere velger.
         </p>
       )}
@@ -159,6 +158,17 @@ export default function Encounter(props: Props) {
         )}
         {e.phase === "reading" && (
           <>
+            <aside className="cg-note">
+              <h3>Reisenotater · dette kan dere bruke i svenneprøven</h3>
+              <ul>
+                {content.journey[e.destId].notes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+              <p className="cg-small">
+                Notatene legges i reiseboken når havnebesøket er fullført.
+              </p>
+            </aside>
             <img
               src={pack.port.image}
               alt={`Stemningsbilde fra ${pack.port.name}`}
@@ -253,12 +263,17 @@ function Tasks({
   pack,
 }: Props & { pack: ContentPack }) {
   const e = group.encounter!;
-  const role = group.members[uid].role;
-  const [fact, setFact] = useState("");
-  const [interpretation, setInterpretation] = useState("");
-  const [perspective, setPerspective] = useState("");
-  const [sourceId, setSourceId] = useState(pack.sources[0].id);
-  const [answers, setAnswers] = useState<number[]>([]);
+  const draft = `${e.id}:${uid}`;
+  const [fact, setFact] = useTextDraft(`${draft}:fact`);
+  const [interpretation, setInterpretation] = useTextDraft(
+    `${draft}:interpretation`,
+  );
+  const [perspective, setPerspective] = useTextDraft(`${draft}:perspective`);
+  const [sourceId, setSourceId] = useTextDraft(
+    `${draft}:source`,
+    pack.sources[0].id,
+  );
+  const [answers, setAnswers] = useAnswerDraft(`${draft}:answers`);
   const eligible = e.eligible.filter((id) => !e.excused[id]);
   const submitted = !!e.evidence[uid];
   const ready = eligible.every((id) => e.evidence[id]);
@@ -267,8 +282,9 @@ function Tasks({
       <h3>{pack.port.task.title}</h3>
       <p>{pack.port.task.desc}</p>
       <p className="cg-note">
-        Gjør oppgaven sammen, og lever deretter ditt eget fagbidrag. Rollen din
-        er <strong>{CREW_ROLES[role].title}</strong>: {pack.roleTasks[role]}
+        Gjør verkstedet sammen. Alle skal bidra; dere fordeler ord, tegning og
+        fremføring selv. Lever deretter ett eget fagbidrag om hva oppgaven
+        viste. Opptak er valgfritt og vises på egen enhet.
       </p>
       {eligible.includes(uid) && !submitted ? (
         <form
@@ -325,13 +341,14 @@ function Tasks({
                       type="radio"
                       name={`quiz-${i}`}
                       checked={answers[i] === index}
-                      onChange={() =>
-                        setAnswers((old) => {
-                          const next = [...old];
-                          next[i] = index;
-                          return next;
-                        })
-                      }
+                      onChange={() => {
+                        const next = Array.from(
+                          { length: 4 },
+                          (_, i) => answers[i] ?? -1,
+                        );
+                        next[i] = index;
+                        setAnswers(next);
+                      }}
                       required
                     />
                     {option}
@@ -349,7 +366,7 @@ function Tasks({
               (settings.requireQuiz &&
                 (answers.length !== 4 ||
                   Array.from({ length: 4 }, (_, i) => answers[i]).some(
-                    (a) => a === undefined,
+                    (a) => a === undefined || a < 0,
                   )))
             }
           >
@@ -470,8 +487,8 @@ function Council({
   pack,
 }: Props & { pack: ContentPack }) {
   const e = group.encounter!;
-  const [choiceId, setChoiceId] = useState("");
-  const [note, setNote] = useState("");
+  const [choiceId, setChoiceId] = useTextDraft(`${e.id}:${uid}:vote-choice`);
+  const [note, setNote] = useTextDraft(`${e.id}:${uid}:vote-note`);
   const [suspicion, setSuspicion] = useState(false);
   const eligible = e.eligible.filter((id) => !e.excused[id]);
   return (
@@ -551,7 +568,7 @@ function Decision({
 }: Props & { pack: ContentPack }) {
   const e = group.encounter!;
   const [choiceId, setChoiceId] = useState(e.choiceId ?? "");
-  const [reason, setReason] = useState(e.reason);
+  const [reason, setReason] = useTextDraft(`${e.id}:${uid}:reason`, e.reason);
   const chief = group.chiefId === uid;
   const sealed =
     !!e.choiceId && (!settings.requireSaga || e.reason.length >= 20);
@@ -560,24 +577,10 @@ function Decision({
       {solo && (
         <details className="cg-help" open>
           <summary>Hør mannskapets ulike forslag</summary>
-          {npcVotes(availableChoices(group, pack.port), [
-            "språk",
-            "sjømannskap",
-            "krigskunst",
-            "diplomati",
-            "tro",
-          ]).map((v) => (
-            <p key={v.role}>
-              <strong>{CREW_ROLES[v.role].title}</strong>:{" "}
-              {CREW_ROLES[v.role].argues} Vi foreslår «
-              {
-                availableChoices(group, pack.port).find(
-                  (c) => c.id === v.choiceId,
-                )?.title
-              }
-              ».
-            </p>
-          ))}
+          <p>
+            Prøv å begrunne to ulike valg. Hva gagner de reisende, hva kan den
+            andre parten ønske, og hvilken risiko er dere villige til å ta?
+          </p>
         </details>
       )}
       {Object.keys(e.voteCounts).length > 0 && (
@@ -702,8 +705,12 @@ function Reflection({
   pack,
   settings,
 }: Props & { pack: ContentPack }) {
-  const [comparison, setComparison] = useState("");
-  const [reflection, setReflection] = useState("");
+  const [comparison, setComparison] = useTextDraft(
+    `${group.encounter!.id}:${uid}:comparison`,
+  );
+  const [reflection, setReflection] = useTextDraft(
+    `${group.encounter!.id}:${uid}:reflection`,
+  );
   const saved = !!group.encounter!.reflection;
   return (
     <>

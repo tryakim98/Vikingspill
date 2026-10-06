@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "prepare": "git config core.hooksPath .githooks || true",
-    "test": "node --import tsx --test tests/domain.test.ts tests/feedback.test.ts",
+    "test": "node --import tsx --test tests/domain.test.ts tests/feedback.test.ts tests/journey.test.ts",
     "test:rules": "firebase emulators:exec --only database --project demo-vikingspill \"node --import tsx --test tests/rules.test.ts\"",
     "build:functions": "node scripts/build-functions.mjs",
     "check:functions": "tsc -p functions/tsconfig.json",

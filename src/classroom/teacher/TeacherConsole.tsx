@@ -14,6 +14,8 @@ import Review, { type ReviewDrafts } from "./Review";
 import { EventsPanel, SettingsPanel } from "./Controls";
 import { attention, onlineMembers, reviewCount } from "./status";
 import { useFeedbackInbox } from "./useFeedbackInbox";
+import FateWheel from "../FateWheel";
+import { PartyResults } from "../Holmgang";
 import "./teacher.css";
 
 const TABS = [
@@ -141,6 +143,25 @@ export default function TeacherConsole({
             </p>
           )}
           <SeaMap groups={groups} />
+          <section
+            className="td-stage-games"
+            aria-label="Skjebne og lagleker på storskjermen"
+          >
+            <FateWheel compact spin={view.wheel} />
+            <div>
+              {Object.values(view.challenges)
+                .filter(
+                  (c) =>
+                    c.status === "open" && Object.keys(c.roster).length > 0,
+                )
+                .map((c) => (
+                  <div key={c.id}>
+                    <h2>{c.title}</h2>
+                    <PartyResults challenge={c} view={view} />
+                  </div>
+                ))}
+            </div>
+          </section>
           <ul className="td-stage-fleet">
             {fleet.map((g) => (
               <li key={g.id}>

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { GOODS, SKILLS, Id } from "../domain/model";
 import type { Content, ContentPack } from "../domain/model";
+import { JOURNEY_LESSONS, PORT_TASKS } from "./activities";
 
 const text = z.string().min(1);
 const quiz = z
@@ -143,15 +144,13 @@ const packSchema = z.object({
     caution: text,
     historicalComparison: text,
   }),
-  roleTasks: z.object(
-    Object.fromEntries(SKILLS.map((k) => [k, text])) as Record<
-      (typeof SKILLS)[number],
-      typeof text
-    >,
-  ),
 });
 export function validateContent(rawPacks: unknown, rawQuiz: unknown): Content {
-  const ports = z.array(packSchema).length(12).parse(rawPacks) as ContentPack[];
+  const sourcePacks = z.array(packSchema).length(12).parse(rawPacks);
+  const ports = sourcePacks.map((pack) => ({
+    ...pack,
+    port: { ...pack.port, task: PORT_TASKS[pack.port.id] ?? pack.port.task },
+  })) as ContentPack[];
   const ids = new Set(ports.map((p) => p.port.id));
   if (ids.size !== ports.length) throw new Error("Havne-ID-er må være unike.");
   for (const { port, sources } of ports) {
@@ -194,5 +193,21 @@ export function validateContent(rawPacks: unknown, rawQuiz: unknown): Content {
       for (const q of questions)
         for (const id of q.source)
           if (!ids.has(id)) throw new Error(`Ukjent quiz-referanse: ${id}.`);
-  return { ports, skillQuestions: bank };
+  const journey = z
+    .record(
+      Id,
+      z.object({
+        notes: z.array(text).min(2),
+        questions: z.array(skillQuiz).min(2),
+      }),
+    )
+    .parse(JOURNEY_LESSONS);
+  for (const port of ports) {
+    if (!journey[port.port.id] || !PORT_TASKS[port.port.id])
+      throw new Error(`Mangler reiseverksted: ${port.port.id}.`);
+    for (const q of journey[port.port.id].questions)
+      if (q.source.some((id) => !ids.has(id)))
+        throw new Error("Ukjent reisenotat.");
+  }
+  return { ports, skillQuestions: bank, journey };
 }

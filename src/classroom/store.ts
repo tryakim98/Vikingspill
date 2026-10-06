@@ -83,6 +83,7 @@ const EMPTY_PRIVATE: PrivateView = {
   trialAnswers: [],
 };
 export type Snapshot = {
+  clockOffset: number;
   public: PublicView | null;
   group: GroupView | null;
   private: PrivateView;
@@ -99,6 +100,7 @@ const Queue = z.object({
 });
 export class GameStore {
   private state: Snapshot = {
+    clockOffset: 0,
     public: null,
     group: null,
     private: EMPTY_PRIVATE,
@@ -282,6 +284,12 @@ export class GameStore {
               ),
             );
             this.stops.push(
+              remote.listen<number>(
+                ".info/serverTimeOffset",
+                (value) => this.emit({ clockOffset: value ?? 0 }),
+                this.fail,
+                false,
+              ),
               remote.connected((connected) => {
                 this.emit({
                   connected,
@@ -328,10 +336,18 @@ export class GameStore {
       const command = CommandSchema.parse({
         ...intent,
         ...(groupId ? { groupId } : {}),
-        ...(aggregate?.encounter
+        ...(aggregate?.encounter &&
+        !["ready_challenge", "submit_challenge", "challenge"].includes(
+          intent.type,
+        )
           ? { encounterId: aggregate.encounter.id }
           : {}),
-        ...(aggregate?.trial ? { trialId: aggregate.trial.id } : {}),
+        ...(aggregate?.trial &&
+        !["ready_challenge", "submit_challenge", "challenge"].includes(
+          intent.type,
+        )
+          ? { trialId: aggregate.trial.id }
+          : {}),
         id: crypto.randomUUID(),
         expectedVersion: version ?? 0,
       });

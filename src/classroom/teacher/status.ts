@@ -2,13 +2,6 @@ import type { GroupView } from "../../domain/model";
 import type { Snapshot } from "../store";
 
 export type Presence = Snapshot["presence"];
-export const ROLE_LABEL = {
-  språk: "Skald / tolk",
-  sjømannskap: "Navigatør",
-  krigskunst: "Kriger",
-  diplomati: "Handelsmann",
-  tro: "Seer",
-} as const;
 
 export function onlineMembers(
   group: GroupView,

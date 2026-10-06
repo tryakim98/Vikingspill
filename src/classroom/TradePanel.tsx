@@ -4,6 +4,8 @@ import type { GroupView, PublicView } from "../domain/model";
 import type { TradeGoodId } from "../types";
 import { TRADE_GOODS } from "../data/tradeGoods";
 import type { Intent } from "./store";
+import { PARTY_GAMES, PARTY_IDS } from "../domain/party";
+import type { PartyId } from "../domain/party";
 import { Button, Panel } from "./ui";
 export default function TradePanel({
   group,
@@ -19,6 +21,7 @@ export default function TradePanel({
   send: (intent: Intent) => Promise<void>;
 }) {
   const [to, setTo] = useState("");
+  const [activity, setActivity] = useState<PartyId>("tapping");
   const [offer, setOffer] = useState<TradeGoodId>("solv");
   const [request, setRequest] = useState<TradeGoodId>("pelsverk");
   const [amount, setAmount] = useState(1);
@@ -50,6 +53,7 @@ export default function TradePanel({
             <label className="cg-field">
               Til skip
               <select
+                aria-label="Til skip"
                 value={to}
                 onChange={(event) => setTo(event.target.value)}
                 required
@@ -171,21 +175,45 @@ export default function TradePanel({
         ))}
       {chief && others.length > 0 && (
         <div className="cg-actions">
+          <label className="cg-field">
+            Holmgangslek
+            <select
+              aria-label="Holmgangslek"
+              value={activity}
+              onChange={(e) => setActivity(e.target.value as PartyId)}
+            >
+              {PARTY_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {PARTY_GAMES[id].title}
+                </option>
+              ))}
+            </select>
+          </label>
           <Button
             secondary
-            disabled={busy || !to}
+            disabled={
+              busy ||
+              !to ||
+              Object.values(publicView.challenges).some(
+                (c) =>
+                  c.status === "open" &&
+                  c.groups.some((id) => id === group.id || id === to),
+              )
+            }
             onClick={() => {
               void send({
                 type: "challenge",
                 to,
                 title: "Holmgang på bølgene",
+                activity,
               });
             }}
           >
             Utfordre valgt skip til holmgang
           </Button>
           <p className="cg-small">
-            Avtal en aktivitet med læreren, som bekrefter vinneren.
+            Alle på begge skip gjør seg klare på hver sin skjerm. Snittet avgjør
+            mobil-lekene; læreren bekrefter resultatet.
           </p>
         </div>
       )}

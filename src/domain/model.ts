@@ -1,5 +1,7 @@
 import { z } from "zod";
 import type { Choice, Destination, SkillKey } from "../types";
+import type { JourneyLesson } from "../content/activities";
+import { PARTY_IDS } from "./party";
 
 export const SKILLS = [
   "språk",
@@ -40,7 +42,7 @@ export const SettingsSchema = z.object({
   requireSaga: z.boolean().default(true),
   requirePerspective: z.boolean().default(true),
   requireBridge: z.boolean().default(true),
-  keyCards: z.boolean().default(true),
+  keyCards: z.boolean().default(false),
   saboteur: z.boolean().default(false),
 });
 export type Settings = z.infer<typeof SettingsSchema>;
@@ -70,7 +72,6 @@ export const RollSchema = z.object({
 });
 export type Roll = z.infer<typeof RollSchema>;
 const MemberSchema = z.object({
-  role: Skill,
   joinedAt: z.number().int(),
   label: ShortText,
 });
@@ -132,6 +133,14 @@ const TrialSchema = z.object({
   skill: Skill,
   level: z.union([z.literal(1), z.literal(2)]),
   questionIndices: z.array(z.number().int().min(0)),
+  bankVersion: z.enum(["legacy", "journey-v1"]).default("legacy"),
+  requiredPorts: z.array(Id).default([]),
+  practiceTitle: z.string().default("Praksis fra reisen"),
+  practicePrompt: z
+    .string()
+    .default(
+      "Bruk to konkrete opplysninger fra besøkte havner. Vis hvordan de påvirker valget deres, og skill fakta fra tolkning.",
+    ),
   answers: z.array(z.number().int().min(0).max(5)),
   phase: z.enum(["quiz", "practice", "pending", "failed", "passed"]),
   practice: z.string(),
@@ -210,6 +219,7 @@ export const GroupSchema = z.object({
   ),
   seenJourneys: z.array(Id),
   lastJourneyVisits: z.number().int().min(0),
+  nextInterlude: z.boolean().default(false),
 });
 export type Group = z.infer<typeof GroupSchema>;
 const TradeSchema = z.object({
@@ -230,6 +240,30 @@ const ChallengeSchema = z.object({
   title: ShortText,
   status: z.enum(["open", "resolved"]),
   winnerId: Id.nullable(),
+  winnerIds: z.array(Id).default([]),
+  activity: z.enum(PARTY_IDS).default("tapping"),
+  phase: z.enum(["waiting", "playing", "finished"]).default("waiting"),
+  roster: z.record(Id, z.array(Id)).default({}),
+  excused: z.record(Id, z.string()).default({}),
+  ready: z.array(Id).default([]),
+  results: z.record(Id, z.number().int().min(0).max(1000)).default({}),
+  startsAt: z.number().int().nullable().default(null),
+  endsAt: z.number().int().nullable().default(null),
+  seed: z.number().int().default(0),
+});
+export type Challenge = z.infer<typeof ChallengeSchema>;
+const WheelSchema = z.object({
+  id: Id,
+  fieldId: z.enum([
+    "gudenes-prove",
+    "storm",
+    "gunstig-vind",
+    "ragnarok",
+    "gudenes-gave",
+    "skjebnemote",
+  ]),
+  at: z.number().int(),
+  text: z.string(),
 });
 export const GameSchema = z.object({
   schemaVersion: z.literal(2),
@@ -246,6 +280,7 @@ export const GameSchema = z.object({
   groups: z.record(Id, GroupSchema),
   trades: z.record(Id, TradeSchema),
   challenges: z.record(Id, ChallengeSchema),
+  wheel: WheelSchema.nullable().default(null),
   receipts: z.record(z.string(), z.number().int().min(0)),
   log: z.array(
     z.object({
@@ -278,10 +313,11 @@ export const CommandSchema = z.union([
     shipName: ShortText,
     shipSymbol: z.enum(["drage", "ulv", "ravn"]),
     shipColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-    role: Skill,
+    // Accepted only for old offline queues; it no longer affects membership.
+    role: Skill.optional(),
     label: ShortText,
   }),
-  command("join_ship", { role: Skill, label: ShortText }),
+  command("join_ship", { role: Skill.optional(), label: ShortText }),
   command("leave_ship", {}),
   command("sail", { destId: Id }),
   command("arrive", {}),
@@ -317,7 +353,24 @@ export const CommandSchema = z.union([
   command("offer_trade", { to: Id, offer: GoodsMap, request: GoodsMap }),
   command("accept_trade", { tradeId: Id }),
   command("reject_trade", { tradeId: Id }),
-  command("challenge", { to: Id, title: ShortText }),
+  command("challenge", {
+    to: Id,
+    title: ShortText,
+    activity: z.enum(PARTY_IDS).default("tapping"),
+  }),
+  command("ready_challenge", { challengeId: Id }),
+  command("start_challenge", { challengeId: Id }),
+  command("submit_challenge", {
+    challengeId: Id,
+    score: z.number().int().min(0).max(1000),
+  }),
+  command("excuse_challenge", {
+    challengeId: Id,
+    memberId: Id,
+    reason: z.string().trim().min(10).max(600),
+  }),
+  command("cancel_challenge", { challengeId: Id }),
+  command("spin_wheel", {}),
   command("ack", { noticeId: Id }),
   command("settings", { settings: SettingsSchema }),
   command("close_game", {}),
@@ -338,10 +391,12 @@ export const CommandSchema = z.union([
     kind: z.enum(["fate", "ragnarok", "trial", "summon"]),
     title: ShortText,
     message: z.string().trim().max(600),
+    activity: z.enum(PARTY_IDS).optional(),
   }),
   command("resolve_challenge", { challengeId: Id, winnerId: Id }),
 ]);
-// The schema intentionally accepts only intent: scores, dice and final outcomes are never inputs.
+// Academic scores, dice and rewards are never inputs. Party games accept a bounded
+// personal measurement; the engine computes team averages and eligible winners.
 export type Command = z.infer<typeof CommandSchema>;
 export type Actor = {
   uid: string;
@@ -360,10 +415,10 @@ export type ContentPack = {
     caution: string;
     historicalComparison: string;
   };
-  roleTasks: Record<SkillKey, string>;
 };
 export type Content = {
   ports: ContentPack[];
+  journey: Record<string, JourneyLesson>;
   skillQuestions: Record<
     SkillKey,
     {
@@ -398,7 +453,12 @@ export type GroupView = Omit<
     | null;
   trial:
     | (Omit<NonNullable<Group["trial"]>, "questionIndices" | "answers"> & {
-        questions: { q: string; opts: string[] }[];
+        questions: {
+          q: string;
+          opts: string[];
+          source: string[];
+          feedback: string | null;
+        }[];
         correct: number | null;
       })
     | null;
@@ -444,6 +504,7 @@ export type PublicView = {
   >;
   trades: Record<string, Trade>;
   challenges: Game["challenges"];
+  wheel: Game["wheel"];
 };
 export function portFor(content: Content, id: string): ContentPack {
   const pack = content.ports.find((p) => p.port.id === id);
@@ -457,8 +518,7 @@ export function availableChoices(
   const hidden = port.hiddenChoice;
   const unlocked =
     hidden &&
-    (group.svennebrev[hidden.unlock.skill] >= (hidden.unlock.nivå ?? 1) ||
-      Object.values(group.members).some((m) => m.role === hidden.unlock.skill));
+    group.svennebrev[hidden.unlock.skill] >= (hidden.unlock.nivå ?? 1);
   return unlocked ? [...port.choices, hidden.choice] : port.choices;
 }
 export const emptyBrev = () =>

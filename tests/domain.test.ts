@@ -22,6 +22,7 @@ import type { SkillKey } from "../src/types";
 import type { Game as EngineGame } from "../src/domain/model";
 import type { Intent } from "../src/classroom/store";
 import { replayCommands } from "../src/domain/replay";
+import { trialBank } from "../src/domain/trials";
 
 const now = 1_000_000;
 let counter = 0;
@@ -319,7 +320,7 @@ test("outsiders and ordinary members cannot sail or impersonate the chief", () =
     /Bare høvdingen/,
   );
 });
-test("roles are unique and rejoining preserves membership identity and join time", () => {
+test("crew membership has no assigned roles and rejoining preserves join time", () => {
   const g = fixture();
   assert.throws(
     () =>
@@ -331,16 +332,12 @@ test("roles are unique and rejoining preserves membership identity and join time
       }),
     /annet skip/,
   );
-  assert.throws(
-    () =>
-      run(g, "b", {
-        type: "join_ship",
-        groupId: "ship",
-        role: "språk",
-        label: "Elev B",
-      }),
-    /rollen er tatt/,
-  );
+  const withoutRole = run(g, "b", {
+    type: "join_ship",
+    groupId: "ship",
+    label: "Elev B",
+  });
+  assert(!Object.hasOwn(withoutRole.groups.ship.members.b, "role"));
   const next = run(
     g,
     "b",
@@ -703,7 +700,7 @@ test("trial owner, valid answers and teacher practice approval are enforced", ()
     /eies/,
   );
   const trial = g.groups.ship.trial!;
-  const bank = content.skillQuestions.språk.tier2;
+  const bank = trialBank(trial, content);
   g = run(g, "a", {
     type: "answer_trial",
     groupId: "ship",

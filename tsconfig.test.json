@@ -20,6 +20,7 @@
   "include": [
     "tests/domain.test.ts",
     "tests/feedback.test.ts",
+    "tests/journey.test.ts",
     "tests/rules.test.ts"
   ]
 }

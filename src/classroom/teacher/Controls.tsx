@@ -4,6 +4,11 @@ import { Button, Download } from "../ui";
 import { learningCsv } from "../files";
 import FeedbackInbox from "./FeedbackInbox";
 import type { FeedbackInboxState } from "./useFeedbackInbox";
+import { useState } from "react";
+import FateWheel from "../FateWheel";
+import { PARTY_GAMES, PARTY_IDS } from "../../domain/party";
+import type { PartyId } from "../../domain/party";
+import PartyControl from "./PartyControl";
 
 type Send = (intent: Intent) => Promise<void>;
 const REQUIREMENTS = [
@@ -31,16 +36,6 @@ const REQUIREMENTS = [
     "requireBridge",
     "Bro til i dag",
     "Gruppen tar med en innsikt til vår egen tid.",
-  ],
-  [
-    "keyCards",
-    "Private rollekort",
-    "En rolle får informasjon som kan bringes inn i samtalen.",
-  ],
-  [
-    "saboteur",
-    "Skjult interesse",
-    "En rolleøvelse med en egen interesse i rådslagningen.",
   ],
 ] as const;
 
@@ -120,7 +115,7 @@ export function SettingsPanel({
           sammenligning og etterarbeid.
         </p>
         <fieldset className="td-requirements">
-          <legend>Oppgaver og roller</legend>
+          <legend>Oppgaver og samtale</legend>
           {REQUIREMENTS.map(([key, label, description]) => (
             <label className="td-checkbox td-requirement" key={key}>
               <input
@@ -184,6 +179,7 @@ export function EventsPanel({
   busy: boolean;
   send: Send;
 }) {
+  const [activity, setActivity] = useState<PartyId>("tapping");
   const disabled = busy || view.closed || !Object.keys(groups).length;
   const open = Object.values(view.challenges).filter(
     (c) => c.status === "open",
@@ -197,43 +193,53 @@ export function EventsPanel({
         </div>
       </div>
       <div className="td-event-grid">
-        <section className="td-card">
+        <section className="td-card td-wheel-card">
           <p className="td-event-number">I</p>
           <h3>Skjebnehjulet</h3>
           <p>
             La en hendelse sette nye vilkår for reisen, og gi mannskapene noe å
             snakke om.
           </p>
-          <Button
-            disabled={disabled}
-            onClick={() => {
-              void send({
-                type: "event",
-                kind: "fate",
-                title: "Skjebnehjulet",
-                message: "",
-              });
+          <FateWheel
+            spin={view.wheel}
+            busy={disabled}
+            onSpin={() => {
+              void send({ type: "spin_wheel" });
             }}
-          >
-            Trekk skjebne
-          </Button>
+          />
         </section>
         <section className="td-card">
           <p className="td-event-number">II</p>
           <h3>Gudenes prøve</h3>
           <p>
-            Avtal en felles aktivitet i klassen. Du bekrefter hvilket skip som
-            vant.
+            En pause med laglek. Alle deltar; mobil-leker avgjøres av snitt per
+            medlem, og de fysiske lekene av lagspill og fremføring.
           </p>
+          <label className="cg-field">
+            Laglek
+            <select
+              aria-label="Laglek"
+              value={activity}
+              onChange={(e) => setActivity(e.target.value as PartyId)}
+            >
+              {PARTY_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {PARTY_GAMES[id].title}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="td-caption">{PARTY_GAMES[activity].instructions}</p>
           <Button
             secondary
-            disabled={disabled}
+            disabled={disabled || open.length > 0}
             onClick={() => {
               void send({
                 type: "event",
                 kind: "trial",
                 title: "Gudenes prøve",
                 message: "",
+                activity,
               });
             }}
           >
@@ -244,8 +250,8 @@ export function EventsPanel({
           <p className="td-event-number">III</p>
           <h3>Ragnarok</h3>
           <p>
-            Halvparten av den positive handelsgevinsten går tapt.
-            Kompetansebevisene beholdes.
+            Halvparten av den positive handelsgevinsten går tapt. Havnebesøk,
+            fagbidrag, stemmer, aktive prøver og kompetansebevis beholdes.
           </p>
           <Button
             secondary
@@ -256,7 +262,7 @@ export function EventsPanel({
                 kind: "ragnarok",
                 title: "Ragnarok",
                 message:
-                  "Halvparten av den positive handelsgevinsten går tapt. Kompetansebevisene beholdes.",
+                  "Halvparten av den positive handelsgevinsten går tapt. Reisen, fagbidrag, stemmer og prøver fortsetter der dere var.",
               });
             }}
           >
@@ -268,29 +274,13 @@ export function EventsPanel({
         <h2>Åpne utfordringer</h2>
         {open.length ? (
           open.map((c) => (
-            <div className="td-review-section" key={c.id}>
-              <h3>{c.title}</h3>
-              <p className="td-caption">
-                Bekreft vinner etter den avtalte aktiviteten.
-              </p>
-              <div className="cg-actions">
-                {c.groups.map((id) => (
-                  <Button
-                    key={id}
-                    disabled={busy || view.closed}
-                    onClick={() => {
-                      void send({
-                        type: "resolve_challenge",
-                        challengeId: c.id,
-                        winnerId: id,
-                      });
-                    }}
-                  >
-                    {groups[id]?.shipName} vant
-                  </Button>
-                ))}
-              </div>
-            </div>
+            <PartyControl
+              key={c.id}
+              challenge={c}
+              view={view}
+              busy={busy || view.closed}
+              send={send}
+            />
           ))
         ) : (
           <p className="td-caption">Ingen åpne utfordringer akkurat nå.</p>

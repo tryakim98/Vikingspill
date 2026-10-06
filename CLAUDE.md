@@ -38,6 +38,14 @@ Se README for utvikling, verifikasjon og produksjonsoppsett.
 
 - Hver elev har eget fagbidrag og én stemme. Flertallet binder avgjørelsen; høvdingen
   bryter bare likhet. Privat kort/stemme skal ikke finnes i gruppevisningen.
+- Elever har ikke faste roller. Nye runder deler ikke ut rollekort; eldre aktive
+  kort kan beholdes som ekstra opplysninger ved gjenoppretting.
+- Nye prøver bruker `journey-v1`, fullførte havnebesøk og konkrete reisenotater.
+  Bevar banken og steget til en allerede aktiv prøve ved gjenoppretting.
+- Gudenes prøve/holmgang er lagleker uten faglig poeng. Deltakerlisten fastsettes
+  ved åpning, alle gjør seg klare, og mobilresultatet er snitt per aktivt medlem.
+  Læreren bekrefter høyeste snitt; likhet gir delt seier. Fravær fritas før start.
+  Skjebnehjulets resultat og effekt er én servertransaksjon.
 - Rundens mannskap, valg og krav fastsettes ved avreise. Lærer kan frita et fraværende
   medlem med begrunnelse. Endrede krav gjelder neste kulturmøte.
 - Saga opprettes alltid ved oppgjør. Kast/varer/poeng/besøkt/saga er én transaksjon.

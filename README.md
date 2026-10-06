@@ -7,7 +7,7 @@ originalspillet før Ludus. Gravyr, skip, sjøkart, musikk og holmgang er behold
 ## Spillforløp
 
 1. Læreren velger Odin, oppretter en økt og deler en firebokstavskode.
-2. Elevene velger Flerspiller, blir med i samme skip og velger hver sin rolle.
+2. Elevene velger Flerspiller og blir med i samme skip. Alle bidrar uten faste roller.
 3. Høvdingen velger havn. Alle leverer egne fakta, kilde, tolkning, perspektiv og
    quizsvar. Læreren kan frita et fraværende medlem med begrunnelse.
 4. Etter samtalen stemmer alle hemmelig. Flertallet bestemmer; høvdingen bryter
@@ -17,7 +17,7 @@ originalspillet før Ludus. Gravyr, skip, sjøkart, musikk og holmgang er behold
 6. Læreren vurderer begrunnelse, kildebruk og perspektiv på en egen skala.
    Terning, rikdom og historisk samsvar gir ingen faglig vurdering.
 
-Tor / Alene bruker samme motor, med NPC-mannskap og tydelig egenvurdering.
+Tor / Alene bruker samme motor, med diskusjonsspørsmål og tydelig egenvurdering.
 Økten lagres på enheten, også under seilas og svenneprøve. Innstillinger gjelder fra
 neste møte. Beregn 45 minutter til 2–3 møter og 10 minutter etterarbeid, eller
 90 minutter til flere møter og 20 minutter etterarbeid.
@@ -28,11 +28,56 @@ Odin har fire områder: **Oversikt**, **Oppgaver og vurdering**, **Hendelser** o
 **Økt og innstillinger**. Spillkode, veiledende tid, tilkoblet mannskap og skip som
 trenger oppfølging vises øverst. Oversikten viser kart, fremdrift og direkte veier
 til gruppene som venter. Vurdering samler ett skip om gangen; elevbidrag åpnes under
-navn og rolle. Ulagrede vurderingsutkast beholdes når du bytter skip eller visning
+navn. Ulagrede vurderingsutkast beholdes når du bytter skip eller visning
 innenfor samme sideøkt. Innstillinger har eksport, sikkerhetskopi og avslutning av økten.
 
 **Vis på storskjerm** åpner kart, kode, tid og skipenes status uten individuelle
-elevnavn, fagbidrag eller tilbakemeldinger. **Esc** går tilbake til regipulten.
+elevnavn, fagbidrag eller tilbakemeldinger. Skjebnehjul og lagresultater kan også vises.
+**Esc** går tilbake til regipulten.
+
+## Reiseboken, prøver og lagleker
+
+Hver havn har et eget lagverksted og to reisenotater. Elevene lærer opplysningene
+under kulturmøtet, og samler dem i reiseboken etter fullført besøk. De kan slå opp
+notatene igjen i sjøkartet og under en prøve. Svenneprøvene viser hvilke havner som
+gjenstår, og serveren avviser prøver uten alle nødvendige besøk. Alle aktuelle
+havner blir representert i teorien; praksisen bruker erfaringer fra de samme stedene.
+Lagets svar leveres av den som startet prøven, og læreren vurderer praksisen.
+
+| Prøve | Første nivå | Andre nivå |
+|---|---|---|
+| Språk og kilder | Hedeby, Hebridene | Hedeby, Hebridene, Novgorod |
+| Seilas og ruter | Hebridene, Færøyene | Hebridene, Færøyene, Island |
+| Makt og konflikt | Lindisfarne, Paris | Lindisfarne, Paris, Dublin |
+| Handel og avtaler | Hedeby, Paris | Hedeby, Paris, Dublin |
+| Tro og perspektiver | Lindisfarne, Sápmi | Lindisfarne, Sápmi, Dublin |
+
+Gudenes prøve og holmgang er **lagleker uten faglig vurdering**: Tors tromme,
+Lokes lysknep, Bifrost-statuene, Den usynlige åren og Skipet i stormen. Deltakerlisten
+fastsettes når leken åpnes. Alle gjør seg klare på sin egen skjerm. Holmgang starter
+når begge lag er klare; læreren starter Gudenes prøve. Fem sekunder nedtelling og
+en felles tidsfrist kommer fra serveren, med synkronisert nettleserklokke.
+I alenespill starter nedtellingen når spilleren er klar, og øvingsleken kan
+avsluttes eller avlyses uten lærer.
+
+Mobil-lekene teller lokalt uten et nettverkskall per trykk. Lagets resultat er
+**sum poeng / antall aktive medlemmer**, og alle må levere før resultatet kan
+bekreftes. Likhet gir delt seier. Fysiske leker krever at alle bekrefter deltakelse;
+læreren velger laget med best gjennomføring. Fravær avklares med begrunnelse før
+start; en pågående lek kan avlyses. Poengene er spillresultater, ikke karakterer.
+Dette er tillitsbaserte klasseromsleker; serveren kontrollerer identitet, tidsfrist,
+grenser og engangslevering, men kan ikke bevise hvert fysisk trykk på en mobil.
+
+Skjebnehjulet har seks felt, gravert bronseramme og ravnemedaljong. Serveren trekker
+feltet og gjennomfører hendelsen én gang; animasjonen stopper på samme felt. Se
+[assets og genereringsprompter](public/game/ASSETS.md). Ragnarok halverer bare positiv
+handelsgevinst. Hendelser endrer ikke pågående besøk, fagbidrag, stemmer, prøvesvar,
+sagaer eller kompetansebevis. Uleverte bidrag, prøvesvar og trykk lagres også som lokale
+utkast. Det krever at nettleseren tillater lokal lagring.
+
+Eksisterende v2-backuper beholder aktive prøver med sin opprinnelige spørsmålsbank
+og dropper elevrollene. Nye prøver bruker den nye reisebanken. Gamle private kort i
+en pågående runde bevares som ekstra opplysninger; nye runder deler ikke ut rollekort.
 
 ## Tilbakemeldinger fra spillerne
 
@@ -95,6 +140,10 @@ Fem ekstra autentiserte mannskaper prøver en flåte på seks skip. Lærerens na
 innstillinger, vurdering etter lukking, skjermdeling og mobiloppsett kontrolleres også.
 Hurtigvalg uten tekst, ekstra meldinger, automatisk kontekst, feedback etter nettbrudd
 og reload, læreroversikt/filter/eksport, øktslutt og alenespill kontrolleres i samme flyt.
+En ny lærer og tre separate spillere gjennomfører havnebesøk, låser opp en prøve,
+leverer teori/praksis, spiller en felles mobil-lek og åpner holmgang. Ragnarok og
+reload testes under fagarbeid, prøve og klikkonkurranse; et resultat leveres etter
+nettbrudd. Nytt skjebnehjul testes på desktop og mobil.
 Skjermbilder og demo-backup legges i `test-results/`. GitHub Actions kjører samme
 kontroller på branchen og PR-er. En eksisterende Chromium-binær kan angis med
 `VIKING_BROWSER_PATH`. Ny kode kan sjekkes med `npm run format:check`.

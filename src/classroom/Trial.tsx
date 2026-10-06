@@ -1,7 +1,7 @@
-import { useState } from "react";
 import type { GroupView } from "../domain/model";
-import { PRACTICE_PROMPTS } from "../domain/engine";
-import { CREW_ROLES } from "../data/crewRoles";
+import { TOPIC_LABEL } from "../domain/trials";
+import { content } from "../content";
+import { useAnswerDraft, useTextDraft } from "./drafts";
 import { Button, Field, Panel } from "./ui";
 import type { Intent } from "./store";
 export default function Trial({
@@ -18,16 +18,22 @@ export default function Trial({
   send: (intent: Intent) => Promise<void>;
 }) {
   const trial = group.trial!;
-  const [answers, setAnswers] = useState<number[]>([]);
-  const [practice, setPractice] = useState("");
+  const [answers, setAnswers] = useAnswerDraft(
+    `${trial.id}:${uid}:trial-answers`,
+  );
+  const [practice, setPractice] = useTextDraft(
+    `${trial.id}:${uid}:practice`,
+    trial.practice,
+  );
   const owner = uid === trial.ownerId;
   return (
     <Panel
-      title={`${CREW_ROLES[trial.skill].title} · ${trial.level === 1 ? "Sveinn" : "Mester"}`}
+      title={`${TOPIC_LABEL[trial.skill]} · ${trial.level === 1 ? "Svenneprøve" : "Mesterprøve"}`}
     >
       <p>
-        Teori og praksis må begge bestås. Prøven og steget er lagret, og
-        overlever oppfriskning av siden.
+        Bruk det dere lærte på reisen. Diskuter sammen;{" "}
+        {group.members[trial.ownerId]?.label} leverer lagets svar og praksis.
+        Notatene fra fullførte besøk er tilgjengelige under spørsmålene.
       </p>
       {!owner && (
         <p>
@@ -45,6 +51,15 @@ export default function Trial({
           {trial.questions.map((q, index) => (
             <fieldset key={q.q} className="cg-choice">
               <legend>{q.q}</legend>
+              <p className="cg-small">
+                Fra reisen:{" "}
+                {q.source
+                  .map(
+                    (id) =>
+                      content.ports.find((p) => p.port.id === id)?.port.name,
+                  )
+                  .join(" og ")}
+              </p>
               {q.opts.map((option, i) => (
                 <label key={option}>
                   <input
@@ -53,13 +68,14 @@ export default function Trial({
                     checked={answers[index] === i}
                     disabled={!owner}
                     required
-                    onChange={() =>
-                      setAnswers((old) => {
-                        const next = [...old];
-                        next[index] = i;
-                        return next;
-                      })
-                    }
+                    onChange={() => {
+                      const next = Array.from(
+                        { length: trial.questions.length },
+                        (_, i) => answers[i] ?? -1,
+                      );
+                      next[index] = i;
+                      setAnswers(next);
+                    }}
                   />
                   {option}
                 </label>
@@ -74,7 +90,7 @@ export default function Trial({
                 Array.from(
                   { length: trial.questions.length },
                   (_, i) => answers[i],
-                ).some((a) => a === undefined)
+                ).some((a) => a === undefined || a < 0)
               }
             >
               Lever teoriprøven
@@ -85,7 +101,8 @@ export default function Trial({
       {trial.phase === "practice" && (
         <>
           <p>{trial.feedback}</p>
-          <p className="cg-note">{PRACTICE_PROMPTS[trial.skill]}</p>
+          <h3>{trial.practiceTitle}</h3>
+          <p className="cg-note">{trial.practicePrompt}</p>
           {owner && (
             <form
               onSubmit={(event) => {
@@ -164,6 +181,33 @@ export default function Trial({
           )}
         </>
       )}
+      {trial.phase !== "quiz" && (
+        <details className="cg-help">
+          <summary>Se spørsmålene med forklaringer</summary>
+          {trial.questions.map((q) => (
+            <p key={q.q}>
+              <strong>{q.q}</strong>
+              <br />
+              {q.feedback}
+            </p>
+          ))}
+        </details>
+      )}
+      <details className="cg-help">
+        <summary>Reiseboken · opplysninger fra besøkte havner</summary>
+        {(trial.requiredPorts.length ? trial.requiredPorts : group.visited).map(
+          (id) => (
+            <div key={id}>
+              <h3>{content.ports.find((p) => p.port.id === id)?.port.name}</h3>
+              <ul>
+                {content.journey[id].notes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </div>
+          ),
+        )}
+      </details>
     </Panel>
   );
 }

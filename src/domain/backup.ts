@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { GameSchema, portFor } from "./model";
 import type { Content, Game } from "./model";
+import { trialBank, trialRoute } from "./trials";
+import { PARTY_GAMES, partyMembers } from "./party";
 const Envelope = z
   .object({
     format: z.literal("vikingspill-backup"),
@@ -76,10 +78,7 @@ export function validateGame(value: unknown, content: Content): Game {
     }
     if (group.trial) {
       const trial = group.trial;
-      const bank =
-        content.skillQuestions[trial.skill][
-          trial.level === 1 ? "tier2" : "tier3"
-        ];
+      const bank = trialBank(trial, content);
       if (
         !group.members[trial.ownerId] ||
         trial.questionIndices.length !== (trial.level === 1 ? 3 : 4) ||
@@ -89,6 +88,16 @@ export function validateGame(value: unknown, content: Content): Game {
         )
       )
         throw new Error("Ugyldig svenneprøve.");
+      if (
+        trial.bankVersion === "journey-v1" &&
+        (JSON.stringify(trial.requiredPorts) !==
+          JSON.stringify(trialRoute(trial.skill, trial.level).ports) ||
+          trial.requiredPorts.some((id) => !group.visited.includes(id)) ||
+          trial.questionIndices.some((i) =>
+            bank[i].source.some((id) => !group.visited.includes(id)),
+          ))
+      )
+        throw new Error("Svenneprøven mangler fullførte havnebesøk.");
     }
   }
   for (const [uid, m] of Object.entries(game.members))
@@ -101,6 +110,41 @@ export function validateGame(value: unknown, content: Content): Game {
       trade.from === trade.to
     )
       throw new Error("Ugyldig handel.");
+  for (const [id, c] of Object.entries(game.challenges)) {
+    const roster = Object.values(c.roster).flat();
+    const legacy = !roster.length;
+    if (
+      c.id !== id ||
+      new Set(c.groups).size !== c.groups.length ||
+      c.groups.some((g) => !game.groups[g]) ||
+      new Set(roster).size !== roster.length ||
+      Object.keys(c.roster).some((g) => !c.groups.includes(g)) ||
+      c.winnerIds.some((g) => !c.groups.includes(g)) ||
+      (c.winnerId && !c.groups.includes(c.winnerId))
+    )
+      throw new Error("Ugyldig laglek.");
+    if (
+      !legacy &&
+      (c.groups.some((g) => !c.roster[g]?.length) ||
+        c.ready.some((uid) => !roster.includes(uid)) ||
+        Object.keys(c.excused).some((uid) => !roster.includes(uid)) ||
+        Object.entries(c.results).some(
+          ([uid, score]) =>
+            !roster.includes(uid) ||
+            !c.ready.includes(uid) ||
+            (PARTY_GAMES[c.activity].digital
+              ? score > PARTY_GAMES[c.activity].duration * 25
+              : score !== 0),
+        ) ||
+        (c.phase === "playing" &&
+          (c.startsAt === null ||
+            c.endsAt !== c.startsAt + PARTY_GAMES[c.activity].duration * 1000 ||
+            c.groups
+              .flatMap((g) => partyMembers(c, g))
+              .some((uid) => !c.ready.includes(uid)))))
+    )
+      throw new Error("Ugyldig deltakelse eller tid i lagleken.");
+  }
   return game;
 }
 export function makeBackup(game: Game, now: number) {
