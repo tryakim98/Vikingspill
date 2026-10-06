@@ -23,6 +23,9 @@ Se README for utvikling, verifikasjon og produksjonsoppsett.
   Kommando-ID beholdes ved retry; runde/prøve-ID hindrer at gamle handlinger treffer
   ny runde. Ingen optimistisk poengskriving.
 - `remote.ts` laster Firebase først når klasserommet brukes.
+- Tilbakemeldinger bruker separat lokal sendekø i `lib/feedback.ts`, med opprinnelig
+  UID/kode og samme meldings-ID ved retry. Ingen navn eller fagbidrag fanges automatisk.
+  Bare øktens lærer leser `v2/feedback/$code`; meldinger endrer aldri faglig vurdering.
 - `src/classroom/teacher/`: læreroversikt, vurdering per skip og egne øktkontroller.
   Storskjermvisningen skal utelate individuelle elevnavn, fagbidrag og tilbakemeldinger
   fra DOM-en, og Esc skal gi fokus tilbake til regipultens storskjermknapp.

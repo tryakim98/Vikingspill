@@ -215,6 +215,123 @@ try {
   await click(chief, "Bekreft seilas →");
   await chief.reload();
   await click(chief, "Til mannskapets oppgaver");
+  await chief
+    .getByLabel("Hva står konkret i teksten eller kilden? (minst 20 tegn)", {
+      exact: true,
+    })
+    .waitFor();
+  // One quick signal works without typing and carries the exact encounter.
+  const chiefFeedback = chief.locator("details.cg-feedback");
+  await chiefFeedback.locator(":scope > summary").click();
+  await click(chief, "For mange regler");
+  await click(chief, "Send tilbakemelding");
+  await chiefFeedback
+    .getByText("Mottatt. Læreren kan lese den.", { exact: true })
+    .waitFor();
+  const quick = await chief.evaluate(
+    () => JSON.parse(localStorage.getItem("vikingspill_feedback_v3"))[0],
+  );
+  assert.equal(quick.post.comment, "");
+  assert.equal(quick.post.destId, "lindisfarne");
+  assert.equal(quick.post.screen, "tasks");
+  assert.ok(quick.post.encounterId);
+  assert.equal(quick.status, "sent");
+  await click(chief, "Gi en tilbakemelding til");
+  await click(chief, "Noe virker ikke");
+  await chiefFeedback.locator(".cg-feedback-extra > summary").click();
+  const gameFeedbackComment = "Tilbakemeldingstest: en knapp reagerte ikke.";
+  await chief
+    .getByLabel("Hva vil du fortelle? (valgfritt)", { exact: true })
+    .fill(gameFeedbackComment);
+  await click(chief, "Send tilbakemelding");
+  await chiefFeedback
+    .getByText("Mottatt. Læreren kan lese den.", { exact: true })
+    .waitFor();
+  const two = await chief.evaluate(() =>
+    JSON.parse(localStorage.getItem("vikingspill_feedback_v3")),
+  );
+  assert.equal(two.length, 2);
+  assert.notEqual(
+    two[0].post.id,
+    two[1].post.id,
+    "A new report never reuses the previous receipt",
+  );
+  assert.equal(two[1].post.comment, gameFeedbackComment);
+  // Keep the form compact once the optional feedback is done.
+  await chiefFeedback.locator(":scope > summary").click();
+  const mobilePupil = students[3];
+  await mobilePupil.ctx.setOffline(true);
+  const mobileFeedback = mobilePupil.page.locator("details.cg-feedback");
+  await mobileFeedback.locator(":scope > summary").click();
+  await click(mobilePupil.page, "Usikker på neste steg");
+  assert.equal(
+    await mobilePupil.page
+      .getByRole("button", { name: "Usikker på neste steg", exact: true })
+      .evaluate((el) => getComputedStyle(el).backgroundColor),
+    "rgb(245, 221, 160)",
+    "Selected quick feedback remains readable while hovered",
+  );
+  await mobileFeedback.screenshot({
+    path: "test-results/feedback-mobile.png",
+  });
+  await click(mobilePupil.page, "Send tilbakemelding");
+  await mobileFeedback
+    .getByText(
+      "Lagret på enheten. Sendes når nettet er tilbake i denne økten.",
+      { exact: true },
+    )
+    .waitFor();
+  const offlineFeedback = await mobilePupil.page.evaluate(
+    () => JSON.parse(localStorage.getItem("vikingspill_feedback_v3"))[0],
+  );
+  assert.equal(offlineFeedback.status, "pending");
+  // A reload may interrupt the first reconnect request; the same ID is retried.
+  await mobilePupil.ctx.setOffline(false);
+  await mobilePupil.page.reload();
+  await wait(
+    async () =>
+      (
+        await mobilePupil.page.evaluate(
+          () => JSON.parse(localStorage.getItem("vikingspill_feedback_v3"))[0],
+        )
+      ).status === "sent",
+    "feedback outbox after reconnect and reload",
+  );
+  await teacher
+    .getByRole("button", {
+      name: "Se spillernes tilbakemeldinger (3)",
+      exact: true,
+    })
+    .waitFor();
+  await click(teacher, "Se spillernes tilbakemeldinger (3)");
+  const inbox = teacher.locator("#feedback-inbox");
+  await inbox.getByText(gameFeedbackComment, { exact: true }).waitFor();
+  assert.equal(await inbox.locator(".cg-feedback-list li").count(), 3);
+  assert.ok((await inbox.innerText()).includes("Lindisfarne · Oppgavene"));
+  assert.equal(
+    await inbox.getByText("Elev 1", { exact: true }).count(),
+    0,
+    "The inbox does not add learner names",
+  );
+  assert.equal(
+    await inbox.evaluate((el) => document.activeElement === el),
+    true,
+    "The inbox shortcut moves keyboard focus",
+  );
+  await inbox
+    .getByLabel("Vis tilbakemeldinger", { exact: true })
+    .selectOption("bug");
+  assert.equal(await inbox.locator(".cg-feedback-list li").count(), 1);
+  await inbox
+    .getByLabel("Vis tilbakemeldinger", { exact: true })
+    .selectOption("all");
+  const feedbackDownload = teacher.waitForEvent("download");
+  await click(teacher, "Eksporter tilbakemeldinger");
+  await (await feedbackDownload).saveAs("test-results/player-feedback.csv");
+  await inbox.screenshot({
+    path: "test-results/feedback-teacher.png",
+  });
+  await click(teacher, "Oversikt");
   const pack = packs.find((p) => p.port.id === "lindisfarne");
   for (const { page } of students) {
     await page
@@ -432,6 +549,11 @@ try {
     "Presentation excludes teacher feedback",
   );
   assert.equal(
+    await teacher.getByText(gameFeedbackComment, { exact: true }).count(),
+    0,
+    "Presentation excludes game feedback, even though the teacher inbox is subscribed",
+  );
+  assert.equal(
     await teacher
       .locator("textarea, select, .td-navigation, .td-rubric")
       .count(),
@@ -528,6 +650,63 @@ try {
   await teacher
     .getByRole("button", { name: "Økten er avsluttet", exact: true })
     .waitFor();
+  // Reports remain available after the lesson; asking for one is optional.
+  await chief
+    .getByText("Før dere går: gi tilbakemelding om spillet", { exact: true })
+    .waitFor();
+  await chief.locator("details.cg-feedback > summary").click();
+  const anotherFeedback = chief.getByRole("button", {
+    name: "Gi en tilbakemelding til",
+    exact: true,
+  });
+  if (await anotherFeedback.count()) await anotherFeedback.click();
+  await click(chief, "Dette likte jeg");
+  await click(chief, "Send tilbakemelding");
+  await chief
+    .locator("details.cg-feedback")
+    .getByText("Mottatt. Læreren kan lese den.", { exact: true })
+    .waitFor();
+  await teacher
+    .getByRole("button", {
+      name: "Se spillernes tilbakemeldinger (4)",
+      exact: true,
+    })
+    .waitFor();
+  await click(teacher, "Se spillernes tilbakemeldinger (4)");
+  await teacher
+    .locator("#feedback-inbox .cg-feedback-list li")
+    .filter({ hasText: "Dette likte jeg" })
+    .getByText(/Etter økten/)
+    .waitFor();
+  // Block only feedback storage: Firebase auth and the game remain available.
+  const blocked = students[1].page;
+  await blocked.evaluate(() => {
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === "vikingspill_feedback_v3")
+        throw new DOMException("Test storage limit", "QuotaExceededError");
+      return original.call(this, key, value);
+    };
+  });
+  await blocked.locator("details.cg-feedback > summary").click();
+  await click(blocked, "Dette likte jeg");
+  await click(blocked, "Send tilbakemelding");
+  await blocked
+    .locator("details.cg-feedback")
+    .getByText("Mottatt. Læreren kan lese den.", { exact: true })
+    .waitFor();
+  assert.equal(
+    await blocked.evaluate(() =>
+      localStorage.getItem("vikingspill_feedback_v3"),
+    ),
+    null,
+  );
+  await teacher
+    .getByRole("button", {
+      name: "Se spillernes tilbakemeldinger (5)",
+      exact: true,
+    })
+    .waitFor();
   await click(teacher, "Oppgaver og vurdering");
   await teacher
     .locator("summary")
@@ -564,9 +743,31 @@ try {
     .getByRole("heading", { name: "Lindisfarne · Kulturmøte", exact: true })
     .waitFor({ timeout: 30000 });
   await solo.screenshot({ path: "test-results/solo.png", fullPage: true });
+  const soloFeedback = solo.locator("details.cg-feedback");
+  await soloFeedback.locator(":scope > summary").click();
+  await soloFeedback.locator(".cg-feedback-extra > summary").click();
+  await solo
+    .getByLabel("Hva vil du fortelle? (valgfritt)", { exact: true })
+    .fill("Færre oppgaver.");
+  await click(solo, "Send tilbakemelding");
+  await soloFeedback
+    .getByText(
+      "Lagret på denne enheten. Last ned og del den med læreren eller den som utvikler spillet.",
+      { exact: true },
+    )
+    .waitFor();
+  const soloPost = await solo.evaluate(
+    () => JSON.parse(localStorage.getItem("vikingspill_feedback_v3"))[0],
+  );
+  assert.equal(soloPost.status, "local");
+  assert.equal(soloPost.code, null);
+  assert.equal(soloPost.uid, null);
+  const soloDownload = solo.waitForEvent("download");
+  await click(solo, "Last ned tilbakemeldinger");
+  await (await soloDownload).saveAs("test-results/solo-feedback.json");
   assert.deepEqual(errors, [], "No uncaught browser errors");
   console.log(
-    "PASS: teacher + four independent learners; private voting; refresh; offline queue; exactly-once reward; reflection; assessment; backup; teacher navigation, settings and private presentation; mobile teacher views; closed-session assessment; solo resume.",
+    "PASS: teacher + four independent learners; private voting; refresh; offline queue; exactly-once reward; reflection; assessment; backup; teacher navigation, settings and private presentation; mobile teacher views; closed-session assessment; solo resume; quick/optional feedback, context, offline retry, teacher inbox, filters, exports and post-lesson feedback.",
   );
 } catch (e) {
   if (browser)

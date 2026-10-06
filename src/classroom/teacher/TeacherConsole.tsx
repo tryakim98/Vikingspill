@@ -13,6 +13,7 @@ import Overview from "./Overview";
 import Review, { type ReviewDrafts } from "./Review";
 import { EventsPanel, SettingsPanel } from "./Controls";
 import { attention, onlineMembers, reviewCount } from "./status";
+import { useFeedbackInbox } from "./useFeedbackInbox";
 import "./teacher.css";
 
 const TABS = [
@@ -31,6 +32,7 @@ export default function TeacherConsole({
   onHome: () => void;
 }) {
   const { state, store } = useGame(session);
+  const feedback = useFeedbackInbox(session.code);
   const now = useNow(true);
   const [error, setError] = useState("");
   const [tab, setTab] = useState<Tab>("overview");
@@ -323,13 +325,25 @@ export default function TeacherConsole({
                 onBackup={() => {
                   void exportBackup();
                 }}
+                feedback={feedback}
               />
             )}
           </div>
         </>
       )}
       <footer className="td-footer">
-        <Feedback code={session.code} screen="lærer" />
+        <Button
+          secondary
+          onClick={() => {
+            setTab("settings");
+            requestAnimationFrame(() =>
+              document.getElementById("feedback-inbox")?.focus(),
+            );
+          }}
+        >
+          Se spillernes tilbakemeldinger ({feedback.posts.length})
+        </Button>
+        <Feedback code={session.code} uid={session.uid} screen="lærer" />
         <p>
           Odin følger flåten · Terningen avgjør spillets utfall. Du vurderer
           fagarbeidet.

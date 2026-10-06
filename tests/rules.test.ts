@@ -141,3 +141,41 @@ test("legacy unsecured paths are closed", async () => {
   await assertFails(db.ref("games/TEST").get());
   await assertFails(db.ref("games/TEST/groups/ship").set({ scores: 999 }));
 });
+test("only this classroom's teacher can read feedback; clients cannot write it directly", async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await ctx
+      .database()
+      .ref("v2/feedback/TEST/a/post")
+      .set({ comment: "A report" });
+  });
+  await assertSucceeds(
+    env
+      .authenticatedContext("teacher")
+      .database()
+      .ref("v2/feedback/TEST")
+      .get(),
+  );
+  await assertFails(
+    env
+      .authenticatedContext("teacher")
+      .database()
+      .ref("v2/feedback/NEXT")
+      .get(),
+  );
+  for (const context of [
+    env.unauthenticatedContext(),
+    env.authenticatedContext("a"),
+    env.authenticatedContext("outsider"),
+  ]) {
+    await assertFails(context.database().ref("v2/feedback/TEST").get());
+    await assertFails(context.database().ref("v2/feedback/TEST/a/post").get());
+  }
+  for (const uid of ["teacher", "a"])
+    await assertFails(
+      env
+        .authenticatedContext(uid)
+        .database()
+        .ref("v2/feedback/TEST/a/post")
+        .set({ comment: "Forged" }),
+    );
+});

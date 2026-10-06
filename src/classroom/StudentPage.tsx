@@ -161,7 +161,16 @@ function ActiveStudent({
       <GameAudio group={group} />
       <Feedback
         code={session.mode === "online" ? session.code : undefined}
-        screen={group?.encounter?.phase ?? "sjøkart"}
+        uid={session.mode === "online" ? session.uid : undefined}
+        screen={
+          state.public?.closed
+            ? "avsluttet"
+            : (group?.encounter?.phase ??
+              (group?.trial ? "prøve" : group ? "sjøkart" : "mannskap"))
+        }
+        destId={group?.encounter?.destId}
+        encounterId={group?.encounter?.id}
+        endOfSession={!!state.public?.closed}
       />
       <SyncStatus state={state} store={store} solo={session.mode === "solo"} />
       <details className="cg-help">

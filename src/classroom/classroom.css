@@ -84,6 +84,110 @@
   gap: 12px;
   margin-top: 16px;
 }
+.cg-feedback {
+  border: 1px solid #78694b;
+  background: #182027e8;
+  margin: 16px 0;
+  max-width: 100%;
+}
+.cg-feedback > summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 12px 16px;
+  color: #e8d299;
+  font-weight: 650;
+}
+.cg-feedback-body {
+  padding: 0 16px 18px;
+  max-width: 680px;
+}
+.cg-feedback-body p {
+  margin: 12px 0;
+  line-height: 1.6;
+}
+.cg-feedback-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.cg-feedback-choices button {
+  text-align: left;
+}
+.cg-feedback-choices button[aria-pressed="true"] {
+  color: #171c20;
+  background: #dfc788;
+  border-color: #f5dda0;
+}
+.cg-feedback-choices button[aria-pressed="true"]:hover:enabled {
+  background: #f5dda0;
+  color: #171c20;
+}
+.cg-feedback-extra {
+  margin: 16px 0;
+}
+.cg-feedback-extra > summary {
+  cursor: pointer;
+  padding: 10px 0;
+  min-height: 44px;
+}
+.cg-feedback-privacy {
+  font-size: 13px;
+  color: #d2c7af;
+}
+.cg-feedback-thanks {
+  color: #e8d299;
+  font-weight: 650;
+}
+.cg-feedback-pending {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0;
+}
+.cg-feedback-totals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.cg-feedback-totals > div {
+  border: 1px solid #70654f;
+  padding: 12px;
+}
+.cg-feedback-totals dt {
+  font-size: 13px;
+}
+.cg-feedback-totals dd {
+  color: #e8d299;
+  font-size: 26px;
+  margin: 6px 0 0;
+}
+.cg-feedback-list {
+  list-style: none;
+  margin: 20px 0 0;
+  max-height: 520px;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+.cg-feedback-list li {
+  border-top: 1px solid #70654f;
+  padding: 14px 0;
+  overflow-wrap: anywhere;
+}
+.cg-feedback-comment {
+  white-space: pre-wrap;
+}
+.cg-feedback summary:focus-visible,
+.cg-feedback-inbox:focus-visible {
+  outline: 3px solid #dfc788;
+  outline-offset: 4px;
+}
+@media (max-width: 420px) {
+  .cg-feedback-choices {
+    grid-template-columns: 1fr;
+  }
+}
 .cg-field {
   display: flex;
   flex-direction: column;

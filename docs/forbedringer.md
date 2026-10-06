@@ -39,6 +39,33 @@ på 390 pikslers skjerm. Mobil bruker et kompakt skipsvalg.
 Storskjermkontrollen undersøker DOM-en for å bekrefte at elevnavn, tilbakemeldinger og
 vurderingskontroller er utelatt. Skjermbilder lastes opp som CI-artefakter.
 
+## Tilbakemeldinger før videre forenkling
+
+Spillerne kan gi fire konkrete signaler uten å skrive. Valgfri fritekst gir plass
+til forklaring eller forslag. Sted, steg og møte-ID følger meldingen automatisk;
+navn, roller, elevbidrag og hemmelige felt fanges ikke. Etter øktens slutt inviterer
+den samme inngangen til en frivillig tilbakemelding, uten et nytt obligatorisk steg.
+
+`domain/feedback.ts` validerer både tidligere fritekstmeldinger og nye hurtigvalg.
+`lib/feedback.ts` lagrer en validert kø med UID/kode; `useFeedbackOutbox.ts` sender
+samme ID ved retry, og beholder ventende meldinger ved reload. Køen er avgrenset til
+200 lokale poster og beskyttes mot overskriving ved skadet lagring. Sending direkte
+til serveren kan fortsatt fungere ved blokkert lokal lagring. UI skiller mellom
+lagret på enheten og mottatt, og tilbyr manuell retry og lokal eksport.
+
+`teacher/FeedbackInbox.tsx` viser hurtigvalgenes antall og mottatte meldinger med
+kategorifilter og CSV/JSON-eksport. Ingen elevnavn eller UID-er legges til i listen
+eller eksporten; innloggings-ID brukes internt på serveren. Meldingene ligger utenfor
+spilltilstand, faglig vurdering og spillbackup. Bare eieren av økten kan lese dem,
+og storskjermvisningen utelater hele oversikten fra DOM-en.
+
+Fire tester dekker datavalidering, køisolasjon, kapasitetsgrense/skadet lagring og
+trygg CSV. Databasetest og ekte callables kontrollerer lærerens lesetilgang,
+uautoriserte/ugyldige meldinger og uforanderlig mottak ved retry. Nettleserflyten
+prøver skriveløst hurtigvalg, flere meldinger, nettbrudd/reload, filter/eksport,
+feedback etter lukking og lokal feedback i alenespill. Den tidligere verifikasjonen
+mot produksjonsdatabasen er erstattet av isolerte demo-emulatorer.
+
 ## Drift og avgrensninger
 
 Urefererte, erstattede skjermer/hooks og de gamle skrive-API-ene er fjernet.
@@ -64,7 +91,7 @@ installerte filer i node_modules ble tilpasset; dette ligger ikke i git og er ik
 nødvendig på vanlige maskiner/GitHub-runneren. Testet funksjonskode og autorisasjon
 er uendret. Playwright brukes når agent-browser-daemonen ikke kan starte her.
 
-Kontrollert 6. oktober 2026: 35 motortester og 7 databaserettighetstester passerer.
+Kontrollert 6. oktober 2026: 35 motortester, 4 tilbakemeldingstester og 8 databaserettighetstester passerer.
 Ekte serverkall for autorisasjon, retry, backup/import og tilbakemelding passerer.
 Nettleserflyt med lærer + fire elever, hemmelig stemme, varig frakoblingskø,
 reload uten ekstra belønning, etterarbeid, vurdering, eksport, mobil og solo passerer.

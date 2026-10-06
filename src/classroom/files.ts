@@ -1,4 +1,7 @@
 import type { GroupView } from "../domain/model";
+import type { ReceivedFeedback } from "../domain/feedback";
+import { feedbackLabel, FEEDBACK_SCREENS } from "../domain/feedback";
+import { content } from "../content";
 export function download(filename: string, text: string) {
   const url = URL.createObjectURL(
     new Blob([text], {
@@ -14,12 +17,15 @@ export function download(filename: string, text: string) {
   URL.revokeObjectURL(url);
 }
 
-export function learningCsv(groups: Record<string, GroupView>) {
+function csvText(rows: unknown[][]) {
   const cell = (value: unknown) => {
     let s = String(value ?? "");
     if (/^[\s]*[=+@-]/.test(s)) s = `'${s}`;
     return `"${s.replaceAll('"', '""')}"`;
   };
+  return "\uFEFF" + rows.map((row) => row.map(cell).join(";")).join("\r\n");
+}
+export function learningCsv(groups: Record<string, GroupView>) {
   const rows: unknown[][] = [
     [
       "Skip",
@@ -68,5 +74,21 @@ export function learningCsv(groups: Record<string, GroupView>) {
           )
           .join("\n"),
       ]);
-  return "\uFEFF" + rows.map((row) => row.map(cell).join(";")).join("\r\n");
+  return csvText(rows);
+}
+
+export function feedbackCsv(posts: ReceivedFeedback[]) {
+  return csvText([
+    ["Mottatt", "Tilbakemelding", "Kommentar", "Havn", "Steg", "Øktmerke"],
+    ...posts.map((p) => [
+      new Date(p.receivedAt).toISOString(),
+      feedbackLabel(p),
+      p.comment,
+      content.ports.find((c) => c.port.id === p.destId)?.port.name ??
+        p.destId ??
+        "",
+      FEEDBACK_SCREENS[p.screen] ?? p.screen,
+      p.okt,
+    ]),
+  ]);
 }

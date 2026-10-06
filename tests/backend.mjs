@@ -162,6 +162,69 @@ await call(student, "submitFeedback", {
     okt: "prøve",
   },
 });
+const quickPost = {
+  id: randomUUID(),
+  category: "forvirrende",
+  signal: "rules",
+  comment: "",
+  screen: "tasks",
+  destId: "lindisfarne",
+  at: Date.now(),
+  okt: "prøve",
+};
+const beforeFeedback = await read(student, code, `groups/${groupId}`);
+await call(student, "submitFeedback", { code, post: quickPost });
+await call(student, "submitFeedback", { code, post: quickPost });
+await call(student, "submitFeedback", {
+  code,
+  post: {
+    ...quickPost,
+    comment: "Et senere forsøk skal ikke overskrive den første meldingen.",
+  },
+});
+async function readFeedback(user, expected = 200) {
+  const response = await fetch(
+    `http://127.0.0.1:9000/v2/feedback/${code}.json?ns=${project}-default-rtdb&auth=${user.token}`,
+  );
+  assert.equal(response.status, expected);
+  return response.json();
+}
+const received = await readFeedback(teacher);
+assert.equal(
+  Object.keys(received[student.uid]).length,
+  1,
+  "A retried report is received only once",
+);
+assert.equal(
+  received[student.uid][quickPost.id].comment,
+  "",
+  "The original receipt is immutable",
+);
+assert.equal(received[student.uid][quickPost.id].destId, "lindisfarne");
+assert.ok(received[student.uid][quickPost.id].receivedAt > 0);
+assert.deepEqual(
+  (await read(student, code, `groups/${groupId}`)).scores,
+  beforeFeedback.scores,
+  "Feedback never changes the assessment or scores",
+);
+await readFeedback(student, 401);
+await readFeedback(outsider, 401);
+await call(null, "submitFeedback", { code, post: quickPost }, 401);
+await call(
+  student,
+  "submitFeedback",
+  { code, post: { ...quickPost, id: randomUUID(), category: "likte" } },
+  400,
+);
+await call(
+  student,
+  "submitFeedback",
+  {
+    code,
+    post: { ...quickPost, id: randomUUID(), signal: undefined, comment: "" },
+  },
+  400,
+);
 await call(
   outsider,
   "submitFeedback",

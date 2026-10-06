@@ -34,6 +34,33 @@ innenfor samme sideøkt. Innstillinger har eksport, sikkerhetskopi og avslutning
 **Vis på storskjerm** åpner kart, kode, tid og skipenes status uten individuelle
 elevnavn, fagbidrag eller tilbakemeldinger. **Esc** går tilbake til regipulten.
 
+## Tilbakemeldinger fra spillerne
+
+**Gi tilbakemelding om spillet** finnes øverst hos elevene, fra valg av mannskap til
+øktens slutt. Fire hurtigvalg kan sendes uten tekst: **For mange regler**, **Usikker
+på neste steg**, **Noe virker ikke** og **Dette likte jeg**. En valgfri setning kan
+utdype valget; et skriftlig forslag kan også sendes alene. Havnen og steget følger
+meldingen automatisk. Ingen skjemaer stopper spillet, og tilbakemelding påvirker
+ikke faglig vurdering.
+
+Klasseromsmeldinger lagres på enheten før sending. Nettbrudd og reload beholder
+samme meldings-ID; sending prøves igjen ved gjenopprettet forbindelse, ved åpning
+av samme økt eller med **Prøv å sende igjen**. Bare opprinnelig innlogging og
+spillkode brukes til retry. Ved blokkert lokal lagring kan en tilkoblet enhet
+fortsatt sende direkte; offline vises en feil, uten å hevde at meldingen er lagret.
+
+Læreren velger **Se spillernes tilbakemeldinger** eller finner oversikten under
+**Økt og innstillinger**. Opptelling, kategori, sted/steg og valgfri tekst kan leses
+og eksporteres til CSV/JSON for utvikleren, også etter avsluttet økt. Elevnavn legges
+ikke til, men anonym innloggings-ID brukes internt for autorisasjon og retry;
+unngå navn i fritekst. Bare øktens lærer har lesetilgang. Meldingene rendres ikke
+i storskjermvisningen og er adskilt fra spillbackup og fagarbeidseksport.
+
+I alenespill lagres tilbakemeldinger lokalt og kan lastes ned og deles. De sendes
+ikke til et klasserom. Eldre servermeldinger kan fortsatt leses i læreroversikten;
+eldre lokale v2-kopier beholdes urørt. Nettleseren oppbevarer inntil 200 nye lokale
+kopier; ventende meldinger slettes ikke for å gi plass til nye.
+
 ## Utvikling og kontroller
 
 Bruk Node 22 og Java 21; Java trengs bare til Firebase-emulatoren.
@@ -66,6 +93,8 @@ og begge produksjonsbyggene. Integrasjonstesten kjører databaserettigheter, ekt
 callable-funksjoner og lærer med fire separate elevinnlogginger i nettleseren.
 Fem ekstra autentiserte mannskaper prøver en flåte på seks skip. Lærerens navigasjon,
 innstillinger, vurdering etter lukking, skjermdeling og mobiloppsett kontrolleres også.
+Hurtigvalg uten tekst, ekstra meldinger, automatisk kontekst, feedback etter nettbrudd
+og reload, læreroversikt/filter/eksport, øktslutt og alenespill kontrolleres i samme flyt.
 Skjermbilder og demo-backup legges i `test-results/`. GitHub Actions kjører samme
 kontroller på branchen og PR-er. En eksisterende Chromium-binær kan angis med
 `VIKING_BROWSER_PATH`. Ny kode kan sjekkes med `npm run format:check`.

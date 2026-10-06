@@ -2,6 +2,8 @@ import type { GroupView, PublicView, Settings } from "../../domain/model";
 import type { Intent } from "../store";
 import { Button, Download } from "../ui";
 import { learningCsv } from "../files";
+import FeedbackInbox from "./FeedbackInbox";
+import type { FeedbackInboxState } from "./useFeedbackInbox";
 
 type Send = (intent: Intent) => Promise<void>;
 const REQUIREMENTS = [
@@ -48,12 +50,14 @@ export function SettingsPanel({
   busy,
   send,
   onBackup,
+  feedback,
 }: {
   view: PublicView;
   groups: Record<string, GroupView>;
   busy: boolean;
   send: Send;
   onBackup: () => void;
+  feedback: FeedbackInboxState;
 }) {
   const settings = view.settings;
   const disabled = busy || view.closed;
@@ -139,6 +143,7 @@ export function SettingsPanel({
         </fieldset>
       </section>
       <div className="td-settings-aside">
+        <FeedbackInbox code={view.code} inbox={feedback} />
         <section className="td-card">
           <p className="td-kicker">Ta vare på arbeidet</p>
           <h2>Saga og sikkerhetskopi</h2>

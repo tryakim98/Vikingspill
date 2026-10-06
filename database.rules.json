@@ -3,6 +3,11 @@
     ".read": false,
     ".write": false,
     "v2": {
+      "feedback": {
+        "$code": {
+          ".read": "auth != null && root.child('v2/games').child($code).child('control/teacherUid').val() === auth.uid"
+        }
+      },
       "games": {
         "$code": {
           "publicJson": {
