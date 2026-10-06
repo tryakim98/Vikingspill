@@ -8,7 +8,16 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "prepare": "git config core.hooksPath .githooks || true"
+    "prepare": "git config core.hooksPath .githooks || true",
+    "test": "node --import tsx --test tests/domain.test.ts",
+    "test:rules": "firebase emulators:exec --only database --project demo-vikingspill \"node --import tsx --test tests/rules.test.ts\"",
+    "build:functions": "node scripts/build-functions.mjs",
+    "check:functions": "tsc -p functions/tsconfig.json",
+    "check:content": "node --import tsx scripts/check-content.ts",
+    "test:types": "tsc -p tsconfig.test.json",
+    "check": "npm run lint && npm run test:types && npm run check:functions && npm run check:content && npm test && npm run build && npm run build:functions",
+    "test:integration": "firebase emulators:exec --only auth,database,functions --project demo-vikingspill \"node --import tsx --test tests/rules.test.ts && node tests/backend.mjs && node tests/browser.mjs\"",
+    "format:check": "prettier --check src/classroom src/domain src/content/validate.ts functions/src tests scripts/build-functions.mjs scripts/check-content.ts scripts/migrate-content.mjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",
@@ -17,22 +26,29 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-error-boundary": "^6.1.1",
-    "react-router-dom": "^7.15.1"
+    "react-router-dom": "^7.15.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@tailwindcss/vite": "^4.3.0",
     "@types/howler": "^2.2.13",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "agent-browser": "^0.38.2",
+    "esbuild": "^0.28.2",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "firebase-tools": "^15.32.1",
     "globals": "^17.6.0",
     "playwright": "^1.60.0",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4.3.0",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12"

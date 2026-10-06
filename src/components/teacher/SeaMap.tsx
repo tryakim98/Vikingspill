@@ -9,7 +9,7 @@
  */
 
 import { motion } from 'motion/react';
-import type { SyncedGroup } from '../../lib/gameSync';
+import type { GroupView } from '../../domain/model';
 import type { ShipSymbol } from '../../types';
 import { destinations } from '../../data';
 import VikingShip from '../ship/VikingShip';
@@ -34,7 +34,7 @@ const HOME = { x: 52, y: 22 }; // Avaldsnes — startpunkt før første seilas
 
 const NAME: Record<string, string> = Object.fromEntries(destinations.map((d) => [d.id, d.name]));
 
-export default function SeaMap({ groups }: { groups: Record<string, SyncedGroup> }) {
+export default function SeaMap({ groups }: { groups: Record<string, GroupView> }) {
   // Plasser skipene der gruppa ER NÅ (pågående seilas → aktiv destinasjon → siste
   // besøkte), ikke bare ved siste besøkte sted. Spre skip som står på samme punkt.
   const counts: Record<string, number> = {};

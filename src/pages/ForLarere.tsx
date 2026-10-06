@@ -93,12 +93,12 @@ export default function ForLarere() {
             <Step
               num="1"
               title="Åpne lenken på din maskin (gjerne projektor)"
-              body={<>Trykk <strong className="inline-flex items-center gap-1 text-viking-gold">«Jeg er Tor <Icon name="bolt" size={14} />»</strong>. Du blir spillets game master.</>}
+              body={<>Trykk <strong className="inline-flex items-center gap-1 text-viking-gold">«Jeg er Odin <Icon name="bolt" size={14} />»</strong>. Du blir spillets game master.</>}
             />
             <Step
               num="2"
               title="Opprett spillet"
-              body={<>Trykk <strong className="text-viking-gold">«Åpne Åsgards porter»</strong>. Du får et runeord på fire bokstaver (f.eks. <code>RAVN</code>).</>}
+              body={<>Trykk <strong className="text-viking-gold">«Opprett nytt spill»</strong>. Du får et runeord på fire bokstaver (f.eks. <code>RAVN</code>).</>}
             />
             <Step
               num="3"
@@ -108,7 +108,7 @@ export default function ForLarere() {
             <Step
               num="4"
               title="Elevene lager grupper"
-              body={<>Først inn i en gruppe blir <strong className="text-viking-gold">høvding</strong> og styrer skipet. De andre i samme gruppe taster samme runeord, finner skipet sitt og trykker «Bli med». Høvdingen velger; alle ser.</>}
+              body={<>Først inn i en gruppe blir <strong className="text-viking-gold">høvding</strong> og styrer skipet. De andre i samme gruppe taster samme runeord, finner skipet sitt og trykker «Bli med». Alle leverer et eget fagbidrag og stemmer hemmelig. Flertallet bestemmer; høvdingen bryter bare likhet.</>}
             />
             <Step
               num="5"
@@ -124,11 +124,11 @@ export default function ForLarere() {
             <Raven size={32} facing="right" color="#CDC3AD" /> Gode tips
           </h2>
           <ul className="space-y-3">
-            <Tip icon="monitor" text={<>La din egen skjerm vises på <strong>projektor eller storskjerm</strong>. Det er der hele klassen ser kartet, leaderboardet og hjulet.</>} />
+            <Tip icon="monitor" text={<>La din egen skjerm vises på <strong>projektor eller storskjerm</strong>. Det er der hele klassen ser kartet, fremgangen og lærerhendelsene.</>} />
             <Tip icon="people" text={<>Lag grupper på <strong>3–5 elever</strong>. Mindre grupper får dårlig diskusjon, større blir kaotiske.</>} />
-            <Tip icon="sail" text={<>Hver gruppe trenger <strong>én høvding</strong> som har rett til å trykke valgene. De andre er med på skjermen og hjelper å diskutere.</>} />
-            <Tip icon="hourglass" text={<>Tidsbruk: en kort time (~75 min) for 6–7 steder, en dobbeltime (~120 min) for full reise gjennom alle 12.</>} />
-            <Tip icon="scroll" text={<>Skru på «Krev begrunnelse» hvis du vil ha saga-loggen tilgjengelig for etterarbeid og vurdering. Innstillingene ligger oppe i panelet ditt.</>} />
+            <Tip icon="sail" text={<>Hver gruppe trenger <strong>én høvding</strong> som har rett til å trykke valgene. Alle andre har egne oppgaver og en likeverdig stemme.</>} />
+            <Tip icon="hourglass" text={<>Tidsbruk: 45 minutter for 2–3 kulturmøter og 10 minutter etterarbeid; 90 minutter for flere møter og 20 minutter etterarbeid.</>} />
+            <Tip icon="scroll" text={<>Sagaen lagres alltid. Læreren vurderer begrunnelse, kildebruk og perspektiv uavhengig av terningutfallet. Eksporter saga og elevbidrag til etterarbeid.</>} />
             <Tip icon="book" text={<>For yrkesfag eller klasser med varierende leseferdighet: bruk innstillingen <strong>Kortversjon</strong> for kortere tekster som beholder handlingen.</>} />
           </ul>
         </section>

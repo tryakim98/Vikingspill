@@ -11,6 +11,7 @@
 
 import type { SkillQuizBank, FerdighetsTreeQuestion } from '../types';
 import quizRaw from './vikingspill_quiz.json';
+import { shuffle } from '../domain/random';
 
 // Cast via unknown fordi JSON-literalen inferes med brede typer (f.eks. correct: number).
 // _meta/_schema i filen utelates ved å plukke kun de fem ferdighetsnøklene.
@@ -38,7 +39,7 @@ export function getQuizQuestionsForSkill(
   const filtered = questions.filter((q) =>
     q.source.some((destId) => visitedDestinations.includes(destId)),
   );
-  return filtered.sort(() => Math.random() - 0.5).slice(0, count);
+  return shuffle(filtered, Math.random).slice(0, count);
 }
 
 /** Bestått-terskel: tier2 = 2 av 3, tier3 = 3 av 4. */

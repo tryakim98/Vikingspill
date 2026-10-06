@@ -4,18 +4,16 @@
  * EKSISTERENDE inngangene (ingen ny spill-logikk, bare ruting):
  *
  *   ODIN  — «Læreren»     → /teacher           (regipult/storskjerm)
- *   VIKING — «Flerspiller» → /student (online)  → JoinGame tar spillkoden
- *   TOR   — «Alene»        → /student (offline)  → playOffline() seeder økten
+ *   VIKING — «Flerspiller» → /student (online)  → spillkode og mannskap
+ *   TOR   — «Alene»        → /student (offline)  → felles spillmotor med lokal lagring
  *
- * Returnerende brukere med lagret rolle hoppes rett videre (samme som før).
+ * Returnerende brukere kan gjenoppta fra sitt valgte spor.
  * Visuelt: svart-hvitt gravyr, hugget flettverksramme (.viking-frame) + material
  * per kort, matt gull kun som sjelden aksent. Ingen runding/skygge/glow.
  */
 
 import type { ReactNode } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { useRole } from '../hooks/useRole';
-import { useSession } from '../hooks/useSession';
+import { useNavigate } from 'react-router-dom';
 import NorseIcon from '../components/decor/NorseIcon';
 import Icon from '../components/decor/Icon';
 import { Yggdrasil, Raven, RuneDivider, Vegvisir, ThorHammer } from '../components/decor';
@@ -35,12 +33,6 @@ interface PathCard {
 
 export default function StartScreen() {
   const navigate = useNavigate();
-  const { role, setRole } = useRole();
-  const { playOffline } = useSession();
-
-  // Returnerende bruker: hopp rett til sitt spor (StudentGame gjenoppretter økten).
-  if (role === 'teacher') return <Navigate to="/teacher" replace />;
-  if (role === 'student') return <Navigate to="/student" replace />;
 
   const cards: PathCard[] = [
     {
@@ -51,7 +43,7 @@ export default function StartScreen() {
       desc: 'Allfaderens utsyn fra Åsgard. Styr spillet fra storskjermen — følg flåten, gi velsignelser og slipp Skjebnehjulet løs.',
       cta: 'Åpne regipulten',
       material: 'stein',
-      onSelect: () => { setRole('teacher'); navigate('/teacher'); },
+      onSelect: () => navigate('/teacher'),
     },
     {
       key: 'viking',
@@ -61,7 +53,7 @@ export default function StartScreen() {
       desc: 'Bli med i lærerens spill med spillkoden fra storskjermen. Dere seiler i sanntid sammen med resten av klassen.',
       cta: 'Tast spillkode',
       material: 'tre',
-      onSelect: () => { setRole('student'); navigate('/student'); },
+      onSelect: () => navigate('/student'),
     },
     {
       key: 'tor',
@@ -71,7 +63,7 @@ export default function StartScreen() {
       desc: 'Seil på egen hånd, offline. Ingen kode, ingen lærer — bare reisen gjennom de tolv havnene, i ditt eget tempo.',
       cta: 'Sett seil alene',
       material: 'skinn',
-      onSelect: () => { setRole('student'); playOffline(); navigate('/student'); },
+      onSelect: () => navigate('/student?mode=solo'),
     },
   ];
 
@@ -119,7 +111,7 @@ export default function StartScreen() {
         {/* Bunnlinje — venstrestilt, ikke sentrert vannmerke. */}
         <div className="mt-8 flex items-center gap-3 opacity-60">
           <Vegvisir size={44} color="#CDC3AD" />
-          <p className="font-cinzel text-xs uppercase tracking-[0.3em] text-viking-gold-soft">Rolle lagres lokalt — klikk to ganger for å bytte</p>
+          <p className="font-cinzel text-xs uppercase tracking-[0.3em] text-viking-gold-soft">Velg din ferd · økten kan gjenopptas på samme enhet</p>
         </div>
       </div>
     </div>

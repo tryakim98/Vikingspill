@@ -4,12 +4,11 @@
  *  - tapping:   flest skjermtrykk på 10 sek
  *  - reaksjon:  raskest reaksjonstid når skjermen blir grønn
  *  - regning:   flest riktige hoderegninger på 20 sek
- * Hver forkjemper spiller på sin egen enhet. Resultatet sendes til Firebase via
- * `submitChampionResult` (kalleren). Når begge er ferdige, kårer SeaBattle vinneren.
+ * Hver forkjemper spiller på sin egen enhet. Resultatet vises lokalt. Læreren avgjør eventuelle konkurranser.
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { DuelChampionResult } from '../../lib/gameSync';
+type DuelChampionResult = { finishedAt: number; score?: number; reactionMs?: number };
 import { playSound } from '../../lib/sound';
 import Icon from '../decor/Icon';
 
@@ -173,7 +172,6 @@ function MathGame({ onDone }: { onDone: Props['onDone'] }) {
 
   useEffect(() => {
     if (phase !== 'go') return;
-    newQuestion();
     const start = Date.now();
     const t = setInterval(() => {
       const left = Math.max(0, 20000 - (Date.now() - start));
@@ -200,7 +198,7 @@ function MathGame({ onDone }: { onDone: Props['onDone'] }) {
         <p className="font-cinzel text-lg text-viking-gold">Hurtig hoderegning</p>
         <p className="mt-2 mb-4 font-inter text-sm text-viking-paper/85">Flest riktige svar på 20 sekunder. Skriv tallet og trykk Enter (eller Svar).</p>
         <button
-          onClick={() => setPhase('go')}
+          onClick={() => { newQuestion(); setPhase('go'); }}
           data-testid="minigame-start"
           className="rounded-md border-2 border-viking-gold bg-viking-gold px-7 py-2 font-saga font-bold text-viking-darkblue hover:bg-viking-gold-soft"
         >

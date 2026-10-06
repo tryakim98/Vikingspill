@@ -125,13 +125,3 @@ export default function Icon({
     </svg>
   );
 }
-
-/** Ferdighet → ikon. Brukes der ferdighetenes emoji sto. */
-export const SKILL_ICON: Record<string, string> = {
-  språk: 'ansuz', sjømannskap: 'raidho', krigskunst: 'uruz', diplomati: 'tiwaz', tro: 'tree',
-};
-/** Handelsvare → ikon. */
-export const GOODS_ICON: Record<string, string> = {
-  pelsverk: 'pelt', solv: 'coin', jern: 'anvil', rav: 'amber',
-  silke: 'thread', hvalrosstann: 'tusk', krydder: 'spice', salt: 'salt',
-};
