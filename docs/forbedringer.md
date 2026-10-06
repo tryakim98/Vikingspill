@@ -18,6 +18,27 @@ Branch: forbedringer/felles-spillmotor. Originalen og Ludus er separate prosjekt
 | Svakt etterarbeidsgrunnlag | Saga alltid, sammenligning, elevbidrag, CSV/JSON | Eksport og backup |
 | Ingen samlet regresjonskontroll | Lint, typing, motor, regler, backend og nettleser i CI | check og test:integration |
 
+## Lærerskjermens designrunde
+
+`src/classroom/teacher/` skiller oversikt, vurdering og øktkontroller. Egen CSS under
+`.cg-teacher` holder utformingen samlet og avgrenser den fra elevsidene.
+
+| Behov i klasserommet | Utforming |
+| --- | --- |
+| Se det viktigste raskt | Fremhevet kode, tid, antall skip, tilkoblet mannskap og skip som trenger oppfølging |
+| Finne gruppen som venter | Handlingsliste og flåtekort med direkte åpning av valgt skip |
+| Lese fagarbeid uten en lang vegg av tekst | Søkbart skipsvalg, filter for ventende vurderinger, sammenleggbare møter og navngitte elevbidrag |
+| Veksle mellom oppfølging og skjermdeling | Vurderingsutkast og gruppebeskjeder beholdes ved bytte av skip/visning i samme sideøkt; bare lagrede vurderinger sendes til spillet |
+| Skille undervisningsinnstillinger fra oppfølging | Egne områder for hendelser og øktoppsett, eksport og etterarbeid |
+| Vise reisen til klassen | Egen storskjermvisning med kart, kode, tid og skipenes fremdrift; elevnavn, bidrag, vurderinger og tilbakemeldinger rendres ikke |
+| Bruke tastatur og mobil | Tydelig aktiv navigasjon, merkede felt, fokusmarkering, Esc med retur til knappen og responsivt oppsett |
+
+Den utvidede nettlesertesten prøver lærerflyten med seks skip, individuell vurdering,
+innstillingsendring, eksport, bevarte vurderingsutkast, skjermdeling og fire lærerområder
+på 390 pikslers skjerm. Mobil bruker et kompakt skipsvalg.
+Storskjermkontrollen undersøker DOM-en for å bekrefte at elevnavn, tilbakemeldinger og
+vurderingskontroller er utelatt. Skjermbilder lastes opp som CI-artefakter.
+
 ## Drift og avgrensninger
 
 Urefererte, erstattede skjermer/hooks og de gamle skrive-API-ene er fjernet.

@@ -23,6 +23,9 @@ Se README for utvikling, verifikasjon og produksjonsoppsett.
   Kommando-ID beholdes ved retry; runde/prøve-ID hindrer at gamle handlinger treffer
   ny runde. Ingen optimistisk poengskriving.
 - `remote.ts` laster Firebase først når klasserommet brukes.
+- `src/classroom/teacher/`: læreroversikt, vurdering per skip og egne øktkontroller.
+  Storskjermvisningen skal utelate individuelle elevnavn, fagbidrag og tilbakemeldinger
+  fra DOM-en, og Esc skal gi fokus tilbake til regipultens storskjermknapp.
 - `database.rules.json`: klienten skriver bare egen tilstedeværelse. Elever leser
   eget skip/egne private felt. Læreren leser grupper, ikke private stemmer.
 - RTDB-visninger er JSON-strenger for å bevare tomme arrays/objekter. Autoritativ

@@ -60,6 +60,7 @@ export function Field({
       {label}
       {multiline ? (
         <textarea
+          aria-label={label}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           maxLength={maxLength}
@@ -68,6 +69,7 @@ export function Field({
         />
       ) : (
         <input
+          aria-label={label}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           maxLength={maxLength}
@@ -122,14 +124,16 @@ export function Shell({
   subtitle,
   children,
   action,
+  className = "",
 }: {
   title: string;
   subtitle?: string;
   children: ReactNode;
   action?: ReactNode;
+  className?: string;
 }) {
   return (
-    <main className="viking-screen cg-screen">
+    <main className={`viking-screen cg-screen ${className}`}>
       <div className="cg-wrap">
         <header className="cg-header">
           <div>

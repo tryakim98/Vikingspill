@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import { spawn, execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -43,6 +44,77 @@ const wait = async (fn, label) => {
     await new Promise((r) => setTimeout(r, 200));
   }
 };
+// Extra authenticated ships exercise a classroom-sized fleet and offline help.
+async function seedFleet(code) {
+  const names = [
+    "Bølgebryteren",
+    "Drageskipet",
+    "Nordlyset",
+    "Havørnen",
+    "Ulven",
+  ];
+  for (let i = 0; i < names.length; i++) {
+    const auth = await fetch(
+      "http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ returnSecureToken: true }),
+      },
+    );
+    assert.equal(auth.status, 200);
+    const { idToken: token } = await auth.json();
+    const call = async (name, data) => {
+      const response = await fetch(
+        `http://127.0.0.1:5001/demo-vikingspill/europe-west1/${name}`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ data }),
+        },
+      );
+      const value = await response.json();
+      assert.equal(response.status, 200, JSON.stringify(value));
+      return value.result;
+    };
+    const read = async (path) => {
+      const response = await fetch(
+        `http://127.0.0.1:9000/v2/games/${code}/${path}.json?ns=demo-vikingspill-default-rtdb&auth=${token}`,
+      );
+      assert.equal(response.status, 200);
+      return JSON.parse(await response.json());
+    };
+    await call("joinClassroom", { code, id: randomUUID() });
+    const groupId = `g-${randomUUID()}`;
+    await call("gameCommand", {
+      code,
+      command: {
+        id: randomUUID(),
+        expectedVersion: (await read("publicJson")).version,
+        type: "create_ship",
+        groupId,
+        shipName: names[i],
+        shipColor: ["#8b5550", "#9a854e", "#638172", "#667d93", "#9b806e"][i],
+        shipSymbol: ["drage", "ulv", "ravn"][i % 3],
+        role: "språk",
+        label: `Mannskap ${i + 1}`,
+      },
+    });
+    await call("gameCommand", {
+      code,
+      command: {
+        id: randomUUID(),
+        expectedVersion: (await read(`groups/${groupId}`)).version,
+        type: "sail",
+        groupId,
+        destId: ["hedeby", "dublin", "lindisfarne"][i % 3],
+      },
+    });
+  }
+}
 try {
   await wait(async () => {
     try {
@@ -85,10 +157,15 @@ try {
   watch(teacher);
   await teacher.goto(`${url}/teacher`);
   await click(teacher, "Opprett nytt spill");
-  await teacher
-    .getByRole("heading", { name: /^Klasserom [A-Z]{4}$/ })
-    .waitFor({ timeout: 30000 });
-  const code = (await teacher.locator("h1").innerText()).slice(-4);
+  await teacher.locator(".td-code-value").waitFor({ timeout: 30000 });
+  const code = await teacher.locator(".td-code-value").innerText();
+  assert.equal(
+    await teacher
+      .getByRole("button", { name: "Oversikt", exact: true })
+      .getAttribute("aria-pressed"),
+    "true",
+    "Current teacher view is marked",
+  );
   const students = [];
   for (let i = 0; i < 4; i++) {
     const ctx = await browser.newContext({
@@ -123,6 +200,14 @@ try {
       .waitFor({ timeout: 30000 });
   }
   const chief = students[0].page;
+  await teacher
+    .locator(".td-ship-card h3")
+    .filter({ hasText: "Ravnen" })
+    .waitFor();
+  await teacher.screenshot({
+    path: "test-results/teacher-overview.png",
+    fullPage: true,
+  });
   await chief
     .locator(".cg-map-list")
     .getByRole("button", { name: "Lindisfarne", exact: true })
@@ -250,6 +335,17 @@ try {
     .locator("summary")
     .filter({ hasText: "Lindisfarne · faglig vurdering" })
     .click();
+  const learnerContribution = teacher
+    .locator(".td-evidence")
+    .filter({ hasText: "Elev 2" });
+  await learnerContribution.locator("summary").click();
+  assert.equal(
+    await learnerContribution
+      .getByText("Fakta fra teksten eller kilden", { exact: true })
+      .isVisible(),
+    true,
+    "Historical contributions identify the individual learner",
+  );
   await teacher.getByLabel("Begrunnelse", { exact: true }).selectOption("2");
   await teacher.getByLabel("Kildebruk", { exact: true }).selectOption("2");
   await teacher.getByLabel("Perspektiv", { exact: true }).selectOption("1");
@@ -266,10 +362,6 @@ try {
       ),
     "independent assessment",
   );
-  const downloadEvent = teacher.waitForEvent("download");
-  await click(teacher, "Sikkerhetskopier hele spillet");
-  const backupDownload = await downloadEvent;
-  await backupDownload.saveAs("test-results/classroom-backup.json");
   await teacher.screenshot({
     path: "test-results/teacher.png",
     fullPage: true,
@@ -278,6 +370,174 @@ try {
     path: "test-results/student-mobile.png",
     fullPage: true,
   });
+  await seedFleet(code);
+  await click(teacher, "Oversikt");
+  await wait(
+    async () => (await teacher.locator(".td-ship-card").count()) === 6,
+    "Six ships on the fleet overview",
+  );
+  await teacher.screenshot({
+    path: "test-results/teacher-fleet.png",
+    fullPage: true,
+  });
+  await click(teacher, "Se Ulven");
+  await teacher.getByRole("heading", { name: "Ulven", exact: true }).waitFor();
+  await teacher.getByRole("button", { name: "Ravnen", exact: true }).click();
+  await teacher
+    .locator("summary")
+    .filter({ hasText: "Lindisfarne · faglig vurdering" })
+    .click();
+  const originalFeedback = await teacher
+    .getByLabel("Faglig tilbakemelding", { exact: true })
+    .inputValue();
+  const unsavedFeedback = `${originalFeedback} Dette er et ulagret utkast.`;
+  await teacher
+    .getByLabel("Faglig tilbakemelding", { exact: true })
+    .fill(unsavedFeedback);
+  await teacher.getByRole("button", { name: "Ulven", exact: true }).click();
+  await teacher.getByRole("button", { name: "Ravnen", exact: true }).click();
+  await teacher
+    .locator("summary")
+    .filter({ hasText: "Lindisfarne · faglig vurdering" })
+    .click();
+  assert.equal(
+    await teacher
+      .getByLabel("Faglig tilbakemelding", { exact: true })
+      .inputValue(),
+    unsavedFeedback,
+    "Unsaved rubric survives choosing a different ship",
+  );
+  await click(teacher, "Vis på storskjerm");
+  await teacher
+    .getByRole("heading", { name: "Flåten på sjøkartet", exact: true })
+    .waitFor();
+  assert.equal(
+    (await teacher.getByText("Ravnen", { exact: true }).count()) > 0,
+    true,
+    "Presentation includes ship names",
+  );
+  assert.equal(
+    await teacher.getByText(/Elev [1-4]/).count(),
+    0,
+    "Presentation excludes individual learner names",
+  );
+  assert.equal(
+    await teacher.getByText(/Mannskap [1-5]/).count(),
+    0,
+    "Presentation excludes fixture learner names",
+  );
+  assert.equal(
+    await teacher.getByText(/God begrunnelse og tydelig skille/).count(),
+    0,
+    "Presentation excludes teacher feedback",
+  );
+  assert.equal(
+    await teacher
+      .locator("textarea, select, .td-navigation, .td-rubric")
+      .count(),
+    0,
+    "Presentation excludes teacher controls",
+  );
+  await teacher.screenshot({
+    path: "test-results/teacher-presentation.png",
+    fullPage: true,
+  });
+  await teacher.keyboard.press("Escape");
+  await wait(
+    async () =>
+      teacher
+        .getByRole("button", { name: "Vis på storskjerm", exact: true })
+        .evaluate((el) => el === document.activeElement),
+    "Escape restores keyboard focus",
+  );
+  await teacher
+    .locator("summary")
+    .filter({ hasText: "Lindisfarne · faglig vurdering" })
+    .click();
+  assert.equal(
+    await teacher
+      .getByLabel("Faglig tilbakemelding", { exact: true })
+      .inputValue(),
+    unsavedFeedback,
+    "Unsaved rubric survives presentation mode",
+  );
+  await teacher
+    .getByLabel("Faglig tilbakemelding", { exact: true })
+    .fill(originalFeedback);
+  await click(teacher, "Økt og innstillinger");
+  await teacher.getByLabel("Øktlengde", { exact: true }).selectOption("90");
+  await text(teacher, "Av 90 minutter · 20 min til etterarbeid");
+  await teacher.getByLabel("Øktlengde", { exact: true }).selectOption("45");
+  await text(teacher, "Av 45 minutter · 10 min til etterarbeid");
+  const downloadEvent = teacher.waitForEvent("download");
+  await click(teacher, "Sikkerhetskopier hele spillet");
+  const backupDownload = await downloadEvent;
+  await backupDownload.saveAs("test-results/classroom-backup.json");
+  await teacher.screenshot({
+    path: "test-results/teacher-settings.png",
+    fullPage: true,
+  });
+  await teacher.setViewportSize({ width: 390, height: 844 });
+  for (const name of [
+    "Oversikt",
+    "Oppgaver og vurdering",
+    "Hendelser",
+    "Økt og innstillinger",
+  ]) {
+    await click(teacher, name);
+    assert.equal(
+      await teacher.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+      true,
+      `No horizontal overflow in teacher view: ${name}`,
+    );
+  }
+  await click(teacher, "Oversikt");
+  await teacher.screenshot({
+    path: "test-results/teacher-mobile.png",
+    fullPage: true,
+  });
+  await click(teacher, "Oppgaver og vurdering");
+  await teacher
+    .getByRole("combobox", { name: "Velg skip til vurdering", exact: true })
+    .selectOption({ label: "Ulven" });
+  await teacher.getByRole("heading", { name: "Ulven", exact: true }).waitFor();
+  await teacher
+    .getByRole("combobox", { name: "Velg skip til vurdering", exact: true })
+    .selectOption({ label: "Ravnen" });
+  await teacher
+    .locator("summary")
+    .filter({ hasText: "Lindisfarne · faglig vurdering" })
+    .click();
+  assert.equal(
+    await teacher.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+    true,
+    "Expanded mobile assessment fits the viewport",
+  );
+  await teacher.screenshot({
+    path: "test-results/teacher-mobile-review.png",
+    fullPage: true,
+  });
+  await teacher.setViewportSize({ width: 1440, height: 1000 });
+  // Returning to a ship keeps a saved assessment available, including after closing.
+  await click(teacher, "Økt og innstillinger");
+  await click(teacher, "Avslutt økten og behold sagaene");
+  await teacher
+    .getByRole("button", { name: "Økten er avsluttet", exact: true })
+    .waitFor();
+  await click(teacher, "Oppgaver og vurdering");
+  await teacher
+    .locator("summary")
+    .filter({ hasText: "Lindisfarne · faglig vurdering" })
+    .click();
+  assert.equal(
+    await teacher.getByLabel("Begrunnelse", { exact: true }).inputValue(),
+    "2",
+    "Saved rubric survives view changes and classroom closing",
+  );
   assert.equal(
     await students[3].page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -306,7 +566,7 @@ try {
   await solo.screenshot({ path: "test-results/solo.png", fullPage: true });
   assert.deepEqual(errors, [], "No uncaught browser errors");
   console.log(
-    "PASS: teacher + four independent learners; private voting; refresh; offline queue; exactly-once reward; reflection; assessment; backup; mobile; solo resume.",
+    "PASS: teacher + four independent learners; private voting; refresh; offline queue; exactly-once reward; reflection; assessment; backup; teacher navigation, settings and private presentation; mobile teacher views; closed-session assessment; solo resume.",
   );
 } catch (e) {
   if (browser)

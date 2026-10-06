@@ -22,6 +22,18 @@ Tor / Alene bruker samme motor, med NPC-mannskap og tydelig egenvurdering.
 neste møte. Beregn 45 minutter til 2–3 møter og 10 minutter etterarbeid, eller
 90 minutter til flere møter og 20 minutter etterarbeid.
 
+## Lærerskjermen
+
+Odin har fire områder: **Oversikt**, **Oppgaver og vurdering**, **Hendelser** og
+**Økt og innstillinger**. Spillkode, veiledende tid, tilkoblet mannskap og skip som
+trenger oppfølging vises øverst. Oversikten viser kart, fremdrift og direkte veier
+til gruppene som venter. Vurdering samler ett skip om gangen; elevbidrag åpnes under
+navn og rolle. Ulagrede vurderingsutkast beholdes når du bytter skip eller visning
+innenfor samme sideøkt. Innstillinger har eksport, sikkerhetskopi og avslutning av økten.
+
+**Vis på storskjerm** åpner kart, kode, tid og skipenes status uten individuelle
+elevnavn, fagbidrag eller tilbakemeldinger. **Esc** går tilbake til regipulten.
+
 ## Utvikling og kontroller
 
 Bruk Node 22 og Java 21; Java trengs bare til Firebase-emulatoren.
@@ -52,6 +64,8 @@ npm run test:integration
 `check` kjører lint, streng typing for tester/server, innholdsvalidering, motortester
 og begge produksjonsbyggene. Integrasjonstesten kjører databaserettigheter, ekte
 callable-funksjoner og lærer med fire separate elevinnlogginger i nettleseren.
+Fem ekstra autentiserte mannskaper prøver en flåte på seks skip. Lærerens navigasjon,
+innstillinger, vurdering etter lukking, skjermdeling og mobiloppsett kontrolleres også.
 Skjermbilder og demo-backup legges i `test-results/`. GitHub Actions kjører samme
 kontroller på branchen og PR-er. En eksisterende Chromium-binær kan angis med
 `VIKING_BROWSER_PATH`. Ny kode kan sjekkes med `npm run format:check`.
