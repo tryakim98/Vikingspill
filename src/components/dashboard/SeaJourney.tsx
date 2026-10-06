@@ -96,6 +96,7 @@ interface Props {
   onSelect: (destId: string | null) => void;
   onConfirm: (destId: string) => void;
   onStartSvenneprove: (destId: string, skill: SkillKey) => void;
+  trialUnlocks?: Record<SkillKey, { available: boolean; missing: string[] }>;
   onPerformAction: (action: SpecialAction) => void;
 }
 
@@ -110,7 +111,7 @@ const CATEGORY_COLOR: Record<ActionCategory, string> = {
   diplomati: 'text-viking-teal',
 };
 
-export default function SeaJourney({ destinations, visited, locked, goods, svennebrev, scores, unlockedSides, performedActions, isChief, previewDestId, sailingTo, onSelect, onConfirm, onStartSvenneprove, onPerformAction }: Props) {
+export default function SeaJourney({ destinations, visited, locked, goods, svennebrev, scores, unlockedSides, performedActions, isChief, previewDestId, sailingTo, onSelect, onConfirm, onStartSvenneprove, onPerformAction, trialUnlocks }: Props) {
   const previewDest = previewDestId ? destinations.find((d) => d.id === previewDestId) ?? null : null;
   const lastVisited = visited[visited.length - 1];
   const shipStart = (lastVisited && MAP_POS[lastVisited]) || HOME;
@@ -402,11 +403,12 @@ export default function SeaJourney({ destinations, visited, locked, goods, svenn
                   {/* Stor, tydelig knapp for å ta svenneprøven direkte */}
                   {svenneReq && svenneReq.type === 'svenneprove' && isChief && (
                     <button
+                      disabled={trialUnlocks && !trialUnlocks[svenneReq.skill].available}
                       onClick={() => onStartSvenneprove(dest.id, svenneReq.skill)}
                       data-testid={`take-svenneprove-${dest.id}`}
                       className="mt-3 w-full rounded-md border-2 border-viking-gold bg-viking-gold/15 px-4 py-2.5 font-cinzel text-sm font-bold text-viking-gold transition hover:bg-viking-gold hover:text-viking-darkblue"
                     >
-                      <Icon name="scroll" size={15} className="mr-1 inline-block align-[-2px]" /> Ta svenneprøven i {skillTreeData[svenneReq.skill].name} →
+                      <Icon name="scroll" size={15} className="mr-1 inline-block align-[-2px]" /> {trialUnlocks && !trialUnlocks[svenneReq.skill].available ? `Fullfør først: ${trialUnlocks[svenneReq.skill].missing.join(', ')}` : `Ta prøven i ${skillTreeData[svenneReq.skill].name} →`}
                     </button>
                   )}
                   {svenneReq && svenneReq.type === 'svenneprove' && !isChief && (

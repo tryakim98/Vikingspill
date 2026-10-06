@@ -53,22 +53,3 @@ export function AutoIcon({ name, size = 18, className = '', title }: Props) {
     ? <NorseIcon name={name} size={size} className={className} title={title} />
     : <Icon name={name} size={size} className={className} title={title} />;
 }
-
-/** Ferdighet → norrønt ikon (PNG). */
-export const SKILL_PNG: Record<string, string> = {
-  språk: 'ikon-sprak',
-  sjømannskap: 'ikon-sjomannskap',
-  krigskunst: 'ikon-krigskunst',
-  diplomati: 'ikon-diplomati',
-  tro: 'ikon-tro',
-};
-
-/** Handelsvare → norrønt ikon (PNG). Bare varene vi har egne motiv for; resten
- *  faller tilbake på SVG-glyfene i Icon.tsx. */
-export const GOODS_PNG: Record<string, string> = {
-  pelsverk: 'ikon-pelsverk',
-  hvalrosstann: 'ikon-hvalrosstann',
-};
-
-/** Generelt handelsvare-ikon der én samle-glyf trengs. */
-export const TRADE_PNG = 'ikon-hvalrosstann';

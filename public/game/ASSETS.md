@@ -1,0 +1,11 @@
+# Skjebnehjulets ornamenter
+
+`wheel-bronze-rim.webp` og `wheel-raven-hub.webp` ble laget med den innebygde imagegen-funksjonen 6. oktober 2026. Originalene er transparente PNG-filer. WebP-utgavene beholder alpha og komprimerer filene for nettbruk. SVG-felt, merker, peker og animasjon tegnes i `src/classroom/FateWheel.tsx` og `fate-wheel.css`.
+
+## Prompt for bronserammen
+
+Create a premium game UI asset: a perfectly circular Viking / Norse fate wheel outer ring frame, viewed straight from above, orthographic, centered, square image 1024x1024. IMPORTANT: only the annular outer rim is visible, the large central circular opening is completely transparent, and all space outside the ring is transparent. Outer diameter occupies 92% of the image, inner opening diameter is 72% of the image. Antique matte bronze, deep charcoal etched recesses, intricate restrained interwoven Norse knotwork engraved evenly around circumference, subtle worn highlights, 12 small bronze rivets at equal spacing. An adult museum engraving aesthetic, black and white stipple texture with desaturated bronze metal highlights, elegant handcrafted Scandinavian artifact. Crisp symmetry, realistic low-relief bronze, restrained ambient shadow, no dramatic perspective, no text, no letters, no runes, no sectors, no pointer, no background, no glow, no cartoon, no bright gold, no skulls. Asset will overlay a six-sector digital spinning wheel in a charcoal and matte bronze classroom Viking game.
+
+## Prompt for ravnemedaljongen
+
+Create a standalone Viking game UI central wheel medallion, isolated on transparent background. A single small perfectly circular antique bronze disk, straight-on orthographic front view, centered in square composition. On the disk a beautiful engraved pair of ravens facing each other with interlaced tails forming a restrained Norse knot. Matte worn desaturated bronze highlights, black etched recesses, museum-quality engraving, sharp low relief, fine stipple hatching, round raised edge with tiny evenly spaced rivets. Outer circle occupies 80% of canvas, remaining space fully transparent. No letters, no text, no runes, no scenery, no outer wheel, no perspective, no bright gold, no cartoon, no glow. Matches a charcoal and bronze Viking fate wheel with Norse knotwork outer ring.

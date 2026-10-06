@@ -1,137 +1,73 @@
-# CLAUDE.md — Vikingenes kulturmøter
+# Arbeidsregler og arkitektur
 
-Praktisk arbeidsdokument: hva man må vite for å jobbe riktig i DETTE repoet uten å
-ødelegge noe. (Visjon, feature-lister og fremtidsplaner hører hjemme andre steder.)
+React 19, TypeScript, Vite, Tailwind, Firebase RTDB og callable Functions.
+Se README for utvikling, verifikasjon og produksjonsoppsett.
 
-## 1. Hva det er + stack
-Nettbasert klasseromsspill (VG2 yrkesfag, kulturmøter): grupper styrer hvert sitt
-vikingskip gjennom 12 historiske havner — leser kulturmøtet, tar en kort stedsquiz,
-og gjør terningbaserte valg med konsekvenser. Én React-app, to roller (lærer/elev).
+## Arbeidsmåte
 
-**Stack:** React 19 + TypeScript + Vite · Tailwind · Firebase Realtime Database
-(sanntid) · `motion` (animasjon) · Howler (lyd). Pre-push-hook kjører
-`tsc -b && vite build` — ikke push hvis build feiler.
+- Svar på norsk. Vis plan ved større endringer; vent der det uttrykkelig bes om det.
+- Fokuserte commits; `npm run check` skal passere før push.
+- Sanntidsendringer testes med lærer og uavhengige elevinnlogginger:
+  `npm run test:integration`.
+- Bekreft at en fil er ureferert før sletting. Ikke endre bilder/teksturer i public
+  uten beskjed. Ikke omformater de tre originale JSON-kildene.
 
-## 2. Arkitektur-sømmer (må kjennes)
-- **Roller/ruter:** `RoleSelect` → `pages/TeacherPanel.tsx` (game master, storskjerm)
-  eller `pages/StudentGame.tsx` (elev). Rolle huskes i localStorage (`useRole`).
-- **Øktmodus (`hooks/useSession.ts`):** `online` `{gameCode, memberId, groupId}` =
-  delt spill via Firebase (`lib/gameSync.ts`), flere enheter i samme gruppe; eller
-  `offline` `{groupId, memberId}` = solo/øving i localStorage. `isOnline` gater alt
-  sanntid.
-- **`GameDashboard`** er den FELLES play-flaten for elev (samme komponent online og
-  offline). Eier dashbord + kart (`SeaJourney`) og rendrer overlays: encounter,
-  svenneprøve, ferdsbrev, ting, sluttseremoni.
-- **`EncounterFlow` = en Step-maskin.** `Step = history | kulturmote | oppgave |
-  transition | quiz | perspektiv | radslagning | valg | saga | roll | rolling |
-  resultat | refleksjon`. Hvilke steg som er med styres av lærer-settings.
-- **`syncMode = !!syncedEncounter`.** Online: steg + quiz-state leses/skrives til
-  Firebase via `onUpdateEncounter`. Offline: lokal `useState`. Skal flere felt endres
-  i én handler, bruk `updateMany` (ett samlet skriv — to separate patcher racer).
-- **Høvding-modell:** bare høvdingen har interaktive kontroller i encounter; andre
-  «ser med» (synket). Eneste unntak: rådslagning.
-- **Deliberasjons-ryggraden (ferdig) — dobbeltspor, felles utgang:** valget avgjøres i
-  `radslagning`-steget og føres ALLTID gjennom `commitDecision()` → saga → roll →
-  resultat → onComplete (identisk konsekvens/avsløring/saga i begge spor).
-  - *Online (bindende):* hvert medlems `CouncilAdvice.choiceId` er en STEMME (`note` =
-    valgfri begrunnelse). Hemmelig votering (kun «X av Y» til alle har stemt), så låses
-    stemmene, `tallyVotes()` avgjør — flertall vinner, **høvding teller som én stemme og
-    bryter KUN ved likhet** (ingen vetorett). Online hopper over `valg`-steget.
-  - *Solo (offline):* mannskapsrollene er NPC-stemmer som argumenterer ulikt via
-    `npcVotes()` (lib/council.ts) + `crewRoles.argues`; spilleren leser «Kildene», hører
-    stemmene, og velger + begrunner i `valg`→`saga`.
-- **Nøkkelkort (trinn 1, ærlige — `data/keyCards.ts` + `lib/keyCards.ts`):** ved ~1/3
-  av møtene (lærerbryter `keyCards`) deler høvdingen ut ÉT privat, beslutningsrelevant
-  kort til ÉN elev (online), VEKTET mot den som har fått færrest (`pickCardHolder`).
-  Holderen ser kortet privat, andre ser nøytral banner; avsløres i resultat + saga. Solo
-  leser de samme «Kildene» (ulogget kontekst). Kortet OPPLYSER, binder ikke.
-- **Sabotør (trinn 2 — `data/agendaCards.ts`):** et agenda-kort er en VARIANT av nøkkel-
-  kortet (`encounter.keyCard.kind='agenda'`), delt ut i samme private-slot — så agenten
-  ikke er til å skille fra en nøkkelkort-holder (ekte deduksjon). Egen lærerbryter
-  `saboteur` (default AV, virker kun når `keyCards` på). Online: agenten får et hemmelig
-  oppdrag (`brief`) om å presse ETT valg; lyktes hvis gruppa velger det. Solo: én NPC-
-  stemme sier `pitch` (manipulativt argument) + spilleren flagger mistanke. Avsløring
-  ALLTID rolle-framet («spillet ga X en skjult rolle»), aldri «X løy». **Belønn årvåkenhet:**
-  de som stemte MOT push gjennomskuer; per-elev-ære AVLEDES av `group.agendaLog`
-  (`deriveHonors`, vist i sluttseremonien) — ingen skriv til medlemsnoden, ingen poengakse.
-- **Progresjonsmodell:** ÉN tallakse — `svennebrev` `0|1|2` per domene (0=ingen,
-  1=sveinn, 2=mester). **Svenneprøven er eneste opplåsing** (hever ett domene ett
-  hakk). Det finnes IKKE et eget «ferdighetsnivå». Arketypen er en **rolle/stemme**
-  (`data/crewRoles.ts`, 1:1 med domenene), ikke et tall — den gir ingen odds-bonus.
-- **`hiddenChoice` (bonus-valg):** ett ekstra valg på 5 havner, åpnet av svennebrev-
-  grad i et domene (sveinn/mester) ELLER en matchende mannskapsrolle ombord. Det
-  UTVIDER kjernevalgene — kommer alltid I TILLEGG, aldri i stedet, og manglende
-  opplåsing gir ingen straff. Kjernevalg (3 per havn) er ALLTID valgbare.
-- **Odds = grunnsjanse (`baseRoll`) + stedsquiz-bonus + lærer-godkjenning + svidd
-  mottakelse.** Svennebrev/rolle påvirker IKKE terningen — de åpner havner/bonus-valg,
-  ikke utfall. Ingen ferdighets-gating av valg, ingen sen-spill-straff.
-- **`textLength` per elev:** hver elev kan veksle `full`/`short` på historie- og
-  kulturmøte-tekst; lærer setter standard (`full`/`short`/`group`).
-- **Tilgang & konsekvenser:** Hovedsporet (7 havner, `MAIN_ROUTE`) er **alltid åpent**
-  — alle får f.eks. Paris-møtet uansett tidligere valg. Sidesteder (5, `SIDE_UNLOCKS`)
-  er gated på svennebrev-grad + score/goods (aldri et rått ferdighetstall), og hver har
-  ≥1 vei som ikke krever ett bestemt domene (varer eller rykte). Valg-konsekvenser
-  *forgrener* — en «svidd mottakelse» ved en senere havn (`data/consequences.ts`, myk
-  −2 + banner, f.eks. Lindisfarne-plyndring → kaldt Paris) — de **amputerer aldri** en
-  havn.
-- **Solo-prinsippet (samme valg, to spor):** online = bindende individuell stemme
-  (høvding bryter likhet); solo (offline) = mannskapet som NPC-arketyp-stemmer,
-  spilleren velger + begrunner. Felles konsekvens og saga-logg.
+## Arkitektur
 
-Nøkkelfiler: `lib/gameSync.ts` (Firebase + typer), `hooks/useGameState.ts`
-(poeng/svennebrev), `lib/oddsEngine.ts` (terning/modifikatorer), `lib/unlocks.ts` +
-`data/routes.ts` (sidested-gating), `data/crewRoles.ts` (mannskapsroller),
-`data/consequences.ts` (svidd mottakelse), `data/destinations.ts` (fletter alle 12 havner).
+- `src/domain/model.ts`: runtime-schema for tilstand, kommandoer og visninger.
+- `src/domain/engine.ts`: ren applyCommand; samme motor for solo/server. Klokke,
+  seed, identitet og tilstedeværelse injiseres. `replay.ts` gjenspiller fanget kontekst.
+- `functions/src/index.ts`: autentiserte callables, autorisasjon og RTDB-transaksjon
+  på hele spillet. Hold cache-lytter under eksisterende spilltransaksjoner.
+- `src/classroom/store.ts`: én abonnementsflate, validert lokal økt og varig kø.
+  Kommando-ID beholdes ved retry; runde/prøve-ID hindrer at gamle handlinger treffer
+  ny runde. Ingen optimistisk poengskriving.
+- `remote.ts` laster Firebase først når klasserommet brukes.
+- Tilbakemeldinger bruker separat lokal sendekø i `lib/feedback.ts`, med opprinnelig
+  UID/kode og samme meldings-ID ved retry. Ingen navn eller fagbidrag fanges automatisk.
+  Bare øktens lærer leser `v2/feedback/$code`; meldinger endrer aldri faglig vurdering.
+- `src/classroom/teacher/`: læreroversikt, vurdering per skip og egne øktkontroller.
+  Storskjermvisningen skal utelate individuelle elevnavn, fagbidrag og tilbakemeldinger
+  fra DOM-en, og Esc skal gi fokus tilbake til regipultens storskjermknapp.
+- `database.rules.json`: klienten skriver bare egen tilstedeværelse. Elever leser
+  eget skip/egne private felt. Læreren leser grupper, ikke private stemmer.
+- RTDB-visninger er JSON-strenger for å bevare tomme arrays/objekter. Autoritativ
+  tilstand, kvitteringer og replaylogg er skjermet fra klienten.
 
-## 3. Estetikk-regler (ikke bryt)
-- **Svart-hvitt-gravyr** som grunnuttrykk; **matt gull/bronse** som SJELDEN aksent
-  (ikke skinnende «KI-gull»).
-- **INGEN emoji i UI.** Bruk `<Icon name=…>` (SVG-strekglyfer, arver `currentColor`)
-  eller `<NorseIcon name=…>` (PNG-maske fra `public/ornamenter/`, fylles med
-  `currentColor`). `AutoIcon` velger familie (`ikon-*` → PNG, ellers SVG-glyf).
-  Behold typografiske tegn: → ← · ✦ ✓ ✕.
-- Teksturer i **`public/textures/`** (kobles via `.mat-*`/`.viking-*` i
-  `src/index.css`); ikoner og rammer i **`public/ornamenter/`**.
-- Fonter: Cinzel (titler), Inter (brødtekst), JetBrains Mono (tall).
+## Regler som skal bevares
 
-## 4. Datakilder (ikke bland systemene)
-| Fil | Innhold |
-|-----|---------|
-| `vikingspill_data.json` | 12 havner: historie, **valg + utfall** |
-| `vikingspill_innhold_v2.json` | **Stedsquiz-kilden** + episke kulturmøter + oppgaver. `destinations.ts` fletter inn; `STEDSQUIZ_PICK` velger 3 + kulturmøte-spm = **4 per havn** |
-| `vikingspill_quiz.json` (`quizBank.ts`) | **ADSKILT system:** ferdighetstre-/svenneprøve-quiz (ferdighetstagget). Brukes KUN av `SkillTrial`/`SvenneproveTrial`. Bland ALDRI med stedsquiz |
+- Hver elev har eget fagbidrag og én stemme. Flertallet binder avgjørelsen; høvdingen
+  bryter bare likhet. Privat kort/stemme skal ikke finnes i gruppevisningen.
+- Elever har ikke faste roller. Nye runder deler ikke ut rollekort; eldre aktive
+  kort kan beholdes som ekstra opplysninger ved gjenoppretting.
+- Nye prøver bruker `journey-v1`, fullførte havnebesøk og konkrete reisenotater.
+  Bevar banken og steget til en allerede aktiv prøve ved gjenoppretting.
+- Gudenes prøve/holmgang er lagleker uten faglig poeng. Deltakerlisten fastsettes
+  ved åpning, alle gjør seg klare, og mobilresultatet er snitt per aktivt medlem.
+  Læreren bekrefter høyeste snitt; likhet gir delt seier. Fravær fritas før start.
+  Skjebnehjulets resultat og effekt er én servertransaksjon.
+- Rundens mannskap, valg og krav fastsettes ved avreise. Lærer kan frita et fraværende
+  medlem med begrunnelse. Endrede krav gjelder neste kulturmøte.
+- Saga opprettes alltid ved oppgjør. Kast/varer/poeng/besøkt/saga er én transaksjon.
+  Reload, retry og varselkvitteringer deler aldri ut nye belønninger.
+- Terning endrer handel/rykte. Faglig vurdering kommer bare fra rubrikk. Historisk
+  samsvar er grunnlag for refleksjon, ikke moralsk fasit eller bonus.
+- 3/4 quizrette hos alle aktive medlemmer, eller lærergodkjenning, gir beste av to
+  kast. Fordeler stables ikke. UI-odds og server bruker samme enumererte regel.
+  Paris etter plyndring har myk −1, aldri stenging av hovedsporet.
+- Svennebrev 0/1/2 kommer bare fra teori og vurdert praksis. Skjebne, kjøp og
+  interludier påvirker midlertidig tilstand, ikke beståtte kompetansebevis.
+- Handel kontrollerer begge beholdninger ved aksept. Læreren bekrefter
+  konkurransevinner; eleven kan ikke sende egen belønning.
+- Høvdingfravær har 60 sekunders frist. Ting avgjøres i motoren. Prøvesvar og
+  lukking tilhører den som startet prøven.
 
-## 5. Arbeidsmåte
-- Svar på **norsk**.
-- **Vis plan før ikke-trivielle endringer**; vent på ok der det bes om det.
-- **Små, fokuserte commits.** Test før «ferdig».
-- **Del lange oppgaver i små steg og commit underveis** — hvis en 529 stopper midt i,
-  kan økten gjenopptas uten å miste arbeid.
-- **Test multi-enhet** ved sanntids-endringer: to nettlesere (vanlig + inkognito) i
-  samme `gameCode` simulerer to elever / lærer + elev.
-- **Ikke rør bilder/teksturer** i `public/` uten beskjed. Behandle JSON-kildefilene
-  som data — ikke reformater hele fila.
-- **Ikke gjør:** ikke lag tomme commits for å vise aktivitet; ikke slett filer uten å
-  bekrefte i koden at de er ubrukte; ikke gjenskap `public/_chatgpt/`.
+## Innhold og uttrykk
 
-## 6. Status
-**Ferdig:** emoji → monokrome ikoner (Icon/NorseIcon); ny estetikk koblet inn
-(teksturer, ornament-ikoner, flettverksrammer); stedsquiz omstrukturert til 4 spm
-(kulturmøte-spm som spm 1); todelt svenneprøve (teori-quiz + ferdighetsspesifikk
-praksis); prøve-navn ryddet — **svenneprøve** hever svennebrev, **ferdsbrev** låser
-opp sidested. **Mannskapsroller** (2.3, `crewRoles.ts`): unik rolle per medlem ved
-innmelding, ingen odds-effekt. **Valg-gating ferdig** (2.4): kjernevalg alltid
-valgbare; bonus-valg åpnes av svennebrev/rolle; sidesteder på svennebrev+score/goods;
-Paris (hovedspor) alltid åpent — Lindisfarne-plyndring gir myk svidd mottakelse, ikke
-stenging. **Deliberasjons-ryggraden ferdig** (3.1–3.5): dobbeltspor med felles utgang —
-online bindende stemme (høvding som tie-break, ingen vetorett) / solo NPC-stemmer via
-`npcVotes`; nøkkelkort (trinn 1, ærlige) med vektet utdeling; alt gjennom
-`commitDecision()` så konsekvens/avsløring/saga er identisk i begge spor.
+Canonical havnepakker: `src/content/packs.json`, validering i `validate.ts`.
+`legacyDestinations.ts` bevares bare som migreringskilde. Stedsquiz og prøvebank
+holdes separate. Kilder, fakta/tolkning/perspektiv og dramatisering skal være synlig.
+Ikke fjern historiske usikkerhetsmerknader uten kildegrunnlag.
 
-**Sabotøren (trinn 2) ferdig:** agenda-kort som variant av nøkkelkort (samme private-slot,
-`kind='agenda'`), lærerstyrt (`saboteur`-bryter, default AV, kun når nøkkelkort på); online
-hemmelig agenda til én elev, solo NPC-agent med mistanke-flagg; rolle-framet avsløring;
-«belønn årvåkenhet» i begge spor; per-elev-ære avledet av `agendaLog` (`deriveHonors`),
-vist i sluttseremonien.
-
-**Neste (påbygg, ikke startet):** **styresett-atlas**; **definisjonsmakt**.
+Svart-hvitt-gravyr, matt bronse, SVG/PNG-ikoner; ingen emoji i UI. Behold
+Cinzel/Inter/JetBrains Mono, lesbar tekst, fokusmarkering og reduced motion.

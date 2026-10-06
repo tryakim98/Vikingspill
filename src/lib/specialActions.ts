@@ -78,7 +78,7 @@ export function describeCost(c: ActionCost | undefined): string {
 
 export function describeEffect(e: ActionEffect): string {
   const parts: string[] = [];
-  if (e.skill) parts.push(`+${e.skill.delta} ${skillTreeData[e.skill.key].name}`);
+  if (e.skill) parts.push(`+${e.skill.delta} midlertidig mannskapstilstand i ${skillTreeData[e.skill.key].name} (kompetansebevis krever prøve)`);
   if (e.rep) parts.push(`${e.rep > 0 ? '+' : ''}${e.rep} rykte`);
   if (e.trade) parts.push(`${e.trade > 0 ? '+' : ''}${e.trade} handel`);
   if (e.und) parts.push(`${e.und > 0 ? '+' : ''}${e.und} kulturforståelse`);
