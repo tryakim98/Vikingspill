@@ -670,7 +670,12 @@ test("takeover waits for disconnect grace and survives old chief disappearing", 
       applyCommand(
         g,
         command,
-        { uid: "b", now, seed: 0, presence: { a: now - (HELM_FAILOVER_MS - 1000) } },
+        {
+          uid: "b",
+          now,
+          seed: 0,
+          presence: { a: now - (HELM_FAILOVER_MS - 1000) },
+        },
         content,
       ),
     /fristen/,
@@ -678,7 +683,12 @@ test("takeover waits for disconnect grace and survives old chief disappearing", 
   const next = applyCommand(
     g,
     command,
-    { uid: "b", now, seed: 0, presence: { a: now - (HELM_FAILOVER_MS + 1000) } },
+    {
+      uid: "b",
+      now,
+      seed: 0,
+      presence: { a: now - (HELM_FAILOVER_MS + 1000) },
+    },
     content,
   );
   assert.equal(next.groups.ship.chiefId, "b");
