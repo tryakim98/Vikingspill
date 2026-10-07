@@ -19,7 +19,7 @@ import { makeBackup, parseBackup } from "../src/domain/backup";
 import { effectiveOdds, resolveRoll } from "../src/domain/odds";
 import { seededRandom, shuffle } from "../src/domain/random";
 import type { SkillKey } from "../src/types";
-import type { Game as EngineGame } from "../src/domain/model";
+import { HELM_FAILOVER_MS, type Game as EngineGame } from "../src/domain/model";
 import type { Intent } from "../src/classroom/store";
 import { replayCommands } from "../src/domain/replay";
 import { trialBank } from "../src/domain/trials";
@@ -670,7 +670,12 @@ test("takeover waits for disconnect grace and survives old chief disappearing", 
       applyCommand(
         g,
         command,
-        { uid: "b", now, seed: 0, presence: { a: now - 5000 } },
+        {
+          uid: "b",
+          now,
+          seed: 0,
+          presence: { a: now - (HELM_FAILOVER_MS - 1000) },
+        },
         content,
       ),
     /fristen/,
@@ -678,11 +683,44 @@ test("takeover waits for disconnect grace and survives old chief disappearing", 
   const next = applyCommand(
     g,
     command,
-    { uid: "b", now, seed: 0, presence: { a: now - 61000 } },
+    {
+      uid: "b",
+      now,
+      seed: 0,
+      presence: { a: now - (HELM_FAILOVER_MS + 1000) },
+    },
     content,
   );
   assert.equal(next.groups.ship.chiefId, "b");
 });
+test("teacher can remove a stale member without resetting ship progress", () => {
+  let g = fixture();
+  g.groups.ship.visited = ["lindisfarne"];
+  g.groups.ship.scores.tradeGain = 7;
+
+  g = run(g, "teacher", {
+    type: "remove_member",
+    groupId: "ship",
+    memberId: "d",
+  });
+
+  assert.equal(g.groups.ship.members.d, undefined);
+  assert.equal(g.members.d.groupId, null);
+  assert.deepEqual(g.groups.ship.visited, ["lindisfarne"]);
+  assert.equal(g.groups.ship.scores.tradeGain, 7);
+});
+
+test("teacher removing the chief hands the helm to a remaining member", () => {
+  const g = run(fixture(), "teacher", {
+    type: "remove_member",
+    groupId: "ship",
+    memberId: "a",
+  });
+  assert.equal(g.groups.ship.members.a, undefined);
+  assert.ok(g.groups.ship.members[g.groups.ship.chiefId]);
+  assert.notEqual(g.groups.ship.chiefId, "a");
+});
+
 test("ting is resolved by the engine without depending on the old chief device", () => {
   let g = fixture();
   g = run(g, "b", { type: "call_ting", groupId: "ship", candidateId: "b" });

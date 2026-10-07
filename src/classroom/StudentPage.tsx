@@ -4,7 +4,7 @@ import Holmgang from "./Holmgang";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { content } from "../content";
-import { SKILLS } from "../domain/model";
+import { HELM_FAILOVER_MS, SKILLS } from "../domain/model";
 import { makeBackup } from "../domain/backup";
 import { TOPIC_LABEL, trialAvailability } from "../domain/trials";
 import FateWheel from "./FateWheel";
@@ -205,6 +205,7 @@ function ActiveStudent({
           groups={state.public?.groups ?? {}}
           busy={busy}
           send={store.send}
+          onBack={onHome}
         />
       ) : (
         <>
@@ -394,7 +395,7 @@ function Crew({
             </Button>
             {!chief &&
               !currentChief?.online &&
-              now - (currentChief?.at ?? now) > 60000 && (
+              now - (currentChief?.at ?? now) > HELM_FAILOVER_MS && (
                 <Button
                   disabled={state.pending > 0}
                   onClick={() => {

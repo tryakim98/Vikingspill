@@ -533,7 +533,36 @@ function GroupReview({
           >
             Gi medlemmet roret
           </Button>
+          <Button
+            secondary
+            disabled={
+              busy ||
+              closed ||
+              !memberId ||
+              Object.keys(group.members).length <= 1
+            }
+            onClick={() => {
+              const label = group.members[memberId]?.label ?? "medlemmet";
+              if (
+                window.confirm(
+                  `Fjerne ${label} fra ${group.shipName}? Skipets reise, poeng og saga beholdes.`,
+                )
+              ) {
+                void send({
+                  type: "remove_member",
+                  groupId: group.id,
+                  memberId,
+                });
+              }
+            }}
+          >
+            Fjern fra skipet
+          </Button>
         </div>
+        <p className="td-caption">
+          «Fjern fra skipet» brukes ved feilregistrering, dobbelt enhet eller
+          når en elev ikke lenger skal delta. Skipets øvrige fremgang beholdes.
+        </p>
       </details>
     </section>
   );

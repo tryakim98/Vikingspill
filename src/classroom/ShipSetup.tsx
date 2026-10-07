@@ -8,10 +8,12 @@ export default function ShipSetup({
   groups,
   busy,
   send,
+  onBack,
 }: {
   groups: PublicView["groups"];
   busy: boolean;
   send: (intent: Intent) => Promise<void>;
+  onBack?: () => void;
 }) {
   const [groupId, setGroupId] = useState("");
   const [shipName, setShipName] = useState("");
@@ -97,16 +99,23 @@ export default function ShipSetup({
           Alle bidrar til oppgavene og laglekene. Den som har roret, åpner
           stegene for laget.
         </p>
-        <Button
-          type="submit"
-          disabled={
-            busy ||
-            label.trim().length < 2 ||
-            (!group && shipName.trim().length < 2)
-          }
-        >
-          {group ? "Bli med ombord" : "Opprett skipet og bli høvding"}
-        </Button>
+        <div className="cg-actions">
+          <Button
+            type="submit"
+            disabled={
+              busy ||
+              label.trim().length < 2 ||
+              (!group && shipName.trim().length < 2)
+            }
+          >
+            {group ? "Bli med ombord" : "Opprett skipet og bli høvding"}
+          </Button>
+          {onBack && (
+            <Button type="button" secondary disabled={busy} onClick={onBack}>
+              ← Tilbake til spillstart
+            </Button>
+          )}
+        </div>
       </form>
     </Panel>
   );

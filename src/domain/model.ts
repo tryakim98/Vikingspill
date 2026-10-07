@@ -1,4 +1,7 @@
 import { z } from "zod";
+
+/** Klasseprøve 07.10.2026: et strømbrudd hos høvdingen skal ikke stoppe laget. */
+export const HELM_FAILOVER_MS = 30_000;
 import type { Choice, Destination, SkillKey } from "../types";
 import type { JourneyLesson } from "../content/activities";
 import { PARTY_IDS } from "./party";
@@ -341,6 +344,7 @@ export const CommandSchema = z.union([
   command("finish", {}),
   command("action", { actionId: Id }),
   command("transfer", { memberId: Id }),
+  command("remove_member", { memberId: Id }),
   command("take_helm", {}),
   command("call_ting", { candidateId: Id }),
   command("ting_vote", { candidateId: Id }),

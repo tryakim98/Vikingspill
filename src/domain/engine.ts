@@ -2,6 +2,7 @@ import {
   CommandSchema,
   DEFAULT_SETTINGS,
   GameSchema,
+  HELM_FAILOVER_MS,
   availableChoices,
   emptyBrev,
   portFor,
@@ -734,14 +735,81 @@ export function applyCommand(
       group.chiefId = cmd.memberId;
       message = "Roret ble overført.";
       break;
+    case "remove_member": {
+      teacherOnly();
+      requireRule(group?.members[cmd.memberId], "Medlemmet er ikke ombord.");
+      requireRule(
+        Object.keys(group.members).length > 1,
+        "Det siste medlemmet kan ikke fjernes fra skipet.",
+      );
+
+      // Et medlem som er låst inn i en pågående runde må ikke kunne blokkere resten
+      // etter at læreren har fjernet en feilregistrert/frakoblet enhet.
+      if (
+        group.encounter?.eligible.includes(cmd.memberId) &&
+        !group.encounter.settled
+      ) {
+        group.encounter.excused[cmd.memberId] =
+          "Fjernet av læreren fra mannskapet.";
+        resolveCouncil(group);
+      }
+
+      // En individuell svenneprøve kan ikke bli stående eid av en bruker som ikke
+      // lenger finnes ombord.
+      if (group.trial?.ownerId === cmd.memberId) {
+        group.trial = null;
+        notice(
+          group,
+          "Svenneprøven ble avbrutt",
+          "Prøven ble lukket fordi deltakeren ble fjernet fra skipet.",
+        );
+      }
+
+      // Åpne lagleker har et frosset roster. Fritak bevarer hendelsen, men den
+      // fjernede enheten teller ikke lenger som et krav for å komme videre.
+      for (const challenge of Object.values(game.challenges)) {
+        if (
+          challenge.status === "open" &&
+          partyMembers(challenge, group.id).includes(cmd.memberId)
+        ) {
+          challenge.excused[cmd.memberId] =
+            "Fjernet av læreren fra mannskapet.";
+        }
+      }
+
+      // Et pågående ting med en fjernet kandidat/sittende høvding er ikke lenger
+      // meningsfullt. Start heller et nytt ting med det faktiske mannskapet.
+      if (
+        group.ting &&
+        (group.ting.candidateId === cmd.memberId ||
+          group.ting.incumbentId === cmd.memberId ||
+          group.ting.eligible.includes(cmd.memberId))
+      ) {
+        group.ting = null;
+      }
+
+      delete group.members[cmd.memberId];
+      if (game.members[cmd.memberId]) game.members[cmd.memberId].groupId = null;
+      if (group.chiefId === cmd.memberId) {
+        group.chiefId = Object.keys(group.members)[0];
+        notice(
+          group,
+          "Nytt ror",
+          `${group.members[group.chiefId].label} tok over roret etter at læreren ryddet mannskapet.`,
+        );
+      }
+      message =
+        "Læreren fjernet et medlem fra skipet uten å nullstille fremgangen.";
+      break;
+    }
     case "take_helm":
       member();
       requireRule(
-        actor.now - (actor.presence[group!.chiefId] ?? 0) > 60000,
+        actor.now - (actor.presence[group!.chiefId] ?? 0) > HELM_FAILOVER_MS,
         "Høvdingen er tilkoblet eller innenfor gjenoppkoblingsfristen.",
       );
       group!.chiefId = actor.uid;
-      message = "Et medlem tok roret etter 60 sekunders frakobling.";
+      message = `Et medlem tok roret etter ${HELM_FAILOVER_MS / 1000} sekunders frakobling.`;
       break;
     case "call_ting":
       member();
