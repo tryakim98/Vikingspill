@@ -1,8 +1,11 @@
 # Vikingenes kulturmøter
 
 Klasseromsspill om kulturmøter for videregående. Mannskapet besøker 12 havner,
-undersøker kilder, drøfter valg og reflekterer over utfall. Denne branchen bygger om
-originalspillet før Ludus. Gravyr, skip, sjøkart, musikk og holmgang er beholdt.
+undersøker kilder, drøfter valg og reflekterer over utfall. Dette er det selvstendige
+Vikingspillet — **ikke Ludus**. Produktene kan dele historikk og ideer, men skal ikke
+dele offentlig URL, navigasjon eller deployment. Kanonisk offentlig adresse er
+`https://vikingspill.vercel.app`, og produksjonsbackend er Firebase-prosjektet
+`vikingspill-2b754`. Gravyr, skip, sjøkart, musikk og holmgang er beholdt.
 
 ## Spillforløp
 
@@ -162,14 +165,15 @@ frontend til en klasseøkt.
    ```sh
    npm ci --prefix functions
    npm run build:functions
-   npx firebase deploy --only functions:vikingspill,database --project DITT_PROSJEKT
+   npx firebase deploy --only functions:vikingspill,database --project vikingspill-2b754
    ```
 
 4. Bygg frontend med samme prosjekt. Callable-funksjonene ligger i `europe-west1`.
 5. Kontroller lærer og separate elevnettlesere før klassen bruker utgaven.
 
-Databasereglene lukker tidligere `games/`-stier. Bruk et eget prosjekt til utprøving
-hvis originalen skal kjøre samtidig.
+Databasereglene lukker tidligere `games/`-stier. Ikke deploy denne appen eller
+backend-endringer til Ludus-prosjektet `ludus-1903`. Bruk et eget testprosjekt hvis
+produksjonen skal stå urørt.
 Lærerrollen bindes til den anonyme innloggingen i nettleseren som opprettet spillet.
 Koden gir ikke lærertilgang. Ta backup før du bytter/nullstiller nettleser.
 Full backup inneholder også private stemmer og rollekort og er for læreren.
