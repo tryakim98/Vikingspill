@@ -3,6 +3,16 @@
 React 19, TypeScript, Vite, Tailwind, Firebase RTDB og callable Functions.
 Se README for utvikling, verifikasjon og produksjonsoppsett.
 
+## Produktgrense
+
+- **Vikingspillet er ikke Ludus.** Dette repoet er sannhetskilden for Vikingspillet.
+- Kanonisk offentlig adresse er `vikingspill.vercel.app`.
+- Produksjonsbackend er Firebase-prosjektet `vikingspill-2b754`.
+- Ikke legg Ludus-forside, Ludus-navigasjon, Ludus-ruter eller `ludus-1903` inn i
+  Vikingspillets brukerflyt eller deployment.
+- Integrasjon mellom produktene skal eventuelt være en eksplisitt ekstern lenke,
+  aldri et delt app-skall.
+
 ## Arbeidsmåte
 
 - Svar på norsk. Vis plan ved større endringer; vent der det uttrykkelig bes om det.
@@ -59,8 +69,9 @@ Se README for utvikling, verifikasjon og produksjonsoppsett.
   interludier påvirker midlertidig tilstand, ikke beståtte kompetansebevis.
 - Handel kontrollerer begge beholdninger ved aksept. Læreren bekrefter
   konkurransevinner; eleven kan ikke sende egen belønning.
-- Høvdingfravær har 60 sekunders frist. Ting avgjøres i motoren. Prøvesvar og
-  lukking tilhører den som startet prøven.
+- Høvdingfravær har 30 sekunders frist. Ting avgjøres i motoren. Læreren kan
+  fjerne et feilregistrert/frakoblet medlem uten å nullstille skipets fremgang.
+  Prøvesvar og lukking tilhører den som startet prøven.
 
 ## Innhold og uttrykk
 
