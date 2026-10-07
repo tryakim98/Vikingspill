@@ -205,6 +205,7 @@ function ActiveStudent({
           groups={state.public?.groups ?? {}}
           busy={busy}
           send={store.send}
+          onBack={onHome}
         />
       ) : (
         <>
