@@ -560,8 +560,8 @@ function GroupReview({
           </Button>
         </div>
         <p className="td-caption">
-          «Fjern fra skipet» brukes ved feilregistrering, dobbelt enhet eller når
-          en elev ikke lenger skal delta. Skipets øvrige fremgang beholdes.
+          «Fjern fra skipet» brukes ved feilregistrering, dobbelt enhet eller
+          når en elev ikke lenger skal delta. Skipets øvrige fremgang beholdes.
         </p>
       </details>
     </section>
