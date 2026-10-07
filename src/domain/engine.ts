@@ -745,7 +745,10 @@ export function applyCommand(
 
       // Et medlem som er låst inn i en pågående runde må ikke kunne blokkere resten
       // etter at læreren har fjernet en feilregistrert/frakoblet enhet.
-      if (group.encounter?.eligible.includes(cmd.memberId) && !group.encounter.settled) {
+      if (
+        group.encounter?.eligible.includes(cmd.memberId) &&
+        !group.encounter.settled
+      ) {
         group.encounter.excused[cmd.memberId] =
           "Fjernet av læreren fra mannskapet.";
         resolveCouncil(group);
@@ -769,7 +772,8 @@ export function applyCommand(
           challenge.status === "open" &&
           partyMembers(challenge, group.id).includes(cmd.memberId)
         ) {
-          challenge.excused[cmd.memberId] = "Fjernet av læreren fra mannskapet.";
+          challenge.excused[cmd.memberId] =
+            "Fjernet av læreren fra mannskapet.";
         }
       }
 
@@ -794,7 +798,8 @@ export function applyCommand(
           `${group.members[group.chiefId].label} tok over roret etter at læreren ryddet mannskapet.`,
         );
       }
-      message = "Læreren fjernet et medlem fra skipet uten å nullstille fremgangen.";
+      message =
+        "Læreren fjernet et medlem fra skipet uten å nullstille fremgangen.";
       break;
     }
     case "take_helm":
