@@ -1,3 +1,4 @@
+import { BalderAction, BalderShip } from "./balder";
 import { z } from "zod";
 
 /** Klasseprøve 07.10.2026: et strømbrudd hos høvdingen skal ikke stoppe laget. */
@@ -38,6 +39,7 @@ const Scores = z.object({
   reputation: z.number().int(),
 });
 export const SettingsSchema = z.object({
+  variant: z.enum(["classic", "balder"]).optional(),
   minutes: z.union([z.literal(45), z.literal(90)]).default(45),
   textLength: z.enum(["short", "full", "group"]).default("group"),
   requireQuiz: z.boolean().default(true),
@@ -184,6 +186,7 @@ const TingSchema = z
   })
   .nullable();
 export const GroupSchema = z.object({
+  balder: BalderShip.optional(),
   id: Id,
   version: z.number().int().min(0),
   shipName: ShortText,
@@ -237,6 +240,7 @@ const TradeSchema = z.object({
 });
 export type Trade = z.infer<typeof TradeSchema>;
 const ChallengeSchema = z.object({
+  deadline: z.number().int().optional(),
   id: Id,
   kind: z.enum(["trial", "duel"]),
   groups: z.array(Id).min(1),
@@ -269,6 +273,7 @@ const WheelSchema = z.object({
   text: z.string(),
 });
 export const GameSchema = z.object({
+  balderSignals: z.record(z.string(), z.number().int()).optional(),
   schemaVersion: z.literal(2),
   contentVersion: z.literal(1),
   code: Code,
@@ -312,6 +317,8 @@ const command = <K extends string, T extends z.ZodRawShape>(
 ) => z.object({ ...commandBase, type: z.literal(type), ...shape }).strict();
 export const CommandSchema = z.union([
   command("join", {}),
+  command("balder", { action: BalderAction }),
+  command("balder_timeout", { challengeId: Id }),
   command("create_ship", {
     shipName: ShortText,
     shipSymbol: z.enum(["drage", "ulv", "ravn"]),
@@ -478,6 +485,7 @@ export type PrivateView = {
   trialAnswers: number[];
 };
 export type PublicView = {
+  balderSignals?: Game["balderSignals"];
   code: string;
   version: number;
   settings: Settings;

@@ -7,7 +7,31 @@ dele offentlig URL, navigasjon eller deployment. Kanonisk offentlig adresse er
 `https://vikingspill.vercel.app`, og produksjonsbackend er Firebase-prosjektet
 `vikingspill-2b754`. Gravyr, skip, sjøkart, musikk og holmgang er beholdt.
 
-## Spillforløp
+## Balder
+
+Velg **Balder** og **Start Balder for klassen**. Del koden. Én elev oppretter et skip,
+og de andre på laget velger det i lista. Alle kan levere på vegne av skipet.
+Hedeby er en enkel første havn. Der leser laget om et møte på markedet, skriver en
+refleksjon og svarer på tre spørsmål. Etterpå kan de gjennomføre Markedstolken.
+
+| Antall godkjente svenneprøver | Havner som åpnes |
+|---|---|
+| 0 | Hedeby, Lindisfarne, Hebridene, Sápmi og Færøyene |
+| 1 | Paris, Dublin og Island |
+| 2 | Novgorod og Miklagard |
+| 3 | Vinland og Bagdad |
+
+Prøvene henter stoff fra Hedeby, Lindisfarne og Hebridene. Elevene leverer et
+konkret produkt fra aktiviteten som tekst. Læreren kan godkjenne eller be om en
+endring. Skipene kan besøke andre åpne havner mens læreren leser.
+
+Hvert riktig quizsvar gir ett poeng. Tre milepæler på kartet åpner signaloppgaver
+for hele klassen. Hvert skip kan tjene inntil fire poeng per signal. I digital
+holmgang spiller hver elev på egen skjerm. Spillet beregner snitt og tildeler
+to poeng til vinneren eller til begge ved likt positivt resultat. Reisen fortsetter
+fra samme sted etterpå.
+
+## Spillforløp i Odin, Viking og Tor
 
 1. Læreren velger Odin, oppretter en økt og deler en firebokstavskode.
 2. Elevene velger Flerspiller og blir med i samme skip. Alle bidrar uten faste roller.

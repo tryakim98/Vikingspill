@@ -4,6 +4,7 @@ import { spawn, execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
+import { verifyBalder } from "./balder-browser.mjs";
 import { verifyJourneyFeatures } from "./journey-browser.mjs";
 import packs from "../src/content/packs.json" with { type: "json" };
 
@@ -816,6 +817,7 @@ try {
     "Solo party leaves the current culture encounter intact",
   );
   await verifyJourneyFeatures(browser, url, watch);
+  await verifyBalder(browser, url, watch);
   assert.deepEqual(errors, [], "No uncaught browser errors");
   console.log(
     "PASS: teacher + four independent learners; private voting; refresh; offline queue; exactly-once reward; reflection; assessment; backup; teacher navigation, settings and private presentation; mobile teacher views; closed-session assessment; solo resume and party completion; quick/optional feedback, context, offline retry, teacher inbox, filters, exports and post-lesson feedback.",

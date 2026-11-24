@@ -36,6 +36,16 @@ export default function StartScreen() {
 
   const cards: PathCard[] = [
     {
+      key: 'balder',
+      motif: <Vegvisir size={88} color="#dcbf83" />,
+      name: 'Balder',
+      role: 'Guidet klassespill',
+      desc: 'Utforsk kulturmøter, løs quizer og åpne nye havner med praktiske svenneprøver. Læreren starter med ett trykk.',
+      cta: 'Åpne Balder',
+      material: 'tre',
+      onSelect: () => navigate('/balder'),
+    },
+    {
       key: 'odin',
       motif: <NorseIcon name="motiv-gudeoye" size={96} className="text-viking-gold-soft" />,
       name: 'Odin',
@@ -83,12 +93,12 @@ export default function StartScreen() {
           </h1>
         </div>
         <p className="mb-5 max-w-lg font-inter italic text-viking-gold-soft">
-          Velg din ferd — tre veier inn i det samme havet
+          Velg hvordan dere vil spille
         </p>
         <RuneDivider className="mb-7 w-full max-w-md" />
 
         {/* Tre likeverdige spor — side om side på bred skjerm, stablet ned mot 360px. */}
-        <div className="flex w-full flex-col gap-5 md:flex-row md:items-stretch">
+        <div className="grid w-full gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {cards.map((c) => (
             <button
               key={c.key}

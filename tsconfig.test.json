@@ -18,6 +18,7 @@
     ]
   },
   "include": [
+    "tests/balder.test.ts",
     "tests/domain.test.ts",
     "tests/feedback.test.ts",
     "tests/journey.test.ts",

@@ -1,3 +1,4 @@
+import BalderStudent from "./balder/Student";
 import Feedback from "./Feedback";
 import GameAudio from "./GameAudio";
 import Holmgang from "./Holmgang";
@@ -143,6 +144,15 @@ function ActiveStudent({
     if (session.mode === "online" && !session.groupId && assigned)
       onSession({ ...session, groupId: assigned.id });
   }, [assigned, session, onSession]);
+  if (state.public?.settings.variant === "balder")
+    return (
+      <BalderStudent
+        state={state}
+        store={store}
+        session={session}
+        onHome={onHome}
+      />
+    );
   const group = state.group;
   const busy = state.pending > 0;
   return (

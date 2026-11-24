@@ -6,7 +6,7 @@ import {
   partyScores,
 } from "../domain/party";
 import { useNow } from "../hooks/useNow";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import Icon from "../components/decor/Icon";
 import type { Intent } from "./store";
 import { useTextDraft } from "./drafts";
@@ -107,6 +107,21 @@ function PartyRound({
   const participating = members.includes(uid);
   const delivered = Object.hasOwn(c.results, uid);
   const ended = c.endsAt !== null && now >= c.endsAt;
+  const automatic = view.settings.variant === "balder";
+  const expired = !!c.deadline && now >= c.deadline;
+  const finalized = useRef(false);
+  useEffect(() => {
+    if (
+      automatic &&
+      expired &&
+      c.status === "open" &&
+      !busy &&
+      !finalized.current
+    ) {
+      finalized.current = true;
+      void send({ type: "balder_timeout", challengeId: c.id });
+    }
+  }, [automatic, expired, c.status, c.id, busy, send]);
   return (
     <Panel
       title={`${c.kind === "trial" ? "Gudenes prøve" : "Holmgang"} · ${activity.title}`}
@@ -115,6 +130,13 @@ function PartyRound({
         En laglek · ingen faglig vurdering · {activity.duration} sekunder
       </p>
       <p>{activity.instructions}</p>
+      {automatic && c.status === "open" && (
+        <p>
+          {c.phase === "waiting"
+            ? "Invitasjonen utløper etter 90 sekunder hvis mannskapene ikke blir klare."
+            : "Spillet summerer trykkene automatisk. Høyest snitt gir to poeng. Manglende bidrag teller som null."}
+        </p>
+      )}
       {c.status === "resolved" ? (
         <p role="status" className="cg-note">
           {c.winnerIds.length
@@ -170,6 +192,7 @@ function PartyRound({
                   now={now}
                   clockOffset={clockOffset}
                   busy={busy}
+                  automatic={automatic}
                   delivered={delivered}
                   send={send}
                 />
@@ -200,7 +223,9 @@ function PartyRound({
                 <p role="status">
                   {solo
                     ? "Ditt bidrag er levert. Du kan avslutte øvingsleken."
-                    : "Ditt bidrag er levert. Læreren bekrefter resultatet når alle har levert."}
+                    : automatic
+                      ? "Ditt bidrag er levert. Spillet regner ut resultatet."
+                      : "Ditt bidrag er levert. Læreren bekrefter resultatet når alle har levert."}
                 </p>
               )}
             </>
@@ -244,6 +269,7 @@ function PartyRound({
 }
 function TapRound({
   challenge: c,
+  automatic,
   uid,
   now,
   clockOffset,
@@ -252,6 +278,7 @@ function TapRound({
   send,
 }: {
   challenge: Challenge;
+  automatic: boolean;
   uid: string;
   now: number;
   clockOffset: number;
@@ -267,6 +294,24 @@ function TapRound({
   const signal =
     c.activity === "tapping" || clickSignal(c.seed, now - c.startsAt!);
   const ended = now >= c.endsAt!;
+  const submitted = useRef(false);
+  useEffect(() => {
+    if (
+      automatic &&
+      ended &&
+      !delivered &&
+      !busy &&
+      !submitted.current &&
+      now < (c.deadline ?? Infinity)
+    ) {
+      submitted.current = true;
+      void send({
+        type: "submit_challenge",
+        challengeId: c.id,
+        score: scoreRef.current,
+      });
+    }
+  }, [automatic, ended, delivered, busy, now, c.deadline, c.id, send]);
   return (
     <div className="cg-tap-round">
       <div className="cg-tap-meta">
@@ -313,7 +358,7 @@ function TapRound({
               : "VENT"}
         </span>
       </button>
-      {ended && !delivered && (
+      {ended && !delivered && !automatic && (
         <Button
           disabled={busy}
           onClick={() => {

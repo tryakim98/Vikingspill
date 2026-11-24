@@ -44,20 +44,9 @@ import {
   STORM_FATE_IDS,
 } from "../data/wheelFields";
 
-export class RuleError extends Error {
-  code: "permission" | "conflict" | "invalid";
-  constructor(message: string, code: RuleError["code"] = "invalid") {
-    super(message);
-    this.code = code;
-  }
-}
-function requireRule(
-  ok: unknown,
-  message: string,
-  code: RuleError["code"] = "invalid",
-): asserts ok {
-  if (!ok) throw new RuleError(message, code);
-}
+import { requireRule, RuleError } from "./rules";
+export { RuleError } from "./rules";
+import { applyBalder } from "./balder";
 export function newGame(
   code: string,
   teacherUid: string,
@@ -214,6 +203,21 @@ function beginParty(challenge: Challenge, now: number) {
     challenge.startsAt + PARTY_GAMES[challenge.activity].duration * 1000;
 }
 
+function finishBalderDuel(game: Game, c: Challenge, acting: Group) {
+  const scores = partyScores(c);
+  const best = Math.max(...scores.map((s) => s.average));
+  c.winnerIds =
+    best > 0
+      ? scores.filter((s) => s.average === best).map((s) => s.groupId)
+      : [];
+  c.winnerId = c.winnerIds[0] ?? null;
+  c.status = "resolved";
+  c.phase = "finished";
+  for (const id of c.winnerIds) {
+    game.groups[id].scores.reputation += 2;
+    if (id !== acting.id) game.groups[id].version++;
+  }
+}
 /** Pure state transition. No UI, clock, network or Math.random; commands supply all context. */
 export function applyCommand(
   previous: Game,
@@ -277,7 +281,38 @@ export function applyCommand(
   const notice = (g: Group, title: string, text: string) =>
     g.notices.push({ id: cmd.id, title, text, at: actor.now, ackedBy: [] });
 
+  const balder = game.settings.variant === "balder";
+  if (balder)
+    requireRule(
+      [
+        "join",
+        "create_ship",
+        "join_ship",
+        "balder",
+        "challenge",
+        "ready_challenge",
+        "submit_challenge",
+        "balder_timeout",
+        "close_game",
+      ].includes(cmd.type),
+      "Handlingen er ikke en del av Balder.",
+    );
   switch (cmd.type) {
+    case "balder":
+      requireRule(balder && group, "Velg et Balder-skip.");
+      if (cmd.action.kind === "review") teacherOnly();
+      else member();
+      applyBalder(game, group, cmd.action, cmd.id, actor.seed);
+      break;
+    case "balder_timeout": {
+      member();
+      const c = game.challenges[cmd.challengeId];
+      requireRule(balder && c?.groups.includes(group!.id), "Ukjent holmgang.");
+      if (c.status === "resolved") break;
+      requireRule(c.deadline && actor.now >= c.deadline, "Tiden er ikke ute.");
+      finishBalderDuel(game, c, group!);
+      break;
+    }
     case "join":
       requireRule(
         !cmd.groupId,
@@ -1019,7 +1054,13 @@ export function applyCommand(
       game.trades[cmd.tradeId].resolvedAt = actor.now;
       break;
     case "challenge":
-      chief();
+      if (balder) {
+        member();
+        requireRule(
+          PARTY_GAMES[cmd.activity].digital,
+          "Velg en digital holmgang.",
+        );
+      } else chief();
       requireRule(
         game.groups[cmd.to] && cmd.to !== group!.id,
         "Velg et annet skip.",
@@ -1033,6 +1074,7 @@ export function applyCommand(
         actor.seed,
         `Holmgang · ${PARTY_GAMES[cmd.activity].title}`,
       );
+      if (balder) game.challenges[cmd.id].deadline = actor.now + 90_000;
       break;
     case "ready_challenge": {
       member();
@@ -1043,14 +1085,21 @@ export function applyCommand(
           partyMembers(c, group!.id).includes(actor.uid),
         "Du deltar ikke i denne åpne lagleken.",
       );
+      requireRule(
+        !balder || !c.deadline || actor.now < c.deadline,
+        "Invitasjonen er utløpt.",
+      );
       if (!c.ready.includes(actor.uid)) c.ready.push(actor.uid);
       if (
         (c.kind === "duel" || game.mode === "solo") &&
         c.groups
           .flatMap((g) => partyMembers(c, g))
           .every((uid) => c.ready.includes(uid))
-      )
+      ) {
         beginParty(c, actor.now);
+        if (balder) c.deadline = c.endsAt! + 30_000;
+      }
+
       break;
     }
     case "start_challenge": {
@@ -1063,6 +1112,12 @@ export function applyCommand(
     case "submit_challenge": {
       member();
       const c = game.challenges[cmd.challengeId];
+      if (
+        balder &&
+        c?.status === "resolved" &&
+        c.roster[group!.id]?.includes(actor.uid)
+      )
+        break;
       requireRule(
         c?.status === "open" &&
           c.phase === "playing" &&
@@ -1085,7 +1140,13 @@ export function applyCommand(
           : cmd.score === 0,
         "Resultatet er utenfor lekens grenser.",
       );
+      if (balder && c.deadline && actor.now >= c.deadline) {
+        finishBalderDuel(game, c, group!);
+        break;
+      }
       c.results[actor.uid] = cmd.score;
+      if (balder && partyScores(c).every((s) => s.complete))
+        finishBalderDuel(game, c, group!);
       break;
     }
     case "excuse_challenge": {
@@ -1129,6 +1190,10 @@ export function applyCommand(
       break;
     case "settings":
       teacherOnly();
+      requireRule(
+        cmd.settings.variant !== "balder",
+        "Opprett en ny Balder-økt fra hovedmenyen.",
+      );
       game.settings = cmd.settings;
       game.endsAt = game.createdAt + cmd.settings.minutes * 60000;
       message = "Læreren endret øktoppsettet.";
@@ -1478,6 +1543,7 @@ export function publicView(game: Game): PublicView {
     code: game.code,
     version: game.version,
     settings: game.settings,
+    balderSignals: game.balderSignals,
     endsAt: game.endsAt,
     closed: game.closed,
     trades: game.trades,

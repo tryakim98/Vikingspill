@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import BalderTeacher from "../balder/Teacher";
 import SeaMap from "../../components/teacher/SeaMap";
 import Icon from "../../components/decor/Icon";
 import { groupStatus } from "../../lib/groupStatus";
@@ -103,6 +104,15 @@ export default function TeacherConsole({
       setError(e instanceof Error ? e.message : "Eksport feilet.");
     }
   };
+  if (view?.settings.variant === "balder")
+    return (
+      <BalderTeacher
+        state={state}
+        store={store}
+        onHome={onHome}
+        inbox={feedback}
+      />
+    );
   if (presenting && view)
     return (
       <main className="viking-screen cg-screen cg-teacher td-presentation">

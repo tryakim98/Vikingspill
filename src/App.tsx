@@ -11,6 +11,7 @@ import "./App.css";
 
 // Pages
 import StartScreen from "./pages/StartScreen";
+const Balder = lazy(() => import("./classroom/balder/Lobby"));
 const TeacherPanel = lazy(() => import("./pages/TeacherPanel"));
 const StudentGame = lazy(() => import("./pages/StudentGame"));
 const ForLarere = lazy(() => import("./pages/ForLarere"));
@@ -35,6 +36,7 @@ function App() {
           >
             <Routes>
               <Route path="/" element={<StartScreen />} />
+              <Route path="/balder" element={<Balder />} />
               <Route path="/teacher" element={<TeacherPanel />} />
               <Route path="/student" element={<StudentGame />} />
               <Route path="/for-larere" element={<ForLarere />} />

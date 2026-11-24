@@ -9,10 +9,12 @@ export default function ShipSetup({
   busy,
   send,
   onBack,
+  guided = false,
 }: {
   groups: PublicView["groups"];
   busy: boolean;
   send: (intent: Intent) => Promise<void>;
+  guided?: boolean;
   onBack?: () => void;
 }) {
   const [groupId, setGroupId] = useState("");
@@ -63,30 +65,34 @@ export default function ShipSetup({
               onChange={setShipName}
               maxLength={60}
             />
-            <div className="cg-grid">
-              <label className="cg-field">
-                Seilsymbol
-                <select
-                  value={symbol}
-                  onChange={(event) =>
-                    setSymbol(event.target.value as ShipSymbol)
-                  }
-                >
-                  <option value="drage">Drage</option>
-                  <option value="ulv">Ulv</option>
-                  <option value="ravn">Ravn</option>
-                </select>
-              </label>
-              <label className="cg-field">
-                Skipets farge
-                <input
-                  type="color"
-                  value={color}
-                  onChange={(event) => setColor(event.target.value)}
-                />
-              </label>
-            </div>
-            <VikingShip color={color} symbol={symbol} size={150} />
+            {!guided && (
+              <>
+                <div className="cg-grid">
+                  <label className="cg-field">
+                    Seilsymbol
+                    <select
+                      value={symbol}
+                      onChange={(event) =>
+                        setSymbol(event.target.value as ShipSymbol)
+                      }
+                    >
+                      <option value="drage">Drage</option>
+                      <option value="ulv">Ulv</option>
+                      <option value="ravn">Ravn</option>
+                    </select>
+                  </label>
+                  <label className="cg-field">
+                    Skipets farge
+                    <input
+                      type="color"
+                      value={color}
+                      onChange={(event) => setColor(event.target.value)}
+                    />
+                  </label>
+                </div>
+                <VikingShip color={color} symbol={symbol} size={150} />
+              </>
+            )}
           </>
         )}
         <Field
@@ -96,8 +102,9 @@ export default function ShipSetup({
           maxLength={60}
         />
         <p>
-          Alle bidrar til oppgavene og laglekene. Den som har roret, åpner
-          stegene for laget.
+          {guided
+            ? "Én på laget oppretter skipet. De andre velger det samme skipet i lista. Dere deler svar og poeng."
+            : "Alle bidrar til oppgavene og laglekene. Den som har roret, åpner stegene for laget."}
         </p>
         <div className="cg-actions">
           <Button
@@ -108,7 +115,11 @@ export default function ShipSetup({
               (!group && shipName.trim().length < 2)
             }
           >
-            {group ? "Bli med ombord" : "Opprett skipet og bli høvding"}
+            {group
+              ? "Bli med ombord"
+              : guided
+                ? "Opprett skipet"
+                : "Opprett skipet og bli høvding"}
           </Button>
           {onBack && (
             <Button type="button" secondary disabled={busy} onClick={onBack}>
