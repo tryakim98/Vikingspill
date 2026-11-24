@@ -76,6 +76,57 @@ export function balderPoints(group: Group | GroupView) {
     Object.values(s?.bonuses ?? {}).reduce((a, b) => a + b, 0)
   );
 }
+export function validateBalderShip(group: Group, game: Game) {
+  const s = group.balder;
+  if (!s) {
+    requireRule(!group.visited.length, "Skipet mangler reisebok.");
+    return;
+  }
+  const gates = approvedCount(s);
+  for (const id of group.visited)
+    requireRule(s.visits[id]?.answers, "Besøket mangler quizsvar.");
+  if (s.current)
+    requireRule(
+      s.visits[s.current] && !group.visited.includes(s.current),
+      "Ugyldig aktiv Balder-havn.",
+    );
+  for (const [id, visit] of Object.entries(s.visits)) {
+    requireRule(
+      Object.hasOwn(HARBOURS, id) && (GATES[id] ?? 0) <= gates,
+      "Ugyldig eller låst Balder-havn.",
+    );
+    if (visit.answers) {
+      const quiz = harbourQuiz(id),
+        answers = visit.answers;
+      requireRule(
+        group.visited.includes(id) &&
+          visit.reflection.trim().length >= 20 &&
+          answers.length === quiz.length &&
+          answers.every((a, i) => a < quiz[i].opts.length) &&
+          visit.correct ===
+            answers.filter((a, i) => a === quiz[i].correct).length,
+        "Ugyldige quizsvar i reiseboka.",
+      );
+    } else
+      requireRule(
+        id === s.current && visit.correct === 0,
+        "Ufullstendig besøk i reiseboka.",
+      );
+  }
+  for (const id of Object.keys(s.trials)) {
+    const trial = PRACTICES.find((t) => t.id === id);
+    requireRule(
+      trial && group.visited.includes(trial.port),
+      "Svenneprøven mangler havnebesøk.",
+    );
+  }
+  for (const tier of Object.keys(s.bonuses))
+    requireRule(
+      ["1", "2", "3"].includes(tier) &&
+        game.balderSignals?.[tier] !== undefined,
+      "Ukjent klasseutfordring.",
+    );
+}
 export function applyBalder(
   game: Game,
   group: Group,

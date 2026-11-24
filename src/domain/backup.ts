@@ -1,3 +1,4 @@
+import { validateBalderShip } from "./balder";
 import { z } from "zod";
 import { GameSchema, portFor } from "./model";
 import type { Content, Game } from "./model";
@@ -32,6 +33,7 @@ export function validateGame(value: unknown, content: Content): Game {
         ids.some((i) => !knownPorts.has(i))
       )
         throw new Error("Ugyldig havnereferanse.");
+    if (game.settings.variant === "balder") validateBalderShip(group, game);
     if (group.encounter) {
       const e = group.encounter;
       const pack = portFor(content, e.destId);

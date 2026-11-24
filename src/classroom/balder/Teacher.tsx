@@ -40,6 +40,17 @@ export default function BalderTeacher({
         title={view.closed ? "Økten er avsluttet" : "Vis koden til klassen"}
       >
         <strong className="bd-code">{view.code}</strong>
+        {!view.closed && (
+          <p>
+            <a
+              href={"/balder?tavle=" + view.code}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Vis spillkoden i et eget vindu
+            </a>
+          </p>
+        )}
         <p>
           Elevene velger <b>Balder</b> i hovedmenyen og taster koden. Én
           oppretter skipet, resten velger det samme skipet på sin mobil eller

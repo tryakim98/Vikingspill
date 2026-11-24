@@ -253,12 +253,7 @@ function Visit({
           </a>
         </div>
       </div>
-      <details>
-        <summary>To spor til quizen</summary>
-        {content.journey[id].notes.map((n) => (
-          <p key={n}>{n}</p>
-        ))}
-      </details>
+
       {!visit.reflection ? (
         <div className="bd-step">
           <h3>Skriv sammen før quizen</h3>

@@ -1,5 +1,3 @@
-import { JOURNEY_LESSONS } from "./activities";
-
 type Harbour = {
   title: string;
   reading: string;
@@ -205,11 +203,285 @@ export const HARBOURS: Record<string, Harbour> = {
     correct: 2,
   },
 };
+type Followup = [
+  question: string,
+  options: [string, string, string],
+  correct: number,
+  explanation: string,
+];
+const FOLLOWUPS: Record<string, [Followup, Followup]> = {
+  lindisfarne: [
+    [
+      "Hva går tapt hvis et kirkekar bare beskrives med vekta i sølv?",
+      [
+        "Karets plass i gudstjenesten",
+        "Opplysninger om sølvets vekt",
+        "Muligheten for å frakte det med skip",
+      ],
+      0,
+      "Karet hadde en funksjon i munkenes fellesskap som en vektangivelse ikke fanger.",
+    ],
+    [
+      "En elev skriver at angriperne ville ramme kristendommen. Hva trenger eleven?",
+      [
+        "En ny beskrivelse av selve karet",
+        "En kilde som belyser angripernes hensikt",
+        "Enda en beskrivelse av munkenes tap",
+      ],
+      1,
+      "Alkuins reaksjon forteller mye om virkningen av angrepet. Et motiv krever kilder som belyser angripernes side.",
+    ],
+  ],
+  hedeby: [
+    [
+      "Hvilken opplysning manglet etter at begge nikket?",
+      [
+        "Hvor kjøperen var født",
+        "Hvor tøystykket var vevd",
+        "Hvilken mengde hver av dem mente",
+      ],
+      2,
+      "Det samme nikket kunne vise til to forskjellige mengder tøy.",
+    ],
+    [
+      "Hvilken handling tester best om de har forstått hverandre?",
+      [
+        "Begge viser hvor mye tøy de mener avtalen gjelder",
+        "Selgeren gjentar samme ord høyere",
+        "Kjøperen nikker en gang til",
+      ],
+      0,
+      "Når begge viser mengden, kan motparten oppdage forskjellen før byttet.",
+    ],
+  ],
+  dublin: [
+    [
+      "Hvorfor er en voksende havn et ufullstendig mål på hvordan folk hadde det?",
+      [
+        "En havn har alltid flere navn",
+        "Velstand for noen kunne henge sammen med tvang for andre",
+        "Håndverkere la sjelden igjen spor",
+      ],
+      1,
+      "Den samme økonomien kunne gi levebrød til en håndverker og ta friheten fra en annen.",
+    ],
+    [
+      "Hvilket spørsmål vil utvide en utstilling om produksjon og salg?",
+      [
+        "Hvordan ble skrinene dekorert?",
+        "Hvor lå de største verkstedene?",
+        "Hvem kunne velge å reise fra byen?",
+      ],
+      2,
+      "Spørsmålet om bevegelsesfrihet gjør at også fangenskap blir synlig.",
+    ],
+  ],
+  paris: [
+    [
+      "En avtale lar skipene passere Paris. Hvilket ståsted mangler hvis vi bare spør byfolket?",
+      [
+        "Folk som bodde lenger oppe langs elva",
+        "Folk som bodde i Paris året etter",
+        "De som forsvarte brua i byen",
+      ],
+      0,
+      "En avtale som lettet presset på byen, kunne endre situasjonen for folk langs resten av ruta.",
+    ],
+    [
+      "Hva må vi finne ut for å vurdere om avtalen ga trygghet?",
+      [
+        "Hvor bred Seinen var",
+        "Hva skipene og folk langs elva gjorde etterpå",
+        "Hva skipene var bygget av",
+      ],
+      1,
+      "Følgene for de berørte avgjør om en lovnad faktisk gjorde dem tryggere.",
+    ],
+  ],
+  hebrides: [
+    [
+      "Hva kan et norrønt navn brukt på gælisk gi spor etter?",
+      [
+        "At alle i bygda var tospråklige",
+        "At navnet beholdt uttalen uendret",
+        "At ord kunne bli tatt i bruk av nye språkbrukere",
+      ],
+      2,
+      "Et lån viser en forbindelse mellom språkmiljøer. Det gir begrenset informasjon om hvert individ.",
+    ],
+    [
+      "To navn ligner. Hvilken undersøkelse styrker forklaringen på likheten?",
+      [
+        "Sammenlign eldre navneformer og hvordan lydene har endret seg",
+        "Velg navnet som er lettest å uttale",
+        "Tell hvor mange bokstaver som er like i dag",
+      ],
+      0,
+      "Eldre former lar oss undersøke en utvikling over tid.",
+    ],
+  ],
+  sameland: [
+    [
+      "Hva kan vi tryggest bruke Ottars ord om skinnene til?",
+      [
+        "Å fastslå at begge sider kalte dem skatt",
+        "Å forstå hvordan han framstilte rikdommen sin",
+        "Å beregne hva hver familie leverte",
+      ],
+      1,
+      "Beretningen gir direkte tilgang til Ottars framstilling. Andre sider av forholdet krever flere kilder.",
+    ],
+    [
+      "Hva ville gitt oss et annet ståsted i saken?",
+      [
+        "Enda en avskrift av Ottars ord",
+        "Et kart med reiseruta hans",
+        "En beretning fra noen som leverte skinnene",
+      ],
+      2,
+      "En annen parts erfaring kan belyse både hva ytelsen kostet og hvordan den ble oppfattet.",
+    ],
+  ],
+  faroyene: [
+    [
+      "Hvorfor kan et låneord være en historisk kilde?",
+      [
+        "Et ord kan bære spor av kontakt mellom språkbrukere",
+        "Et ord oppgir hvem som var øyas første innbygger",
+        "Et ord gir en presis dato for bosettingen",
+      ],
+      0,
+      "At et ord vandrer mellom språk kan fortelle om kontakt. Ordets form alene daterer ikke reisen.",
+    ],
+    [
+      "Hvilken påstand om argi trenger flere kilder?",
+      [
+        "Forskere sammenligner ordet med gælisk",
+        "En bestemt gjeter brakte ordet til Færøyene",
+        "Ordet er knyttet til beitebruk",
+      ],
+      1,
+      "Et språklig slektskap identifiserer ingen enkelt person som bar ordet med seg.",
+    ],
+  ],
+  island: [
+    [
+      "Hvilket spørsmål undersøker politisk innflytelse mest direkte?",
+      [
+        "Hvor langt det var å gå til tinget",
+        "Hvor mange som kunne høre møtet",
+        "Hvem som kunne føre en sak og få den avgjort",
+      ],
+      2,
+      "Tilgang til tale, støtte og avgjørelser forteller om fordelingen av makt.",
+    ],
+    [
+      "Hva kunne et felles ting bety for folk fra ulike bygder?",
+      [
+        "De fikk et sted der tvister kunne behandles etter felles regler",
+        "Alle med ulike skikker ville straks bli enige",
+        "Tilknytningen til hjemstedet mistet all betydning",
+      ],
+      0,
+      "En møteplass kunne gjøre uenighet håndterbar selv om forskjellene mellom folk fortsatte.",
+    ],
+  ],
+  vinland: [
+    [
+      "Hva skjuler ordet «oppdagelse» hvis fortelleren aldri oppgir et ståsted?",
+      [
+        "Hvilke byggematerialer som ble brukt",
+        "At området allerede inngikk i andre menneskers historie",
+        "Hvor lenge husene sto",
+      ],
+      1,
+      "Det som var nytt land for en sjøfarer, kunne være et kjent landskap for andre.",
+    ],
+    [
+      "Hvilken museumsopplysning krever andre kilder enn hustuftene?",
+      [
+        "Det var bygninger på stedet",
+        "Bygningene kan undersøkes arkeologisk",
+        "To personer ønsket å slutte en bestemt avtale",
+      ],
+      2,
+      "Bygningsspor kan ikke alene gjengi ord, ønsker eller motiver i et møte.",
+    ],
+  ],
+  novgorod: [
+    [
+      "Hvorfor kunne en lokal veiviser få noe å si i en forhandling?",
+      [
+        "Mannskapet trengte kunnskap om neste etappe",
+        "Veiviseren eide nødvendigvis begge elvene",
+        "Alle varene måtte være laget lokalt",
+      ],
+      0,
+      "Kunnskap om farvann og omlasting kunne gi forhandlingsmakt også til den som ikke eide båten.",
+    ],
+    [
+      "En fremmed mynt dukker opp ved elva. Hvilken slutning er mest holdbar?",
+      [
+        "Myntens første eier seilte hele veien",
+        "Mynten kom hit, men kan ha byttet hender underveis",
+        "Alle på stedet kjente myntens språk",
+      ],
+      1,
+      "Funnstedet gir ett holdepunkt. En full reiserute trenger flere spor.",
+    ],
+  ],
+  baghdad: [
+    [
+      "Hvor fant møtet med rus i denne fortellingen sted?",
+      ["I et verksted i Bagdad", "Ved keiserens hoff", "Ved Volga"],
+      2,
+      "Forbindelsen til Bagdad går gjennom utsendingen. Han beskrev folk han møtte ved Volga.",
+    ],
+    [
+      "Hvilken formulering skiller best mellom iakttakelse og tolkning?",
+      [
+        "Han beskrev et smykke. Hva det betydde for eieren, må undersøkes videre.",
+        "Han så smykket og kjente derfor eierens hensikt.",
+        "Leseren kan uten videre bruke beskrivelsen om alle i området.",
+      ],
+      0,
+      "En gjenstand kan beskrives av en utenforstående, mens eierens tolkning kan kreve en annen kilde.",
+    ],
+  ],
+  miklagard: [
+    [
+      "Hvilken form for kulturkontakt viser eksempelet med væringgarden?",
+      [
+        "Folk som flykter fra en beleiring",
+        "Folk som lærer å arbeide i en fremmed institusjon",
+        "Folk som får en felles religion ved første møte",
+      ],
+      1,
+      "Tjeneste ved hoffet satte folk med ulik bakgrunn i et arbeidsfellesskap.",
+    ],
+    [
+      "Hva ville styrket tolkningen av mynten som lønn?",
+      [
+        "At den var rund",
+        "At den hadde reist langt",
+        "Et uavhengig spor som knytter den til en person i keiserens tjeneste",
+      ],
+      2,
+      "Et spor etter eieren og tjenesten hjelper oss å skille lønn fra andre forklaringer.",
+    ],
+  ],
+};
+
 export function harbourQuiz(id: string) {
   const h = HARBOURS[id];
   return [
     { q: h.question, opts: h.options, correct: h.correct, feedback: h.reading },
-    ...JOURNEY_LESSONS[id].questions,
+    ...FOLLOWUPS[id].map(([q, opts, correct, feedback]) => ({
+      q,
+      opts,
+      correct,
+      feedback,
+    })),
   ];
 }
 export const GATES: Record<string, number> = {

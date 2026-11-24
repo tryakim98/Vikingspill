@@ -55,6 +55,22 @@ export default function BalderLobby() {
       setBusy(false);
     }
   }
+  const board = params.get("tavle");
+  if (board && /^[A-Z]{4}$/.test(board))
+    return (
+      <Shell className="bd" title="Bli med i Balder">
+        <Panel title="Klassekoden">
+          <strong className="bd-code">{board}</strong>
+          <p>
+            Åpne <b>{location.host}/balder</b> på mobil eller PC og tast koden.
+          </p>
+          <p>
+            Én i gruppa oppretter et skip. Resten velger samme skipsnavn. Seil
+            til Hedeby når mannskapet er samlet.
+          </p>
+        </Panel>
+      </Shell>
+    );
   return (
     <Shell
       title="Balder"
