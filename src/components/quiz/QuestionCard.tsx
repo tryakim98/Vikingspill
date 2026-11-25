@@ -40,7 +40,7 @@ export default function QuestionCard({ q, opts, correct, feedback, answer, onAns
   // ikke ved hver re-render. Bruker en streng-nøkkel så useMemo ikke trigges av
   // nye array-referanser med samme innhold.
   const memoKey = q + '' + opts.join('');
-  const perm = useMemo(() => shufflePermutation(opts.length), [memoKey, opts.length]);
+  const perm = useMemo(() => shufflePermutation(memoKey.split('\u0001').length - 1), [memoKey]);
 
   const displayedOpts = perm.map((origIdx) => opts[origIdx]);
   const displayedCorrect = perm.indexOf(correct);
