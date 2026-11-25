@@ -23,6 +23,22 @@
 }
 .bd .cg-header h1 {
   font-family: var(--bd-ser);
+  overflow-wrap: anywhere;
+}
+.bd-crew .cg-header > div,
+.bd-teacher .cg-header > div {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+  padding-inline-start: clamp(3.5rem, 6vw, 5.1rem);
+}
+.bd-crew .cg-header > div::before,
+.bd-teacher .cg-header > div::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: clamp(2.8rem, 5vw, 4.2rem);
+  background: url("/game/balder/skipsmerke.webp") center / contain no-repeat;
 }
 .bd .cg-panel {
   min-width: 0;
@@ -121,17 +137,19 @@
   margin-bottom: 1.1rem;
   align-items: end;
   border: 1px solid #917954;
-  background: #142020;
+  background: #102021;
 }
 .bd-front .cg-header::before,
 .bd-board .cg-header::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: 0 0 0 auto;
+  height: 100%;
+  aspect-ratio: 1942 / 809;
+  max-width: 100%;
   z-index: -1;
-  background:
-    linear-gradient(90deg, #102021 20%, #102021e6 34%, transparent 64%),
-    url("/game/balder/seilas.webp") right center / auto 100% no-repeat, #102021;
+  background: url("/game/balder/seilas.webp") right center / cover no-repeat;
+  mask-image: linear-gradient(to right, transparent, black 28%);
 }
 .bd-front .cg-header h1,
 .bd-board .cg-header h1 {
@@ -612,6 +630,11 @@
   }
   .bd-front .cg-header::before,
   .bd-board .cg-header::before {
+    inset: 0;
+    width: 100%;
+    height: auto;
+    aspect-ratio: auto;
+    mask-image: none;
     background:
       linear-gradient(0deg, #0a1718ef 0%, #101c1c75 47%, transparent 76%),
       url("/game/balder/seilas-liten.webp") 66% 43% / cover no-repeat;

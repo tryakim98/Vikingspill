@@ -11,7 +11,10 @@ export default function BalderLobby() {
   const nav = useNavigate();
   const [params] = useSearchParams();
   const [code, setCode] = useState(
-    (params.get("kode") ?? "").toUpperCase().slice(0, 4),
+    (params.get("kode") ?? "")
+      .toUpperCase()
+      .replace(/[^A-Z]/g, "")
+      .slice(0, 4),
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
