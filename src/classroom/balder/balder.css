@@ -351,8 +351,7 @@
 }
 .bd-chart {
   position: relative;
-  width: 100%;
-  min-width: 60rem;
+  width: max(100%, 60rem);
   aspect-ratio: 1160/600;
   background: #24464b url("/game/balder/sjokart.webp") center / 100% 100%
     no-repeat;

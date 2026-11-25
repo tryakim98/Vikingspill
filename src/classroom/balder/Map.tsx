@@ -11,17 +11,17 @@ const width = 1160,
 type Site = { place: [number, number]; label: [number, number] };
 const sites: Record<string, Site> = {
   vinland: { place: [93, 366], label: [133, 388] },
-  island: { place: [423, 176], label: [394, 146] },
-  faroyene: { place: [572, 213], label: [513, 197] },
-  hebrides: { place: [576, 275], label: [489, 263] },
-  dublin: { place: [577, 343], label: [496, 347] },
-  lindisfarne: { place: [621, 311], label: [667, 270] },
-  hedeby: { place: [733, 328], label: [790, 325] },
+  island: { place: [423, 176], label: [373, 116] },
+  faroyene: { place: [572, 213], label: [512, 193] },
+  hebrides: { place: [576, 275], label: [475, 269] },
+  dublin: { place: [577, 343], label: [491, 350] },
+  lindisfarne: { place: [621, 311], label: [674, 256] },
+  hedeby: { place: [733, 328], label: [800, 335] },
   sameland: { place: [836, 79], label: [889, 63] },
   paris: { place: [662, 400], label: [634, 436] },
   novgorod: { place: [946, 270], label: [1009, 242] },
   miklagard: { place: [924, 488], label: [864, 504] },
-  baghdad: { place: [1075, 564], label: [1039, 533] },
+  baghdad: { place: [1075, 564], label: [1040, 541] },
 };
 
 type HarbourState = "open" | "visited" | "locked";

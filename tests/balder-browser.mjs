@@ -64,16 +64,26 @@ export async function verifyBalder(browser, url, watch) {
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     );
-    const targets = await chart
-      .getByRole("button")
-      .evaluateAll((buttons) =>
-        buttons.map((button) => button.getBoundingClientRect().toJSON()),
-      );
+    const targets = await chart.getByRole("button").evaluateAll((buttons) =>
+      buttons.map((button) => {
+        const { width, height, left, right, top, bottom } =
+          button.getBoundingClientRect();
+        return {
+          name: button.getAttribute("aria-label"),
+          width,
+          height,
+          left,
+          right,
+          top,
+          bottom,
+        };
+      }),
+    );
     assert.equal(targets.length, 12);
     for (const [index, a] of targets.entries()) {
       assert(
         a.width >= 44 && a.height >= 44,
-        "Each harbour has a full-size touch target",
+        `${a.name} needs a full-size touch target (${a.width} × ${a.height})`,
       );
       for (const b of targets.slice(index + 1)) {
         assert(
@@ -81,7 +91,7 @@ export async function verifyBalder(browser, url, watch) {
             b.right <= a.left ||
             a.bottom <= b.top ||
             b.bottom <= a.top,
-          "Harbour touch targets must not overlap",
+          `Overlapping harbour targets: ${JSON.stringify(a)} / ${JSON.stringify(b)}`,
         );
       }
     }
