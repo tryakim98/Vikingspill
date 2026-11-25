@@ -14,12 +14,35 @@ export async function verifyBalder(browser, url, watch) {
     await button(teacher, "Start Balder for klassen").click();
     await teacher.locator(".bd-code").waitFor();
     const code = await teacher.locator(".bd-code").innerText();
+    const board = await teacher.context().newPage();
+    let joinLink;
+    try {
+      const link = teacher.getByRole("link", {
+        name: "Vis spillkoden i et eget vindu",
+      });
+      await board.goto(new URL(await link.getAttribute("href"), url).href);
+      assert.equal(await board.locator(".bd-code").innerText(), code);
+      const qr = board.getByAltText(
+        "QR-kode til Balder med klassens spillkode",
+      );
+      await qr.evaluate((image) => image.decode());
+      joinLink = await board
+        .getByRole("link", {
+          name: "Åpne Balder med klassekoden ferdig utfylt",
+        })
+        .getAttribute("href");
+      assert.equal(new URL(joinLink).searchParams.get("kode"), code);
+    } finally {
+      await board.close();
+    }
     for (const [p, name] of [
       [student, "Ravnen"],
       [peer, "Stormen"],
     ]) {
-      await p.goto(url + "/balder");
-      await p.getByLabel("Spillkode fra læreren").fill(code);
+      await p.goto(p === student ? joinLink : url + "/balder");
+      const codeField = p.getByLabel("Spillkode fra læreren");
+      if (p === student) assert.equal(await codeField.inputValue(), code);
+      else await codeField.fill(code);
       await button(p, "Bli med i Balder").click();
       await p.getByLabel("Skipets navn").fill(name);
       await p
@@ -41,6 +64,27 @@ export async function verifyBalder(browser, url, watch) {
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     );
+    const targets = await chart
+      .getByRole("button")
+      .evaluateAll((buttons) =>
+        buttons.map((button) => button.getBoundingClientRect().toJSON()),
+      );
+    assert.equal(targets.length, 12);
+    for (const [index, a] of targets.entries()) {
+      assert(
+        a.width >= 44 && a.height >= 44,
+        "Each harbour has a full-size touch target",
+      );
+      for (const b of targets.slice(index + 1)) {
+        assert(
+          a.right <= b.left ||
+            b.right <= a.left ||
+            a.bottom <= b.top ||
+            b.bottom <= a.top,
+          "Harbour touch targets must not overlap",
+        );
+      }
+    }
     await chart.getByRole("button", { name: /Paris/ }).click();
     await see(peer, "Ny klasseutfordring · Flåtesignal 1");
     await peer.getByText("Ny klasseutfordring · Flåtesignal 1").click();

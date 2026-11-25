@@ -28,7 +28,7 @@ export default function BalderTeacher({
   );
   return (
     <Shell
-      className="bd"
+      className="bd bd-teacher"
       title="Balder · læreroversikt"
       action={
         <Button secondary onClick={onHome}>
@@ -39,26 +39,25 @@ export default function BalderTeacher({
       <Panel
         title={view.closed ? "Økten er avsluttet" : "Vis koden til klassen"}
       >
-        <strong className="bd-code">{view.code}</strong>
-        {!view.closed && (
-          <p>
-            <a
-              href={"/balder?tavle=" + view.code}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Vis spillkoden i et eget vindu
-            </a>
-          </p>
-        )}
+        <div className="bd-teacher-code">
+          <strong className="bd-code">{view.code}</strong>
+          {!view.closed && (
+            <p>
+              <a
+                className="bd-board-link"
+                href={"/balder?tavle=" + view.code}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Vis spillkoden i et eget vindu
+              </a>
+            </p>
+          )}
+        </div>
         <p>
           Elevene velger <b>Balder</b> i hovedmenyen og taster koden. Én
           oppretter skipet, resten velger det samme skipet på sin mobil eller
           PC.
-        </p>
-        <p>
-          Tips til første havn: Hedeby åpner prøven Markedstolken. Gruppene kan
-          seile videre mens de venter på godkjenning.
         </p>
       </Panel>
       <SyncStatus state={state} store={store} solo={false} />
@@ -146,9 +145,18 @@ function Review({
   }
   return (
     <article className="bd-review">
-      <h3>
-        {group.shipName} · {trial.title}
-      </h3>
+      <div className="bd-review-head">
+        <img
+          src={`/game/balder/${trial.id}.webp`}
+          alt=""
+          width={78}
+          height={52}
+          loading="lazy"
+        />
+        <h3>
+          {group.shipName} · {trial.title}
+        </h3>
+      </div>
       <p>{trial.proof}</p>
       <blockquote>{entry.text}</blockquote>
       <div className="cg-actions">

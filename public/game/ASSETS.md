@@ -9,3 +9,19 @@ Create a premium game UI asset: a perfectly circular Viking / Norse fate wheel o
 ## Prompt for ravnemedaljongen
 
 Create a standalone Viking game UI central wheel medallion, isolated on transparent background. A single small perfectly circular antique bronze disk, straight-on orthographic front view, centered in square composition. On the disk a beautiful engraved pair of ravens facing each other with interlaced tails forming a restrained Norse knot. Matte worn desaturated bronze highlights, black etched recesses, museum-quality engraving, sharp low relief, fine stipple hatching, round raised edge with tiny evenly spaced rivets. Outer circle occupies 80% of canvas, remaining space fully transparent. No letters, no text, no runes, no scenery, no outer wheel, no perspective, no bright gold, no cartoon, no glow. Matches a charcoal and bronze Viking fate wheel with Norse knotwork outer ring.
+
+## Balder
+
+Alle bilder under `/game/balder/` leveres som WebP. Det røde seilet i `seilas.webp` og `seilas-liten.webp` går igjen i skipsmerket i hovedmenyen. De tre stillebenene viser tøyet til Markedstolken, spennen med to merkelapper og karttegnerens ark. Gjenstandene er spillillustrasjoner. De tolv havnegraveringene er nettutgaver av spillets originaler under `/steder/`.
+
+`sjokart.webp` er tegnet fra landpolygoner og elver i [Natural Earth 1:50m](https://www.naturalearthdata.com/downloads/50m-physical-vectors/), som er [public domain](https://www.naturalearthdata.com/about/terms-of-use/). Kartplaten dekker 65° V–53° Ø og 29,5–72,3° N i Mercator-projeksjon. Havnenes anker og de forskjøvede navneskiltene har samme koordinatsystem i `Map.tsx`. Vinland er markert ved L’Anse aux Meadows, og Sápmi ved et representativt punkt i regionen. Bagdad viser hvor utsendingen i havneteksten kom fra.
+
+Skipsmerket og de fire signalbrikkene er generert for spillet og lagret med gjennomsiktig bakgrunn. Brikkene er sortert i spillmotorens rekkefølge: sol, måne, fjell og bølge.
+
+<details>
+<summary>Motivbeskrivelser til de nye spillbrikkene</summary>
+
+- Skipsmerket: A single modest Scandinavian boat brooch for an original historical classroom game, a low relief cast bronze longship under a square once-red sail, mounted in an openwork oval frame. Straight-on museum object photograph on transparent background. Broadside silhouette, one curved hull with raised prows, single mast, square sail and three waves beneath. Weathered honey bronze, dark recesses, traces of iron-red pigment, raking light from upper left. No text or runes.
+- Flåtesignalet: A square 2 × 2 production texture atlas on a transparent background. Four circular handmade oak counters in orthographic top-down view, deeply carved cream-filled pictograms readable at 28 px. Sun with eight rays at top left, crescent moon at top right, two mountain peaks at bottom left, two rolling waves at bottom right. Worn chamfered rims, raking light from the upper left. No text or runes.
+
+</details>
