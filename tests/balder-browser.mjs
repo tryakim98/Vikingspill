@@ -14,7 +14,7 @@ export async function verifyBalder(browser, url, watch) {
     await button(teacher, "Start Balder for klassen").click();
     await teacher.locator(".bd-code").waitFor();
     const code = await teacher.locator(".bd-code").innerText();
-    const board = await teacher.context().newPage();
+    const board = await browser.newPage();
     let joinLink;
     try {
       const link = teacher.getByRole("link", {
