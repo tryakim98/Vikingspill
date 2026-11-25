@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { content } from "../../content";
-import { GATES, HARBOURS, PRACTICES, harbourQuiz } from "../../content/balder";
+import { useRef, useState } from "react";
+import { HARBOURS, PRACTICES, harbourQuiz } from "../../content/balder";
 import {
   approvedCount,
   balderPoints,
@@ -40,6 +39,7 @@ export default function BalderStudent({
     current = s.current;
   const [selected, setSelected] = useState<string | null>(null);
   const [review, setReview] = useState<string | null>(null);
+  const result = useRef<HTMLDetailsElement>(null);
   const approved = approvedCount(s);
   const scope = [session.code, group?.id, session.uid].join(":");
   const act = (action: Action) => {
@@ -51,11 +51,18 @@ export default function BalderStudent({
     setSelected(id);
     setReview(null);
     if (!completed.includes(id) && !busy) act({ kind: "visit", port: id });
-    else if (completed.includes(id)) setReview(id);
+    else if (completed.includes(id)) {
+      setReview(id);
+      requestAnimationFrame(() => {
+        if (!result.current) return;
+        result.current.open = true;
+        result.current.querySelector("summary")?.focus();
+      });
+    }
   }
   return (
     <Shell
-      className="bd"
+      className="bd bd-crew"
       title={group?.shipName ?? "Balder · finn skipet ditt"}
       subtitle={`Spillkode ${view.code}${group ? ` · ${completed.length}/12 havner · ${balderPoints(group)} poeng` : ""}`}
       action={
@@ -117,52 +124,38 @@ export default function BalderStudent({
           ) : (
             <>
               {last && (
-                <Result key={review ?? last} id={review ?? last} s={s} />
+                <Result
+                  key={review ?? last}
+                  id={review ?? last}
+                  s={s}
+                  detailsRef={result}
+                />
               )}
-              <Panel
-                title={
-                  completed.length === 12
-                    ? "Alle havner er besøkt"
-                    : completed.length
-                      ? "Hvor går neste seilas?"
-                      : "Første seilas"
-                }
-              >
-                <p>
-                  {completed.length === 12
-                    ? "Se tilbake på svarene ved å velge en besøkt havn på kartet."
-                    : "Velg en åpen havn. Les sammen, lever én refleksjon for skipet og svar på tre quizspørsmål."}
-                </p>
-                {!completed.length && (
-                  <Button disabled={busy} onClick={() => pick("hedeby")}>
-                    Seil til Hedeby
-                  </Button>
-                )}
-              </Panel>
-              {selected && (GATES[selected] ?? 0) > approved && (
-                <p role="status" className="cg-note">
-                  {harbourName(selected)} åpner etter {GATES[selected]}{" "}
-                  godkjente svenneprøver. Dere har {approved}. Velg en prøve
-                  nedenfor eller en åpen havn.
-                </p>
-              )}
-              <Map approved={approved} visited={completed} onPick={pick} />
+              <Map
+                approved={approved}
+                visited={completed}
+                selected={selected}
+                busy={busy}
+                onPick={pick}
+              />
               <Panel title={`Praktiske svenneprøver · ${approved}/3 godkjent`}>
                 <p>
                   Gjør oppgaven sammen og lever produktet i feltet. Dere kan
                   fortsette til en annen åpen havn mens læreren leser.
                 </p>
-                {PRACTICES.map((t) => (
-                  <Practice
-                    key={t.id}
-                    trial={t}
-                    state={s}
-                    scope={scope}
-                    visited={completed}
-                    act={act}
-                    busy={busy}
-                  />
-                ))}
+                <div className="bd-workshop">
+                  {PRACTICES.map((t) => (
+                    <Practice
+                      key={t.id}
+                      trial={t}
+                      state={s}
+                      scope={scope}
+                      visited={completed}
+                      act={act}
+                      busy={busy}
+                    />
+                  ))}
+                </div>
               </Panel>
               <details className="cg-help">
                 <summary>Utfordre et skip til holmgang</summary>
@@ -241,10 +234,12 @@ function Visit({
   return (
     <Panel title={harbourName(id)}>
       <div className="bd-harbour">
-        <img
-          alt=""
-          src={content.ports.find((p) => p.port.id === id)!.port.image}
-        />
+        <div className="bd-print">
+          <img
+            alt={`Illustrasjon av ${harbourName(id)}`}
+            src={`/game/balder/havn-${id}.webp`}
+          />
+        </div>
         <div>
           <h3>{h.title}</h3>
           <p>{h.reading}</p>
@@ -254,6 +249,14 @@ function Visit({
         </div>
       </div>
 
+      <ol className="bd-steps" aria-label="Steg i havna">
+        <li aria-current={!visit.reflection ? "step" : undefined}>
+          1 · Refleksjon
+        </li>
+        <li aria-current={visit.reflection ? "step" : undefined}>
+          2 · Havnequiz
+        </li>
+      </ol>
       {!visit.reflection ? (
         <div className="bd-step">
           <h3>Skriv sammen før quizen</h3>
@@ -313,11 +316,19 @@ function Visit({
     </Panel>
   );
 }
-function Result({ id, s }: { id: string; s: BalderState }) {
+function Result({
+  id,
+  s,
+  detailsRef,
+}: {
+  id: string;
+  s: BalderState;
+  detailsRef: React.RefObject<HTMLDetailsElement | null>;
+}) {
   const v = s.visits[id];
   return (
     <Panel title={`${harbourName(id)} · ${v.correct}/3 riktige`}>
-      <details>
+      <details ref={detailsRef}>
         <summary>Se svar og forklaringer</summary>
         <p>{v.reflection}</p>
         {harbourQuiz(id).map((q, i) => (
@@ -352,40 +363,53 @@ function Practice({
     scope + ":trial:" + t.id,
     entry?.text ?? "",
   );
+  const status =
+    entry?.status ?? (visited.includes(t.port) ? "ready" : "locked");
+  const labels = {
+    approved: "Godkjent",
+    pending: "Hos læreren",
+    revise: "Prøv igjen",
+    ready: "Klar",
+    locked: `Besøk ${harbourName(t.port)} først`,
+  };
   return (
-    <details className="bd-practice">
+    <details className="bd-practice" data-status={status}>
       <summary>
-        {t.title} ·{" "}
-        {entry?.status === "approved"
-          ? "Godkjent"
-          : entry?.status === "pending"
-            ? "Hos læreren"
-            : entry?.status === "revise"
-              ? "Prøv igjen"
-              : visited.includes(t.port)
-                ? "Klar"
-                : `Besøk ${harbourName(t.port)} først`}
+        <img
+          src={`/game/balder/${t.id}.webp`}
+          alt=""
+          width={600}
+          height={400}
+          loading="lazy"
+        />
+        <span className="bd-practice-label">
+          <strong>{t.title}</strong>
+          <span className="bd-sr-only"> · </span>
+          <small>{labels[status]}</small>
+        </span>
       </summary>
-      <p>{t.task}</p>
-      {entry && <blockquote>{entry.text}</blockquote>}
-      {entry?.feedback && <p>Fra læreren: {entry.feedback}</p>}
-      {visited.includes(t.port) && (!entry || entry.status === "revise") && (
-        <>
-          <p>{t.proof}</p>
-          <Field
-            label="Dokumentasjon fra gruppa"
-            multiline
-            value={draft}
-            onChange={setDraft}
-          />
-          <Button
-            disabled={busy || draft.trim().length < 20}
-            onClick={() => act({ kind: "submit", trial: t.id, text: draft })}
-          >
-            Lever svenneprøven
-          </Button>
-        </>
-      )}
+      <div className="bd-practice-body">
+        <p>{t.task}</p>
+        {entry && <blockquote>{entry.text}</blockquote>}
+        {entry?.feedback && <p>Fra læreren: {entry.feedback}</p>}
+        {visited.includes(t.port) && (!entry || entry.status === "revise") && (
+          <>
+            <p>{t.proof}</p>
+            <Field
+              label="Dokumentasjon fra gruppa"
+              multiline
+              value={draft}
+              onChange={setDraft}
+            />
+            <Button
+              disabled={busy || draft.trim().length < 20}
+              onClick={() => act({ kind: "submit", trial: t.id, text: draft })}
+            >
+              Lever svenneprøven
+            </Button>
+          </>
+        )}
+      </div>
     </details>
   );
 }
@@ -418,6 +442,17 @@ function Bonus({
         En havn har utløst et signal til alle skip. Dere får ett bonuspoeng per
         riktig plass. Én på skipet sender svaret.
       </p>
+      <div className="bd-signal-order">
+        {shown.map((i) => (
+          <img
+            key={i}
+            src={`/game/balder/signal-${i}.webp`}
+            alt=""
+            width={64}
+            height={64}
+          />
+        ))}
+      </div>
       <p>
         <b>{shown.map((i) => SIGNALS[i]).join(" · ")}</b>
       </p>
@@ -430,7 +465,15 @@ function Bonus({
             disabled={answer.includes(i)}
             onClick={() => set([...answer, i])}
           >
-            {v}
+            <span className="bd-signal-choice">
+              <img
+                src={`/game/balder/signal-${i}.webp`}
+                alt=""
+                width={28}
+                height={28}
+              />
+              {v}
+            </span>
           </Button>
         ))}
       </div>

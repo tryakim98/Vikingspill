@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getRemote } from "../remote";
 import { saveSession } from "../store";
-import { Button, Field, Panel, Shell } from "../ui";
+import { Button, Panel, Shell } from "../ui";
+import ClassBoard from "./ClassBoard";
 import "./balder.css";
 
 const LAST = "vikingspill:balder:last";
@@ -10,7 +11,10 @@ export default function BalderLobby() {
   const nav = useNavigate();
   const [params] = useSearchParams();
   const [code, setCode] = useState(
-    (params.get("kode") ?? "").toUpperCase().slice(0, 4),
+    (params.get("kode") ?? "")
+      .toUpperCase()
+      .replace(/[^A-Z]/g, "")
+      .slice(0, 4),
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -56,26 +60,12 @@ export default function BalderLobby() {
     }
   }
   const board = params.get("tavle");
-  if (board && /^[A-Z]{4}$/.test(board))
-    return (
-      <Shell className="bd" title="Bli med i Balder">
-        <Panel title="Klassekoden">
-          <strong className="bd-code">{board}</strong>
-          <p>
-            Åpne <b>{location.host}/balder</b> på mobil eller PC og tast koden.
-          </p>
-          <p>
-            Én i gruppa oppretter et skip. Resten velger samme skipsnavn. Seil
-            til Hedeby når mannskapet er samlet.
-          </p>
-        </Panel>
-      </Shell>
-    );
+  if (board && /^[A-Z]{4}$/.test(board)) return <ClassBoard code={board} />;
   return (
     <Shell
       title="Balder"
-      subtitle="Utforsk vikingtidens kulturmøter sammen."
-      className="bd"
+      subtitle="Seil til tolv havner og utforsk vikingtidens kulturmøter med mannskapet ditt."
+      className="bd bd-front"
       action={
         <Button secondary onClick={() => nav("/")}>
           Hovedmeny
@@ -88,36 +78,44 @@ export default function BalderLobby() {
         </p>
       )}
       <div className="bd-lobby">
-        <Panel title="Jeg er lærer">
-          <p>
-            Del klassen i små mannskap. Vis spillkoden. Elevene velger havn,
-            skriver sammen og får quizen rettet med én gang.
-          </p>
-          <p>
-            Underveis leser du korte innleveringer fra praktiske svenneprøver.
-            Ett trykk åpner flere havner for gruppa.
-          </p>
-          <Button disabled={busy} onClick={() => void enter()}>
-            Start Balder for klassen
-          </Button>
-        </Panel>
         <Panel title="Jeg er elev">
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void enter(code);
+            className="bd-join"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (code.length === 4 && !busy) void enter(code);
             }}
           >
-            <Field
-              label="Spillkode fra læreren"
-              value={code}
-              maxLength={4}
-              onChange={(v) => setCode(v.toUpperCase().replace(/[^A-Z]/g, ""))}
-            />
+            <label className="cg-field">
+              Spillkode fra læreren
+              <input
+                value={code}
+                maxLength={4}
+                pattern="[A-Z]{4}"
+                autoCapitalize="characters"
+                spellCheck={false}
+                autoComplete="off"
+                enterKeyHint="go"
+                required
+                placeholder="ABCD"
+                onChange={(e) =>
+                  setCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, ""))
+                }
+              />
+            </label>
             <Button type="submit" disabled={busy || code.length !== 4}>
               Bli med i Balder
             </Button>
           </form>
+        </Panel>
+        <Panel title="Jeg er lærer">
+          <p>
+            Del klassen i små mannskap og vis spillkoden på tavla. Elevene
+            seiler selv. Du godkjenner svenneprøvene underveis.
+          </p>
+          <Button disabled={busy} onClick={() => void enter()}>
+            Start Balder for klassen
+          </Button>
         </Panel>
       </div>
       {last && (

@@ -37,7 +37,7 @@ export default function StartScreen() {
   const cards: PathCard[] = [
     {
       key: 'balder',
-      motif: <Vegvisir size={88} color="#dcbf83" />,
+      motif: <img src="/game/balder/skipsmerke.webp" alt="" width={100} height={92} className="h-[88px] w-[100px] object-contain" />,
       name: 'Balder',
       role: 'Guidet klassespill',
       desc: 'Utforsk kulturmøter, løs quizer og åpne nye havner med praktiske svenneprøver. Læreren starter med ett trykk.',
